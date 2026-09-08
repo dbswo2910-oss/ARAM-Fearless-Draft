@@ -1,0 +1,39 @@
+ARAM Fearless Draft v0.15.13 - executed audit
+
+EXECUTED / PASS
+- JavaScript syntax: main.js, role-grade-v01513.js, live-strength-v01513.js
+- Champion count: 173
+- Champion role profile coverage: 173/173
+- Invalid/missing role templates: 0
+- Function18 missing/invalid profiles: 0
+- 5-stage Power Curve missing/invalid profiles: 0
+- Build-sensitive champions without build variant: 0 (38/38 mapped)
+- Internal Golden Guard: 293/293 PASS (headless DOM shim only for the Data UX card-count selector)
+- Match-history arbitrary Riot ID + participant PUUID path: PASS
+- Live Client detail normalization (death/runes/spells/events): PASS
+- LIVE build-aware item regression: PASS
+- LIVE Strength Advantage regression: PASS
+- ROLE GRADE v3 archetype baseline regression: ADC B72 / mage B67 / tank B65 / support B72 / bruiser B65
+- Tank good-case regression: A82
+- Tank feed/high-volume guard: D40 despite high raw damage taken/mitigation
+- Mitigation sensitivity: score 64 -> 72 when mitigation evidence improves with other major signals held stable
+- Self-heal support leakage guard: Soraka synthetic self-heal-only case ally sustain 7 / self sustain 94 / overall D28
+- Match Lab team table order regression: damage -> received/mitigated -> DPM -> gold
+
+SCREENSHOT-DERIVED BALANCE CHECK
+Using the values visible in the supplied 5-player screenshot, reconstructing team shares from the displayed totals:
+- Shen: ROLE GRADE v2 A78 -> v3 B72
+- Hwei: A80 -> A78
+- Lissandra: B64 -> C62
+- Kayle: D31 -> D29
+- Shyvana: C63 -> C60
+This is a calibration check from the displayed snapshot, not a claim about global player percentiles.
+
+NOT EXECUTED IN THIS ENVIRONMENT
+- Real Windows + League Client end-to-end match session.
+- Live in-game visual inspection after an actual ARAM begins.
+
+MODEL PRINCIPLE
+- ROLE GRADE is an internal performance index, not a Riot global percentile.
+- Match outcome and Power Curve do not directly add grade points.
+- DamageSelfMitigated is valuable evidence for frontline play but is not sufficient alone; it is combined with damage taken, mitigation ratio, per-death absorption, KP, CC and survival context.
