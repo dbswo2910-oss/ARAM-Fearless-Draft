@@ -1,6 +1,6 @@
 {
-  "version": "0.15.13",
-  "message": "v0.15.13 · ROLE GRADE v3 balance + 피해흡수/피해감소 + Match Lab stat layout",
+  "version": "0.15.14",
+  "message": "v0.15.14 · Match Lab 친구 즐겨찾기 + 드롭다운 빠른 전적 조회",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -12,16 +12,20 @@
       "source": "update/v0.15.13/role-grade-v01513.js"
     },
     {
+      "path": "match-lab-favorites-v01514.js",
+      "source": "update/v0.15.14/match-lab-favorites-v01514.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.13/main.js"
+      "source": "update/v0.15.14/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.13/package.json"
+      "source": "update/v0.15.14/package.json"
     }
   ],
   "delete": [
