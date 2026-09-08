@@ -1,24 +1,32 @@
 {
-  "version": "0.15.12",
-  "message": "v0.15.12 · updater text-file hash compatibility hotfix + LIVE Strength Advantage",
+  "version": "0.15.13",
+  "message": "v0.15.13 · ROLE GRADE v3 balance + 피해흡수/피해감소 + Match Lab stat layout",
   "min_launcher": "2.0.2",
   "files": [
     {
-      "path": "live-strength-v01512.js",
-      "source": "update/v0.15.12/live-strength-v01512.js"
+      "path": "live-strength-v01513.js",
+      "source": "update/v0.15.13/live-strength-v01513.js"
+    },
+    {
+      "path": "role-grade-v01513.js",
+      "source": "update/v0.15.13/role-grade-v01513.js"
     },
     {
       "path": "preload.js",
-      "source": "update/v0.15.12/preload.js"
+      "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.12/main.js"
+      "source": "update/v0.15.13/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.12/package.json"
+      "source": "update/v0.15.13/package.json"
     }
   ],
-  "delete": ["live-strength-v01510.js", "live-strength-v01511.js"]
+  "delete": [
+    "live-strength-v01510.js",
+    "live-strength-v01511.js",
+    "live-strength-v01512.js"
+  ]
 }
