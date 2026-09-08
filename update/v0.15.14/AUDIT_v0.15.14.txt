@@ -1,0 +1,55 @@
+ARAM Fearless Draft v0.15.14 QA/AUDIT
+
+PASS — JavaScript syntax
+- main.js
+- preload.js
+- autosync-core.js
+- live-strength-v01513.js
+- role-grade-v01513.js
+- match-lab-favorites-v01514.js
+
+PASS — Embedded data integrity
+- Champions: 173/173 unique
+- Function18: 173/173 with 18 axes
+- Power Curve: 173/173 with 5 required stages
+
+PASS — Match Lab Favorites pure regression
+- add/remove/toggle
+- local persistence
+- Riot ID + PUUID preservation
+- 30-player cap
+- version marker v0.15.14
+
+PASS — Full browser runtime smoke (Chromium headless + Desktop API mock)
+- base app boot/init
+- v0.15.13 LIVE Strength patch injection
+- v0.15.13 ROLE GRADE v3 patch injection
+- v0.15.14 Favorites patch injection
+- top app version becomes v0.15.14
+- main nav → Random Practice
+- Random Practice Pick ↔ In-game switching
+- main nav → Match Lab
+- Riot ID search path
+- favorite star add/remove
+- favorites dropdown open/list/select
+- favorites persistence after Match Lab re-render
+- v0.15.13 173/173 role-profile metadata retained
+- Match Lab stat order retained: damage → received/mitigated → DPM → gold
+- Browser page errors: 0
+- Browser console errors: 0
+
+PASS — package
+- package.json v0.15.14
+- main.js VERSION v0.15.14
+- v0.15.14 runtime patch is included in injection marker validation
+- ZIP integrity test passed
+
+NOT EXECUTED
+- Actual Windows Electron + real League Client end-to-end game session.
+- Real Riot/LCU friend history response in this Linux QA environment.
+
+User live check recommended
+- Search a real friend's Riot ID
+- Press ☆ 즐겨찾기
+- Restart app and verify ★ 친구 dropdown persists
+- Select saved friend and confirm history loads
