@@ -1,28 +1,28 @@
 {
-  "version": "0.15.11",
-  "message": "v0.15.11 · updater visibility hotfix + LIVE Strength Advantage",
-  "min_launcher": "2.0.1",
+  "version": "0.15.12",
+  "message": "v0.15.12 · updater v2.0.2 compatibility + LIVE Strength Advantage",
+  "min_launcher": "2.0.2",
   "files": [
     {
-      "path": "live-strength-v01511.js",
-      "source": "update/v0.15.11/live-strength-v01511.js",
-      "sha256": "12e2e179894bb752eb155bc23fc0173c48427c18c827e300a7269d1bc8b09c47"
+      "path": "live-strength-v01512.js",
+      "source": "update/v0.15.12/live-strength-v01512.js",
+      "sha256": "d68b50f95a4c005ec75d7bc4a3ee1c2fe77eee009fa5c0c3e1c51f9a62fb9464"
     },
     {
       "path": "preload.js",
-      "source": "update/v0.15.11/preload.js",
-      "sha256": "28bcc5463ba1d8213ceb62bc178688ee01301ee44fa5efec494c569543efe71c"
+      "source": "update/v0.15.12/preload.js",
+      "sha256": "33d64806f92af07b6fc60efed9deeb01c0d58372a6a1f36e7b5ed88accc28949"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.11/main.js",
-      "sha256": "9385d2d740454bae3c7d58c848e645b0c3706f5d9120ad723dd25e827e6212e8"
+      "source": "update/v0.15.12/main.js",
+      "sha256": "626e71cb3a00a52189624c9582d588f61b90e7510e4ea4150f0baf502b5fce9d"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.11/package.json",
-      "sha256": "40ed4de3fdfee1719584700f67784355b8023022881596f7e38a4e7da99aa579"
+      "source": "update/v0.15.12/package.json",
+      "sha256": "d3ce546bfcac126fd9b0fb3bacdc86395e3b11747662a67e64bfe72b507d2f0f"
     }
   ],
-  "delete": ["live-strength-v01510.js"]
+  "delete": ["live-strength-v01510.js", "live-strength-v01511.js"]
 }
