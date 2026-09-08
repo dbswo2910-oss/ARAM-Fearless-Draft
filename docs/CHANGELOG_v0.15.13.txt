@@ -1,0 +1,36 @@
+ARAM Fearless Draft v0.15.13
+ROLE GRADE v3 Balance Pass + Match Lab Stat Layout
+
+1) 173-champion ROLE GRADE audit
+- 173/173 champion-specific role profiles present.
+- 173/173 profile templates resolve to a valid role template.
+- 38/38 build-sensitive champions have a matching live/final-build variant definition.
+- 173/173 Function18 profiles complete (18 axes, 0~5).
+- 173/173 5-stage Power Curve data complete.
+- Existing Golden Guard regression: 293/293 PASS in headless QA.
+
+2) ROLE GRADE v3 balance
+- Tank inflation guard: raw damage-taken / mitigation team rank can no longer dominate the grade.
+- Added explicit '피해 흡수' score: damage taken share + self-mitigated share + mitigation ratio + absorbed value per death.
+- Team-rank weight in durability evidence reduced; absolute/efficiency evidence increased.
+- Poor high-volume tanking (high deaths, low KP/CC) no longer receives a high grade simply for absorbing lots of damage.
+- Champion Function18 expectation normalization strengthened but bounded so champion identity is not punished.
+- Function18 direct final score weight remains capped at 5%.
+- Grade cutoffs remain S+ 96 / S 91 / A+ 84 / A 76 / B 64 / C 52 / D below 52.
+
+3) Sustain split
+- Ally sustain now uses explicit teammate-heal + teammate-shield fields.
+- Self sustain uses totalHeal separately.
+- Prevents self-healing champions from accidentally receiving support-grade sustain credit and avoids combining ambiguous heal fields into one inflated value.
+
+4) Match Lab layout
+- Team table column order changed to:
+  챔피언 | KDA/KP | 피해량 | 받은피해/감소 | DPM | 골드/효율
+- Damage taken and mitigated damage are now adjacent to damage dealt.
+- Gold moved to the final economy column.
+- Selected-player metric grid also shows 받은피해 / 감소.
+
+5) Existing live systems preserved
+- v0.15.12 LIVE Strength Advantage retained and versioned to v0.15.13.
+- v0.15.9 live build-aware item recommendation and owned-item guard retained.
+- Match Lab Riot ID/participant history navigation retained.
