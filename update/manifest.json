@@ -1,28 +1,28 @@
 {
-  "version": "0.15.10",
-  "message": "v0.15.10 · LIVE Strength Advantage · 실시간 전력 좌우 비교 그래프",
+  "version": "0.15.11",
+  "message": "v0.15.11 · updater visibility hotfix + LIVE Strength Advantage",
   "min_launcher": "2.0.1",
   "files": [
     {
-      "path": "live-strength-v01510.js",
-      "source": "update/v0.15.10/live-strength-v01510.js",
-      "sha256": "96f7824cec66ff5217b6e01633f9dc2406c121d5d64360617476cc3e4af2c13b"
+      "path": "live-strength-v01511.js",
+      "source": "update/v0.15.11/live-strength-v01511.js",
+      "sha256": "12e2e179894bb752eb155bc23fc0173c48427c18c827e300a7269d1bc8b09c47"
     },
     {
       "path": "preload.js",
-      "source": "update/v0.15.10/preload.js",
-      "sha256": "11095a05de170cc352a113a5035f4fe90e426e0fac8c8f9fa52f992e2cb4695b"
+      "source": "update/v0.15.11/preload.js",
+      "sha256": "28bcc5463ba1d8213ceb62bc178688ee01301ee44fa5efec494c569543efe71c"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.10/main.js",
-      "sha256": "2040389d3590da08760509e7306bf48a4b1b006cf80eae5db5d1d5a0f2dd0138"
+      "source": "update/v0.15.11/main.js",
+      "sha256": "9385d2d740454bae3c7d58c848e645b0c3706f5d9120ad723dd25e827e6212e8"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.10/package.json",
-      "sha256": "6b1b0f69cf3d5218554d496c6009357f721380666be888701e488b6820b7d9d6"
+      "source": "update/v0.15.11/package.json",
+      "sha256": "40ed4de3fdfee1719584700f67784355b8023022881596f7e38a4e7da99aa579"
     }
   ],
-  "delete": []
+  "delete": ["live-strength-v01510.js"]
 }
