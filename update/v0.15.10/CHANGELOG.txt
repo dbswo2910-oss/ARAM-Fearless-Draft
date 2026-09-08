@@ -1,0 +1,18 @@
+ARAM Fearless Draft v0.15.10
+
+LIVE Strength Advantage
+- 랜덤연습 > 인게임 > 라이브 요약에 실시간 전력 우위 카드 추가
+- 우리/상대 전력을 좌우 비교 그래프로 표시
+- 전력 계산 축: 현재 장비 가치, 시간대 조합 파워, 평균 레벨, 생존 인원, 최근 60초 킬 흐름
+- 다음 파워 구간의 조합 강도와 현재 대비 추세 표시
+- 판정 신뢰도와 현재 교전 판단 문구 표시
+- 상대 숨은 보유 골드는 추정하지 않음
+- 장비 가치는 Live Client에 노출된 현재 장착 아이템 가격 합계만 사용
+- 기존 v0.15.9 LIVE Build Profile, 아이템 중복 방지, ROLE GRADE v2 유지
+
+QA
+- Match Lab arbitrary Riot ID / PUUID history PASS
+- Live Client detail normalization PASS
+- v0.15.9 item/build regressions PASS
+- v0.15.10 LIVE strength engine + UI regression PASS
+- Windows + real League Client end-to-end test not executed in Linux build environment
