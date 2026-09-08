@@ -1,27 +1,23 @@
 {
   "version": "0.15.12",
-  "message": "v0.15.12 · updater v2.0.2 compatibility + LIVE Strength Advantage",
+  "message": "v0.15.12 · updater text-file hash compatibility hotfix + LIVE Strength Advantage",
   "min_launcher": "2.0.2",
   "files": [
     {
       "path": "live-strength-v01512.js",
-      "source": "update/v0.15.12/live-strength-v01512.js",
-      "sha256": "d68b50f95a4c005ec75d7bc4a3ee1c2fe77eee009fa5c0c3e1c51f9a62fb9464"
+      "source": "update/v0.15.12/live-strength-v01512.js"
     },
     {
       "path": "preload.js",
-      "source": "update/v0.15.12/preload.js",
-      "sha256": "33d64806f92af07b6fc60efed9deeb01c0d58372a6a1f36e7b5ed88accc28949"
+      "source": "update/v0.15.12/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.12/main.js",
-      "sha256": "626e71cb3a00a52189624c9582d588f61b90e7510e4ea4150f0baf502b5fce9d"
+      "source": "update/v0.15.12/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.12/package.json",
-      "sha256": "d3ce546bfcac126fd9b0fb3bacdc86395e3b11747662a67e64bfe72b507d2f0f"
+      "source": "update/v0.15.12/package.json"
     }
   ],
   "delete": ["live-strength-v01510.js", "live-strength-v01511.js"]
