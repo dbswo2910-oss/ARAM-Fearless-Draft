@@ -37,45 +37,37 @@ function createWindow(){
     try{
       const liveCode=fs.readFileSync(path.join(__dirname,'live-strength-v01513.js'),'utf8')+'\n//# sourceURL=live-strength-v01513.js';
       const favoriteCode=fs.readFileSync(path.join(__dirname,'match-lab-favorites-v01514.js'),'utf8')+'\n//# sourceURL=match-lab-favorites-v01514.js';
-      const roleCode=fs.readFileSync(path.join(__dirname,'role-grade-v01515.js'),'utf8')+'\n//# sourceURL=role-grade-v01515.js';
+      const roleBaseCode=fs.readFileSync(path.join(__dirname,'role-grade-v01513.js'),'utf8')+'\n//# sourceURL=role-grade-v01513.js';
+      const roleCode=fs.readFileSync(path.join(__dirname,'role-grade-fairs-v01515.js'),'utf8')+'\n//# sourceURL=role-grade-fairs-v01515.js';
       const replayCode=fs.readFileSync(path.join(__dirname,'match-lab-replay-v01515.js'),'utf8')+'\n//# sourceURL=match-lab-replay-v01515.js';
       mainWindow.webContents.executeJavaScript(liveCode,false)
         .then(()=>mainWindow.webContents.executeJavaScript(favoriteCode,false))
+        .then(()=>mainWindow.webContents.executeJavaScript(roleBaseCode,false))
         .then(()=>mainWindow.webContents.executeJavaScript(roleCode,false))
         .then(()=>mainWindow.webContents.executeJavaScript(replayCode,false))
-        .then(()=>mainWindow.webContents.executeJavaScript('Boolean(window.__ARAM_LIVE_STRENGTH_V01513__) && Boolean(window.__ARAM_MATCH_LAB_FAVORITES_V01514__) && Boolean(window.__ARAM_ROLE_GRADE_V01515__) && Boolean(window.__ARAM_MATCH_LAB_REPLAY_V01515__)',false))
+        .then(()=>mainWindow.webContents.executeJavaScript('Boolean(window.__ARAM_LIVE_STRENGTH_V01513__) && Boolean(window.__ARAM_MATCH_LAB_FAVORITES_V01514__) && Boolean(window.__ARAM_ROLE_GRADE_V01513__) && Boolean(window.__ARAM_ROLE_GRADE_V01515__) && Boolean(window.__ARAM_MATCH_LAB_REPLAY_V01515__)',false))
         .then(ok=>{if(!ok)console.error('[v0.15.15] runtime patch marker missing')})
         .catch(e=>console.error('[v0.15.15] runtime patch inject failed',e));
     }catch(e){console.error('[v0.15.15] runtime patch read failed',e)}
   });
   mainWindow.once('ready-to-show',()=>mainWindow.show());
-  // v0.14.3: X closes the app completely instead of hiding it to the tray.
   mainWindow.on('closed',()=>{mainWindow=null});
   mainWindow.webContents.setWindowOpenHandler(({url})=>{if(/^https?:\/\//i.test(url))shell.openExternal(url);return{action:'deny'}});
   mainWindow.webContents.on('will-navigate',(e,url)=>{if(!url.startsWith('file:'))e.preventDefault()});
   return mainWindow;
 }
-function createTray(){
-  tray=new Tray(trayImage());tray.setToolTip('ARAM Fearless Draft');tray.on('double-click',showWindow);rebuildTrayMenu();
-}
+function createTray(){tray=new Tray(trayImage());tray.setToolTip('ARAM Fearless Draft');tray.on('double-click',showWindow);rebuildTrayMenu()}
 
 if(!app.requestSingleInstanceLock()){app.quit()}else if(isUpdateHandoff){
-  // Updater handoff probe: if no older instance owns the lock, exit immediately.
   app.whenReady().then(()=>{quitting=true;app.quit()});
 }else{
   app.on('second-instance',(_event,argv)=>{
-    if(Array.isArray(argv)&&argv.includes('--aram-update-handoff')){
-      quitting=true;
-      try{core.stop()}catch{}
-      app.quit();
-      return;
-    }
+    if(Array.isArray(argv)&&argv.includes('--aram-update-handoff')){quitting=true;try{core.stop()}catch{}app.quit();return}
     showWindow();
   });
   app.whenReady().then(()=>{
     app.setAppUserModelId('ingdidi.aram-fearless-draft');
-    core.start();
-    createWindow();createTray();
+    core.start();createWindow();createTray();
     ipcMain.handle('autosync:get-state',()=>core.getState());
     ipcMain.handle('match-history:load',(_event,opts)=>core.getAramMatchHistory(opts||{}));
     ipcMain.handle('desktop:get-info',()=>({electron:true,version:VERSION,electronVersion:process.versions.electron,platform:process.platform,arch:process.arch,alwaysOnTop,launchAtStartup:app.getLoginItemSettings().openAtLogin,update:{status:process.env.ARAM_UPDATE_STATUS||'unknown',repo:process.env.ARAM_UPDATE_REPO||'',current:process.env.ARAM_UPDATE_CURRENT||VERSION,latest:process.env.ARAM_UPDATE_LATEST||VERSION,checkedAt:Number(process.env.ARAM_UPDATE_CHECKED_AT||0),message:process.env.ARAM_UPDATE_MESSAGE||''}}));
