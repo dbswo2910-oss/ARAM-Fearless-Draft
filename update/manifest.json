@@ -1,7 +1,7 @@
 {
   "version": "0.15.9",
-  "message": "v0.15.9 · LIVE build-aware item engine + owned-item hard guard · ROLE GRADE v2",
-  "min_launcher": "2.0.0",
+  "message": "v0.15.9 · stable launcher base repair · requires launcher 2.0.1 or newer",
+  "min_launcher": "2.0.1",
   "files": [],
   "delete": []
 }
