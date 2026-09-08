@@ -1,6 +1,6 @@
 {
-  "version": "0.15.14",
-  "message": "v0.15.14 · Match Lab 친구 즐겨찾기 + 드롭다운 빠른 전적 조회",
+  "version": "0.15.15",
+  "message": "v0.15.15 · ROLE GRADE v4 FAIR-S + Pick Replay REC v2",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -16,16 +16,24 @@
       "source": "update/v0.15.14/match-lab-favorites-v01514.js"
     },
     {
+      "path": "role-grade-fairs-v01515.js",
+      "source": "update/v0.15.15/role-grade-fairs-v01515.js"
+    },
+    {
+      "path": "match-lab-replay-v01515.js",
+      "source": "update/v0.15.15/match-lab-replay-v01515.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.14/main.js"
+      "source": "update/v0.15.15/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.14/package.json"
+      "source": "update/v0.15.15/package.json"
     }
   ],
   "delete": [
