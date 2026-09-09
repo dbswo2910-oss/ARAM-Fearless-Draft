@@ -1,3 +1,4 @@
+# CI auto-deploy verification marker
 name = "aram-community-calibration"
 main = "worker.js"
 compatibility_date = "2026-09-09"
