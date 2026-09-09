@@ -1,0 +1,30 @@
+ARAM Fearless Draft v0.15.33 CHANGELOG
+
+Theme
+- Riot Grade 장기 누적 스냅샷을 PLAYER PROFILE을 열지 않아도 가능한 범위에서 자동 동기화.
+
+Changes
+1. Auto Snapshot
+- 새 renderer: riot-grade-autosnapshot-v01533.js
+- Match Lab 상세 전적이 메모리에 로드되어 있으면 약 30초마다 저장 Riot Grade와 현재 ROLE 결과를 연결해 snapshot annotation 시도.
+- 앱 포커스 복귀 / document visibility 복귀 시 추가 동기화.
+- renderAramHistoryFeedback 이후에도 지연 동기화.
+
+2. Why
+- v0.15.32 persistent history는 ROLE CALIBRATION 화면을 열 때 snapshot을 붙일 수 있었음.
+- 사용자가 Player Profile을 자주 열지 않는 경우 Grade가 쌓여도 ROLE snapshot이 늦게 붙을 수 있었음.
+- v0.15.33은 현재 Match Lab 전적이 로드된 상태라면 프로필을 열지 않아도 자동 연결해 장기 표본 손실 위험을 줄임.
+
+3. Safety
+- 실제 annotation 검증은 v0.15.32 collector가 담당하며 PUUID / gameId / championId / Queue 검증을 유지.
+- 같은 signature는 60초 내 불필요하게 반복 저장하지 않음.
+- 저장된 Grade가 없는 경기는 snapshot을 생성하지 않음.
+- Riot Grade는 계속 scoring use OFF이며 ROLE 점수에 영향 없음.
+
+4. Runtime
+- v0.15.33 main은 v0.15.32 persistent collector/history를 유지하고 auto snapshot renderer를 마지막에 추가 주입.
+- marker chain에 __ARAM_RIOT_GRADE_AUTOSNAPSHOT_V01533__ 추가.
+
+Limit
+- Match Lab 상세 전적 자체가 한 번도 로드되지 않은 상태에서는 renderer가 ROLE을 계산할 원본이 없으므로 snapshot을 만들지 않음.
+- 실제 Windows + Riot Client 장기 실행 E2E는 사용자 확인 필요.
