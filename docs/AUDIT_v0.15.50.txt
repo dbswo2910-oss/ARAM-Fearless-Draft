@@ -1,0 +1,29 @@
+ARAM Fearless Draft v0.15.50 Audit Scope
+
+자동 검증
+- manifest / main.js / package.json 버전 일치
+- random-ingame-coach-v01550.js 전달 및 JS parse
+- readiness marker
+- v0.15.49 실제 설치본 인게임 DOM reference 존재
+- #random / #randomIngameShell / .randomModeNav exact selector 사용
+- broad title/regex DOM discovery 금지
+- Preview 진입 및 PREVIEW 안전 라벨
+- alive / dead / respawn 3상태
+- AUTO: dead -> build, alive/respawn -> live
+- LIVE / 빌드 / 상세 3탭
+- 통계 기본트리 vs 이번 판 최적화 비교
+- 기존 LIVE 엔진 재사용
+- score_logic_changed:false
+- main injection order/readiness guard
+
+수동 확인 필요
+- Windows Electron 실제 폰트/DPI/간격
+- 실제 사망 감지 후 빌드 화면 자동 전환
+- 부활 7초 이하에서 LIVE 복귀
+- 실제 인게임에서 정보가 1화면에 과밀하지 않은지
+- 미리보기와 실제 게임 UI가 동일하게 보이는지
+
+이번 감사가 보증하지 않는 것
+- Live Client가 제공하지 않는 위치/스킬 쿨타임 추정
+- LOL.PS 사이트의 실시간 데이터 수집
+- 실제 Windows 게임 중 시각적 사용성(사용자 스크린샷 필요)
