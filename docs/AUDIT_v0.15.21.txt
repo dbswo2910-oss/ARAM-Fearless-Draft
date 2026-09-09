@@ -1,0 +1,37 @@
+ARAM Fearless Draft v0.15.21 AUDIT
+Date: 2026-09-09
+
+PASS · player-profile-data-sticky-v01521.js Node syntax check
+PASS · v0.15.21 main.js Node syntax check
+PASS · package.json JSON parse
+
+PLAYER PROFILE diversity mock regression
+- ADC형 샘플 -> 딜 생산형 / 안정 캐리형 / 포킹 압박형 등으로 분리, 기존 밸런스 fallback 미사용
+- 탱커형 샘플 -> 선봉 돌격형 + 탱커 스페셜리스트
+- 서포터형 샘플 -> 팀 조율형 + 서포터 스페셜리스트
+- 탱커/원딜/서포터 혼합 샘플 -> 멀티롤 올라운더
+- 동일 능력치 복제가 아닌 서로 다른 관측축 + 개인 내 contrast normalization 사용 확인
+- 주 역할 스페셜리스트는 보조 특성으로 남되, 세부 플레이스타일이 있을 경우 세부 유형이 1순위가 되도록 점수 조정
+- 밸런스형 hard fallback 제거 확인
+
+DATA champion detail sticky
+- '챔피언 상세' / 'Champion Detail' 제목을 가진 .panel / .dataInfoPanel 및 champion-detail 계열 DOM을 의미 기반 탐색
+- 1050px 이상: position:sticky, top:10px, max-height:calc(100vh - 20px), 내부 overflow:auto
+- 1050px 미만: static fallback
+- DOM 재렌더 / 챔피언 클릭 / resize 후 sticky 재적용 루틴 확인
+
+Runtime chain
+PASS · v0.15.13 LIVE strength
+PASS · v0.15.14 Match Lab favorites
+PASS · ROLE GRADE base + FAIR-S
+PASS · v0.15.15 replay
+PASS · v0.15.16 multi-user isolation
+PASS · v0.15.17 queue split + Draft Architecture Guard v2
+PASS · v0.15.18 role metric detail
+PASS · v0.15.19 Player Profile base
+PASS · v0.15.20 LIVE item visibility memory
+PASS · v0.15.21 profile diversity/sticky marker wired in main.js
+
+Limitations
+- 실제 사용자 Windows DPI/폰트와 데이터 화면의 설치본 DOM에서 사람 눈으로 sticky 동작을 확인하는 E2E는 이 환경에서 실행하지 못함.
+- 따라서 실제 설치본에서 챔피언 상세 패널의 제목/DOM 구조가 예상과 다를 경우 selector 보정이 추가로 필요할 수 있음. 패치는 exact title + class/id fallback 두 단계로 탐색하도록 구성함.
