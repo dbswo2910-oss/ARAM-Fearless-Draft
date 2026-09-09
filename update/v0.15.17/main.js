@@ -2,7 +2,9 @@
 const path=require('path');
 const fs=require('fs');
 const {app,BrowserWindow,Tray,Menu,ipcMain,nativeImage,shell}=require('electron');
-const {LeagueAutoSyncCore}=require('./autosync-core');
+const autosyncCore=require('./autosync-core');
+require('./autosync-queue-v01517').patch(autosyncCore);
+const {LeagueAutoSyncCore}=autosyncCore;
 
 const VERSION='0.15.17';
 let mainWindow=null,tray=null,quitting=false,alwaysOnTop=false;
@@ -57,7 +59,6 @@ function createWindow(){
     }catch(e){console.error('[v0.15.17] runtime patch read failed',e)}
   });
   mainWindow.once('ready-to-show',()=>mainWindow.show());
-  // v0.14.3: X closes the app completely instead of hiding it to the tray.
   mainWindow.on('closed',()=>{mainWindow=null});
   mainWindow.webContents.setWindowOpenHandler(({url})=>{if(/^https?:\/\//i.test(url))shell.openExternal(url);return{action:'deny'}});
   mainWindow.webContents.on('will-navigate',(e,url)=>{if(!url.startsWith('file:'))e.preventDefault()});
@@ -68,7 +69,6 @@ function createTray(){
 }
 
 if(!app.requestSingleInstanceLock()){app.quit()}else if(isUpdateHandoff){
-  // Updater handoff probe: if no older instance owns the lock, exit immediately.
   app.whenReady().then(()=>{quitting=true;app.quit()});
 }else{
   app.on('second-instance',(_event,argv)=>{
