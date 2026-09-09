@@ -1,6 +1,6 @@
 {
-  "version": "0.15.31",
-  "message": "v0.15.31 · Riot Grade 누적 검증",
+  "version": "0.15.32",
+  "message": "v0.15.32 · Riot Grade 장기 누적 검증",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -108,16 +108,24 @@
       "source": "update/v0.15.31/riot-grade-calibration-v01531.js"
     },
     {
+      "path": "riot-grade-collector-v01532.js",
+      "source": "update/v0.15.32/riot-grade-collector-v01532.js"
+    },
+    {
+      "path": "riot-grade-calibration-history-v01532.js",
+      "source": "update/v0.15.32/riot-grade-calibration-history-v01532.js"
+    },
+    {
       "path": "preload.js",
-      "source": "update/v0.15.28/preload.js"
+      "source": "update/v0.15.32/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.31/main.js"
+      "source": "update/v0.15.32/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.31/package.json"
+      "source": "update/v0.15.32/package.json"
     }
   ],
   "delete": [
