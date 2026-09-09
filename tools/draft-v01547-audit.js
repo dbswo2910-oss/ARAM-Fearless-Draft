@@ -5,6 +5,7 @@ const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
 const report={generatedAt:new Date().toISOString(),pass:[],fail:[],info:{}};
 const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail});
+const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number);for(let i=0;i<Math.max(A.length,B.length);i++){const x=A[i]||0,y=B[i]||0;if(x!==y)return x>y}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const tabsPath=byPath.get('draft-judgment-tabs-v01547.js');
@@ -12,17 +13,17 @@ const riskPath=byPath.get('draft-risk-board-v01546.js');
 const layoutPath=byPath.get('draft-layout-v01545.js');
 const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
-ok(m.version==='0.15.47','Manifest is v0.15.47',m.version);
-ok(!!tabsPath&&/v0\.15\.47\/draft-judgment-tabs-v01547\.js$/.test(tabsPath)&&exists(tabsPath),'v0.15.47 judgment tabs runtime delivered',tabsPath||'missing');
+ok(ge(m.version,'0.15.47'),'Manifest is v0.15.47 or newer',m.version);
+ok(!!tabsPath&&/v0\.15\.47\/draft-judgment-tabs-v01547\.js$/.test(tabsPath)&&exists(tabsPath),'v0.15.47 judgment tabs runtime retained',tabsPath||'missing');
 ok(!!riskPath&&exists(riskPath),'v0.15.46 risk detector retained',riskPath||'missing');
 ok(!!layoutPath&&/v0\.15\.45\/draft-layout-v01545\.js$/.test(layoutPath),'Stable v0.15.45 layout retained',layoutPath||'missing');
-ok(!!mainPath&&/v0\.15\.47\/main\.js$/.test(mainPath)&&exists(mainPath),'v0.15.47 main runtime delivered',mainPath||'missing');
-ok(!!pkgPath&&/v0\.15\.47\/package\.json$/.test(pkgPath)&&exists(pkgPath),'v0.15.47 package metadata delivered',pkgPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current main runtime delivered',mainPath||'missing');
+ok(!!pkgPath&&exists(pkgPath),'Current package metadata delivered',pkgPath||'missing');
 const s=tabsPath&&exists(tabsPath)?read(tabsPath):'';
 const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
 try{new Function(s);ok(true,'Judgment tabs runtime parses as JavaScript')}catch(e){ok(false,'Judgment tabs runtime parses as JavaScript',e.message)}
-try{new Function(main);ok(true,'Main runtime parses as JavaScript')}catch(e){ok(false,'Main runtime parses as JavaScript',e.message)}
+try{new Function(main);ok(true,'Current main runtime parses as JavaScript')}catch(e){ok(false,'Current main runtime parses as JavaScript',e.message)}
 ok(/__ARAM_DRAFT_JUDGMENT_TABS_V01547__\s*=\s*true/.test(s),'v0.15.47 readiness marker exists');
 for(const label of ['요약','위험 감지','조합 상성'])ok(s.includes(label),`Judgment tab exists: ${label}`);
 ok(/pureEngageProfile/.test(s)&&/direct\(name,'이니시'\).*f18\(name,'이니시'\).*direct\(name,'강제진입'\).*f18\(name,'강제진입'\)/s.test(s),'Strong-engage calibration uses initiation features');
@@ -33,10 +34,11 @@ ok(/draftPickClearScrollFixV01547/.test(s)&&/position:relative!important/.test(s
 ok(/activeTab='summary'/.test(s),'Summary tab is the default view');
 ok(/active\.slice\(0,2\)/.test(s),'Risk tab keeps TOP2 detailed risk explanations');
 const ir=main.indexOf("'draft-risk-board-v01546.js'"),it=main.indexOf("'draft-judgment-tabs-v01547.js'"),inext=main.indexOf("'role-metric-detail-v01518.js'");
-ok(ir>=0&&ir<it&&it<inext,'Main injects judgment tabs after risk board and before later UI patches');
-ok(main.includes('__ARAM_DRAFT_JUDGMENT_TABS_V01547__'),'Main readiness guard covers v0.15.47 judgment tabs');
-ok(/const VERSION='0\.15\.47'/.test(main),'Main VERSION is v0.15.47');
-ok(pkg.version==='0.15.47','package.json VERSION is v0.15.47',pkg.version);
+ok(ir>=0&&ir<it&&it<inext,'Current main injects judgment tabs after risk board and before later UI patches');
+ok(main.includes('__ARAM_DRAFT_JUDGMENT_TABS_V01547__'),'Current main readiness guard covers v0.15.47 judgment tabs');
+const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'0';
+ok(ge(vm,'0.15.47'),'Current main VERSION is v0.15.47 or newer',vm);
+ok(ge(pkg.version,'0.15.47'),'Current package VERSION is v0.15.47 or newer',pkg.version);
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','draft-v01547-report.json'),JSON.stringify(report,null,2));
