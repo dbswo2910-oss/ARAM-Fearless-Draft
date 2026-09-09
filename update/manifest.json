@@ -1,6 +1,6 @@
 {
-  "version": "0.15.18",
-  "message": "v0.15.18 · Match Lab 역할 지표 상세보기",
+  "version": "0.15.19",
+  "message": "v0.15.19 · Player Profile + Scout Report + Growth Coach",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -44,16 +44,20 @@
       "source": "update/v0.15.18/role-metric-detail-v01518.js"
     },
     {
+      "path": "player-profile-v01519.js",
+      "source": "update/v0.15.19/player-profile-v01519.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.18/main.js"
+      "source": "update/v0.15.19/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.18/package.json"
+      "source": "update/v0.15.19/package.json"
     }
   ],
   "delete": [
