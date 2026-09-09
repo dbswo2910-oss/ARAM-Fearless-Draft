@@ -1,0 +1,93 @@
+ARAM Fearless Draft v0.15.17 QA / AUDIT
+Date: 2026-09-09
+
+PASS — actually executed
+1. JavaScript syntax
+- autosync-core.js
+- autosync-queue-v01517.js (updater compatibility patch)
+- draft-pick-balance-v01517.js
+- live-strength-v01513.js
+- main.js
+- match-lab-favorites-v01514.js
+- match-lab-queue-v01517.js
+- match-lab-replay-v01515.js
+- multi-user-isolation-v01516.js
+- preload.js
+- role-grade-fairs-v01515.js
+- role-grade-v01513.js
+=> all node --check PASS
+
+2. Static/cumulative integrity
+- package/main version: 0.15.17
+- champion data: 173/173
+- prior cumulative modules/resources preserved
+- full package contains direct queue-safe AutoSync core
+- stable-updater path additionally tested by applying autosync-queue-v01517.js to the actual v0.15.16 autosync-core baseline
+- v0.15.17 queue split and draft architecture patches are marker-checked
+
+3. Backend queue separation
+- Queue 450 => standard
+- Queue 2400/KIWI => mayhem
+- explicit non-ARAM queue on map 12 => rejected
+- Mayhem never enters standard Random Practice/Live ARAM context
+- mixed mocked history returned only requested queue
+- updater compatibility test on v0.15.16 base: standard 1 / mayhem 1 and runtime Q2400 rejected
+=> PASS
+
+4. Match Lab queue UI VM
+- 일반 칼바람 / 아수라장 buttons installed
+- standard -> mayhem requests queueMode=mayhem and replaces full dataset
+- mayhem -> standard requests queueMode=standard and restores Q450 dataset
+=> PASS
+
+5. Generalized draft architecture audit — all 173 candidates x contrasting contexts
+A. frontline only + no stable ranged core + enemy range/CC
+- median stable-ranged adjustment +7.6
+- median low-range-commit adjustment -6.9
+B. two ranged cores + no frontline + enemy dive
+- median frontline adjustment +4.1
+- median non-frontline adjustment -0.4
+C. already-balanced 3-man shell
+- median absolute adjustment 0.0 / mean 0.93
+- architecture layer becomes a tie-breaker instead of dominating
+D. frontline + one low-range commit + no ranged core
+- median stable-ranged adjustment +5.2
+- median second low-range-commit adjustment -11.8
+E. patch source checked for tested champion-name hardcoding
+=> PASS
+
+6. Exact user screenshot state reconstructed in full engine
+- BLUE PICK2 -> BLUE PICK3 consecutive state
+- TOP6: 징크스 183.5 / 흐웨이 183.0 / 럭스 178.9 / 갈리오 175.7 / 니코 175.4 / 야스오 172.9
+- Yasuo no longer #1
+- after a ranged core is secured, low-range package penalty automatically recovers
+=> PASS
+
+7. Built-in Golden regression suite
+- 293 checks executed
+- 292 direct PASS
+- 1 raw failure is DOM-stub-only: #dataCard querySelectorAll cannot parse generated innerHTML in Node VM
+- underlying functionMetricCards('소나') independently produced exactly 10 champMetric cards, satisfying the same assertion semantically
+- no other engine regression failures
+
+8. Old "프로그램 기준" UI cleanup
+- obsolete panel removed by runtime cleanup
+- unrelated data panels remain intact
+=> PASS
+
+9. Package integrity
+- final ZIP rebuilt from final stage after updater compatibility patch was added
+- archive integrity tested with unzip -t
+- SHA-256 recorded separately
+
+NOT EXECUTED — environment limitation
+- native Windows Electron visual E2E
+- actual Riot/League Client with real Queue 450 and Queue 2400 histories
+- live two-PC draft room test
+
+USER LIVE CHECK NEEDED
+- fully close app and rerun Launcher v2.0.2
+- confirm v0.15.17
+- Match Lab: switch 일반 칼바람 / 아수라장 and verify different histories
+- Data: confirm "프로그램 기준" panel is gone
+- Draft: check several real pick states, not only the supplied Yasuo case
