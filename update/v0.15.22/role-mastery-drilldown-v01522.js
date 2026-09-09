@@ -4,7 +4,7 @@
   const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,Number(v)||0));
   const num=(v,d=0)=>Number.isFinite(Number(v))?Number(v):d;
   const avg=a=>a?.length?a.reduce((s,x)=>s+num(x),0)/a.length:0;
-  const esc=s=>{try{return aramHistoryEsc(String(s??''))}catch{return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}};
+  const esc=s=>{try{return aramHistoryEsc(String(s??''))}catch{return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}};
   const grade=v=>v>=96?'S+':v>=91?'S':v>=84?'A+':v>=76?'A':v>=64?'B':v>=52?'C':'D';
   let selectedRole='';
   let bindScheduled=false;
@@ -65,10 +65,13 @@
     if(!role){drill?.remove();return}
     const list=aggregate(role),metrics=ROLE_METRICS[role]||FALLBACK,total=list.reduce((s,x)=>s+x.n,0),wins=list.reduce((s,x)=>s+x.wins,0);
     if(!drill){drill=document.createElement('div');drill.id='pp22RoleDrill';drill.className='pp22drill';container.insertAdjacentElement('afterend',drill)}
+    const sig=[role,total,wins,...list.map(x=>`${x.champion}:${x.n}:${x.wins}:${x.score.toFixed(2)}:${x.trend==null?'n':x.trend.toFixed(2)}`)].join('|');
+    if(drill.dataset.sig===sig)return;
     const cards=list.map(x=>{
       const wr=x.n?x.wins/x.n*100:0,tr=x.trend;
       return `<div class="pp22champ"><div class="pp22champTop"><div class="pp22champName"><b>${esc(x.champion)}</b><span>${x.n}경기 · ${x.wins}승 ${x.n-x.wins}패 · 승률 ${Math.round(wr)}%</span></div><div class="pp22champScore"><strong>${Math.round(x.score)}</strong><i>${grade(x.score)}</i></div></div><div class="pp22champMeta"><span class="pp22pill">최고 ROLE ${Math.round(x.best)}</span>${tr==null?'':`<span class="pp22pill ${tr>=3?'good':tr<=-3?'bad':''}">최근 흐름 ${tr>=0?'+':''}${tr.toFixed(1)}</span>`}${x.n<3?'<span class="pp22pill">소표본</span>':''}</div><div class="pp22metrics">${metrics.map(([k,l])=>`<div class="pp22metric"><div><span>${esc(l)}</span><b>${Math.round(num(x[k]))}</b></div><i style="--w:${Math.round(clamp(x[k]))}%"></i></div>`).join('')}</div></div>`
     }).join('');
+    drill.dataset.sig=sig;
     drill.innerHTML=`<div class="pp22drillHead"><div><b>${esc(role)} · 챔피언별 상세</b><span>현재 불러온 전적 중 ${esc(role)} ${total}경기를 챔피언별로 묶었습니다.</span></div><em>${wins}승 ${total-wins}패 · ${list.length}챔피언</em></div><div class="pp22hint">ROLE GRADE와 해당 역할에서 중요한 관측지표 평균입니다. 1~2경기는 소표본으로 참고하세요.</div>${cards?`<div class="pp22champGrid">${cards}</div>`:'<div class="pp22empty">이 역할의 10인 상세 전적이 없습니다.</div>'}`;
   }
   function select(role){
