@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.50**
+- Active updater version: **v0.15.51**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -124,9 +124,31 @@ LIVE default information budget:
 
 Secondary numbers such as average item value/average level are not shown in the combat default view. They remain under Detail.
 
+### v0.15.51 — Screenshot-driven HUD hierarchy polish (Phase 2)
+
+The user reviewed real Windows preview screenshots at 1480x940. The screenshots showed that the coach foundation worked, but several layout problems remained:
+
+- pick-stage `완성 조합 TOP5` still occupied a large block above the coach while in in-game mode
+- preview scenario/role selects each consumed a full row
+- LIVE repeated `현재 구도` in both NOW CALL and a separate fourth metric card
+- the four equal LIVE metric cards made the actionable `내 역할` text too narrow/small
+- on death, the generic statistical build and current-match recommendation had equal visual priority, even though the current-match purchase is the primary action
+
+v0.15.51 is a **UI-only layer** (`random-ingame-ux-v01551.js`) loaded immediately after the v0.15.50 coach renderer. It does not change score/recommendation logic.
+
+Current visual contract:
+
+- in in-game mode, hide pick-stage headers/recommendation shells so the coach starts near the top
+- preview controls use one compact desktop toolbar
+- LIVE supporting metrics are exactly three visible cards: highest threat / local action / next purchase
+- NOW CALL owns the current-fight/current-matchup summary; do not repeat the same `현재 구도` card below
+- give `내 역할` the widest LIVE support card
+- in dead Build view, place `이번 판 최적화` first and give it substantially more width than `통계 기본트리`
+- keep the statistical build visible as reference, not as the primary action
+
 ### Preview design rule
 
-Random Practice now gets `🎮 인게임 미리보기`.
+Random Practice has `🎮 인게임 미리보기`.
 
 Preview state/scenario controls:
 
@@ -136,14 +158,14 @@ Preview state/scenario controls:
 
 Important: preview uses the **same coach renderer** as actual LIVE. It must always show `PREVIEW · 실제 게임 데이터 아님`. If a real ARAM live context appears while preview is active, preview yields to real LIVE data.
 
-### Item presentation in v0.15.50
+### Item presentation
 
 The item view compares:
 
 - **통계 기본트리**: embedded champion DB `기본 트리` + `통계 기준`
 - **이번 판 최적화**: existing LIVE item engine TOP1 + alternatives
 
-The embedded DB already contains source metadata such as `26.17 ARAM · MetaSRC + LOL.PS 교차` for many champions. v0.15.50 may display this metadata, but it does **not** crawl/fetch LOL.PS live during a match.
+The embedded DB already contains source metadata such as `26.17 ARAM · MetaSRC + LOL.PS 교차` for many champions. Current builds may display this metadata, but the app does **not** crawl/fetch LOL.PS live during a match.
 
 Future item-statistics phase can automate a cached external-statistics refresh separately. Do not make in-game rendering depend on fragile live website scraping.
 
@@ -185,10 +207,11 @@ Alive:
 Dead:
 
 1. respawn time + current gold
-2. statistical base build vs current-match optimized build
-3. TOP1 + alternatives
-4. next-fight action line
-5. more detail only on request
+2. current-match optimized build as the primary action
+3. statistical base build as a secondary reference
+4. TOP1 + alternatives
+5. next-fight action line
+6. more detail only on request
 
 Respawn <= 7s:
 
@@ -217,6 +240,7 @@ Start with:
 4. `docs/INSTALLED_BASELINE_v0.15.49.md`
 5. `reference/installed-v0.15.49/random-practice-pick-fragment.html`
 6. `reference/installed-v0.15.49/random-practice-ingame-fragment.html`
-7. current version-specific patch (`update/v0.15.50/random-ingame-coach-v01550.js` for current in-game work)
+7. `update/v0.15.50/random-ingame-coach-v01550.js` — coach renderer/state machine
+8. `update/v0.15.51/random-ingame-ux-v01551.js` — current screenshot-driven visual hierarchy layer
 
 Do not restart design decisions from scratch unless the user asks to change direction.
