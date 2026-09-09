@@ -1,0 +1,97 @@
+name: Deploy Community Calibration Worker
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/community-calibration/worker.js'
+      - 'backend/community-calibration/wrangler.template.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-community-calibration
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Check Worker syntax
+        shell: bash
+        run: |
+          cp backend/community-calibration/worker.js /tmp/community-calibration-worker.mjs
+          node --check /tmp/community-calibration-worker.mjs
+
+      - name: Check Cloudflare credentials
+        id: auth
+        shell: bash
+        run: |
+          if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Cloudflare deploy skipped. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets to enable automatic deployment."
+          fi
+
+      - name: Resolve D1 database and build Wrangler config
+        if: steps.auth.outputs.ready == 'true'
+        shell: bash
+        run: |
+          npx --yes wrangler@4 d1 list --json > /tmp/d1-list.json
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const raw = JSON.parse(fs.readFileSync('/tmp/d1-list.json', 'utf8'));
+          const list = Array.isArray(raw) ? raw : (Array.isArray(raw.result) ? raw.result : []);
+          const db = list.find(x => x && x.name === 'aram-calibration');
+          if (!db) {
+            console.error('D1 database "aram-calibration" was not found in this Cloudflare account.');
+            process.exit(1);
+          }
+          const id = db.uuid || db.id || db.database_id;
+          if (!id) {
+            console.error('D1 database id was not present in Wrangler output.');
+            process.exit(1);
+          }
+          const src = path.join('backend','community-calibration','wrangler.template.toml');
+          const dst = path.join('backend','community-calibration','wrangler.ci.toml');
+          const template = fs.readFileSync(src, 'utf8');
+          fs.writeFileSync(dst, template.replace('__D1_DATABASE_ID__', String(id)));
+          console.log('Resolved D1 database:', db.name);
+          NODE
+
+      - name: Deploy Worker to Cloudflare
+        if: steps.auth.outputs.ready == 'true'
+        shell: bash
+        run: |
+          npx --yes wrangler@4 deploy --config backend/community-calibration/wrangler.ci.toml
+
+      - name: Verify health endpoint
+        if: steps.auth.outputs.ready == 'true'
+        shell: bash
+        run: |
+          for i in 1 2 3 4 5; do
+            BODY=$(curl -fsS 'https://aram-community-calibration.dbswo2910.workers.dev/health' || true)
+            echo "$BODY"
+            if echo "$BODY" | grep -q '"ok":true' && echo "$BODY" | grep -q '"service":"community-calibration"'; then
+              exit 0
+            fi
+            sleep 3
+          done
+          echo 'Health verification failed after deploy.' >&2
+          exit 1
