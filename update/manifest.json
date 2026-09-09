@@ -1,6 +1,6 @@
 {
-  "version": "0.15.20",
-  "message": "v0.15.20 · LIVE 상대 장비가치 시야 안정화",
+  "version": "0.15.21",
+  "message": "v0.15.21 · PLAYER PROFILE 다양화 + 챔피언 상세 Sticky",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -52,16 +52,20 @@
       "source": "update/v0.15.20/live-item-memory-v01520.js"
     },
     {
+      "path": "player-profile-data-sticky-v01521.js",
+      "source": "update/v0.15.21/player-profile-data-sticky-v01521.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.20/main.js"
+      "source": "update/v0.15.21/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.20/package.json"
+      "source": "update/v0.15.21/package.json"
     }
   ],
   "delete": [
