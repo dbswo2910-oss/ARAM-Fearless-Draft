@@ -1,0 +1,47 @@
+ARAM Fearless Draft v0.15.33 AUDIT
+
+Scope
+- v0.15.32 persistent Riot Grade/ROLE snapshot이 PLAYER PROFILE 개방에 의존하지 않도록 background sync 보강.
+
+Source / wiring review
+- riot-grade-autosnapshot-v01533.js는 v0.15.32 exported syncSnapshots API만 사용.
+- 30초 주기, 앱 focus 복귀, visibility 복귀, Match Lab feedback render 이후 동기화 경로 존재.
+- busy guard 존재.
+- 동일 match list + Grade record count + lastCaptureAt signature는 60초 내 반복 annotation을 억제.
+- 현재 Match Lab matches가 비어 있으면 아무 작업도 하지 않음.
+- annotation 결과 updated>0일 때만 calibration panel refresh 시도.
+
+Safety inheritance
+- snapshot write 자체는 main process v0.15.32 collector의 annotateSnapshots가 수행.
+- 다른 PUUID 거부 유지.
+- Grade record에 실제 gameId match가 없는 경우 unmatched 처리 유지.
+- championId 확인 유지.
+- Queue 450/2400 검증 유지.
+- score 0~100 finite 검증 유지.
+
+Scoring isolation
+- autosnapshot은 aramHistoryRoleBreakdown 결과를 validation snapshot으로 보존할 뿐 계산식 override 없음.
+- Riot Grade를 ROLE score에 합산하지 않음.
+- scoring use OFF 원칙 유지.
+
+Runtime chain review
+- v0.15.33 main은 v0.15.32 persistent collector를 사용.
+- riot-grade-calibration-history-v01532.js 다음에 riot-grade-autosnapshot-v01533.js를 주입.
+- marker chain에 persistent calibration + autosnapshot 둘 다 요구.
+- 이전 v0.15.31 calibration renderer는 runtime injection하지 않음.
+- 기존 v0.15.28 single-match RIOT GRADE CHECK는 유지.
+
+Regression risk
+- renderAramHistoryFeedback wrapper가 기존 반환값을 그대로 반환하고 추가 작업은 setTimeout 비동기 호출만 함.
+- 30초마다 IPC를 호출하지만 current matches가 없으면 즉시 종료하고, 동일 signature 60초 suppression으로 write 빈도를 제한.
+- 실제 Grade annotation은 이미 저장된 Grade와 현재 Match Lab 경기 교집합만 대상.
+
+Not executed in actual environment
+- 실제 Windows Electron 장시간 30초 timer 동작 E2E 미실행.
+- 실제 Riot Client 게임 종료 직후 Grade poll과 autosnapshot의 시간 순서 E2E 미실행.
+- 앱 절전/복귀 및 장시간 백그라운드 후 focus 이벤트 실제 확인 미실행.
+- 실제 사용자 데이터에서 수백 경기 userData I/O 체감 성능 미검증.
+
+Result
+- 구조/회귀 안전장치 검토 완료.
+- 실제 Windows + Riot Client E2E 확인 필요.
