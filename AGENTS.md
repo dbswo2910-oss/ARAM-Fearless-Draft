@@ -91,3 +91,20 @@ Visible hierarchy:
 - `🎮 인게임 미리보기` uses the same coach renderer with synthetic data. It must always show `PREVIEW · 실제 게임 데이터 아님`.
 
 The v0.15.50 patch does **not** change recommendation scoring and does **not** live-crawl LOL.PS. Where the embedded item DB says `LOL.PS/MetaSRC` cross-validation, that source metadata may be displayed as the statistical baseline. A later source-refresh phase can automate external statistics separately.
+
+## v0.15.51 screenshot-polish contract
+
+`update/v0.15.51/random-ingame-ux-v01551.js` is a UI-only post-processing layer loaded immediately after the v0.15.50 coach renderer. It exists because the first real Windows preview screenshots revealed unnecessary visual competition.
+
+Rules:
+
+- in `data-random-mode="ingame"`, hide pick-stage stage headings/recommendation shells so the coach begins near the top of the page
+- keep preview controls on a single desktop toolbar when space allows
+- LIVE has three visible support cards only: `최고 위협 / 내 역할 / 다음 구매`
+- `현재 구도` belongs to NOW CALL and must not be duplicated as a fourth card
+- `내 역할` gets the widest support card because it often contains the longest actionable instruction
+- death Build view puts `이번 판 최적화` before and visually above `통계 기본트리`
+- statistical build stays visible as reference, not as the primary instruction
+- `score_logic_changed:false`; do not change recommendation calculations in this layer
+
+Current in-game work should normally read both v0.15.50 and v0.15.51 files before editing.
