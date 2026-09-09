@@ -1,6 +1,6 @@
 {
-  "version": "0.15.24",
-  "message": "v0.15.24 · LIVE 시간대 전력 안정화",
+  "version": "0.15.25",
+  "message": "v0.15.25 · MATCH LAB CC 영향력",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -32,6 +32,10 @@
       "source": "update/v0.15.17/autosync-queue-v01517.js"
     },
     {
+      "path": "autosync-cc-impact-v01525.js",
+      "source": "update/v0.15.25/autosync-cc-impact-v01525.js"
+    },
+    {
       "path": "match-lab-queue-v01517.js",
       "source": "update/v0.15.17/match-lab-queue-v01517.js"
     },
@@ -42,6 +46,10 @@
     {
       "path": "role-metric-detail-v01518.js",
       "source": "update/v0.15.18/role-metric-detail-v01518.js"
+    },
+    {
+      "path": "cc-impact-v01525.js",
+      "source": "update/v0.15.25/cc-impact-v01525.js"
     },
     {
       "path": "player-profile-v01519.js",
@@ -77,11 +85,11 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.24/main.js"
+      "source": "update/v0.15.25/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.24/package.json"
+      "source": "update/v0.15.25/package.json"
     }
   ],
   "delete": [
