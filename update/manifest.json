@@ -1,6 +1,6 @@
 {
-  "version": "0.15.17",
-  "message": "v0.15.17 · ARAM queue split + Draft Architecture Guard v2 + Data UI cleanup",
+  "version": "0.15.18",
+  "message": "v0.15.18 · Match Lab 역할 지표 상세보기",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -40,16 +40,20 @@
       "source": "update/v0.15.17/draft-pick-balance-v01517.js"
     },
     {
+      "path": "role-metric-detail-v01518.js",
+      "source": "update/v0.15.18/role-metric-detail-v01518.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.17/main.js"
+      "source": "update/v0.15.18/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.17/package.json"
+      "source": "update/v0.15.18/package.json"
     }
   ],
   "delete": [
