@@ -58,12 +58,12 @@ function patch(coreMod){
     const cache=core.__aramMissionTimelineCacheV01529||(core.__aramMissionTimelineCacheV01529=new Map());
     if(cache.has(gid))return cache.get(gid);
     let out;
-    try{const payload=await core.lcuGet(`/lol-match-history/v1/game-timelines/${encodeURIComponent(gid)}`,3500);out=summarize(payload,m)}catch(e){out={available:false,reason:'timeline-unavailable',error:e?.message||String(e),source:'LCU game timeline'}}
+    try{const payload=await core.lcuGet(`/lol-match-history/v1/game-timelines/${encodeURIComponent(gid)}`,1800);out=summarize(payload,m)}catch(e){out={available:false,reason:'timeline-unavailable',error:e?.message||String(e),source:'LCU game timeline'}}
     cache.set(gid,out);if(cache.size>120){const first=cache.keys().next().value;cache.delete(first)}return out;
   }
   async function enrich(core,matches){
-    const xs=arr(matches),max=Math.min(xs.length,40);let cursor=0;
-    const workers=Array.from({length:Math.min(6,max)},async()=>{while(true){const i=cursor++;if(i>=max)break;const m=xs[i];try{m.missionTimelineV01529=await getSummary(core,m)}catch(e){m.missionTimelineV01529={available:false,reason:'timeline-error',error:e?.message||String(e)}}}});
+    const xs=arr(matches),max=Math.min(xs.length,40);let cursor=0,serviceFailures=0,circuitOpen=false;
+    const workers=Array.from({length:Math.min(6,max)},async()=>{while(true){const i=cursor++;if(i>=max)break;const m=xs[i];if(circuitOpen){m.missionTimelineV01529={available:false,reason:'timeline-circuit-open'};continue}try{const r=await getSummary(core,m);m.missionTimelineV01529=r;if(r?.reason==='timeline-unavailable'&&++serviceFailures>=6)circuitOpen=true}catch(e){m.missionTimelineV01529={available:false,reason:'timeline-error',error:e?.message||String(e)};if(++serviceFailures>=6)circuitOpen=true}}});
     await Promise.all(workers);return xs;
   }
   Core.prototype.getAramMatchHistory=async function(opts={}){
