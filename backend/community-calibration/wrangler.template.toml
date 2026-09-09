@@ -1,0 +1,9 @@
+name = "aram-community-calibration"
+main = "worker.js"
+compatibility_date = "2026-09-09"
+workers_dev = true
+
+[[d1_databases]]
+binding = "CALIBRATION_DB"
+database_name = "aram-calibration"
+database_id = "__D1_DATABASE_ID__"
