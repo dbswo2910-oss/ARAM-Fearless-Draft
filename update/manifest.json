@@ -1,6 +1,6 @@
 {
-  "version": "0.15.22",
-  "message": "v0.15.22 · ROLE MASTERY 챔피언별 드릴다운",
+  "version": "0.15.23",
+  "message": "v0.15.23 · 역할별 전체 프로필 + 앱 내부 업데이트",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -60,16 +60,24 @@
       "source": "update/v0.15.22/role-mastery-drilldown-v01522.js"
     },
     {
+      "path": "role-profile-context-v01523.js",
+      "source": "update/v0.15.23/role-profile-context-v01523.js"
+    },
+    {
+      "path": "in-app-updater-ui-v01523.js",
+      "source": "update/v0.15.23/in-app-updater-ui-v01523.js"
+    },
+    {
       "path": "preload.js",
-      "source": "update/v0.15.13/preload.js"
+      "source": "update/v0.15.23/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.22/main.js"
+      "source": "update/v0.15.23/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.22/package.json"
+      "source": "update/v0.15.23/package.json"
     }
   ],
   "delete": [
