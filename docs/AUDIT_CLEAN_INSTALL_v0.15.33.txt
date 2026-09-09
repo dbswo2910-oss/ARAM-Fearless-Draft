@@ -1,0 +1,81 @@
+ARAM Fearless Draft v0.15.33 · CLEAN INSTALL / NEW-PC AUDIT
+Date: 2026-09-09
+
+[결론]
+- 기존 v0.15.9 standalone EXE는 새 사용자 배포 기준으로 사용하지 않는다.
+  해당 EXE는 v0.15.9 앱을 내장하며 현재 v0.15.33으로 최초 부트스트랩하는 경로가 없다.
+- 새 PC 배포용으로 현재 v0.15.33 전체 앱을 내장한 standalone Windows x64 EXE를 별도로 생성했다.
+
+[CURRENT APP ASSEMBLY]
+- Base full bundle: v0.15.18 app bundle
+- Current overlay: update/manifest.json v0.15.33 활성 runtime/main/preload/package 파일
+- Manifest delete 목록 적용
+- 최종 app package version: 0.15.33
+- appbundle ZIP files: 36
+- appbundle ZIP integrity: PASS
+- appbundle SHA-256: c35b8b8882bda6d57cb7b8701922d46d21bd9550254b2c4604c4bffa8a784fcc
+
+[STATIC / SYNTAX]
+- Current app root JavaScript: 32 files
+- node --check: 32/32 PASS
+- package.json parse/version: PASS / 0.15.33
+- index.html/main.js/preload.js present: PASS
+- current manifest obsolete delete files absent: PASS
+
+[STANDALONE LAUNCHER]
+- Go standalone launcher
+- Target: Windows GUI x86-64
+- Embedded app bundle: v0.15.33
+- Output: ARAM_Fearless_Draft_v0.15.33_windows_x64.exe
+- PE inspection: PE32+ GUI x86-64 PASS
+- SHA-256: fc9c87eb9d483c8da92ccb9c17a2513454474c6888abcf70d9eff02fafb7afeb
+
+[FIRST-RUN]
+- Uses %LOCALAPPDATA%\ARAM Fearless Draft AutoUpdate
+- Extracts embedded app into appfiles
+- Creates .v01533-ready marker
+- Reuses Electron 44.2.0 if already cached
+- Otherwise downloads official electron-v44.2.0-win32-x64.zip
+- Retry up to 3 attempts / 20 minute timeout per attempt
+- Expected Electron SHA-256: 4021363e3090d67a144ebedb90765cf193b0e61f300c519c83f0174502a481da
+- Official Electron v44.2.0 win32-x64 release asset reports the same digest: MATCH
+- ZIP extraction has path traversal guards
+- Node.js / Python / preinstalled Electron not required
+
+[IN-APP UPDATE]
+- v0.15.33 main.js contains independent GitHub raw manifest updater.
+- Default repo: dbswo2910-oss/ARAM-Fearless-Draft
+- desktop:update-now remains available in portable bootstrap mode.
+- Riot Grade / local profile data are not used to decide update versions.
+
+[NEW-PC DATA]
+- Static app/champion/calculation/UI data are the same at the same app version.
+- Local Electron storage starts fresh for a new Windows user profile.
+- Favorites, Player Profile history and Riot Grade records are not bundled from the developer PC.
+- AutoSync/LIVE/Riot Grade features require that machine's League Client when those features are used.
+
+[COMPATIBILITY]
+- Distribution build is Windows x64 only.
+- Electron 44 requires modern 64-bit Windows (Windows 10+).
+- Windows 32-bit is not supported by Electron 44.
+- ARM64-specific distribution is not included.
+
+[DISTRIBUTION UX RISK]
+- EXE is not signed with a trusted Authenticode code-signing certificate.
+- A fresh Windows PC can show Microsoft Defender SmartScreen / Unknown Publisher warning.
+- Public distribution should eventually use code signing.
+
+[NOT EXECUTED HERE]
+- Literal clean Windows physical/VM E2E was not available in this Linux execution environment.
+- Do not claim real-Windows clean-install E2E PASS yet.
+- Verified: PE x64 build, embedded bundle integrity, JS syntax, first-run launcher logic, official Electron asset digest match, current in-app update path.
+
+[ONE-TIME USER E2E]
+1. Run v0.15.33 EXE on a Windows PC/profile where this app has never run.
+2. Confirm Electron downloads once and v0.15.33 opens.
+3. Reopen and confirm Electron is reused.
+4. Log into Riot Client and confirm AutoSync.
+5. Run an ARAM and verify relevant LIVE/Match Lab/Riot Grade paths.
+
+Status: AUTOMATED / STATIC CLEAN-INSTALL AUDIT PASS
+Real clean Windows first-run E2E: REQUIRED ONCE
