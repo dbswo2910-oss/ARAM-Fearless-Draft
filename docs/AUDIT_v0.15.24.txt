@@ -1,0 +1,32 @@
+v0.15.24 AUDIT
+
+Scope
+- LIVE 시간대 전력 지표 재설계
+- 기존 생존 인원/최근 킬 기반 변동 제거
+- 장비/코어/레벨/핵심레벨/성장곡선 기반 구조적 시간대 전력
+
+Static checks
+- time-power-v01524.js: node --check PASS
+- v0.15.24 main.js: node --check PASS
+- v0.15.24 package.json: JSON parse PASS
+
+Synthetic regression
+- 동일 장비/레벨/성장곡선 상태에서 recent ChampionKill 이벤트만 변경해도 raw 시간대 전력 불변 PASS
+- alive 상태를 1:5로 변경해도 raw 시간대 전력 불변 PASS
+- factor set = item/core/level/break/curve PASS
+- alive/flow factor 미포함 PASS
+- 출력 예시 raw share 65.93, display 66:34 PASS
+
+Design guards
+- 상대 아이템 미노출은 v0.15.20 last-seen item memory 사용
+- 코어 타이밍 보너스 상한 ±6
+- 평균 레벨 보정 상한 ±4.5
+- 핵심 레벨 타이밍 보정 상한 ±5
+- 성장곡선 보정 상한 ±9
+- 전체 표시 범위 20:80 ~ 80:20
+- 작은 점수 변화는 dead-band + smoothing 적용
+
+Not executed here
+- 실제 Windows + Riot Client 장시간 E2E
+- 실제 게임에서 모든 아이템 객체의 price/name 필드 변형 확인
+- 모든 해상도/DPI 시각 검수
