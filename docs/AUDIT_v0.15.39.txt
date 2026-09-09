@@ -1,0 +1,31 @@
+ARAM Fearless Draft v0.15.39 Audit
+
+Scope
+- Input interaction stability patch
+- Invite/watch code validation and focus recovery
+- Draft/build-up champion search rollback after validation errors
+- Runtime injection/manifest/version consistency
+
+Root cause
+- Base search commit updates input value and data-committed before the draft/ban callback validates the selected champion.
+- When validation rejects a duplicate/banned/etc. champion, application state stays unchanged while the input can already contain the rejected committed value.
+- Existing validation also uses native blocking alert(), which can disrupt focus flow in Electron.
+
+Fix
+- Added input-interaction-stability-v01539.js.
+- Replaces app alert() with a non-blocking toast and restores input focus.
+- Tracks last stable search committed value and rolls back rejected visual commits.
+- Clears armed/action UI state and closes stale suggestions on rollback.
+- Invite/watch codes are digit-only, max 6 chars, and prevalidated before the original network action.
+
+Automated targeted UI regression
+- 23/23 PASS on reconstructed current base UI in Chromium at 1480x940.
+- Covered invite/watch invalid input, no native alert, toast visibility, focus recovery, continued typing, duplicate champion rejection, banned champion rejection, committed/value rollback, generic alert non-blocking behavior, and page-error check.
+
+Repository regression
+- Full Regression Audit run 34337603387: SUCCESS on release commit 59e1aa41e69dcbf126534dc453053352d0ee1ffd.
+
+Limitations
+- This is not an actual Windows/Electron/Riot Client E2E test.
+- Repository regression still cannot fully inspect the installed base index.html/autosync-core.js because those base files are not stored in the incremental update repository.
+- Community Calibration collection remains disabled and was not changed by this release.
