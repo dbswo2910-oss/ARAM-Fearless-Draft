@@ -1,0 +1,19 @@
+ARAM Fearless Draft v0.15.45 audit scope
+
+검사 대상
+- update manifest / package / main version 일치
+- 현재 manifest에 포함된 모든 JS syntax 검사
+- runtime injection target/marker 무결성
+- v0.15.43 듀오 과집중 감쇠 및 위험 알람 유지
+- v0.15.43 레이아웃 이동 비활성화
+- v0.15.44 layout hotfix 미주입 및 설치본 삭제
+- v0.15.45 independent-column layout runtime 주입
+- 왼쪽 순서: BAN1-3 -> BAN4-5 -> CURRENT PICKS -> PICK JUDGMENT -> CHAMPION POOL
+- 오른쪽 순서: NEXT PICK TOP6 -> OUR BAN TOP6
+- currentPickGrid leaf 이동 확인(상위 panel 전체 이동 금지)
+- 인위적인 50/50 row grid 미사용
+- ROLE / Riot Grade scoring isolation 유지
+
+한계
+- 저장소에는 설치본 index.html이 포함되지 않아 실제 Electron 렌더 픽셀 위치는 정적 CI만으로 완전 검증할 수 없습니다.
+- 따라서 v0.15.45는 기존 원본 builder의 두 컬럼을 보존하고 필요한 leaf/section 순서만 바꾸는 보수적 방식으로 수정했습니다.
