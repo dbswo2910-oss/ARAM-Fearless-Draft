@@ -1,0 +1,31 @@
+ARAM Fearless Draft v0.15.28 AUDIT
+
+Scope: Riot 실제 경기 Grade 수집/Match Lab 비교 표시
+
+Static checks
+- riot-grade-collector-v01528.js node --check PASS
+- riot-grade-ui-v01528.js node --check PASS
+- main.js node --check PASS
+- preload.js node --check PASS
+- package.json JSON parse PASS
+
+Synthetic collector regression
+1) {gameId, championId, grade:'A+'} 직접 응답 추출 PASS
+2) nested championMastery.grade='S_MINUS' -> S- 정규화 PASS
+3) KR_987654 형태 gameId -> 987654 canonical matching PASS
+4) B_PLUS -> B+ 정규화 PASS
+5) 동일 gameId/championId/grade 중복 저장 방지 로직 포함
+6) PUUID 저장 및 Match Lab 대상 계정과 일치할 때만 비교하도록 UI 필터 포함
+
+Safety / scoring isolation
+- Riot Grade는 v0.15.28 ROLE 계산식에 0% 반영됩니다.
+- Riot Grade를 평균/정답 점수로 간주하지 않고 외부 검증 앵커로만 표시합니다.
+- gameId가 직접 제공되지 않을 때만 EOG stats block gameId fallback을 사용하고 UI에 연결 방식을 표시합니다.
+- 과거 Grade 소급 추정 없음.
+
+Not executed
+- 실제 Windows + Riot Client의 게임 종료 직후 LCU champion-mastery-updates 응답 E2E
+- 현재 2026 클라이언트가 실제 응답에서 grade/gameId/championId를 어떤 정확한 중첩 구조로 반환하는지 실계정 샘플
+- 실제 Match Lab DOM에서 카드 위치/레이아웃 사람 눈 검수
+
+따라서 첫 실제 게임 종료 후 Match Lab에서 Riot Grade가 잡히는지 확인이 필요합니다. 응답 필드 구조가 예상과 다를 경우 수집기는 다양한 중첩 구조를 탐색하도록 만들었지만, 실제 payload 한 번을 기준으로 v0.15.29에서 즉시 보강할 수 있습니다.
