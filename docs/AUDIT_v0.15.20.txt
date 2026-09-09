@@ -1,0 +1,27 @@
+ARAM Fearless Draft v0.15.20 AUDIT
+
+EXECUTED / PASS
+1) Syntax
+- main.js Node syntax PASS
+- live-item-memory-v01520.js Node syntax PASS
+- package.json JSON parse PASS
+- manifest.json JSON parse PASS
+
+2) LIVE item memory regression
+- visible enemy 2 items = 2200g PASS
+- enemy item list disappears under fog/observation gap -> remains 2200g PASS
+- enemy reappears with added item -> refreshes to 3700g PASS
+- enemy player temporarily disappears from ctx.enemy -> cached 3700g snapshot retained PASS
+- new match/game-time reset -> old cache cleared, new 400g value PASS
+- footer explains last-seen fallback PASS
+
+3) Design guard
+- only enemy-side cached equipment is used for fallback
+- no hidden gold estimate
+- no guessed future purchase value
+- small legitimate item-value decreases are not forcibly frozen
+- previous cumulative runtime patches stay loaded before v0.15.20
+
+NOT EXECUTED
+- Actual Windows + Riot Client Live Client API end-to-end session with real fog-of-war transitions.
+- Human visual inspection in user's exact Windows DPI/font environment.
