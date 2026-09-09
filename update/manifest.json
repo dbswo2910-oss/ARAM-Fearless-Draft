@@ -1,6 +1,6 @@
 {
-  "version": "0.15.16",
-  "message": "v0.15.16 · Riot PUUID Multi-user Isolation",
+  "version": "0.15.17",
+  "message": "v0.15.17 · ARAM queue split + Draft Architecture Guard v2 + Data UI cleanup",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -28,16 +28,28 @@
       "source": "update/v0.15.16/multi-user-isolation-v01516.js"
     },
     {
+      "path": "autosync-queue-v01517.js",
+      "source": "update/v0.15.17/autosync-queue-v01517.js"
+    },
+    {
+      "path": "match-lab-queue-v01517.js",
+      "source": "update/v0.15.17/match-lab-queue-v01517.js"
+    },
+    {
+      "path": "draft-pick-balance-v01517.js",
+      "source": "update/v0.15.17/draft-pick-balance-v01517.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.16/main.js"
+      "source": "update/v0.15.17/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.16/package.json"
+      "source": "update/v0.15.17/package.json"
     }
   ],
   "delete": [
