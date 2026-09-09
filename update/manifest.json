@@ -1,6 +1,6 @@
 {
-  "version": "0.15.39",
-  "message": "v0.15.39 · 입력창 잠김/검증 안정화",
+  "version": "0.15.40",
+  "message": "v0.15.40 · 캐치↔생존 대응 + BLUE/RED 밴픽 정렬",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -46,6 +46,14 @@
     {
       "path": "draft-pick-balance-v01517.js",
       "source": "update/v0.15.17/draft-pick-balance-v01517.js"
+    },
+    {
+      "path": "catch-resilience-v01540.js",
+      "source": "update/v0.15.40/catch-resilience-v01540.js"
+    },
+    {
+      "path": "draft-side-order-v01540.js",
+      "source": "update/v0.15.40/draft-side-order-v01540.js"
     },
     {
       "path": "role-metric-detail-v01518.js",
@@ -137,11 +145,11 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.39/main.js"
+      "source": "update/v0.15.40/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.39/package.json"
+      "source": "update/v0.15.40/package.json"
     },
     {
       "path": "autosync-telemetry-v01534.js",
