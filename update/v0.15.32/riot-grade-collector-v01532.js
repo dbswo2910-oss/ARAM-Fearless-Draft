@@ -37,10 +37,15 @@ function createCollector(core,{app,intervalMs=5000}={}){
     const ourGrade=str(x.ourGrade).trim().toUpperCase();
     return{schema:SNAPSHOT_SCHEMA,gameId,puuid:a.puuid||puuid,champion,championId,role,roleScore:Math.round(clamp(score,0,100)*10)/10,ourGrade,queueId,engineKey:engineKey||'ROLE_FAIRS_MISSION_V01529',engineVersion:str(x.engineVersion||'0.15.32'),snapshotAt:Date.now()};
   }
+  function sameSnapshot(a,b){
+    if(!a||!b)return false;
+    const keys=['schema','gameId','puuid','champion','championId','role','roleScore','ourGrade','queueId','engineKey','engineVersion'];
+    return keys.every(k=>String(a[k]??'')===String(b[k]??''));
+  }
   function annotateSnapshots(input){
-    load();const a=account(),xs=Array.isArray(input)?input:[input],now=Date.now();let updated=0,rejected=0,unmatched=0;
-    for(const raw of xs){const s=sanitizeSnapshot(raw,a);if(!s){rejected++;continue}const i=records.findIndex(r=>canonGameId(r.gameId)===s.gameId&&(!a.puuid||!r.puuid||r.puuid===a.puuid)&&(s.championId==null||r.championId==null||num(r.championId)===s.championId));if(i<0){unmatched++;continue}const prev=records[i].roleSnapshot;records[i]={...records[i],roleSnapshot:{...(prev||{}),...s,snapshotAt:prev?.engineKey===s.engineKey&&num(prev?.roleScore)===s.roleScore?prev.snapshotAt:s.snapshotAt},lastAnnotatedAt:now};updated++}
-    if(updated){status.lastSnapshotAt=now;save()}else refreshCounts();return{updated,rejected,unmatched,records:status.records,snapshots:status.snapshots,scoringUse:false}
+    load();const a=account(),xs=Array.isArray(input)?input:[input],now=Date.now();let updated=0,unchanged=0,rejected=0,unmatched=0;
+    for(const raw of xs){const s=sanitizeSnapshot(raw,a);if(!s){rejected++;continue}const i=records.findIndex(r=>canonGameId(r.gameId)===s.gameId&&(!a.puuid||!r.puuid||r.puuid===a.puuid)&&(s.championId==null||r.championId==null||num(r.championId)===s.championId));if(i<0){unmatched++;continue}const prev=records[i].roleSnapshot;if(sameSnapshot(prev,s)){unchanged++;continue}records[i]={...records[i],roleSnapshot:{...(prev||{}),...s},lastAnnotatedAt:now};updated++}
+    if(updated){status.lastSnapshotAt=now;save()}else refreshCounts();return{updated,unchanged,rejected,unmatched,records:status.records,snapshots:status.snapshots,scoringUse:false}
   }
   function getState(){load();return{...status,running:!!timer,records:records.map(x=>({...x,roleSnapshot:x.roleSnapshot?{...x.roleSnapshot}:undefined})),storage:'local-userData',scoringUse:false,snapshotScoringUse:false}}
   function start(){if(timer)return;load();status.running=true;poll().catch(()=>{});timer=setInterval(()=>poll().catch(()=>{}),Math.max(3000,Number(intervalMs)||5000));timer.unref?.()}
