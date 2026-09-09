@@ -106,10 +106,11 @@ if(main){
     const body=read(f.source);
     for(const ch of matchAll(/ipcMain\.handle\(['"]([^'"]+)['"]/g,body))defs.push({channel:ch,source:f.source,target:f.path});
   }
-  const handles=[...new Set(defs.map(x=>x.channel))];
+  const byChannel=new Map();
+  for(const d of defs){const a=byChannel.get(d.channel)||[];a.push(d);byChannel.set(d.channel,a)}
+  const duplicateChannels=[...byChannel.entries()].filter(([,xs])=>new Set(xs.map(x=>x.source)).size>1).map(([ch])=>ch);
   result.info.preloadInvokes=invokes;result.info.ipcDefinitions=defs;
-  const dup=[...new Set(defs.filter((x,i,a)=>a.findIndex(y=>y.channel===x.channel&&y.source!==x.source)<i).map(x=>x.channel))];
-  assert(!dup.length,'Current IPC channel definitions have no cross-module duplicates',dup.join(', '));
+  assert(!duplicateChannels.length,'Current IPC channel definitions have no cross-module duplicates',duplicateChannels.join(', '));
   for(const ch of invokes){
     const matches=defs.filter(x=>x.channel===ch);
     assert(matches.length>0,'Preload IPC has matching current handler',ch);
