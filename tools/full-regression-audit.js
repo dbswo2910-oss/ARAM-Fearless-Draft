@@ -93,18 +93,32 @@ if(main){
   assert(requiredMarkers.length>0,'Runtime marker guard detected',String(requiredMarkers.length));
   for(const s of scripts){
     const src=targetMap.get(s);if(!src||!exists(src))continue;
-    const body=read(src);const markers=matchAll(/window\.(__ARAM_[A-Z0-9_]+__)\s*=\s*true/g,body);
+    const body=read(src),markers=matchAll(/window\.(__ARAM_[A-Z0-9_]+__)\s*=\s*true/g,body);
     assert(markers.length>0,'Runtime script exposes readiness marker',`${s}: ${markers.join(',')||'none'}`);
     if(markers.length)assert(markers.some(m=>requiredMarkers.includes(m)),'Runtime marker included in main guard',`${s}: ${markers.join(',')}`);
   }
 
-  // IPC bridge contract.
+  // IPC bridge contract. Some handlers are registered by current main-process modules (e.g. itemCatalog.register).
   const preload=preloadEntry&&exists(preloadEntry.source)?read(preloadEntry.source):'';
   const invokes=matchAll(/ipcRenderer\.invoke\(['"]([^'"]+)['"]/g,preload);
-  const handles=matchAll(/ipcMain\.handle\(['"]([^'"]+)['"]/g,main);
-  result.info.preloadInvokes=invokes;result.info.mainHandles=handles;
-  assert(new Set(handles).size===handles.length,'Main IPC handlers have no duplicates',handles.join(', '));
-  for(const ch of invokes)assert(handles.includes(ch),'Preload IPC has matching main handler',ch);
+  const defs=[];
+  for(const f of files.filter(x=>x.source.endsWith('.js')&&exists(x.source))){
+    const body=read(f.source);
+    for(const ch of matchAll(/ipcMain\.handle\(['"]([^'"]+)['"]/g,body))defs.push({channel:ch,source:f.source,target:f.path});
+  }
+  const handles=[...new Set(defs.map(x=>x.channel))];
+  result.info.preloadInvokes=invokes;result.info.ipcDefinitions=defs;
+  const dup=[...new Set(defs.filter((x,i,a)=>a.findIndex(y=>y.channel===x.channel&&y.source!==x.source)<i).map(x=>x.channel))];
+  assert(!dup.length,'Current IPC channel definitions have no cross-module duplicates',dup.join(', '));
+  for(const ch of invokes){
+    const matches=defs.filter(x=>x.channel===ch);
+    assert(matches.length>0,'Preload IPC has matching current handler',ch);
+    if(matches.length&&matches.every(x=>x.source!==mainEntry.source)){
+      const moduleTargets=matches.map(x=>x.target.replace(/\.js$/,''));
+      const wired=moduleTargets.some(t=>main.includes(`require('./${t}')`)||main.includes(`require("./${t}")`));
+      assert(wired,'Modular IPC handler module is required by current main',`${ch}: ${matches.map(x=>x.target).join(', ')}`);
+    }
+  }
 }
 
 // Product invariants that must never regress.
@@ -132,8 +146,7 @@ for(const f of files.filter(x=>x.source.endsWith('.js')&&exists(x.source))){
   if(/\bInfinity\b/.test(s))warn('Literal Infinity usage found',f.source);
 }
 
-// Base UI source availability check: current runtime main loads index.html/autosync-core from installed base,
-// but these files are not delivered by the update manifest. Record as a hard scope limitation, not a false pass.
+// Installed base UI/core are prerequisites but not stored in this update repository.
 const baseUiInRepo=exists('index.html')||walk('update').some(x=>/\/index\.html$/.test(x));
 const baseCoreInRepo=exists('autosync-core.js')||walk('update').some(x=>/\/autosync-core\.js$/.test(x));
 result.info.baseUiInRepo=baseUiInRepo;result.info.baseCoreInRepo=baseCoreInRepo;
