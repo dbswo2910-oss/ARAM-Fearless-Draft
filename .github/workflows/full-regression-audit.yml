@@ -41,6 +41,8 @@ jobs:
         run: node tools/draft-v01547-audit.js
       - name: Run Random Practice Exact-DOM UI v0.15.49 audit
         run: node tools/random-practice-v01549-audit.js
+      - name: Run Random In-game Coach + Preview v0.15.50 audit
+        run: node tools/random-ingame-v01550-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -72,6 +74,7 @@ jobs:
             audit-output/draft-v01546-report.json
             audit-output/draft-v01547-report.json
             audit-output/random-practice-v01549-report.json
+            audit-output/random-ingame-v01550-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
