@@ -1,6 +1,6 @@
 {
-  "version": "0.15.37",
-  "message": "v0.15.37 · 해석형 역할 스카우트 리포트",
+  "version": "0.15.38",
+  "message": "v0.15.38 · 헤더 브랜드 정리",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -88,6 +88,10 @@
       "source": "update/v0.15.37/profile-ux-v01537.js"
     },
     {
+      "path": "brand-header-v01538.js",
+      "source": "update/v0.15.38/brand-header-v01538.js"
+    },
+    {
       "path": "in-app-updater-ui-v01523.js",
       "source": "update/v0.15.23/in-app-updater-ui-v01523.js"
     },
@@ -129,11 +133,11 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.37/main.js"
+      "source": "update/v0.15.38/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.37/package.json"
+      "source": "update/v0.15.38/package.json"
     },
     {
       "path": "autosync-telemetry-v01534.js",
