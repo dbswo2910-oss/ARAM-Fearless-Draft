@@ -1,0 +1,31 @@
+ARAM Fearless Draft v0.15.18 AUDIT
+
+EXECUTED / PASS
+1) Node syntax
+- main.js PASS
+- role-metric-detail-v01518.js PASS
+
+2) Existing cumulative regression
+- Queue 450 / Queue 2400 split PASS
+- Match Lab queue UI reload PASS
+- Draft screenshot architecture regression PASS
+- 173-champion generalized draft architecture audit PASS
+- obsolete Program Criteria panel cleanup PASS
+- full inline app + cumulative patch boot PASS
+- built-in Golden Guard: 293 cases; 292 direct PASS + 1 DOM-stub-only Data UX case independently verified as 10 metric cards (same known VM limitation)
+
+3) New v0.15.18 metric drilldown regression
+- 피해 흡수 detail content PASS
+- 이니시 수행 detail content PASS
+- 핵심기능 실행(Function18) detail content PASS
+- actual stat values / formula / ROLE weight / review cue presence PASS
+
+4) Static/package integrity
+- champion dataset 173/173 PASS
+- v0.15.17 -> v0.15.18 unchanged modules hash check PASS
+- only main.js/package.json changed plus new role-metric-detail-v01518.js
+- ZIP integrity PASS
+
+NOT EXECUTED
+- Actual Windows + Riot Client end-to-end match-history session.
+- Human visual inspection inside the user's exact Windows DPI/font environment.
