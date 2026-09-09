@@ -1,6 +1,6 @@
 {
-  "version": "0.15.30",
-  "message": "v0.15.30 · 역할별 PLAYER PROFILE 완전 전환",
+  "version": "0.15.31",
+  "message": "v0.15.31 · Riot Grade 누적 검증",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -104,16 +104,20 @@
       "source": "update/v0.15.28/riot-grade-ui-v01528.js"
     },
     {
+      "path": "riot-grade-calibration-v01531.js",
+      "source": "update/v0.15.31/riot-grade-calibration-v01531.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.28/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.30/main.js"
+      "source": "update/v0.15.31/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.30/package.json"
+      "source": "update/v0.15.31/package.json"
     }
   ],
   "delete": [
