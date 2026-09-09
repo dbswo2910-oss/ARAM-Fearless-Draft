@@ -1,6 +1,6 @@
 {
-  "version": "0.15.15",
-  "message": "v0.15.15 · ROLE GRADE v4 FAIR-S + Pick Replay REC v2",
+  "version": "0.15.16",
+  "message": "v0.15.16 · Riot PUUID Multi-user Isolation",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -24,16 +24,20 @@
       "source": "update/v0.15.15/match-lab-replay-v01515.js"
     },
     {
+      "path": "multi-user-isolation-v01516.js",
+      "source": "update/v0.15.16/multi-user-isolation-v01516.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.15/main.js"
+      "source": "update/v0.15.16/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.15/package.json"
+      "source": "update/v0.15.16/package.json"
     }
   ],
   "delete": [
