@@ -1,0 +1,28 @@
+ARAM Fearless Draft v0.15.25 AUDIT
+
+Scope: Match Lab CC Impact
+
+PASS - autosync-cc-impact-v01525.js Node syntax
+PASS - cc-impact-v01525.js Node syntax
+PASS - v0.15.25 main.js Node syntax
+PASS - package.json JSON parse
+PASS - legacy LCU participantIdentities -> raw participant CC field enrichment mock
+PASS - modern/raw participant direct field/challenges/stats lookup paths implemented
+PASS - missing quality fields -> old CC quantity score preserved
+PASS - CC quality correction bounded: max +12 base correction, max -4 only with hard-CC + conversion evidence
+PASS - knockEnemyIntoTeamAndKill bounded direct evidence bonus max +4
+PASS - engage/peel/utility/control/pick recomputed after CC impact change
+PASS - Match Lab CC card re-bound to enhanced CC detail after v0.15.18 drilldown annotation
+PASS - exact spell hit / exact causal kill inference explicitly disabled
+PASS - ROLE GRADE v4 FAIR-S thresholds and 173 champion role profiles unchanged
+PASS - v0.15.24 LIVE time-window power patch retained unchanged
+PASS - v0.15.23 in-app updater retained unchanged
+
+Synthetic scoring checks:
+- volume 68 / strong immobilize+kill conversion -> CC impact increased moderately, not beyond cap
+- volume 80 / many hard CC but weak kill conversion -> only small bounded reduction
+- no challenge quality data -> CC impact exactly equals old CC quantity
+
+Known runtime limitation:
+- Riot/LCU does not guarantee that Match-v5-style challenge fields are present in every local match-history payload. When absent, the app deliberately shows '미제공' and uses the existing CC quantity score only. It does not fabricate a conversion score.
+- Actual Windows + Riot Client end-to-end validation of which challenge fields are exposed by the user's current Korean LCU build was not available in this environment. The first real Match Lab screenshot after update should be used to confirm field availability.
