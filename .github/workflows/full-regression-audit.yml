@@ -21,6 +21,8 @@ jobs:
           node-version: '20'
       - name: Run full regression audit
         run: node tools/full-regression-audit.js
+      - name: Run Community Calibration audit
+        run: node tools/community-calibration-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -35,12 +37,14 @@ jobs:
           }
           fs.writeFileSync('audit-output/current-overlay/_manifest.json',JSON.stringify(m,null,2));
           NODE
-      - name: Upload audit report
+      - name: Upload audit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: full-regression-report
-          path: audit-output/full-regression-report.json
+          path: |
+            audit-output/full-regression-report.json
+            audit-output/community-calibration-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
