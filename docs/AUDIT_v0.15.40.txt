@@ -1,0 +1,44 @@
+ARAM Fearless Draft v0.15.40 Audit
+
+Scope
+- Catch-resilience draft scoring layer
+- BLUE-left / RED-right draft visual ordering
+- Runtime injection / manifest / version wiring
+- Static and reconstructed headless UI validation
+
+Catch-resilience checks
+- Enemy catch pressure -> bounded pick response bonus.
+- Our catch pressure -> bounded ban response bonus.
+- Direct self-save coefficient 1.35 > ally-save coefficient 0.72.
+- Activation baseline: catch 7.
+- Maximum response bonus: +7.5.
+- Low catch pressure produces no forced bonus.
+- Score detail explicitly exposes the new catch-survival factor.
+- Completed comp metrics expose both Catch and Survival.
+- ROLE Grade impact: false.
+- Riot Grade impact: false.
+
+Synthetic example used for validation
+- High-catch composition: Blitzcrank / Nautilus / Thresh / Leona / Pyke.
+- Team catch observed in reconstructed UI test: 23.5.
+- Xayah direct self-save response bonus: +6.6.
+- Lulu ally-save response bonus: +3.2.
+- Ashe response bonus: 0 in the tested setup.
+- This example verifies weighting/orientation, not a global balance truth or population statistic.
+
+Draft-order investigation
+- Standard draft step sequence was reviewed and was already correct.
+- The defect was visual side placement: local views stayed Our-left/Enemy-right, and online mock draft stayed Team-A-left/Team-B-right even when the opposite side was BLUE.
+- v0.15.40 keeps the draft sequence unchanged and normalizes the visible board to BLUE-left / RED-right.
+
+Reconstructed UI checks
+- Local first side = Enemy (our team RED): current step Enemy BLUE BAN3, next step Our RED BAN3.
+- Builder ban/pick layout: Enemy BLUE left, Our RED right.
+- Live ban/pick layout: Enemy BLUE left, Our RED right.
+- Online mock draft firstTeam=B: Team B BLUE left, Team A RED right.
+- No page errors observed in the targeted headless reproduction.
+
+Limitations
+- These are static/synthetic/headless checks using the reconstructed installed UI.
+- Actual Windows Electron + real user interaction after update is not claimed until the user verifies v0.15.40 in the installed application.
+- Community Calibration remains disabled and is outside this release scope.
