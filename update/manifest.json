@@ -1,6 +1,6 @@
 {
-  "version": "0.15.25",
-  "message": "v0.15.25 · MATCH LAB CC 영향력",
+  "version": "0.15.26",
+  "message": "v0.15.26 · LIVE 시간대 전력 데이터 소스 수정",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -80,16 +80,24 @@
       "source": "update/v0.15.24/time-power-v01524.js"
     },
     {
+      "path": "item-catalog-v01526.js",
+      "source": "update/v0.15.26/item-catalog-v01526.js"
+    },
+    {
+      "path": "time-power-fix-v01526.js",
+      "source": "update/v0.15.26/time-power-fix-v01526.js"
+    },
+    {
       "path": "preload.js",
-      "source": "update/v0.15.23/preload.js"
+      "source": "update/v0.15.26/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.25/main.js"
+      "source": "update/v0.15.26/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.25/package.json"
+      "source": "update/v0.15.26/package.json"
     }
   ],
   "delete": [
