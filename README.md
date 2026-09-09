@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.50**  
+Current app/update version: **v0.15.51**  
 Current balance/data patch: **26.17**
 
 This repository is used for source control, automated regression validation, incremental in-app updates, Windows x64 distribution work, and durable AI/coding-agent handoff.
@@ -22,16 +22,20 @@ Do not infer Random Practice DOM from screenshots or broad Korean-title matching
 
 ## Current in-game direction
 
-v0.15.50 starts the compact **In-game Coach HUD** redesign:
+v0.15.50 introduced the compact **In-game Coach HUD** foundation. v0.15.51 is the first real Windows screenshot-driven hierarchy polish:
 
 - alive → compact LIVE decisions
 - dead → automatic Build/analysis view
 - respawn <= 7s → compact LIVE preparation view
 - 3 visible tabs: `LIVE / 빌드 / 상세`
 - program-internal `인게임 미리보기` so the real HUD can be reviewed without starting a match
+- in-game mode hides pick-stage recommendation noise
+- preview controls are compressed into one desktop toolbar
+- LIVE support cards are reduced to `최고 위협 / 내 역할 / 다음 구매`
+- death view prioritizes `이번 판 최적화` over the statistical baseline
 - statistical baseline item tree vs current-match optimized item recommendation
 
-See `docs/CHANGELOG_v0.15.50.txt` and `docs/AUDIT_v0.15.50.txt`.
+See `docs/CHANGELOG_v0.15.51.txt` and `docs/AUDIT_v0.15.51.txt`.
 
 ## New-PC distribution
 
