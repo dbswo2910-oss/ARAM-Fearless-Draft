@@ -1,6 +1,6 @@
 {
-  "version": "0.15.23",
-  "message": "v0.15.23 · 역할별 전체 프로필 + 앱 내부 업데이트",
+  "version": "0.15.24",
+  "message": "v0.15.24 · LIVE 시간대 전력 안정화",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -68,16 +68,20 @@
       "source": "update/v0.15.23/in-app-updater-ui-v01523.js"
     },
     {
+      "path": "time-power-v01524.js",
+      "source": "update/v0.15.24/time-power-v01524.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.23/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.23/main.js"
+      "source": "update/v0.15.24/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.23/package.json"
+      "source": "update/v0.15.24/package.json"
     }
   ],
   "delete": [
