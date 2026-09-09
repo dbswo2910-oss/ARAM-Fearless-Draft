@@ -47,19 +47,30 @@ function extractRows(root){
   return [...uniq.values()];
 }
 function safeJsonRead(file){try{const x=JSON.parse(fs.readFileSync(file,'utf8'));return x&&typeof x==='object'?x:null}catch{return null}}
-function atomicWrite(file,data){const tmp=`${file}.tmp-${process.pid}`;fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(tmp,JSON.stringify(data,null,2),'utf8');try{fs.renameSync(tmp,file)}catch{try{fs.unlinkSync(file)}catch{}fs.renameSync(tmp,file)}}
+function atomicWrite(file,data){
+  const tmp=`${file}.tmp-${process.pid}`;
+  try{
+    fs.mkdirSync(path.dirname(file),{recursive:true});
+    fs.writeFileSync(tmp,JSON.stringify(data,null,2),'utf8');
+    // Never delete the last valid store when replacement fails.
+    fs.renameSync(tmp,file);
+  }finally{try{fs.unlinkSync(tmp)}catch{}}
+}
 function createCollector(core,{app,intervalMs=5000}={}){
   if(!core)throw new Error('core required');
-  let timer=null,busy=false,loaded=false,records=[];
+  let timer=null,busy=false,loaded=false,dirty=false,records=[];
   const status={running:false,lastPollAt:0,lastSuccessAt:0,lastCaptureAt:0,lastError:'',lastResult:'대기',endpoint:ENDPOINT,records:0};
   const storePath=()=>{try{return path.join(app.getPath('userData'),'riot-grade-v01528.json')}catch{return path.join(process.cwd(),'riot-grade-v01528.json')}};
   function load(){if(loaded)return;loaded=true;const x=safeJsonRead(storePath());records=Array.isArray(x?.records)?x.records.slice(0,MAX_RECORDS):[];status.records=records.length}
   function save(){atomicWrite(storePath(),{schema:1,updatedAt:Date.now(),records:records.slice(0,MAX_RECORDS)})}
+  function flush(){if(!dirty)return;save();dirty=false;status.lastError='';}
   function account(){const a=core.account||{};return{puuid:str(a.puuid),riotId:str(a.riotId||a.gameName||a.displayName||a.summonerName)}}
   function fingerprint(r,a){return crypto.createHash('sha1').update([a.puuid||a.riotId,r.gameId,r.championId??'',r.grade].join('|')).digest('hex')}
   async function poll(){
     if(busy)return getState();busy=true;status.lastPollAt=Date.now();load();
     try{
+      // Persist pending records even when the client has gone away.
+      flush();
       if(typeof core.refreshCreds==='function'&&!await core.refreshCreds()){status.lastResult='League Client 연결 대기';status.lastError='';return getState()}
       const before=account();if(!before.puuid){status.lastResult='계정 확인 대기';return getState()}
       let payload;try{payload=await core.lcuGet(ENDPOINT,3500)}catch(e){status.lastResult='게임 종료 등급 대기';status.lastError='';return getState()}
@@ -75,13 +86,13 @@ function createCollector(core,{app,intervalMs=5000}={}){
         const rec={schema:1,grade:r.grade,gameId:r.gameId||'',championId:r.championId,queueId:r.queueId,gameMode:r.gameMode||'',puuid:a.puuid,riotId:a.riotId,capturedAt:now,gameIdSource:r.gameIdSource,source:'LCU champion-mastery-updates'};
         rec.key=fingerprint(rec,a);
         const i=records.findIndex(x=>x.key===rec.key||(rec.gameId&&canonGameId(x.gameId)===rec.gameId&&num(x.championId)===num(rec.championId)&&x.grade===rec.grade&&(x.puuid===a.puuid)));
-        if(i>=0)records[i]={...records[i],...rec,capturedAt:records[i].capturedAt||now,lastSeenAt:now};else{records.unshift({...rec,lastSeenAt:now});added++}
+        if(i>=0)records[i]={...records[i],...rec,capturedAt:records[i].capturedAt||now,lastSeenAt:now};else{records.unshift({...rec,lastSeenAt:now});added++;dirty=true}
       }
-      records=records.sort((a,b)=>num(b.capturedAt,0)-num(a.capturedAt,0)).slice(0,MAX_RECORDS);status.records=records.length;status.lastCaptureAt=added?now:status.lastCaptureAt;status.lastResult=added?`Riot Grade ${added}건 저장`:`새로 저장할 확정 등급 없음 · 경기/챔피언 식별 정보 확인 필요`;status.lastError='';if(added)save();
-    }catch(e){status.lastError=e?.message||String(e);status.lastResult='수집 오류'}finally{busy=false}
+      records=records.sort((a,b)=>num(b.capturedAt,0)-num(a.capturedAt,0)).slice(0,MAX_RECORDS);status.records=records.length;status.lastCaptureAt=added?now:status.lastCaptureAt;status.lastResult=added?`Riot Grade ${added}건 저장`:`새로 저장할 확정 등급 없음 · 경기/챔피언 식별 정보 확인 필요`;status.lastError='';flush();
+    }catch(e){status.lastError=e?.message||String(e);status.lastResult=dirty?'등급 저장 재시도 대기':'수집 오류'}finally{busy=false}
     return getState();
   }
-  function getState(){load();return{...status,running:!!timer,records:records.map(x=>({...x})),storage:'local-userData',scoringUse:false}}
+  function getState(){load();return{...status,running:!!timer,records:records.map(x=>({...x})),storage:'local-userData',persistencePending:dirty,scoringUse:false}}
   function start(){if(timer)return;load();status.running=true;poll().catch(()=>{});timer=setInterval(()=>poll().catch(()=>{}),Math.max(3000,Number(intervalMs)||5000));timer.unref?.()}
   function stop(){if(timer)clearInterval(timer);timer=null;status.running=false}
   return{start,stop,poll,getState,extractRows,normGrade,canonGameId};

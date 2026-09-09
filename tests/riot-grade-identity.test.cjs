@@ -50,3 +50,27 @@ test('async annotation is discarded when selected match changes',async()=>{
 test('async annotation is discarded when selected account changes',async()=>{
  const f=ui(),pending=f.api.annotate();f.history.account.puuid='two';f.resolve({records:[]});await pending;assert.equal(f.root.inserted,undefined);
 });
+test('failed first write retries identical grade and survives restart',async t=>{
+ const f=fixture(t,{gameId:'123456',championId:888,grade:'A'}),original=fs.writeFileSync;
+ fs.writeFileSync=()=>{throw new Error('injected disk full')};
+ try{await f.collector.poll()}finally{fs.writeFileSync=original}
+ assert.match(f.collector.getState().lastError,/disk full/);
+ await f.collector.poll();
+ assert.equal(createCollector(f.core,{app:f.app}).getState().records.length,1);
+});
+test('pending write recovers even after client disconnects',async t=>{
+ const f=fixture(t,{gameId:'123456',championId:888,grade:'A'}),original=fs.writeFileSync;
+ fs.writeFileSync=()=>{throw new Error('injected disk full')};
+ try{await f.collector.poll()}finally{fs.writeFileSync=original}
+ f.core.refreshCreds=async()=>false;await f.collector.poll();
+ assert.equal(createCollector(f.core,{app:f.app}).getState().records.length,1);
+});
+test('failed replacement preserves valid store and recovers without temp files',async t=>{
+ const f=fixture(t,{gameId:'123456',championId:888,grade:'A'});await f.collector.poll();
+ f.core.lcuGet=async()=>({gameId:'234567',championId:888,grade:'S'});
+ const original=fs.renameSync;fs.renameSync=()=>{throw new Error('injected sharing violation')};
+ try{await f.collector.poll()}finally{fs.renameSync=original}
+ assert.equal(createCollector(f.core,{app:f.app}).getState().records.length,1);
+ await f.collector.poll();assert.equal(createCollector(f.core,{app:f.app}).getState().records.length,2);
+ assert.equal(fs.readdirSync(f.app.getPath()).filter(x=>x.includes('.tmp-')).length,0);
+});

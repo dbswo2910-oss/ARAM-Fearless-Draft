@@ -4,14 +4,14 @@
     "Full app index.html and autosync-core.js absent from tracked main; full app/Windows/Riot E2E not validated. This does not block independent persistence tests."
   ],
   "cycle_id": "rg-persist-20260909-01",
-  "evidence": "poll mutates records before save; save is guarded only by added. If the first write throws, the record remains in memory, and an identical retry has added=0, potentially skipping persistence forever. Candidate to reproduce, not yet a proven production failure.",
-  "next_issue_id": "RG-PERSIST-RETRY-001",
-  "next_target": "work-in-progress/riot-grade-identity/collector.js: poll/save/atomicWrite; compare update/v0.15.28/riot-grade-collector-v01528.js",
+  "evidence": "safeJsonRead returns null for missing file, malformed JSON and read errors alike. load marks loaded=true and substitutes empty records. A later successful capture may overwrite a damaged or temporarily unreadable store. Need failure-injection reproduction, no production claim yet.",
+  "next_issue_id": "RG-STORE-LOAD-002",
+  "next_target": "work-in-progress/riot-grade-identity/collector.js: safeJsonRead/load/save",
   "next_tests": [
-    "Inject one fs write/rename failure; next identical poll must eventually persist or surface pending persistence.",
-    "Restart collector and verify record presence after recovered save.",
-    "Ensure failed replace does not destroy previous valid store.",
-    "Rerun existing 9 identity/UI regression cases; add failure and recovery coverage."
+    "Seed invalid JSON; capture grade; verify original bytes are preserved or explicitly quarantined before recovery.",
+    "Inject non-ENOENT read error then restore access; ensure existing records are not silently replaced.",
+    "Test valid schema, empty store, missing file and record-limit handling.",
+    "Rerun 12 identity/persistence cases."
   ],
   "parent_cycle_id": "bootstrap-20260909-01",
   "processed_event_ids": [
@@ -21,6 +21,6 @@
     "bootstrap-20260909-01"
   ],
   "schema": 1,
-  "source_head_sha": "70113a5aa3ecbc409bb18d7338e162282b62b09f",
-  "status": "running"
+  "source_head_sha": "be6745cceb64510637ddebcf2fa2afc0e0609af6",
+  "status": "completed"
 }
