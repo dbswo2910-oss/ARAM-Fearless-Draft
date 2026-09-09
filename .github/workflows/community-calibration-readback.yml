@@ -25,3 +25,4 @@ jobs:
         run: |
           npx --yes wrangler@4 d1 execute aram-calibration --remote --json --command "SELECT COUNT(*) AS total_events, SUM(CASE WHEN engine_version='SMOKE_TEST_V1' THEN 1 ELSE 0 END) AS smoke_events, SUM(CASE WHEN engine_version IS NULL OR engine_version!='SMOKE_TEST_V1' THEN 1 ELSE 0 END) AS non_smoke_events, MAX(received_at) AS latest_received_at FROM calibration_events;"
           npx --yes wrangler@4 d1 execute aram-calibration --remote --json --command "SELECT received_at, app_version, champion_id, role, role_score, role_grade, riot_grade, engine_version FROM calibration_events WHERE engine_version IS NULL OR engine_version!='SMOKE_TEST_V1' ORDER BY id DESC LIMIT 5;"
+          npx --yes wrangler@4 d1 execute aram-calibration --remote --json --command "SELECT name FROM sqlite_master WHERE type='index' ORDER BY name;"
