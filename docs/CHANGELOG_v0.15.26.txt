@@ -1,0 +1,24 @@
+v0.15.26 · LIVE 시간대 전력 데이터 소스 수정
+
+1. 코어 완성 판정 수정
+- v0.15.24는 Live Client item object의 price/name 필드에 직접 의존해 코어를 판정했습니다.
+- 이제 앱 메인 프로세스가 Riot Data Dragon 16.17.1 item catalog를 읽어 itemID 기준으로 총 가격과 ARAM(Map 12) 사용 가능 여부를 확인합니다.
+- Data Dragon이 일시적으로 실패하면 Live Client direct price -> 기존 randomLivePlayerValue 단일 아이템 fallback 순으로 판정합니다.
+- 코어 데이터가 불완전할 때 0개로 단정하지 않고 해당 factor를 점수에서 제외합니다.
+
+2. 인벤토리 소스 확장
+- items / inventory / itemList / raw.items / live.items / player.items 경로를 순차 확인합니다.
+- 양 팀 각각 최소 4명 + 아이템 판정률 75% 이상일 때만 코어 완성 차이를 전력 점수에 반영합니다.
+
+3. 시간대 전력 안정화 보정
+- 생존 인원과 최근 킬은 계속 완전히 제외합니다.
+- 코어 또는 6/11/16 핵심 레벨이 실제로 변하면 메인 수치가 빠르게 따라가도록 smoothing을 조정했습니다.
+- 평소 작은 변화는 완충합니다.
+
+4. 진단 표시
+- 코어 factor 아래에 Data Dragon 버전 또는 fallback 상태를 표시합니다.
+- Footer에 실제 인벤토리 판정 인원 수를 표시합니다.
+
+5. 유지
+- v0.15.25 MATCH LAB CC 영향력 포함 이전 모든 기능 유지.
+- 3번(173챔 데스 가치 보정)은 아직 적용하지 않았습니다.
