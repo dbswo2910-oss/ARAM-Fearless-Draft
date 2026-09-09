@@ -1,0 +1,9 @@
+{
+  "enabled": false,
+  "policy_version": 1,
+  "schema_version": 1,
+  "endpoint": "",
+  "minimum_app_version": "0.15.34",
+  "mode": "required-for-use",
+  "notice": "Community Calibration 서버가 준비된 뒤 enabled=true로 전환합니다."
+}
