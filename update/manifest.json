@@ -1,6 +1,6 @@
 {
-  "version": "0.15.33",
-  "message": "v0.15.33 · Riot Grade 자동 장기 스냅샷",
+  "version": "0.15.34",
+  "message": "v0.15.34 · Community Calibration 미래 데이터 보존 기반",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -125,11 +125,19 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.33/main.js"
+      "source": "update/v0.15.34/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.33/package.json"
+      "source": "update/v0.15.34/package.json"
+    },
+    {
+      "path": "autosync-telemetry-v01534.js",
+      "source": "update/v0.15.34/autosync-telemetry-v01534.js"
+    },
+    {
+      "path": "community-calibration-v01534.js",
+      "source": "update/v0.15.34/community-calibration-v01534.js"
     }
   ],
   "delete": [
