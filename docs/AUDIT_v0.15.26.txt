@@ -1,0 +1,25 @@
+v0.15.26 AUDIT
+
+PASS: node --check preload.js
+PASS: node --check main.js
+PASS: node --check item-catalog-v01526.js
+PASS: node --check time-power-fix-v01526.js
+PASS: package.json JSON parse
+
+Synthetic core tests:
+- Live item objects without price + Data Dragon itemID catalog: 3 completed cores vs 0 correctly detected.
+- Completed item values resolved from catalog even when randomLivePlayerValue returns 0.
+- Enemy inventory missing: core factor disabled and delta forced to 0, not interpreted as enemy 0 cores.
+- Level 6/11/16 breakpoint calculation remains separate.
+- v0.15.26 runtime marker true in synthetic VM test.
+
+Design audit:
+- Current alive count: excluded from time-power score.
+- Recent kills / kill flow: excluded from time-power score.
+- Core completion: itemID-based Data Dragon primary source.
+- Data Dragon failover: Live direct price -> existing single-item value fallback.
+- Missing/incomplete core evidence cannot create false team advantage.
+
+Not executed in this environment:
+- Actual Windows League game + live 127.0.0.1:2999 end-to-end observation.
+- Riot CDN request from the user's installed desktop environment.
