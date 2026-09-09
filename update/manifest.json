@@ -1,6 +1,6 @@
 {
-  "version": "0.15.34",
-  "message": "v0.15.34 · Community Calibration 미래 데이터 보존 기반",
+  "version": "0.15.35",
+  "message": "v0.15.35 · Match Lab 요약 상세지표 + 역할 프로필 충돌 수정",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -49,7 +49,7 @@
     },
     {
       "path": "role-metric-detail-v01518.js",
-      "source": "update/v0.15.18/role-metric-detail-v01518.js"
+      "source": "update/v0.15.35/role-metric-detail-v01518.js"
     },
     {
       "path": "cc-impact-v01525.js",
@@ -69,7 +69,7 @@
     },
     {
       "path": "player-profile-data-sticky-v01521.js",
-      "source": "update/v0.15.21/player-profile-data-sticky-v01521.js"
+      "source": "update/v0.15.35/player-profile-data-sticky-v01521.js"
     },
     {
       "path": "role-mastery-drilldown-v01522.js",
@@ -125,11 +125,11 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.34/main.js"
+      "source": "update/v0.15.35/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.34/package.json"
+      "source": "update/v0.15.35/package.json"
     },
     {
       "path": "autosync-telemetry-v01534.js",
