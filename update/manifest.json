@@ -1,6 +1,6 @@
 {
-  "version": "0.15.26",
-  "message": "v0.15.26 · LIVE 시간대 전력 데이터 소스 수정",
+  "version": "0.15.27",
+  "message": "v0.15.27 · LIVE 시간대 전력 신뢰성 재검수",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -76,16 +76,12 @@
       "source": "update/v0.15.23/in-app-updater-ui-v01523.js"
     },
     {
-      "path": "time-power-v01524.js",
-      "source": "update/v0.15.24/time-power-v01524.js"
+      "path": "item-catalog-v01527.js",
+      "source": "update/v0.15.27/item-catalog-v01527.js"
     },
     {
-      "path": "item-catalog-v01526.js",
-      "source": "update/v0.15.26/item-catalog-v01526.js"
-    },
-    {
-      "path": "time-power-fix-v01526.js",
-      "source": "update/v0.15.26/time-power-fix-v01526.js"
+      "path": "time-power-v01527.js",
+      "source": "update/v0.15.27/time-power-v01527.js"
     },
     {
       "path": "preload.js",
@@ -93,16 +89,19 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.26/main.js"
+      "source": "update/v0.15.27/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.26/package.json"
+      "source": "update/v0.15.27/package.json"
     }
   ],
   "delete": [
     "live-strength-v01510.js",
     "live-strength-v01511.js",
-    "live-strength-v01512.js"
+    "live-strength-v01512.js",
+    "time-power-v01524.js",
+    "time-power-fix-v01526.js",
+    "item-catalog-v01526.js"
   ]
 }
