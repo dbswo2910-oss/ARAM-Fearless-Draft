@@ -28,8 +28,25 @@
   }
   function unwrapHost(el){
     let p=el?.parentElement||null;
-    if(p&&/^draft(?:Phase|Current)SectionV01545$/.test(p.id||''))p=p.parentElement;
+    if(p&&/^draft(?:Phase[12]|Current)SectionV01545$/.test(p.id||''))p=p.parentElement;
     return p;
+  }
+  function commonAncestor(nodes,stop){
+    const xs=(nodes||[]).filter(Boolean);if(!xs.length)return null;
+    for(let p=xs[0].parentElement;p&&p!==stop;p=p.parentElement){if(xs.every(x=>p.contains(x)))return p}
+    return null;
+  }
+  function topChildUnder(ancestor,node){
+    if(!ancestor||!node||!ancestor.contains(node))return null;
+    let p=node;while(p.parentElement&&p.parentElement!==ancestor)p=p.parentElement;
+    return p.parentElement===ancestor?p:null;
+  }
+  function resolveLeftHost(root,phase1,phase2,grid){
+    let host=commonAncestor([phase1,phase2,grid],root)||unwrapHost(phase1)||unwrapHost(phase2);
+    const workspace=root.querySelector('.builderWorkspace');
+    if(host&&workspace&&host===workspace){const branch=topChildUnder(workspace,phase1);if(branch)host=branch}
+    if(host&&/^draft(?:Phase[12]|Current)SectionV01545$/.test(host.id||''))host=host.parentElement;
+    return host&&root.contains(host)?host:null;
   }
   function ensureSection(id,title,content,host){
     if(!content||!host)return null;
@@ -82,11 +99,11 @@
 
   function applyLayout(){
     const root=document.getElementById('builder');if(!root)return false;
-    const phase1=document.getElementById('banPhase1'),phase2=document.getElementById('banPhase2');
-    if(!phase1||!phase2)return false;
+    const phase1=document.getElementById('banPhase1'),phase2=document.getElementById('banPhase2'),grid=root.querySelector('.currentPickGrid');
+    if(!phase1||!phase2||!grid)return false;
 
-    let leftHost=unwrapHost(phase1)||unwrapHost(phase2);
-    if(!leftHost||!root.contains(leftHost))return false;
+    const leftHost=resolveLeftHost(root,phase1,phase2,grid);
+    if(!leftHost)return false;
 
     const p1=ensureSection('draftPhase1SectionV01545','1차 밴 · 1~3밴',phase1,leftHost);
     const p2=ensureSection('draftPhase2SectionV01545','2차 밴 · 4~5밴',phase2,leftHost);
