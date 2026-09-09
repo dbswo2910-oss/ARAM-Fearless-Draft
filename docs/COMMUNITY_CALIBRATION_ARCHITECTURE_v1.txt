@@ -1,0 +1,126 @@
+ARAM Fearless Draft — Community Calibration v1 Architecture
+Date: 2026-09-09
+Status: STAGED / SERVER NOT YET ENABLED
+
+PURPOSE
+- Increase ROLE/PLAYER calibration sample size as more users run the app.
+- Keep Riot Grade as an external validation label, not an automatic scoring input.
+- Preserve enough sanitized source data to recompute future metrics where possible.
+- Do not collect Riot ID, summoner name, PUUID, chat, friends, email, phone, or raw account identifiers in the central dataset.
+
+IMPORTANT FUTURE-DATA PRINCIPLE
+A narrow payload such as only ROLE score + Riot Grade is not future-proof. If a new metric becomes useful later, historical games cannot be reconstructed if the underlying source field was never retained.
+
+Community Calibration therefore uses two layers:
+1) INDEXED CALIBRATION FIELDS
+   - queue_id
+   - patch_version
+   - app_version / engine_version
+   - champion_id / role
+   - role_score / role_grade
+   - riot_grade
+   - anonymous_install_id
+   - game_hash
+
+2) VERSIONED SANITIZED PAYLOAD_JSON
+   - current derived signals / Function18 observations
+   - all safe numeric/boolean own-player gameplay fields available to the client snapshot
+   - selected non-identifying enums needed to interpret those numbers
+   - no account identity fields
+   - schema_version + policy_version attached to every row
+
+This means a future feature can often be recomputed from old rows without asking users to replay those matches.
+
+HARD LIMIT
+No system can recover a field that Riot never exposed to the client, or a field that the app never obtained from its source endpoint at the time. Therefore future-proofing means retaining a broad sanitized source snapshot, not promising perfect historical reconstruction.
+
+DATA MINIMIZATION / IDENTITY
+Central server must not store:
+- puuid
+- Riot ID / gameName / tagLine
+- summonerName / summonerId / accountId
+- chat / friend list
+- email / phone
+- raw access tokens / LCU credentials
+- raw gameId
+
+Instead:
+- anonymous_install_id is a random app-generated identifier unrelated to Riot account identity.
+- game_hash is SHA-256 over a local anonymous install secret + raw gameId; raw gameId remains local only.
+
+CONSENT MODEL
+Product decision: Community Calibration data sharing is a condition of using the distributed app once the feature is enabled.
+The first-run notice must therefore say this clearly instead of presenting it as optional telemetry.
+Buttons:
+- 동의하고 시작
+- 동의하지 않고 종료
+If the user declines, the app exits.
+A new policy_version requires the notice to be shown again.
+
+The notice must explicitly summarize:
+- what is collected
+- what is not collected
+- why it is collected
+- that the dataset is used to improve ARAM analysis/calibration
+- data retention / deletion policy once finalized
+
+REMOTE KILL SWITCH
+update/community-calibration-config.json controls activation.
+Current state is enabled=false.
+The client must not block startup or upload anything while disabled.
+After the server is deployed and tested, configure:
+- enabled=true
+- endpoint=https://.../v1/calibration
+- policy_version=1
+- schema_version=1
+
+SERVER REFERENCE
+backend/community-calibration/worker.js
+backend/community-calibration/schema.sql
+Suggested backend: Cloudflare Worker + D1.
+The public client endpoint is write-only and validates schema, queue, grade, body size and banned identity keys.
+
+FLEXIBLE DATABASE DESIGN
+Frequently queried dimensions are stored as indexed columns.
+The sanitized versioned event body is stored as payload_json.
+This avoids destructive schema migrations every time a new gameplay metric is added.
+
+CALIBRATION USE
+Do not perform automatic score correction from population data.
+Use population data to surface investigation candidates, for example:
+- Renata: 347 samples, our ROLE lower than Riot Grade in 76%, average band gap +1.3
+- Xerath: 430 samples, our ROLE higher in 69%, average band gap -0.9
+
+Then review the structural cause:
+- Function18 expectation
+- observability
+- role weights
+- death/mission model
+- patch changes
+- source-data semantics
+
+Only after analysis + regression should the scoring engine change.
+
+QUEUE / PATCH ISOLATION
+- Queue 450 and 2400 never share calibration baselines.
+- Patch version must be stored with every event.
+- Engine/app version must be stored so scoring changes can be separated from player/meta changes.
+
+LOCAL BUFFER
+The production client should keep a bounded pending upload queue so short network/server outages do not lose a completed-game sample. The queue must be deduplicated by game_hash and should have a strict storage cap.
+
+NEXT IMPLEMENTATION STEPS
+1. Inspect the current AutoSync match object and identify the broadest own-player raw gameplay payload actually available before normalization discards fields.
+2. Build a sanitizer that keeps numeric/boolean gameplay fields and whitelisted enums while rejecting identity fields.
+3. Build Community Calibration client capture + local queue.
+4. Build first-run required-consent modal, but keep it behind enabled=false remote config until server is live.
+5. Deploy D1 schema + Worker.
+6. Run synthetic malformed/PII/duplicate/oversize tests.
+7. Run actual Windows + Riot Client E2E with a test account.
+8. Only then flip enabled=true.
+
+DO NOT CLAIM
+- that historical data is perfectly recoverable
+- that a user's own sample is the population average
+- that Riot Grade formula is known
+- that server collection is live while enabled=false
