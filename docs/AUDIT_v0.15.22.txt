@@ -1,0 +1,30 @@
+ARAM Fearless Draft v0.15.22 AUDIT
+Date: 2026-09-09
+
+Static integration review
+PASS · role-mastery-drilldown-v01522.js created and runtime marker __ARAM_ROLE_MASTERY_DRILLDOWN_V01522__ defined
+PASS · v0.15.22 main.js loads v0.15.13 -> v0.15.21 cumulative patches before v0.15.22 drilldown
+PASS · final runtime marker chain includes v0.15.22 marker
+PASS · package metadata version = 0.15.22
+
+ROLE MASTERY drilldown review
+PASS · role cards use existing ROLE MASTERY role labels rather than hardcoded card positions
+PASS · role classification mirrors Player Profile role grouping (ADC/Tank/Support/Mage/Bruiser/Assassin)
+PASS · champion aggregation is scoped to the selected role
+PASS · games / wins / losses / win rate / ROLE average / best ROLE are calculated per champion
+PASS · role-specific metric sets are separated for Tank/Mage/ADC/Support/Bruiser/Assassin
+PASS · 1~2 match samples are visibly marked as small samples
+PASS · trend is not emitted before 4 matches for a champion
+PASS · repeated click closes the selected role and switching role replaces drilldown content
+PASS · keyboard Enter/Space and aria-expanded are wired
+PASS · profile DOM rerender recovery uses MutationObserver + delayed rebind
+
+History-limit inspection
+- Match Lab UI loader in match-lab-queue-v01517.js clamps user-requested limit to max 30.
+- AutoSync queue backend in autosync-queue-v01517.js accepts max 40 and scan max 160.
+- v0.15.22 intentionally does not change the match-history limit.
+
+Limitations
+- Actual user Windows + League Client E2E interaction was not run in this environment.
+- Champion field resolution uses the same aramHistoryResolveParticipant path used by ROLE/FUNCTION analysis, with championName/champion/rawChampionName/id fallbacks.
+- ROLE drilldown reflects only matches already loaded into Match Lab; it does not silently request extra history.
