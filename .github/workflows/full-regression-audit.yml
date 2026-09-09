@@ -25,6 +25,8 @@ jobs:
         run: node tools/community-calibration-audit.js
       - name: Run Profile UX audit
         run: node tools/profile-ux-audit.js
+      - name: Run Draft v0.15.40 audit
+        run: node tools/draft-v01540-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -48,6 +50,7 @@ jobs:
             audit-output/full-regression-report.json
             audit-output/community-calibration-report.json
             audit-output/profile-ux-report.json
+            audit-output/draft-v01540-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
