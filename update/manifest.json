@@ -1,6 +1,6 @@
 {
-  "version": "0.15.29",
-  "message": "v0.15.29 · 173챔 Mission / Death Fairness",
+  "version": "0.15.30",
+  "message": "v0.15.30 · 역할별 PLAYER PROFILE 완전 전환",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -80,6 +80,10 @@
       "source": "update/v0.15.23/role-profile-context-v01523.js"
     },
     {
+      "path": "role-profile-specialized-v01530.js",
+      "source": "update/v0.15.30/role-profile-specialized-v01530.js"
+    },
+    {
       "path": "in-app-updater-ui-v01523.js",
       "source": "update/v0.15.23/in-app-updater-ui-v01523.js"
     },
@@ -105,11 +109,11 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.29/main.js"
+      "source": "update/v0.15.30/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.29/package.json"
+      "source": "update/v0.15.30/package.json"
     }
   ],
   "delete": [
