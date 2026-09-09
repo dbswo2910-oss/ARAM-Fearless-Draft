@@ -10,6 +10,7 @@ const ROLES = new Set(['원딜','탱커','서포터','메이지','브루저','�
 const GRADE_RE = /^(?:S\+?|S-|A[+-]?|B[+-]?|C[+-]?|D[+-]?)$/;
 const HEX64 = /^[a-f0-9]{64}$/i;
 const INSTALL_ID_RE = /^[a-zA-Z0-9._:-]{16,128}$/;
+const encoder = new TextEncoder();
 
 const BANNED_KEYS = new Set([
   'puuid','riotid','riot_id','summonername','summoner_name','gamename','game_name',
@@ -28,6 +29,7 @@ function cors(extra={}) {
   };
 }
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:cors({'content-type':'application/json; charset=utf-8'})});}
+function byteLength(s){return encoder.encode(String(s??'')).byteLength;}
 function str(v,max=128){const s=v==null?'':String(v).trim();return s.length<=max?s:'';}
 function num(v){const n=Number(v);return Number.isFinite(n)?n:null;}
 function int(v){const n=num(v);return n===null?null:Math.trunc(n);}
@@ -72,7 +74,7 @@ function validateEvent(raw,root){
   if(role&&!ROLES.has(role))return{ok:false,error:'invalid role'};
   if(roleScore!==null&&(roleScore<0||roleScore>100))return{ok:false,error:'invalid role score'};
   const payload=JSON.stringify(raw);
-  if(Buffer.byteLength(payload,'utf8')>MAX_EVENT_BYTES)return{ok:false,error:'event too large'};
+  if(byteLength(payload)>MAX_EVENT_BYTES)return{ok:false,error:'event too large'};
   return{ok:true,row:{schemaVersion,policyVersion,anonymousInstallId,gameHash,queueId,championId,role,roleScore,roleGrade,riotGrade,patchVersion,appVersion,engineVersion,payload}};
 }
 
@@ -87,7 +89,7 @@ export default {
     if(len>MAX_BODY_BYTES)return json({ok:false,error:'body too large'},413);
     let text='';
     try{text=await request.text();}catch{return json({ok:false,error:'body read failed'},400);}
-    if(Buffer.byteLength(text,'utf8')>MAX_BODY_BYTES)return json({ok:false,error:'body too large'},413);
+    if(byteLength(text)>MAX_BODY_BYTES)return json({ok:false,error:'body too large'},413);
     let body;
     try{body=JSON.parse(text);}catch{return json({ok:false,error:'invalid json'},400);}
     if(!body||typeof body!=='object')return json({ok:false,error:'invalid body'},400);
