@@ -1,6 +1,6 @@
 {
-  "version": "0.15.38",
-  "message": "v0.15.38 · 헤더 브랜드 정리",
+  "version": "0.15.39",
+  "message": "v0.15.39 · 입력창 잠김/검증 안정화",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -132,12 +132,16 @@
       "source": "update/v0.15.32/preload.js"
     },
     {
+      "path": "input-interaction-stability-v01539.js",
+      "source": "update/v0.15.39/input-interaction-stability-v01539.js"
+    },
+    {
       "path": "main.js",
-      "source": "update/v0.15.38/main.js"
+      "source": "update/v0.15.39/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.38/package.json"
+      "source": "update/v0.15.39/package.json"
     },
     {
       "path": "autosync-telemetry-v01534.js",
