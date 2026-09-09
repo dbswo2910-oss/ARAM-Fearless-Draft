@@ -58,7 +58,7 @@ async function checkAndApplyUpdate(){
     const touched=[...new Set([...files.map(x=>x.target),...deletes])];
     for(const rel of touched){const dst=path.join(__dirname,...rel.split('/'));if(fs.existsSync(dst)){const bk=path.join(backup,...rel.split('/'));ensureParent(bk);fs.copyFileSync(dst,bk)}}
     try{
-      for(const f of files){const dst=path.join(__dirname,...f.target.split('/'));ensureParent(dst);const tmp=`${dst}.aram-new-${process.pid}`;fs.copyFileSync(f.staged,tmp);try{fs.renameSync(tmp,dst)}catch{try{fs.unlinkSync(dst)}catch{}fs.renameSync(tmp,dst)}written.push(f.target)}
+      for(const f of files){const dst=path.join(__dirname,...f.target.split('/'));ensureParent(dst);written.push(f.target);const tmp=`${dst}.aram-new-${process.pid}`;fs.copyFileSync(f.staged,tmp);try{fs.renameSync(tmp,dst)}catch{try{fs.unlinkSync(dst)}catch{}fs.renameSync(tmp,dst)}}
       for(const rel of deletes){const dst=path.join(__dirname,...rel.split('/'));if(fs.existsSync(dst)){fs.rmSync(dst,{recursive:true,force:true});deleted.push(rel)}}
     }catch(e){
       for(const rel of [...written,...deleted]){const dst=path.join(__dirname,...rel.split('/')),bk=path.join(backup,...rel.split('/'));try{if(fs.existsSync(bk)){ensureParent(dst);fs.copyFileSync(bk,dst)}else fs.rmSync(dst,{recursive:true,force:true})}catch{}}
