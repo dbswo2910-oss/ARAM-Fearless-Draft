@@ -1,6 +1,6 @@
 {
-  "version": "0.15.21",
-  "message": "v0.15.21 · PLAYER PROFILE 다양화 + 챔피언 상세 Sticky",
+  "version": "0.15.22",
+  "message": "v0.15.22 · ROLE MASTERY 챔피언별 드릴다운",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -56,16 +56,20 @@
       "source": "update/v0.15.21/player-profile-data-sticky-v01521.js"
     },
     {
+      "path": "role-mastery-drilldown-v01522.js",
+      "source": "update/v0.15.22/role-mastery-drilldown-v01522.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.13/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.21/main.js"
+      "source": "update/v0.15.22/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.21/package.json"
+      "source": "update/v0.15.22/package.json"
     }
   ],
   "delete": [
