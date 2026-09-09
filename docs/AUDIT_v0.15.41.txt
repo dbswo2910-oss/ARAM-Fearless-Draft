@@ -1,0 +1,20 @@
+ARAM Fearless Draft v0.15.41 AUDIT
+
+Scope
+- Builder champion portrait pool runtime and updater wiring.
+- Existing v0.15.40 draft side-order / catch-resilience compatibility.
+- Repository regression and static validation.
+
+Validated
+- Runtime JS syntax passes node --check locally.
+- Reconstructed base UI synthetic Playwright test rendered 173 champion cards.
+- Prior-set picked champions display as fearless exhausted; historical bans are not treated as exhausted.
+- Current picks and bans display separate state badges.
+- Available champion card click writes only the current local draft NOW step through existing canSetBan/canSetDraftChamp validation.
+- Builder pool uses realtime mock-draft portrait/card styling and role filters.
+- Runtime marker and main injection guard are present.
+- Community Calibration remains disabled in update/community-calibration-config.json.
+
+Limitations
+- Browser/Playwright validation is synthetic and is not an actual Windows Electron + Riot Client E2E.
+- Actual Windows visual/interaction confirmation should be performed after in-app update to v0.15.41.
