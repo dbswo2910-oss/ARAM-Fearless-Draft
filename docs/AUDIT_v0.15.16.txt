@@ -1,0 +1,47 @@
+ARAM Fearless Draft v0.15.16 - QA / AUDIT
+
+EXECUTED PASS
+- JavaScript syntax: multi-user-isolation-v01516.js / main.js / 기존 runtime patch files
+- Browser boot/runtime marker: PASS
+- App version/title: 0.15.16 / ARAM Fearless Draft v0.15.16
+- Main navigation smoke: builder / random / history / data PASS
+- Random Practice mode: Pick <-> In-Game PASS
+- Champion coverage: 173/173
+- Role profile coverage: 173/173
+- Function18 coverage: 173/173
+- 5-stage power curve coverage: 173/173
+- Existing Golden Guard regression: 293/293 PASS
+- FAIR-S uniform benchmark retained:
+  * standardized 88 input -> 173/173 exactly S boundary 91
+  * standardized 96 input -> 173/173 S+
+  * standardized 70 input -> no A+/S inflation
+- First-user legacy migration:
+  * main draft/random state -> owner A
+  * favorites -> owner A
+  * mock-draft restore session -> owner A
+  * legacy shared user-data keys removed
+- Same-PC account A/B isolation simulation:
+  * random queue state separated
+  * favorites separated
+  * online team/session preference separated
+  * Match Lab runtime list reset on switch
+  * BGM setting intentionally shared
+- APP REC ownership simulation:
+  * owner A record tagged ownerPuuid=A
+  * A viewing own match -> REC visible
+  * friend viewing same gameId -> REC hidden
+  * detail tab no REC badge for friend
+  * row no APP REC marker for friend
+  * switch to owner B -> A record storage invisible
+- Browser page errors: 0
+- Relevant console errors: 0
+
+NOT EXECUTED
+- Native Windows + real Riot/League Client account A -> logout -> account B end-to-end switch.
+- Two physical PCs simultaneously running the same released build.
+- Real PeerJS internet room with host/guest/spectators while changing Riot accounts.
+
+DESIGN CONCLUSION
+- Different PCs: state remains naturally isolated by each machine's Electron storage and localhost League Client.
+- Same Windows user + different Riot accounts: account-sensitive data is now separated by Riot PUUID after the account is detected.
+- Offline/no Riot login: no stable human identity is available, so anonymous manual state is device-local rather than person-specific.
