@@ -23,6 +23,8 @@ jobs:
         run: node tools/full-regression-audit.js
       - name: Run Community Calibration audit
         run: node tools/community-calibration-audit.js
+      - name: Run Profile UX audit
+        run: node tools/profile-ux-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -45,6 +47,7 @@ jobs:
           path: |
             audit-output/full-regression-report.json
             audit-output/community-calibration-report.json
+            audit-output/profile-ux-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
