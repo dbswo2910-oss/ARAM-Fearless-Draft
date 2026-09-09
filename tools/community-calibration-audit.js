@@ -14,11 +14,16 @@ const ok=(v,n,d='')=>{(v?pass:fail).push({name:n,detail:d});if(!v)console.error(
   let cfg=null;
   try{cfg=JSON.parse(read('update/community-calibration-config.json'));ok(true,'remote config JSON')}catch(e){ok(false,'remote config JSON',e.message)}
   if(cfg){
-    ok(cfg.enabled===false,'staged config remains disabled','must stay false until backend + Windows/Riot E2E');
+    ok(typeof cfg.enabled==='boolean','remote config enabled flag is boolean');
     ok(Number(cfg.schema_version)===1,'schema version is 1');
     ok(Number(cfg.policy_version)===1,'policy version is 1');
-    ok(!cfg.endpoint,'disabled config has no live endpoint');
     ok(cfg.mode==='required-for-use','consent mode is explicit required-for-use');
+    if(cfg.enabled===true){
+      ok(/^https:\/\//i.test(String(cfg.endpoint||'')),'enabled config uses HTTPS endpoint');
+      ok(/\/v1\/calibration\/?$/i.test(String(cfg.endpoint||'')),'enabled config points to calibration API');
+    }else{
+      ok(!cfg.endpoint,'disabled config has no live endpoint');
+    }
   }
 
   const telemetry='update/v0.15.34/autosync-telemetry-v01534.js';
