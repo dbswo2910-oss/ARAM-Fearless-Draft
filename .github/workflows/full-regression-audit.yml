@@ -35,6 +35,8 @@ jobs:
         run: node tools/draft-v01543-audit.js
       - name: Run Stable Draft Layout v0.15.45 audit
         run: node tools/draft-v01545-audit.js
+      - name: Run Pick Judgment Risk Board v0.15.46 audit
+        run: node tools/draft-v01546-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -63,6 +65,7 @@ jobs:
             audit-output/draft-v01542-report.json
             audit-output/draft-v01543-report.json
             audit-output/draft-v01545-report.json
+            audit-output/draft-v01546-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
