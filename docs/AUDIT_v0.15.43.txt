@@ -1,0 +1,28 @@
+v0.15.43 AUDIT
+
+검증 목표
+1) 특정 시너지 허브 챔피언을 이름으로 예외처리하지 않고 듀오 보너스의 tail만 일반화해 압축하는지
+2) 듀오 + 41루트 중복 보상이 과도할 때만 제한적으로 감쇠하는지
+3) 요청한 Builder 화면 순서가 DOM 재배치 규칙에 명시되어 있는지
+4) 위험 알람이 최대 2개만 표시되고 N픽 CC/CATCH·다이브·포킹을 활용하는지
+5) ROLE / Riot Grade가 영향을 받지 않는지
+
+정적/회귀 검사
+- 모든 current manifest JS: node --check
+- manifest/package/main 버전 일치
+- main runtime injection marker 일치
+- v0.15.43 전용 audit
+- 기존 v0.15.40 / v0.15.41 / v0.15.42 감사 유지
+- full regression audit 유지
+
+밸런스 원칙
+- raw duo <= 12: 변경 없음
+- raw duo > 12: 단계형 diminishing returns
+- duo effective <= 22
+- duo >= 18 AND 41-route >= 18일 때만 추가 overlap guard, 최대 2.5
+- 야스오/오리아나/럼블 등 사용자 예시는 코드 하드코딩 금지
+- 실제 앱에서는 aramDuoBalanceAuditV01543()으로 현재 조합 기준 전체 후보의 raw 듀오 과집중을 확인 가능
+
+제한
+- 저장소에는 설치본 index.html/base core가 없으므로 실제 Windows DPI/폰트/현재 설치본 DOM에서의 최종 육안 E2E는 사용자 환경에서 확인 필요.
+- UI 패치는 ID 우선 + 제목 텍스트 fallback으로 기존 DOM 차이를 방어한다.
