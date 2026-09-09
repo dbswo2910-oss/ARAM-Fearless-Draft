@@ -1,6 +1,6 @@
 {
-  "version": "0.15.47",
-  "message": "v0.15.47 · 픽 판단 탭 + 조합 상성 + 위험 보정 + X 스크롤 수정",
+  "version": "0.15.48",
+  "message": "v0.15.48 · 랜덤 연습 Focus UI 정리",
   "min_launcher": "2.0.2",
   "files": [
     {"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},
@@ -22,6 +22,7 @@
     {"path":"draft-layout-v01545.js","source":"update/v0.15.45/draft-layout-v01545.js"},
     {"path":"draft-risk-board-v01546.js","source":"update/v0.15.46/draft-risk-board-v01546.js"},
     {"path":"draft-judgment-tabs-v01547.js","source":"update/v0.15.47/draft-judgment-tabs-v01547.js"},
+    {"path":"random-practice-focus-v01548.js","source":"update/v0.15.48/random-practice-focus-v01548.js"},
     {"path":"role-metric-detail-v01518.js","source":"update/v0.15.35/role-metric-detail-v01518.js"},
     {"path":"cc-impact-v01525.js","source":"update/v0.15.25/cc-impact-v01525.js"},
     {"path":"mission-death-fairness-v01529.js","source":"update/v0.15.29/mission-death-fairness-v01529.js"},
@@ -44,8 +45,8 @@
     {"path":"riot-grade-autosnapshot-v01533.js","source":"update/v0.15.33/riot-grade-autosnapshot-v01533.js"},
     {"path":"preload.js","source":"update/v0.15.32/preload.js"},
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
-    {"path":"main.js","source":"update/v0.15.47/main.js"},
-    {"path":"package.json","source":"update/v0.15.47/package.json"},
+    {"path":"main.js","source":"update/v0.15.48/main.js"},
+    {"path":"package.json","source":"update/v0.15.48/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
     {"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"}
   ],
