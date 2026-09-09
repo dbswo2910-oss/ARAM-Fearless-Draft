@@ -1,0 +1,14 @@
+{
+  "baseline": "0.15.28",
+  "syntax_checked": 56,
+  "syntax_failures": [],
+  "manifest_missing_files": [],
+  "duplicate_targets": false,
+  "base_required_not_in_manifest": [
+    "autosync-core"
+  ],
+  "base_index_html_present": false,
+  "collector_regression": "9/9 PASS",
+  "full_app_boot": "BLOCKED: missing base app",
+  "Windows_Riot_E2E": "NOT RUN"
+}
