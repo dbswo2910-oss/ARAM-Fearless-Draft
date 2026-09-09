@@ -1,6 +1,6 @@
 {
-  "version": "0.15.28",
-  "message": "v0.15.28 · Riot Grade 검증 수집",
+  "version": "0.15.29",
+  "message": "v0.15.29 · 173챔 Mission / Death Fairness",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -36,6 +36,10 @@
       "source": "update/v0.15.25/autosync-cc-impact-v01525.js"
     },
     {
+      "path": "autosync-mission-timeline-v01529.js",
+      "source": "update/v0.15.29/autosync-mission-timeline-v01529.js"
+    },
+    {
       "path": "match-lab-queue-v01517.js",
       "source": "update/v0.15.17/match-lab-queue-v01517.js"
     },
@@ -50,6 +54,10 @@
     {
       "path": "cc-impact-v01525.js",
       "source": "update/v0.15.25/cc-impact-v01525.js"
+    },
+    {
+      "path": "mission-death-fairness-v01529.js",
+      "source": "update/v0.15.29/mission-death-fairness-v01529.js"
     },
     {
       "path": "player-profile-v01519.js",
@@ -97,11 +105,11 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.28/main.js"
+      "source": "update/v0.15.29/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.28/package.json"
+      "source": "update/v0.15.29/package.json"
     }
   ],
   "delete": [
