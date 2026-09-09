@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
   const V='0.15.28';
-  const esc=s=>{try{return aramHistoryEsc(String(s??''))}catch{return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}};
+  const esc=s=>{try{return aramHistoryEsc(String(s??''))}catch{return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}};
   const num=(v,d=0)=>Number.isFinite(Number(v))?Number(v):d;
   const canon=v=>{const s=String(v??'').trim(),m=s.match(/(?:^|_)(\d{5,})$/);return m?m[1]:s};
   let cache={at:0,state:null,pending:null};
