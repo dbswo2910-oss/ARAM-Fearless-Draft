@@ -1,6 +1,6 @@
 {
-  "version": "0.15.27",
-  "message": "v0.15.27 · LIVE 시간대 전력 신뢰성 재검수",
+  "version": "0.15.28",
+  "message": "v0.15.28 · Riot Grade 검증 수집",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -84,16 +84,24 @@
       "source": "update/v0.15.27/time-power-v01527.js"
     },
     {
+      "path": "riot-grade-collector-v01528.js",
+      "source": "update/v0.15.28/riot-grade-collector-v01528.js"
+    },
+    {
+      "path": "riot-grade-ui-v01528.js",
+      "source": "update/v0.15.28/riot-grade-ui-v01528.js"
+    },
+    {
       "path": "preload.js",
-      "source": "update/v0.15.26/preload.js"
+      "source": "update/v0.15.28/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.27/main.js"
+      "source": "update/v0.15.28/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.27/package.json"
+      "source": "update/v0.15.28/package.json"
     }
   ],
   "delete": [
