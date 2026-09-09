@@ -56,7 +56,7 @@ const ok=(v,n,d='')=>{(v?pass:fail).push({name:n,detail:d});if(!v)console.error(
   ok(/raw_game_id_upload\s*:\s*false/.test(cs),'raw game id upload disabled');
   ok(/identity_upload\s*:\s*false/.test(cs),'identity upload disabled');
   ok(/동의하고 시작/.test(cs)&&/동의하지 않고 종료/.test(cs),'required consent choices present');
-  ok(/https:\\/\\//.test(cs),'HTTPS upload guard present');
+  ok(cs.includes('^https:\\/\\/'),'HTTPS upload guard present');
 
   const worker=read('backend/community-calibration/worker.js');
   for(const key of ['puuid','summonername','riotid','gameid','access_token'])ok(worker.toLowerCase().includes(`'${key}'`)||worker.toLowerCase().includes(`'${key.replace('_','')}'`),`worker rejects ${key}`);
