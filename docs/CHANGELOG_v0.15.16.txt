@@ -1,0 +1,37 @@
+ARAM Fearless Draft v0.15.16
+Riot PUUID Multi-user Isolation
+
+[핵심 변경]
+1. Riot 계정별 로컬 저장소 분리
+- 드래프트/시리즈/랜덤연습 상태
+- Match Lab 친구 즐겨찾기
+- Match Lab APP REC 및 픽창 임시 세션
+- 실시간 모의밴픽 복구 세션/팀명/관전자명
+- 랜덤연습 Pick/In-Game UI 상태
+위 항목을 현재 로컬 League Client의 Riot PUUID별로 분리합니다.
+
+2. 계정 변경 안전장치
+- Riot PUUID 변경 감지 시 이전 계정 상태를 먼저 저장합니다.
+- 이전 계정의 실시간 모의밴픽 네트워크 연결은 새 계정으로 승계하지 않습니다.
+- 새 계정의 드래프트/랜덤연습/즐겨찾기/Match Lab 상태를 별도 저장소에서 복원합니다.
+- Match Lab 화면의 검색 대상/경기 목록은 계정 전환 시 현재 계정 기준으로 초기화합니다.
+
+3. APP REC 소유권 검증
+- 새 REC/픽창 session에 ownerPuuid를 기록합니다.
+- APP REC는 현재 로컬 Riot 계정의 PUUID와 경기 대상 PUUID가 모두 일치할 때만 표시합니다.
+- 친구와 같은 게임을 했더라도 친구 전적 화면에 내 APP REC가 친구의 REC처럼 표시되지 않습니다.
+- 다른 Riot 계정으로 바꾸면 이전 계정 REC 저장소 자체가 보이지 않습니다.
+
+4. 기존 사용자 마이그레이션
+- v0.15.15 이전의 공용 로컬 데이터는 v0.15.16 최초 실행 시 처음 감지된 Riot 계정으로 1회 이전합니다.
+- 이전 후 공용 사용자 데이터 키를 제거해 다음 앱 부팅에서 이전 계정 데이터가 잠깐 노출되는 것을 막습니다.
+
+5. PC 공용 설정 유지
+- BGM/SFX
+- AutoSync ON/OFF
+- 회귀검사 UI 접힘 상태
+등 장치 환경설정은 계정별로 쪼개지 않고 PC 공용으로 유지합니다.
+
+[의도된 제한]
+- League Client에 로그인하지 않은 오프라인/익명 사용 상태에서는 Riot PUUID를 알 수 없으므로 사용자별 자동 분리가 불가능합니다.
+- 서로 다른 PC에서는 원래부터 Electron/localStorage 및 localhost Live Client가 각각 분리되어 있으므로 데이터가 교차하지 않습니다.
