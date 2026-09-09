@@ -1,0 +1,40 @@
+ARAM Fearless Draft v0.15.32 CHANGELOG
+
+Theme
+- Riot Grade 누적 검증을 현재 Match Lab 30경기 범위 밖까지 유지하도록 영속 스냅샷 구조로 확장.
+
+Changes
+1. Riot Grade record annotation
+- 기존 v0.15.28 userData 저장 파일을 그대로 사용하며 schema 2로 확장.
+- 실제 Riot Grade record에 동일 경기의 ROLE snapshot을 붙일 수 있음.
+- snapshot: gameId / PUUID / champion / championId / role / roleScore / ourGrade / queueId / engineKey / engineVersion / snapshotAt.
+- Riot Grade 원본 필드는 변경하지 않음.
+- 최대 600 Grade record 정책 유지.
+
+2. Cross-account / queue safety
+- 현재 League Client 계정 PUUID와 다른 PUUID snapshot은 main process에서 거부.
+- Riot Grade가 실제로 저장된 gameId와 매칭되는 경우만 snapshot을 기록.
+- Queue 450 / 2400만 허용하고 calibration 집계도 현재 Queue와 동일한 snapshot만 사용.
+
+3. Persistent calibration history
+- PLAYER PROFILE의 Riot Grade 누적 검증은 현재 화면의 최대 30경기만 보는 대신 저장된 ROLE snapshot 전체를 사용.
+- 한 경기가 Match Lab 최근 30경기 밖으로 밀려나도 snapshot이 남아 있으면 챔피언/역할 편향 표본에서 유지.
+- 현재 역할 엔진 기준을 engineKey로 저장하고 다른 엔진 기준 snapshot은 현재 집계에서 제외할 수 있게 설계.
+
+4. Calibration UI
+- 'ROLE CALIBRATION HISTORY · Riot Grade'로 갱신.
+- 누적 비교 수 / 현재 화면 연결 수 / 저장 Grade 수 / 전체 grade-band 차이를 표시.
+- 챔피언별 3경기, 지속 후보 5경기 기준은 기존 v0.15.31 정책 유지.
+- Riot Grade는 계속 scoring use OFF. ROLE 점수 자동보정 없음.
+
+5. Runtime / IPC
+- new collector: riot-grade-collector-v01532.js
+- new renderer: riot-grade-calibration-history-v01532.js
+- preload adds annotateRiotGradeSnapshots().
+- main adds riot-grade:annotate-snapshots IPC.
+- v0.15.31 calibration renderer는 runtime injection에서 교체하고 v0.15.32 history renderer를 사용.
+
+Important
+- v0.15.28~0.15.31에서 이미 수집된 Riot Grade 중 현재 Match Lab에 다시 잡히는 경기는 v0.15.32에서 snapshot을 붙일 수 있음.
+- 과거에 Grade는 저장됐지만 해당 경기가 더 이상 현재 Match Lab 범위에 없고 ROLE snapshot도 없으면 소급 복원하지 않음.
+- 실제 Windows + Riot Client 장기 누적 E2E는 사용자 환경 확인 필요.
