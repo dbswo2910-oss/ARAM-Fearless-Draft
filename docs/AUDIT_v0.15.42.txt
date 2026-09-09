@@ -1,0 +1,28 @@
+ARAM Fearless Draft v0.15.42 AUDIT
+
+Scope
+- Partial-N live draft context for pick and current-set ban recommendations.
+- Compact builder decision UX, builder pool collapse, and DATA sticky detail behavior.
+- Existing v0.15.40 catch-resilience and v0.15.41 builder-pool compatibility.
+- Repository regression/static validation.
+
+Validated locally
+- draft-live-context-v01542.js and v0.15.42 main.js pass node --check.
+- Dedicated static audit: 17 PASS / 0 FAIL.
+- Forward-compatible v0.15.41 builder-pool audit fixture: 12 PASS / 0 FAIL.
+- Reconstructed base UI synthetic Chromium test used the example opponent partial lineup 애쉬/세라핀/마오카이.
+- Existing v0.15.40 catch pressure for that 3-pick sample was 12.5 / scale 0.5; v0.15.42 partial-N context recognized 12.5 total, about 4.2 per revealed slot, confidence about 0.9, and pressure scale about 0.7.
+- In that synthetic sample, direct self-save candidates such as 자야/시비르/이즈리얼/카이사 received higher catch-response value while vulnerable carries such as 징크스/코그모/빅토르 received bounded negative context adjustments.
+- Symmetric current-set ban context was also exercised with our 애쉬/세라핀/마오카이 partial lineup: hard self-save/rescue counters gained ban context while candidates already vulnerable to our catch lost ban priority.
+- The correction is written into firstParts/contrib so displayed score totals remain aligned with recommendation scoring.
+- Builder compact board renders 우리 결손 / 상대 핵심 위협 / 다음 픽 목표.
+- Builder route UI and duplicate builder power-curve UI are hidden only at presentation level; underlying engine functions are not deleted.
+- Builder champion pool collapse uses localStorage and retains current pick/ban/exhaustion logic from v0.15.41.
+- DATA desktop sticky fix stretches the right-column parent so the existing sticky detail panel can actually travel during page scroll.
+- ROLE GRADE and Riot Grade are explicitly isolated from this draft-only layer.
+- Community Calibration remains disabled in update/community-calibration-config.json.
+
+Limitations
+- Browser/Chromium validation is synthetic and is not an actual Windows Electron + Riot Client E2E.
+- Ranking examples are scenario checks, not guarantees that one specific counter champion must always be TOP1; the rest of the draft engine remains active by design.
+- Actual Windows visual/interaction confirmation should be performed after in-app update to v0.15.42.
