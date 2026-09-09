@@ -1,6 +1,6 @@
 {
-  "version": "0.15.32",
-  "message": "v0.15.32 · Riot Grade 장기 누적 검증",
+  "version": "0.15.33",
+  "message": "v0.15.33 · Riot Grade 자동 장기 스냅샷",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -116,16 +116,20 @@
       "source": "update/v0.15.32/riot-grade-calibration-history-v01532.js"
     },
     {
+      "path": "riot-grade-autosnapshot-v01533.js",
+      "source": "update/v0.15.33/riot-grade-autosnapshot-v01533.js"
+    },
+    {
       "path": "preload.js",
       "source": "update/v0.15.32/preload.js"
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.32/main.js"
+      "source": "update/v0.15.33/main.js"
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.32/package.json"
+      "source": "update/v0.15.33/package.json"
     }
   ],
   "delete": [
