@@ -1,0 +1,45 @@
+ARAM Fearless Draft v0.15.29 AUDIT
+
+Scope
+- 3번: 173챔 챔피언 임무 / 데스 가치 / 기능 관측 가능성 공정성
+
+Static checks
+- autosync-mission-timeline-v01529.js node --check PASS
+- mission-death-fairness-v01529.js node --check PASS
+- main.js node --check PASS
+- package.json JSON parse PASS
+
+Synthetic timeline regression
+- 2회 사망 중 1회는 사망 직전 본인 처치관여 + 사망 후 아군 2킬: productive=true / strong=true PASS
+- 의미 없는 단독 사망 후 추가 아군 사망: productive=false PASS
+- deathCount 2 / productiveDeaths 1 / strongDeaths 1 집계 PASS
+
+Synthetic mission regression
+- Malphite-like Function18: commitment 4.7/5, refundCap 0.60 PASS
+- Jax-like Function18: commitment 2.1/5, refundCap 약 0.21 and explicit maxCap <=0.34 PASS
+- Renata-like Function18: support/unique-function observability lowered without fixed score bonus PASS
+- strong engage example: survival itself remains 30 while effective-survival counterfactual is used only to calculate refund PASS
+- maximum death refund +4 ROLE point PASS
+- sub-S score cannot be pushed to S by mission/observability positive adjustment PASS
+
+Design safeguards
+- No role-wide death immunity.
+- No champion fixed +10 style bonus.
+- No refund without timeline evidence.
+- No refund when execution evidence <50.
+- No double reward of CC/engage/absorb: refund is bounded by counterfactual survival-caused raw-score loss.
+- Exact spell-hit/replay-scene claims are not made.
+
+Coverage note
+- Mission profile is generated champion-by-champion from existing Function18, so every champion present in the app champion index can receive a distinct profile.
+- Runtime audit function aramMissionDeathV01529.auditAll() reports detected champion count and expected 173.
+- Actual installed app 173/173 runtime count must be confirmed in Windows environment; static environment here does not contain the embedded champion index.
+
+Performance risk
+- First Match Lab load can request up to 40 local LCU timelines, concurrency 6; results are cached up to 120 gameIds for the process lifetime.
+- If timeline service is unavailable, scores fall back to no death refund rather than guessing.
+
+Not executed
+- Actual Windows + Riot Client timeline payload E2E.
+- Actual embedded 173 champion runtime audit.
+- Human visual inspection at all DPI/window sizes.
