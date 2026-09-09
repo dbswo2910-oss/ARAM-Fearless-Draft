@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "cycle_id": "bootstrap-20260909-01",
+  "parent_cycle_id": null,
+  "status": "completed",
+  "auto_continue": "YES",
+  "source_head_sha": "70113a5aa3ecbc409bb18d7338e162282b62b09f",
+  "processed_event_ids": [],
+  "processed_handoff_ids": [],
+  "next_issue_id": "RG-PERSIST-RETRY-001",
+  "next_target": "work-in-progress/riot-grade-identity/collector.js: poll/save/atomicWrite; compare update/v0.15.28/riot-grade-collector-v01528.js",
+  "evidence": "poll mutates records before save; save is guarded only by added. If the first write throws, the record remains in memory, and an identical retry has added=0, potentially skipping persistence forever. Candidate to reproduce, not yet a proven production failure.",
+  "next_tests": [
+    "Inject one fs write/rename failure; next identical poll must eventually persist or surface pending persistence.",
+    "Restart collector and verify record presence after recovered save.",
+    "Ensure failed replace does not destroy previous valid store.",
+    "Rerun existing 9 identity/UI regression cases; add failure and recovery coverage."
+  ],
+  "blockers": [
+    "Full app index.html and autosync-core.js absent from tracked main; full app/Windows/Riot E2E not validated. This does not block independent persistence tests."
+  ]
+}
