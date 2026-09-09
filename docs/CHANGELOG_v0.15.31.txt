@@ -1,0 +1,24 @@
+ARAM Fearless Draft v0.15.31 CHANGELOG
+
+ROLE CALIBRATION · Riot Grade 누적 검증
+
+1. Riot Grade를 ROLE 점수에 직접 합산하지 않고 외부 검증 라벨로 누적 비교합니다.
+2. 현재 불러온 Match Lab 전적과 로컬 Riot Grade 저장본을 gameId + PUUID로 연결합니다.
+3. Riot의 +/- 세부 등급과 앱의 굵은 ROLE 등급 체계 차이를 줄이기 위해 비교 시 coarse band를 사용합니다.
+   - S+ -> S+
+   - S/S- -> S
+   - A+ -> A+
+   - A/A- -> A
+   - B+/B/B- -> B
+   - C+/C/C- -> C
+   - D+/D/D- -> D
+4. PLAYER PROFILE 하단에 ROLE CALIBRATION 패널을 추가합니다.
+5. 챔피언별 및 역할별로 반복적인 저평가/고평가 후보를 표시합니다.
+6. 최소 3경기부터 의심 신호를 표시하며, 5경기 이상 + 동일 방향 68% 이상일 때만 지속 후보로 승격합니다.
+7. 다른 플레이어를 조회 중일 때 현재 로그인 계정의 Riot Grade를 잘못 연결하지 않습니다.
+8. 글로벌 percentile이나 Riot 내부 수식을 추정하지 않습니다.
+9. scoring use는 계속 OFF이며 이번 버전은 ROLE 점수 자체를 변경하지 않습니다.
+
+Known limitation
+- v0.15.28 이후 앱이 실행된 상태에서 수집된 Riot Grade만 사용할 수 있습니다.
+- 실제 Windows + Riot Client에서 충분한 Grade 표본이 쌓인 상태의 E2E 화면 검증은 필요합니다.
