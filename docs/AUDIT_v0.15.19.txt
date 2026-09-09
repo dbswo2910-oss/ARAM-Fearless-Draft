@@ -1,0 +1,29 @@
+ARAM Fearless Draft v0.15.19 AUDIT
+
+EXECUTED / PASS
+- main.js Node syntax PASS.
+- player-profile-v01519.js Node syntax PASS.
+- package.json / update manifest JSON parse PASS (local candidate).
+- 20-game PLAYER INDEX aggregation PASS.
+- recent 10 vs previous 10 trend calculation PASS.
+- previous segment under 5 games -> comparison baseline hidden PASS.
+- role mastery grouping PASS.
+- role mastery small-sample shrinkage/provisional flag PASS.
+- non-efficiency role resource-score attenuation PASS.
+- standard 450 / mayhem 2400 profile separation PASS.
+- NEXT OBJECTIVE generation, baseline gameId capture, new-match detection, success/retry path PASS.
+- DOM-stub launcher insertion / profile overlay open-render-close PASS.
+- runtime injection keeps cumulative v0.15.13~v0.15.18 patches before player-profile-v01519.js.
+- runtime marker chain includes __ARAM_PLAYER_PROFILE_V01519__.
+
+DESIGN SAFETY
+- PLAYER INDEX is an app-internal composite, not Riot official rank or global percentile.
+- 10인 상세 데이터가 없는 경기는 profile aggregation에서 제외.
+- small samples are explicitly marked and shrunk toward neutral.
+- Scout Report only describes match-result statistics; no replay-scene/positioning/skill-use inference is claimed.
+- Mayhem profile is separate and warns that augment effects are included.
+
+NOT EXECUTED
+- Actual Windows + Riot Client end-to-end load/search/profile session.
+- Human visual inspection on the user's exact Windows DPI/font/monitor environment.
+- Longitudinal live validation after multiple real future matches for NEXT OBJECTIVE persistence.
