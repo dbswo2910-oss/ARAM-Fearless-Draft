@@ -1,0 +1,26 @@
+ARAM Fearless Draft v0.15.46 validation scope
+
+Validated by tools/draft-v01546-audit.js and Full Regression Audit workflow.
+
+Checks
+- manifest current version = 0.15.46
+- draft-risk-board-v01546.js is included in updater overlay
+- stable v0.15.45 draft layout remains active
+- cleaned v0.15.43 duo balance / alert runtime remains active
+- main.js and package.json version = 0.15.46
+- risk runtime and main runtime parse successfully as JavaScript
+- 8 risk categories exist
+- risk board is mounted inside builderCore (픽 판단)
+- legacy emergency cards are removed when the new board renders
+- all active risks render as badges
+- top 2 risks render detailed cards
+- partial-pick confidence and our-composition response are reflected
+- recommendation score logic is unchanged
+- runtime injection order = balance -> stable layout -> v0.15.46 risk board
+
+Expected UI behavior
+- 상대 0~1픽: 상대 2픽부터 분석 안내
+- 상대 2픽 이상: 위험도 주의 이상 항목을 모두 compact badge로 표시
+- 복수 위험: 동시에 여러 badge 노출
+- 상위 2개: 상세 설명 + 주요 원인 챔피언 + 대응 방향 노출
+- 기존 픽 판단의 우리 결손 / 상대 핵심 위협 / 다음 픽 목표는 유지
