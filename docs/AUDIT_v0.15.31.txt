@@ -1,0 +1,64 @@
+ARAM Fearless Draft v0.15.31 AUDIT
+
+Scope
+- Riot Grade Collector 누적 데이터를 ROLE 엔진 검증용으로 집계
+- 챔피언별 / 역할별 반복 저평가·고평가 후보 탐지
+- PLAYER PROFILE 하단 검증 패널
+
+Design safeguards
+- Riot Grade는 ROLE 점수에 합산하지 않음: scoring_use=false
+- 자동 보정값 생성하지 않음
+- 글로벌 percentile 생성하지 않음
+- Riot 내부 등급 수식 추정하지 않음
+- gameId와 PUUID를 같이 확인하여 다른 조회 플레이어에 로컬 Grade가 붙지 않도록 함
+- v0.15.28 이후 수집된 실제 Grade만 사용
+
+Grade-scale fairness
+- 앱 ROLE 등급은 D/C/B/A/A+/S/S+의 굵은 구간을 사용합니다.
+- Riot Grade의 +/-를 그대로 단계 비교하면 체계 차이 때문에 과도한 오차처럼 보일 수 있습니다.
+- 따라서 비교용으로 Riot Grade를 동일한 coarse band로 접습니다.
+  S+ => S+
+  S/S- => S
+  A+ => A+
+  A/A- => A
+  B+/B/B- => B
+  C+/C/C- => C
+  D+/D/D- => D
+
+Signal thresholds
+- 1~2경기: 소표본
+- 3경기 이상 + 평균 gap >= 0.6 band + 같은 방향 >=60%: 저평가/고평가 의심
+- 5경기 이상 + 평균 gap >= 0.8 band + 같은 방향 >=68%: 지속 저평가/고평가 후보
+- 이것은 수정 명령이 아니라 엔진 재검토 신호입니다.
+
+UI
+- PLAYER PROFILE 하단에 ROLE CALIBRATION · Riot Grade 누적 검증 패널을 추가합니다.
+- 현재 불러온 전적 수, 동일 경기 연결 수, 저장된 Grade 수, 전체 차이를 표시합니다.
+- 동일 챔피언 3경기 이상에서 챔피언별 편향 후보를 표시합니다.
+- 역할별 비교도 별도 표시합니다.
+- 다른 사용자를 조회하면 로컬 Riot Grade 비교를 차단한다는 문구를 표시합니다.
+
+Static checks
+- riot-grade-calibration-v01531.js: node --check PASS (local construction copy)
+- 새 패치에는 NaN/Infinity 방지용 numeric fallback과 빈 표본 처리가 존재함
+- 역할/챔피언 그룹에서 빈 배열 처리 존재
+- coarse grade mapper는 S+/S/S-/A+/A/A-/B±/C±/D±를 처리
+- ROLE 점수 변경 함수 override 없음
+- Riot Grade collector 저장 구조 변경 없음
+- Queue 450/2400 혼합 로직 추가 없음; 현재 불러온 Match Lab queue scope를 그대로 사용
+
+Regression considerations
+- v0.15.29 Mission/Death Fairness 결과를 현재 aramHistoryRoleBreakdown에서 읽어 비교합니다.
+- v0.15.30 역할별 Player Profile DOM이 재렌더링되면 calibration 패널을 다시 붙이도록 MutationObserver와 지연 재렌더를 사용합니다.
+- 전체/역할 프로필 계산 자체는 변경하지 않습니다.
+- Riot Grade single-match CHECK(v0.15.28)는 유지하며, v0.15.31은 누적 집계만 추가합니다.
+
+Known risks / actual environment not executed
+- 실제 Windows Electron에서 PLAYER PROFILE을 연속 역할 전환했을 때 calibration 패널이 항상 마지막 위치에 유지되는지 E2E 미검증
+- 현재 Riot Client에서 실제 Grade 수집이 장기간 안정적으로 누적되는지 E2E 미검증
+- 사용자 실제 데이터에서 3/5경기 threshold가 너무 민감하거나 둔한지는 표본 축적 후 재검토 필요
+- 실제 DPI/좁은 화면 육안검사 미실행
+
+Result
+- 자동/정적 검증 범위 PASS
+- 실제 Windows + Riot Client 데이터 축적 E2E는 미검증
