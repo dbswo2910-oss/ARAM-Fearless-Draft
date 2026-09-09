@@ -1,9 +1,9 @@
 {
-  "enabled": false,
+  "enabled": true,
   "policy_version": 1,
   "schema_version": 1,
-  "endpoint": "",
+  "endpoint": "https://aram-community-calibration.dbswo2910.workers.dev/v1/calibration",
   "minimum_app_version": "0.15.34",
   "mode": "required-for-use",
-  "notice": "Community Calibration 서버가 준비된 뒤 enabled=true로 전환합니다."
+  "notice": "Community Calibration 서버 연결이 활성화되었습니다."
 }
