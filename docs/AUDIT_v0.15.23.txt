@@ -1,0 +1,53 @@
+ARAM Fearless Draft v0.15.23 AUDIT
+Date: 2026-09-09
+
+STATIC / SYNTAX
+PASS · role-profile-context-v01523.js Node syntax check
+PASS · in-app-updater-ui-v01523.js Node syntax check
+PASS · preload.js Node syntax check
+PASS · main.js Node syntax check
+PASS · package.json JSON structure
+
+ROLE PROFILE CONTEXT
+PASS · ROLE MASTERY click keeps all role cards visible for role-to-role navigation
+PASS · selected role filters source matches before v0.15.19 full profile render
+PASS · v0.15.21 analyze() receives role-filtered profile through wrapped profile API
+PASS · role selection recalculates PLAYER INDEX / form / stability / 6 absolute axes / DEVELOPMENT
+PASS · PLAY STYLE RADAR and PLAY TYPE use selected-role rows
+PASS · SCOUT REPORT is rewritten as role-scoped commentary and reports the selected role sample count
+PASS · role-specific NEXT OBJECTIVE selects the weakest metric from that role's metric set
+PASS · v0.15.22 champion drilldown stays synchronized with the selected role
+PASS · same-role click / header × returns to all-role profile
+PASS · source Match Lab history state is restored immediately after modal-only role render
+
+IN-APP UPDATE
+PASS · updater checks public main/update/manifest.json over HTTPS
+PASS · no-update path returns status=current and does not call app.quit/app.exit
+PASS · update-found path stages every manifest file before replacing live files
+PASS · unsafe absolute / drive / .. paths rejected
+PASS · update source constrained to update/* and approved GitHub HTTPS hosts
+PASS · optional manifest SHA-256 supported
+PASS · touched files are backed up and rollback is attempted on apply failure
+PASS · successful apply calls app.relaunch() then exits current process
+PASS · min_launcher gate returns launcher-required without closing the app
+PASS · preload exposes desktop:update-now only through contextBridge
+PASS · renderer update badge shows checking / latest / applied / error states
+
+RUNTIME CHAIN
+PASS · v0.15.13 LIVE strength
+PASS · v0.15.14 favorites
+PASS · ROLE GRADE base + FAIR-S
+PASS · v0.15.15 replay
+PASS · v0.15.16 multi-user isolation
+PASS · v0.15.17 queue split + Draft Architecture Guard v2
+PASS · v0.15.18 role metric detail
+PASS · v0.15.19 Player Profile base
+PASS · v0.15.20 LIVE item visibility memory
+PASS · v0.15.21 profile diversity + data sticky
+PASS · v0.15.22 role mastery champion drilldown
+PASS · v0.15.23 full role context + in-app updater markers wired in main.js
+
+LIMITATIONS / FIRST-BOOT NOTE
+- 실제 사용자 Windows 설치 경로에서 실행 중 main.js/preload.js를 덮어쓴 뒤 app.relaunch()까지 이어지는 완전한 E2E는 이 환경에서 실행할 수 없음.
+- v0.15.23 자체를 설치하려면 기존 Launcher v2.0.2를 한 번 재실행해야 함. v0.15.23이 설치된 이후부터 상단 업데이트 배지가 앱 내부 업데이트 진입점으로 동작함.
+- 업데이트 배지는 현재 UI의 '업데이트/최신 버전' 텍스트를 가진 상단의 가장 작은 상태 요소를 의미 기반으로 탐색함. 실제 설치본 DOM이 크게 바뀌면 selector 보정이 필요할 수 있음.
