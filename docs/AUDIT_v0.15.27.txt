@@ -1,0 +1,32 @@
+ARAM Fearless Draft v0.15.27 AUDIT
+
+Scope: LIVE 시간대 전력 데이터 신뢰성
+
+Static checks
+- time-power-v01527.js node --check PASS
+- item-catalog-v01527.js node --check PASS
+- main.js node --check PASS
+- package.json JSON parse PASS
+
+Synthetic regression checks
+1) 완전 동일 상태 -> raw 50:50 PASS
+2) 장비가치 우위 -> 해당 축만 상승 PASS
+3) 상대 인벤토리 1명 누락 -> 장비/코어 축 모두 비활성화, 가짜 우위 없음 PASS
+4) 코어 +1 -> 코어 delta +1.25 PASS
+5) 상대 레벨 1명 누락 -> 평균레벨/6·11·16 축 비활성화, Lv.0 오판 없음 PASS
+6) 평균레벨 +1 -> level delta +1.8 PASS
+7) Lv.11 전원 도달 vs 미도달 -> 핵심레벨 보정 작동 PASS
+8) 성장곡선 +10 -> curve delta +3.2 PASS
+9) 성장곡선 미제공 -> 해당 축 비활성화 PASS
+10) alive/recent kill 상태만 변경 -> raw time power 동일 PASS
+
+Regression issue found in v0.15.26
+- 5명 중 1명 레벨 누락 시 0레벨처럼 평균되어 level+breakpoint에서 약 +5.6 가짜 우위가 가능했습니다.
+- 5명 중 1명 인벤토리 누락이어도 4/5를 reliable로 인정하여 코어/장비 우위가 왜곡될 수 있었습니다.
+- v0.15.27에서는 양쪽 완전 관측이 아닐 경우 해당 축을 점수에서 제외합니다.
+
+Not executed
+- 실제 Windows + League Client 실시간 E2E
+- 실제 Data Dragon 네트워크 응답/현재 Riot 클라이언트 아이템 객체 전수 샘플
+
+따라서 실제 게임에서 10/10 데이터가 들어오는지 사용자 환경 확인은 여전히 필요합니다. UI에는 각 축의 데이터 대기/확인 상태가 노출됩니다.
