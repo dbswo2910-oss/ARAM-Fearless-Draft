@@ -66,7 +66,7 @@ In-game base shell:
 
 Read both exact DOM fragments under `reference/installed-v0.15.49/` before changing Random Practice layout.
 
-## Current in-game runtime contract — v0.15.53
+## Current in-game runtime contract — v0.15.54
 
 The active visible HUD is layered deliberately:
 
@@ -75,8 +75,9 @@ The active visible HUD is layered deliberately:
 3. `update/v0.15.51/random-ingame-ux-v01551.js`
 4. `update/v0.15.52/random-ingame-ux-v01552.js`
 5. `update/v0.15.53/random-ingame-shop-v01553.js`
+6. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
 
-`v0.15.50` supplies the coach renderer/state machine/preview. `v0.15.51` fixes screenshot-driven visual hierarchy. `v0.15.52` removes remaining duplicate/noise copy. `v0.15.53` adds death-time immediate-purchase planning using recipe-aware Data Dragon data.
+`v0.15.50` supplies the coach renderer/state machine/preview. `v0.15.51` fixes screenshot-driven visual hierarchy. `v0.15.52` removes duplicate/noise copy. `v0.15.53` adds death-time immediate-purchase planning. `v0.15.54` is screenshot-driven display polish only.
 
 Visible hierarchy:
 
@@ -109,11 +110,22 @@ v0.15.53 purchase-planner rules:
 - use `ko_KR` item catalog where available
 - `score_logic_changed:false`; this layer does not alter recommendation/threat/item scoring
 
+v0.15.54 screenshot-polish rules:
+
+- keep the top death strip as the single visible source for current gold
+- hide the duplicate gold amount from the `지금 구매` planner header
+- shorten `이번 죽음에 바로 살 것` to `지금 살 것`
+- shorten the preview assumption to `보유템 없음 가정`
+- hide the nested global `.footer` while Random Practice is actually in in-game mode; the earlier direct-child selector was insufficient in the real Windows screenshot
+- do not change purchase/recommendation math in this layer (`score_logic_changed:false`)
+
 **The overall HUD layout is considered largely stabilized. Do not begin another major layout redesign unless the user explicitly asks.**
 
 ## Next planned phase
 
-Primary candidate: strengthen the statistical baseline with patch-level cached LOL.PS ARAM data, while keeping current-match optimization separate.
+First validate the v0.15.53 purchase math and owned-item extraction in a real Live Client match before changing shop calculations. The preview screenshot alone is sufficient for display polish but not for proving live inventory shape.
+
+After live validation, primary candidate: strengthen the statistical baseline with patch-level cached LOL.PS ARAM data.
 
 Requirements:
 
@@ -121,6 +133,6 @@ Requirements:
 - refresh/cache external statistics by patch or controlled update job
 - show source and freshness clearly
 - keep `통계 빌드` as reference and `이번 판 최적화` as the actionable recommendation
-- first verify v0.15.53 real Windows/Live Client component extraction before expanding the shop planner further
+- only change purchase math after verifying real live inventory/recipe behavior
 
-See `docs/AI_HANDOFF.md` and `docs/CHANGELOG_v0.15.53.txt` before starting this phase.
+See `docs/AI_HANDOFF.md`, `docs/CHANGELOG_v0.15.53.txt`, and `docs/CHANGELOG_v0.15.54.txt` before starting this phase.
