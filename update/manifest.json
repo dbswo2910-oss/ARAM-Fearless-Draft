@@ -1,6 +1,6 @@
 {
-  "version": "0.15.56",
-  "message": "v0.15.56 · 인게임 아이템 공식 아이콘 표시",
+  "version": "0.15.57",
+  "message": "v0.15.57 · 전 메뉴 아이템 아이콘 일관화",
   "min_launcher": "2.0.2",
   "files": [
     {"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},
@@ -30,6 +30,7 @@
     {"path":"random-ingame-shop-v01553.js","source":"update/v0.15.53/random-ingame-shop-v01553.js"},
     {"path":"random-ingame-shop-polish-v01554.js","source":"update/v0.15.54/random-ingame-shop-polish-v01554.js"},
     {"path":"random-item-icons-v01556.js","source":"update/v0.15.56/random-item-icons-v01556.js"},
+    {"path":"item-icons-global-v01557.js","source":"update/v0.15.57/item-icons-global-v01557.js"},
     {"path":"role-metric-detail-v01518.js","source":"update/v0.15.35/role-metric-detail-v01518.js"},
     {"path":"cc-impact-v01525.js","source":"update/v0.15.25/cc-impact-v01525.js"},
     {"path":"mission-death-fairness-v01529.js","source":"update/v0.15.29/mission-death-fairness-v01529.js"},
@@ -52,8 +53,8 @@
     {"path":"riot-grade-autosnapshot-v01533.js","source":"update/v0.15.33/riot-grade-autosnapshot-v01533.js"},
     {"path":"preload.js","source":"update/v0.15.32/preload.js"},
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
-    {"path":"main.js","source":"update/v0.15.56/main.js"},
-    {"path":"package.json","source":"update/v0.15.56/package.json"},
+    {"path":"main.js","source":"update/v0.15.57/main.js"},
+    {"path":"package.json","source":"update/v0.15.57/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
     {"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"}
   ],
