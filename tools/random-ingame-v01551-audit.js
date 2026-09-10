@@ -5,22 +5,24 @@ const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
 const report={generatedAt:new Date().toISOString(),pass:[],fail:[],info:{}};
 const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail});
+const parts=v=>String(v||'0').split('.').map(x=>Number.parseInt(x,10)||0);
+const atLeast=(a,b)=>{const A=parts(a),B=parts(b),L=Math.max(A.length,B.length);for(let i=0;i<L;i++){const x=A[i]||0,y=B[i]||0;if(x!==y)return x>y}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const uxPath=byPath.get('random-ingame-ux-v01551.js');
 const coachPath=byPath.get('random-ingame-coach-v01550.js');
 const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
-ok(m.version==='0.15.51','Manifest is v0.15.51',m.version);
+ok(atLeast(m.version,'0.15.51'),'Manifest is v0.15.51 or newer',m.version);
 ok(!!coachPath&&/v0\.15\.50\/random-ingame-coach-v01550\.js$/.test(coachPath)&&exists(coachPath),'v0.15.50 coach engine remains delivered',coachPath||'missing');
-ok(!!uxPath&&/v0\.15\.51\/random-ingame-ux-v01551\.js$/.test(uxPath)&&exists(uxPath),'v0.15.51 in-game UX polish runtime delivered',uxPath||'missing');
-ok(!!mainPath&&/v0\.15\.51\/main\.js$/.test(mainPath)&&exists(mainPath),'v0.15.51 main runtime delivered',mainPath||'missing');
-ok(!!pkgPath&&/v0\.15\.51\/package\.json$/.test(pkgPath)&&exists(pkgPath),'v0.15.51 package delivered',pkgPath||'missing');
+ok(!!uxPath&&/v0\.15\.51\/random-ingame-ux-v01551\.js$/.test(uxPath)&&exists(uxPath),'v0.15.51 in-game UX polish runtime remains delivered',uxPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current main runtime delivered',mainPath||'missing');
+ok(!!pkgPath&&exists(pkgPath),'Current package delivered',pkgPath||'missing');
 const s=uxPath&&exists(uxPath)?read(uxPath):'';
 const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
 try{new Function(s);ok(true,'v0.15.51 UX runtime parses as JavaScript')}catch(e){ok(false,'v0.15.51 UX runtime parses as JavaScript',e.message)}
-try{new Function(main);ok(true,'v0.15.51 main runtime parses as JavaScript')}catch(e){ok(false,'v0.15.51 main runtime parses as JavaScript',e.message)}
+try{new Function(main);ok(true,'Current main runtime parses as JavaScript')}catch(e){ok(false,'Current main runtime parses as JavaScript',e.message)}
 ok(/__ARAM_RANDOM_INGAME_UX_V01551__\s*=\s*true/.test(s),'v0.15.51 readiness marker exists');
 ok(s.includes('#random')&&s.includes('#riCoachShellV01550'),'UX patch targets exact coach/root selectors');
 ok(/riIngameFocusV01551/.test(s),'In-game focus class exists');
@@ -31,11 +33,12 @@ ok(/grid-template-columns:minmax\(150px,\.78fr\) minmax\(280px,1\.55fr\) minmax\
 ok(/\.riBuildCard\.opt\{order:-1/.test(s),'Death build puts current-match optimized recommendation first');
 ok(/grid-template-columns:minmax\(0,1\.35fr\) minmax\(0,\.65fr\)/.test(s),'Death build gives optimized recommendation more visual weight');
 ok(/score_logic_changed:false/.test(s),'v0.15.51 is explicitly score-neutral');
-ok(main.includes("'random-ingame-coach-v01550.js','random-ingame-ux-v01551.js','role-metric-detail-v01518.js'"),'Main injects UX polish immediately after coach engine');
-ok(main.includes('__ARAM_RANDOM_INGAME_COACH_V01550__')&&main.includes('__ARAM_RANDOM_INGAME_UX_V01551__'),'Main readiness guard covers coach and UX polish');
-ok(/const VERSION='0\.15\.51'/.test(main),'Main VERSION is v0.15.51');
-ok(pkg.version==='0.15.51','package.json VERSION is v0.15.51',pkg.version);
-report.info={scope:'screenshot-driven visual hierarchy polish after v0.15.50 preview review',scoreLogicChanged:false,changes:['hide pick-stage noise in ingame','compact preview toolbar','remove duplicate situation card','prioritize role and next purchase','prioritize optimized death build']};
+ok(main.includes("'random-ingame-coach-v01550.js','random-ingame-ux-v01551.js'"),'Main keeps coach -> v0.15.51 UX injection order');
+ok(main.includes('__ARAM_RANDOM_INGAME_COACH_V01550__')&&main.includes('__ARAM_RANDOM_INGAME_UX_V01551__'),'Main readiness guard covers coach and v0.15.51 UX polish');
+const mainVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
+ok(atLeast(mainVersion,'0.15.51'),'Main VERSION is v0.15.51 or newer',mainVersion);
+ok(atLeast(pkg.version,'0.15.51'),'package.json VERSION is v0.15.51 or newer',pkg.version);
+report.info={scope:'forward-compatible regression contract for screenshot-driven v0.15.51 visual hierarchy polish',scoreLogicChanged:false,changes:['hide pick-stage noise in ingame','compact preview toolbar','remove duplicate situation card','prioritize role and next purchase','prioritize optimized death build']};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-ingame-v01551-report.json'),JSON.stringify(report,null,2));
