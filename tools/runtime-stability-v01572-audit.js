@@ -3,20 +3,23 @@ const fs=require('fs'),path=require('path'),vm=require('vm');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
-const report={version:'0.15.72',generated_at:new Date().toISOString(),checks:[]};
+const report={version:'0.15.72-historical',generated_at:new Date().toISOString(),checks:[]};
 const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
+const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json')),byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const get=target=>{const p=byPath.get(target);return p&&exists(p)?read(p):''};
-const runtime=get('runtime-random-practice-v01572.js'),entry=get('main-v01572.js'),pkg=JSON.parse(get('package.json')||'{}');
+const runtime=get('runtime-random-practice-v01572.js'),pkg=JSON.parse(get('package.json')||'{}'),entryTarget=String(pkg.main||'main.js'),entry=get(entryTarget);
+const historicalEntry=exists('update/v0.15.72/main-v01572.js')?read('update/v0.15.72/main-v01572.js'):'';
 const focus=get('random-practice-focus-v01549.js'),density=get('random-pick-density-v01555.js'),party=get('random-party-picks-v01558.js'),perf=get('runtime-performance-v01568.js');
 const updater=get('in-app-updater-ui-v01523.js'),sticky=get('player-profile-data-sticky-v01521.js'),live=get('runtime-live-autosync-v01571.js');
-for(const [n,s] of [['runtime',runtime],['entry',entry],['focus',focus],['density',density],['party',party],['perf',perf],['updater',updater],['sticky',sticky],['live',live]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
-ok('manifest version',m.version==='0.15.72',m.version);
-ok('package version',pkg.version==='0.15.72',pkg.version);
-ok('package entry',pkg.main==='main-v01572.js',pkg.main||'');
+for(const [n,s] of [['runtime',runtime],['current entry',entry],['historical v0.15.72 entry',historicalEntry],['focus',focus],['density',density],['party',party],['perf',perf],['updater',updater],['sticky',sticky],['live',live]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
+ok('manifest is v0.15.72 or newer',ge(m.version,'0.15.72'),m.version);
+ok('package is v0.15.72 or newer',ge(pkg.version,'0.15.72'),pkg.version);
+ok('current package entry delivered',!!byPath.get(entryTarget)&&!!entry,`${entryTarget} -> ${byPath.get(entryTarget)||'missing'}`);
+ok('historical v0.15.72 entry remains available',!!historicalEntry);
 ok('runtime delivered',byPath.get('runtime-random-practice-v01572.js')==='update/v0.15.72/runtime-random-practice-v01572.js');
-ok('runtime injected after Random compatibility stack',entry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js'"));
-ok('readiness includes v0.15.72 runtime',entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
+ok('current entry preserves Random v0.15.72 injection',entry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js'"));
+ok('current entry readiness includes v0.15.72 runtime',entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
 ok('v0.15.71 core governor preserved',entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
 
 ok('v49 recurring subtree observer removed',!focus.includes('new MutationObserver('));
@@ -28,7 +31,6 @@ ok('v58 broad document click/input refresh removed',!party.includes("document.ad
 ok('v58 has team-minus-external fallback',party.includes('for(const n of unique(s.team||[]))')&&party.includes('external.has(n)'));
 ok('v68 Random observer removed',!perf.includes('new MutationObserver('));
 ok('v68 broad Random document listeners removed',!perf.includes("document.addEventListener('input'")&&!perf.includes("document.addEventListener('change'")&&!perf.includes("document.addEventListener('click'"));
-
 ok('updater exact badge binding',updater.includes("document.getElementById('topUpdateBadge')"));
 ok('updater no whole-document MutationObserver',!updater.includes('new MutationObserver('));
 ok('updater no layout-wide getBoundingClientRect scan',!updater.includes('getBoundingClientRect'));
@@ -36,7 +38,6 @@ ok('Data sticky exits outside active Data view',sticky.includes("if(!dataView?.c
 ok('Data sticky observer scoped to dataView',sticky.includes("obs.observe(dataView,{childList:true,subtree:true})"));
 ok('Data sticky click listener scoped to #data',sticky.includes("#data [class*=\"champ\"]"));
 ok('Data sticky no body observer',!sticky.includes('obs.observe(document.body'));
-
 ok('Random runtime has no MutationObserver',!runtime.includes('MutationObserver'));
 ok('Random runtime has no recurring interval',!runtime.includes('setInterval('));
 ok('Random runtime coalesces compatibility refresh',runtime.includes('scheduleMaintenance')&&runtime.includes('aramRandomPracticeFocusV01549?.refresh')&&runtime.includes('aramRandomPartyPicksV01558?.refresh'));
@@ -51,24 +52,12 @@ async function vmTest(){
   const listeners={};
   const result={innerHTML:'',firstChild:{textContent:''}},detail={innerHTML:''},random={classList:{contains:x=>x==='active'},getAttribute:()=> 'pick'};
   const document={visibilityState:'visible',querySelector(sel){if(sel==='#random.active')return random;if(sel==='#random')return random;if(sel==='#comboResults')return result;if(sel==='#comboDetail')return detail;if(sel==='[data-rp72-progress]')return null;return null},addEventListener(t,fn){(listeners[t]??=[]).push(fn)}};
-  const names=['A','B','C','D','E'];
-  const randomState={ourModes:{},combos:[],selectedCombo:0,shortlist:[],lastComboCount:0};
-  const score=xs=>xs.reduce((a,x)=>a+x.charCodeAt(0),0);
-  const ctx={window:null,document,performance:{now:()=>Date.now()},PerformanceObserver:undefined,setTimeout,clearTimeout,Date,Math,Set,Map,Object,String,Number,Array,JSON,console,
-    randomViewMode:'pick',randomState,
-    randomDraftPlan:()=>({queue:2,external:['X','Y','Z'],locked:[],needed:2,pool:names,duplicates:[],provisional:false,totalCombos:10}),
-    teamScore:xs=>({s:score(xs),direction:'d',reason:'r',warning:'w',structure:'s',parts:{},pair:{}}),
-    renderRandomInputs(){},renderRandomAnalysis(){},renderRandomDetails(){},runRandomCombos(){},renderRandomComboResults(){},renderComboDetail(){},renderExternalCheck(){},persist(){},
-  };
+  const names=['A','B','C','D','E'];const randomState={ourModes:{},combos:[],selectedCombo:0,shortlist:[],lastComboCount:0};const score=xs=>xs.reduce((a,x)=>a+x.charCodeAt(0),0);
+  const ctx={window:null,document,performance:{now:()=>Date.now()},PerformanceObserver:undefined,setTimeout,clearTimeout,Date,Math,Set,Map,Object,String,Number,Array,JSON,console,randomViewMode:'pick',randomState,randomDraftPlan:()=>({queue:2,external:['X','Y','Z'],locked:[],needed:2,pool:names,duplicates:[],provisional:false,totalCombos:10}),teamScore:xs=>({s:score(xs),direction:'d',reason:'r',warning:'w',structure:'s',parts:{},pair:{}}),renderRandomInputs(){},renderRandomAnalysis(){},renderRandomDetails(){},runRandomCombos(){},renderRandomComboResults(){},renderComboDetail(){},renderExternalCheck(){},persist(){}};
   ctx.window=ctx;ctx.window.addEventListener=()=>{};ctx.window.aramRandomPracticeFocusV01549={refresh(){}};ctx.window.aramRandomPickDensityV01555={refresh(){}};ctx.window.aramRandomPartyPicksV01558={refresh(){}};ctx.window.aramRuntimePerformanceV01568={refresh(){}};
-  vm.runInNewContext(runtime,ctx);
-  ctx.window.runRandomCombos();
-  await new Promise(r=>setTimeout(r,120));
-  const brute=[];for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++){const party=[names[i],names[j]],xs=['X','Y','Z',...party];brute.push({party,score:score(xs)})}
-  brute.sort((a,b)=>b.score-a.score||a.party.join('|').localeCompare(b.party.join('|'),'ko'));
+  vm.runInNewContext(runtime,ctx);ctx.window.runRandomCombos();await new Promise(r=>setTimeout(r,120));
+  const brute=[];for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++){const party=[names[i],names[j]],xs=['X','Y','Z',...party];brute.push({party,score:score(xs)})}brute.sort((a,b)=>b.score-a.score||a.party.join('|').localeCompare(b.party.join('|'),'ko'));
   ok('VM cooperative TOP5 produces exact exhaustive ranking',JSON.stringify(randomState.combos.map(x=>[x.party,x.score]))===JSON.stringify(brute.slice(0,5).map(x=>[x.party,x.score])),JSON.stringify(randomState.combos.map(x=>[x.party,x.score])));
   ok('VM reports all ten combinations processed',ctx.window.aramRandomPracticeRuntimeV01572.getStats().counters.comboTeams===10,String(ctx.window.aramRandomPracticeRuntimeV01572.getStats().counters.comboTeams));
 }
-
-(async()=>{try{await vmTest()}catch(e){ok('VM cooperative calculation test',false,e.stack||e.message)}
-report.pass=report.checks.every(x=>x.pass);fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output','runtime-stability-v01572-report.json'),JSON.stringify(report,null,2));for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1)})();
+(async()=>{try{await vmTest()}catch(e){ok('VM cooperative calculation test',false,e.stack||e.message)}report.pass=report.checks.every(x=>x.pass);fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output','runtime-stability-v01572-report.json'),JSON.stringify(report,null,2));for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1)})();
