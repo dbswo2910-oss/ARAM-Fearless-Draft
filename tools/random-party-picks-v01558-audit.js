@@ -31,7 +31,10 @@ ok(/#externalCheck \.randomCheckGrid/.test(s)&&/grid-template-columns:minmax\(0,
 ok(/조합 보완/.test(s)&&/실질 딜 밸런스/.test(s)&&/추천 계산/.test(s),'Status cards use shorter, clearer labels');
 ok(/@media\(max-width:760px\)/.test(s)&&/grid-template-columns:1fr!important/.test(s),'Status UI stacks on narrow screens');
 ok(/score_logic_changed:false/.test(s),'Party-pick UI patch is explicitly score-neutral');
-ok(main.includes("'random-pick-density-v01555.js','random-party-picks-v01558.js','random-ingame-coach-v01550.js'"),'Current main injects v0.15.58 after pick density and before in-game coach');
+const pickPos=main.indexOf("'random-pick-density-v01555.js'");
+const partyPos=main.indexOf("'random-party-picks-v01558.js'");
+const coachPos=main.indexOf("'random-ingame-coach-v01550.js'");
+ok(pickPos>=0&&partyPos>pickPos&&coachPos>partyPos,'Current main keeps v0.15.58 after pick density and before in-game coach');
 ok(main.includes('__ARAM_RANDOM_PARTY_PICKS_V01558__'),'Current main readiness guard covers v0.15.58');
 const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
 ok(ge(vm,'0.15.58'),'Current main VERSION is v0.15.58 or newer',vm);
