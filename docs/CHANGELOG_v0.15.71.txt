@@ -1,0 +1,20 @@
+ARAM Fearless Draft v0.15.71
+
+Real-game-only freeze stabilization after v0.15.70.
+
+Diagnosis
+- The app was stable in Random In-game preview but could still freeze only while a real League game was running.
+- The installed base renderer polls AutoSync every 900 ms without a single-flight guard.
+- Live-game tracking rewrote Match Lab linkage data to localStorage on every poll.
+- The main AutoSync core polled every 750 ms and repeatedly refreshed LCU identity/lobby/gameflow plus Live Client endpoints.
+
+Changes
+- Renderer AutoSync polling is single-flight; overlapping polls are skipped instead of queued.
+- Renderer poll cadence is 1250 ms.
+- Match Lab live-game linkage persists only once per complete 5v5 game snapshot per process/game.
+- Stable AutoSync and Match Lab account chrome are not repainted on every live poll.
+- Main AutoSync core cadence is 1200 ms.
+- During a live game, identity/lobby refresh is throttled to 15 s and credential/gameflow checks to 3 s.
+- Active-player name is cached 15 s and event history 3 s; player list, active player and game stats remain live each core tick.
+- v0.15.70 Random In-game single-owner remains active.
+- No recommendation, ban, team, item, threat, purchase, or scoring formulas changed.
