@@ -1,0 +1,15 @@
+v0.15.59 audit scope
+
+Feature: Random Practice party-row state labels.
+
+Expected behavior:
+1. v0.15.58 remains the owner of AutoSync/manual row state.
+2. v0.15.59 reads `rpPartySyncedV01558` and `rpManualLockedV01558` only.
+3. AutoSync current pick is labeled `팀원픽` in blue inside the row search area.
+4. Explicit user lock is labeled `수동고정` in green inside the row search area.
+5. Old slot-side badges are hidden so the same state is not shown twice.
+6. Pool `팀원픽` behavior remains owned by v0.15.58.
+7. No recommendation/scoring data is mutated.
+
+Automated check: `tools/random-party-labels-v01559-audit.js` via Full Regression Audit.
+Real-environment follow-up: verify a real League champ-select screenshot for AutoSync ordering and Windows DPI/font placement.
