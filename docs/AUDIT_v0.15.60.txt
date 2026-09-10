@@ -1,0 +1,24 @@
+v0.15.60 audit scope
+
+1. Random Practice party labels
+- visible manual/AutoSync pill copy: `팀원픽`
+- manual lock state remains internal and is not rewritten
+- v0.15.58/v0.15.59 state layers remain in place
+- score logic unchanged
+
+2. Latest item artwork
+- latest visual metadata: CommunityDragon `latest` mirror of Riot client lol-game-data `v1/items.json`
+- latest icon URL derived from each current item's `iconPath`
+- Data Dragon remains recipe/price/map-12 metadata source
+- Data Dragon image remains fallback if the latest mirror image fails
+- v0.15.56/v0.15.57 item images are refreshed in place, not duplicated
+- Match Lab final-item images are refreshed in place
+
+3. Safety/regression
+- no recommendation/balance/shop math changes
+- exact known item image selectors only
+- broken images do not remove item text
+- updater manifest, main, package, workflow, changelog synchronized
+
+Real-environment caveat
+CI can validate source wiring and overlay assembly but cannot confirm the user's Windows DPI/font rendering, League Client live state, or remote image network availability. A real post-update screenshot is still required for runtime visual confirmation.
