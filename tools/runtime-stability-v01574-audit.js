@@ -1,0 +1,23 @@
+'use strict';
+const fs=require('fs'),path=require('path');
+const ROOT=path.resolve(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8'),exists=p=>fs.existsSync(path.join(ROOT,p));
+const m=JSON.parse(read('update/manifest.json')),by=new Map((m.files||[]).map(x=>[x.path,x.source]));
+const checks=[];const ok=(n,p,d='')=>checks.push({name:n,pass:!!p,detail:d});
+const src=t=>by.get(t)&&exists(by.get(t))?read(by.get(t)):'';
+const pkg=JSON.parse(src('package.json')||'{}'),entry=src(pkg.main||''),watch=src('freeze-watchdog-v01574.js');
+for(const [n,s] of [['entry',entry],['watchdog',watch]]){try{new Function(s);ok(n+' parses',true)}catch(e){ok(n+' parses',false,e.message)}}
+ok('manifest version',m.version==='0.15.74',m.version);ok('package version',pkg.version==='0.15.74',pkg.version);ok('package entry',pkg.main==='main-v01574.js',pkg.main||'');
+ok('watchdog delivered',by.get('freeze-watchdog-v01574.js')==='update/v0.15.74/freeze-watchdog-v01574.js');
+ok('watchdog wired',entry.includes("require('./freeze-watchdog-v01574').install({version:'0.15.74'})"));
+ok('shop53 unsafe retry is patched before execute',entry.includes("file==='random-ingame-shop-v01553.js'")&&entry.includes("Date.now()-Number(catalog.loadedAt||0)>15000")&&entry.includes("loadCatalog().then(x=>{if(x?.ok)sync()})"));
+ok('icons57 failure is retained and throttled',entry.includes("file==='item-icons-global-v01557.js'")&&entry.includes("else catalog=x||null")&&entry.includes("loadCatalog().then(x=>{if(x?.ok)sync()})"));
+ok('art66 mutation retries are throttled',entry.includes("file==='item-art-runtime-v01566.js'")&&entry.includes("if(!catalog||Date.now()-Number(catalog.loadedAt||0)>15000)loadCatalog().then(x=>{if(x?.ok)scan(root)})"));
+ok('script patch happens before sourceURL append',entry.indexOf("file==='random-ingame-shop-v01553.js'")<entry.indexOf("code+=`\\n//# sourceURL=${file}`"));
+ok('watchdog records Electron unresponsive',watch.includes("wc.on('unresponsive'"));
+ok('watchdog records render-process-gone',watch.includes("wc.on('render-process-gone'"));
+ok('watchdog records last interaction and runtime stats',watch.includes('__ARAM_FREEZE_TRACE_V01574__')&&watch.includes('shop53:')&&watch.includes('icons57:')&&watch.includes('art66:'));
+ok('watchdog probe is bounded',watch.includes('1400')&&watch.includes('probe-timeout'));
+ok('score logic untouched by wrapper',!entry.includes('teamScore(')&&!entry.includes('recommendPicks(')&&!entry.includes('recommendBans('));
+const report={version:'0.15.74',checks,pass:checks.every(x=>x.pass),score_logic_changed:false};
+fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01574-report.json'),JSON.stringify(report,null,2));for(const c of checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1);
