@@ -1,0 +1,24 @@
+ARAM Fearless Draft v0.15.60
+
+Scope
+- Random Practice visible party labels are unified to `팀원픽`.
+- AutoSync-held picks and explicit manual locks remain different internal states; only the visible wording is unified.
+- Item artwork is refreshed from the latest Riot-client lol-game-data icon metadata mirrored by CommunityDragon.
+- Existing Data Dragon item/recipe metadata remains the source for ARAM availability, recipes, prices, and purchase math.
+- If the latest CommunityDragon artwork is unavailable, item images fall back to the current versioned Data Dragon image.
+- Existing recommendation, champion, item-choice, threat, shop, and composition scoring are unchanged (`score_logic_changed:false`).
+
+Item-image coverage
+- v0.15.56 Random Practice in-game coach item icons
+- v0.15.57 global item icon surfaces (draft, Random Practice legacy/live, Champion DB, Match Lab recommendations)
+- Match Lab actual final-item row (`#historyMatchDetail .matchItems img`) without creating duplicate artwork
+
+Implementation
+- `update/v0.15.60/ui-refresh-v01560.js`
+- `update/v0.15.60/item-catalog-v01527.js` (stable installed filename, new source)
+- `update/v0.15.60/main.js`
+- `update/v0.15.60/package.json`
+- `tools/v01560-audit.js`
+
+Validation note
+Static/source/CI validation does not prove actual Windows rendering or network delivery of remote images. Verify one real Windows Random Practice screen and at least one item-bearing screen after updating.
