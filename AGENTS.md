@@ -67,7 +67,7 @@ In-game base shell:
 
 Read both exact DOM fragments under `reference/installed-v0.15.49/` before changing Random Practice layout.
 
-## Current Random Practice / item UI runtime contract — v0.15.60
+## Current Random Practice / item UI runtime contract — v0.15.61
 
 Pick-side layers:
 
@@ -75,7 +75,8 @@ Pick-side layers:
 2. `update/v0.15.55/random-pick-density-v01555.js`
 3. `update/v0.15.58/random-party-picks-v01558.js`
 4. `update/v0.15.59/random-party-labels-v01559.js`
-5. `update/v0.15.60/ui-refresh-v01560.js` — final visible label override only; internal state stays distinct
+5. `update/v0.15.60/ui-refresh-v01560.js` — visible wording + latest item-art refresh
+6. `update/v0.15.61/random-party-label-fix-v01561.js` — real-Windows follow-up; directly creates the visible party pill from active row state
 
 In-game and item-visual layers:
 
@@ -90,20 +91,22 @@ In-game and item-visual layers:
 
 Installed item-catalog filename remains `item-catalog-v01527.js`; active source is `update/v0.15.60/item-catalog-v01527.js`.
 
-`v0.15.55` keeps rank 1 large while compacting ranks 2–5. `v0.15.56` adds item icons to the current coach. `v0.15.57` audits and extends the same visual language across verified item-bearing menus. `v0.15.58` adds AutoSync party-current-pick visibility and fixes the cramped composition-status layout. `v0.15.59` made manual-vs-AutoSync state visible. `v0.15.60` deliberately simplifies the visible wording again: both states display as `팀원픽`, while the internal manual-lock distinction remains intact.
+`v0.15.55` keeps rank 1 large while compacting ranks 2–5. `v0.15.56` adds item icons to the current coach. `v0.15.57` audits and extends the same visual language across verified item-bearing menus. `v0.15.58` adds AutoSync party-current-pick visibility and fixes the cramped composition-status layout. `v0.15.59` made manual-vs-AutoSync state visible. `v0.15.60` simplified the visible wording again to `팀원픽`. `v0.15.61` fixes the real-Windows case where that visible pill could be absent because v0.15.60 only restyled an existing v0.15.59 pill.
 
-v0.15.58–0.15.60 Random Practice pick rules:
+v0.15.58–0.15.61 Random Practice pick rules:
 
 - read party-held champions from observable AutoSync champ-select state (`party`, plus local-champion fallback)
 - display current party champions in `#manualPartyInputs` as display-only current picks, but do not write them into `randomState.manual`
 - explicit manual locks remain an internal user choice; current AutoSync picks stay swappable unless manually locked
 - **visible UI wording is unified**: AutoSync-held and manually locked party rows both display `팀원픽`
+- v0.15.61 must not depend on `.rpPartyStatePillV01559` already existing; it directly checks `rpPartySyncedV01558`, `rpManualLockedV01558`, and `randomState.manual`, then creates `.rpPartyLabelV01561`
 - do not collapse the underlying distinction: manual locks still affect recommendation state, AutoSync current picks alone do not
+- the section title is `우리 파티 챔피언 · 고정할 픽만 선택`
 - mark party-held candidates in `#poolInputs` with `팀원픽`; they remain recommendation candidates
 - an existing `외부픽` remains excluded and takes precedence over `팀원픽`
 - `#externalCheck` remains the full-width host; its child `.randomCheckGrid` owns the actual three-card desktop grid
 - visible status copy is `현재 조합 체크` with `조합 보완 / 실질 딜 밸런스 · AD / AP / 추천 계산`
-- old narrow slot badges remain hidden to avoid duplicate or clipped labels
+- old narrow/legacy party-state pills are hidden to avoid duplicate or clipped labels
 - exact selectors only: `#manualPartyInputs`, `#poolInputs`, `#externalCheck`
 - `score_logic_changed:false`
 
@@ -165,9 +168,10 @@ v0.15.60 latest-item-art rules:
 
 ## Next planned phase
 
-First validate v0.15.60 in a real Windows/League session:
+First validate v0.15.61 in a real Windows/League session:
 
 - confirm both manually entered and AutoSync party picks visibly say `팀원픽`
+- confirm the section title says `우리 파티 챔피언 · 고정할 픽만 선택`
 - confirm internal manual-lock behavior is unchanged
 - confirm latest item art appears on actual item-bearing screens and falls back cleanly if the mirror is unavailable
 - validate purchase math/owned-item extraction in a real Live Client death/shop state before changing shop calculations
