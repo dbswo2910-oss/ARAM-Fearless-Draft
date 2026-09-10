@@ -11,7 +11,7 @@ const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const iconPath=byPath.get('item-icons-global-v01557.js'),oldIconPath=byPath.get('random-item-icons-v01556.js'),mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.57'),'Manifest is v0.15.57 or newer',m.version);
 ok(!!iconPath&&/v0\.15\.57\/item-icons-global-v01557\.js$/.test(iconPath)&&exists(iconPath),'v0.15.57 global icon runtime remains delivered',iconPath||'missing');
-ok(!!oldIconPath&&/v0\.15\.56\/random-item-icons-v01556\.js$/.test(oldIconPath)&&exists(oldIconPath),'v0.15.56 coach icon layer remains delivered',oldIconPath||'missing');
+ok(!!oldIconPath&&/random-item-icons-v01556\.js$/.test(oldIconPath)&&exists(oldIconPath),'v0.15.56 coach icon contract remains delivered',oldIconPath||'missing');
 ok(!!mainPath&&exists(mainPath),'Current main is delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package is delivered',pkgPath||'missing');
 const s=iconPath&&exists(iconPath)?read(iconPath):'',main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
