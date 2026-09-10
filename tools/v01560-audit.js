@@ -29,8 +29,9 @@ const oldAt=main.indexOf("'random-item-icons-v01556.js'"),globalAt=main.indexOf(
 ok(oldAt>=0&&globalAt>oldAt&&refreshAt>globalAt&&roleAt>refreshAt,'Main preserves v0.15.60 after existing item visual layers');
 const v58At=main.indexOf("'random-party-picks-v01558.js'"),v59At=main.indexOf("'random-party-labels-v01559.js'"),coachAt=main.indexOf("'random-ingame-coach-v01550.js'");
 ok(v58At>=0&&v59At>v58At&&coachAt>v59At,'v0.15.59 historical ordering remains intact between v0.15.58 and in-game coach',`${v58At}/${v59At}/${coachAt}`);
-const perfAt=main.indexOf("'runtime-performance-v01567.js'");
-if(ge(m.version,'0.15.67'))ok(perfAt>v58At&&perfAt<v59At,'v0.15.67 may insert a compatibility/performance owner before historical v0.15.59 initialization',`${v58At}/${perfAt}/${v59At}`);
+const perf67At=main.indexOf("'runtime-performance-v01567.js'"),perf68At=main.indexOf("'runtime-performance-v01568.js'");
+if(ge(m.version,'0.15.68'))ok(perf68At>=0&&perf68At<v58At,'v0.15.68 may install the performance owner before all historical UI maintenance layers',`${perf68At}/${v58At}/${v59At}`);
+else if(ge(m.version,'0.15.67'))ok(perf67At>v58At&&perf67At<v59At,'v0.15.67 may insert a compatibility/performance owner before historical v0.15.59 initialization',`${v58At}/${perf67At}/${v59At}`);
 ok(main.includes('__ARAM_UI_REFRESH_V01560__'),'Main readiness guard covers v0.15.60');
 const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
 ok(ge(vm,'0.15.60'),'Current main VERSION is v0.15.60 or newer',vm);
