@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.62**  
+Current app/update version: **v0.15.66**  
 Current balance/data patch: **26.17**
 
 This repository is used for source control, automated regression validation, incremental in-app updates, Windows x64 distribution work, and durable AI/coding-agent handoff.
@@ -22,7 +22,7 @@ Do not infer Random Practice DOM from screenshots or broad Korean-title matching
 
 ## Current UI direction
 
-v0.15.50–0.15.62 establish the compact **In-game Coach HUD**, consistent visual item language, and a denser Random Practice pick workflow:
+v0.15.50–0.15.66 establish the compact **In-game Coach HUD**, consistent visual item language, a denser Random Practice pick workflow, and a single-owner item-art runtime:
 
 - alive → compact LIVE decisions
 - dead → automatic Build/analysis view
@@ -42,14 +42,16 @@ v0.15.50–0.15.62 establish the compact **In-game Coach HUD**, consistent visua
 - v0.15.60 simplifies the visible party wording so both AutoSync-held and manually locked party champions display as `팀원픽` while their internal states remain distinct. It also refreshes item artwork from the latest Riot-client lol-game-data assets mirrored by CommunityDragon, with versioned Data Dragon artwork as fallback. Recommendation and shop scoring are unchanged.
 - v0.15.61 is the first real-Windows follow-up for the party label: it directly derives the visible state from the actual party row instead of depending on the v0.15.59 pill.
 - v0.15.62 corrects the requested **display location** after real-Windows review: the inline `팀원픽` pill inside `우리 파티 챔피언` is hidden, and `팀원픽` is shown beside the slot number in `남은 랜덤 챔피언`, matching the existing `외부픽` location. Both manual locks and AutoSync-held party picks qualify; an existing `외부픽` still takes precedence. Scoring is unchanged.
+- v0.15.63–v0.15.65 progressively unified and stabilized current Riot-client item artwork, but retained historical image observers/pollers for compatibility.
+- v0.15.66 fixes a startup/UI responsiveness regression by loading `item-art-runtime-v01566.js` before those historical image layers, preempting their watcher initialization, and leaving one mutation-driven item-art owner with no recurring whole-document polling. Recommendation and scoring logic remain unchanged.
 
-The Match Lab actual final-item row already used Riot/Data Dragon artwork in the base renderer; v0.15.60 refreshes that existing image in place rather than adding duplicate artwork.
+The Match Lab actual final-item row already used Riot/Data Dragon artwork in the base renderer; the item-art runtime refreshes that existing image in place rather than adding duplicate artwork.
 
 The HUD layout is intentionally treated as **largely stabilized**. Current work should improve decision quality inside this hierarchy rather than restart a large redesign.
 
-The shop planner uses recipe-aware Data Dragon item metadata (`ko_KR`, ARAM map 12, recipe links, combine/total gold). In real LIVE state it only gives exact component-buy instructions when currently owned components can be confirmed, avoiding unsafe duplicate-buy advice. v0.15.60 keeps that recipe/price source unchanged while using current Riot-client icon metadata for visuals; image failure falls back to versioned Data Dragon art, then text-only display.
+The shop planner uses recipe-aware Data Dragon item metadata (`ko_KR`, ARAM map 12, recipe links, combine/total gold). In real LIVE state it only gives exact component-buy instructions when currently owned components can be confirmed, avoiding unsafe duplicate-buy advice. Item-art layers do not change recipe, price, purchase, recommendation, or scoring logic.
 
-See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.62.txt`.
+See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.66.txt`.
 
 ## New-PC distribution
 
