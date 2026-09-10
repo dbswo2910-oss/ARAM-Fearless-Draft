@@ -67,6 +67,8 @@ jobs:
         run: node tools/runtime-stability-v01567-audit.js
       - name: Run v0.15.68 native window responsiveness audit
         run: node tools/runtime-stability-v01568-audit.js
+      - name: Run v0.15.69 automatic Golden Guard freeze audit
+        run: node tools/runtime-stability-v01569-audit.js
       - name: Run Random In-game Coach + Preview v0.15.50 audit
         run: node tools/random-ingame-v01550-audit.js
       - name: Run Random In-game HUD hierarchy v0.15.51 audit
@@ -124,6 +126,7 @@ jobs:
             audit-output/runtime-stability-v01566-report.json
             audit-output/runtime-stability-v01567-report.json
             audit-output/runtime-stability-v01568-report.json
+            audit-output/runtime-stability-v01569-report.json
             audit-output/random-ingame-v01550-report.json
             audit-output/random-ingame-v01551-report.json
             audit-output/random-ingame-v01552-report.json
