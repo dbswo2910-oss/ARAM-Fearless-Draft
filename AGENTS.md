@@ -66,20 +66,25 @@ In-game base shell:
 
 Read both exact DOM fragments under `reference/installed-v0.15.49/` before changing Random Practice layout.
 
-## Current in-game runtime contract — v0.15.54
+## Current Random Practice runtime contract — v0.15.56
 
-The active visible HUD is layered deliberately:
+Pick-side layers:
 
 1. `update/v0.15.49/random-practice-focus-v01549.js`
-2. `update/v0.15.50/random-ingame-coach-v01550.js`
-3. `update/v0.15.51/random-ingame-ux-v01551.js`
-4. `update/v0.15.52/random-ingame-ux-v01552.js`
-5. `update/v0.15.53/random-ingame-shop-v01553.js`
-6. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
+2. `update/v0.15.55/random-pick-density-v01555.js`
 
-`v0.15.50` supplies the coach renderer/state machine/preview. `v0.15.51` fixes screenshot-driven visual hierarchy. `v0.15.52` removes duplicate/noise copy. `v0.15.53` adds death-time immediate-purchase planning. `v0.15.54` is screenshot-driven display polish only.
+In-game layers:
 
-Visible hierarchy:
+1. `update/v0.15.50/random-ingame-coach-v01550.js`
+2. `update/v0.15.51/random-ingame-ux-v01551.js`
+3. `update/v0.15.52/random-ingame-ux-v01552.js`
+4. `update/v0.15.53/random-ingame-shop-v01553.js`
+5. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
+6. `update/v0.15.56/random-item-icons-v01556.js`
+
+`v0.15.55` keeps rank 1 large while compacting ranks 2–5 and the external-pick status strip. `v0.15.56` adds official Data Dragon item icons without changing recommendation logic.
+
+Visible in-game hierarchy:
 
 - 3 tabs: `LIVE / 빌드 / 상세`
 - AUTO:
@@ -116,14 +121,23 @@ v0.15.54 screenshot-polish rules:
 - hide the duplicate gold amount from the `지금 구매` planner header
 - shorten `이번 죽음에 바로 살 것` to `지금 살 것`
 - shorten the preview assumption to `보유템 없음 가정`
-- hide the nested global `.footer` while Random Practice is actually in in-game mode; the earlier direct-child selector was insufficient in the real Windows screenshot
+- hide the nested global `.footer` while Random Practice is actually in in-game mode
 - do not change purchase/recommendation math in this layer (`score_logic_changed:false`)
+
+v0.15.56 item-icon rules:
+
+- use item IDs/name mapping and Data Dragon version from the existing desktop item catalog
+- decorate `LIVE 다음 구매`, death `지금 살 것`, optimized core, final core target, and statistical base tree
+- keep item names/prices visible; icons supplement rather than replace text
+- limit statistical tree icon strip to a few recognized items to avoid clutter
+- if an image fails to load, hide the broken image and retain text-only UI
+- `score_logic_changed:false`
 
 **The overall HUD layout is considered largely stabilized. Do not begin another major layout redesign unless the user explicitly asks.**
 
 ## Next planned phase
 
-First validate the v0.15.53 purchase math and owned-item extraction in a real Live Client match before changing shop calculations. The preview screenshot alone is sufficient for display polish but not for proving live inventory shape.
+First validate purchase math and owned-item extraction in a real Live Client match before changing shop calculations. The preview is sufficient for display polish but not for proving live inventory shape.
 
 After live validation, primary candidate: strengthen the statistical baseline with patch-level cached LOL.PS ARAM data.
 
@@ -135,4 +149,4 @@ Requirements:
 - keep `통계 빌드` as reference and `이번 판 최적화` as the actionable recommendation
 - only change purchase math after verifying real live inventory/recipe behavior
 
-See `docs/AI_HANDOFF.md`, `docs/CHANGELOG_v0.15.53.txt`, and `docs/CHANGELOG_v0.15.54.txt` before starting this phase.
+See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
