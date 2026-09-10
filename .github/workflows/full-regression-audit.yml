@@ -45,6 +45,8 @@ jobs:
         run: node tools/random-ingame-v01550-audit.js
       - name: Run Random In-game HUD hierarchy v0.15.51 audit
         run: node tools/random-ingame-v01551-audit.js
+      - name: Run Random In-game HUD micro-polish v0.15.52 audit
+        run: node tools/random-ingame-v01552-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -78,6 +80,7 @@ jobs:
             audit-output/random-practice-v01549-report.json
             audit-output/random-ingame-v01550-report.json
             audit-output/random-ingame-v01551-report.json
+            audit-output/random-ingame-v01552-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
