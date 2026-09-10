@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const autosyncCore=require('./autosync-core');
+require('./autosync-live-runtime-v01571').patch(autosyncCore);
+const basePath=path.join(__dirname,'main.js');
+let src=fs.readFileSync(basePath,'utf8');
+const scriptsOld="'runtime-performance-v01568.js','live-strength-v01513.js'";
+const scriptsNew="'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'";
+const readyOld='Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__) && Boolean(window.__ARAM_LIVE_STRENGTH_V01513__)';
+const readyNew='Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__) && Boolean(window.__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__) && Boolean(window.__ARAM_LIVE_STRENGTH_V01513__)';
+if(!src.includes(scriptsOld)||!src.includes(readyOld)||!src.includes("const VERSION='0.15.70'"))throw new Error('v0.15.71 base main contract mismatch');
+src=src.replace(scriptsOld,scriptsNew).replace(readyOld,readyNew).replaceAll('0.15.70','0.15.71');
+module._compile(src,__filename);
