@@ -1,6 +1,6 @@
 {
-  "version": "0.15.57",
-  "message": "v0.15.57 · 전 메뉴 아이템 아이콘 일관화",
+  "version": "0.15.58",
+  "message": "v0.15.58 · 랜덤연습 팀원픽 표시 + 조합 체크 정리",
   "min_launcher": "2.0.2",
   "files": [
     {"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},
@@ -24,6 +24,7 @@
     {"path":"draft-judgment-tabs-v01547.js","source":"update/v0.15.47/draft-judgment-tabs-v01547.js"},
     {"path":"random-practice-focus-v01549.js","source":"update/v0.15.49/random-practice-focus-v01549.js"},
     {"path":"random-pick-density-v01555.js","source":"update/v0.15.55/random-pick-density-v01555.js"},
+    {"path":"random-party-picks-v01558.js","source":"update/v0.15.58/random-party-picks-v01558.js"},
     {"path":"random-ingame-coach-v01550.js","source":"update/v0.15.50/random-ingame-coach-v01550.js"},
     {"path":"random-ingame-ux-v01551.js","source":"update/v0.15.51/random-ingame-ux-v01551.js"},
     {"path":"random-ingame-ux-v01552.js","source":"update/v0.15.52/random-ingame-ux-v01552.js"},
@@ -53,8 +54,8 @@
     {"path":"riot-grade-autosnapshot-v01533.js","source":"update/v0.15.33/riot-grade-autosnapshot-v01533.js"},
     {"path":"preload.js","source":"update/v0.15.32/preload.js"},
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
-    {"path":"main.js","source":"update/v0.15.57/main.js"},
-    {"path":"package.json","source":"update/v0.15.57/package.json"},
+    {"path":"main.js","source":"update/v0.15.58/main.js"},
+    {"path":"package.json","source":"update/v0.15.58/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
     {"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"}
   ],
