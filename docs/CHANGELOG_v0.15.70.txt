@@ -1,0 +1,29 @@
+ARAM Fearless Draft v0.15.70
+
+Purpose
+- Fix the remaining real-Windows freeze that correlates with the heavily layered Random Practice In-game runtime.
+
+Diagnosis from the real installed baseline
+- The hidden legacy Random In-game dashboard continued to run `renderRandomDetails()` while v0.15.50 Coach hid that dashboard visually.
+- `renderRandomDetails()` recalculates threat, item advice, power, alive state and fight plan, then rewrites many hidden DOM surfaces.
+- Returning to the Random tab also called `renderRandomAnalysis()`, which rebuilt pick-analysis DOM and then invoked the hidden in-game detail renderer even when In-game mode was active.
+- v0.15.50, v0.15.52, v0.15.53, v0.15.54, v0.15.56 and v0.15.57 each added recurring maintenance work; v0.15.51 added a subtree MutationObserver; v0.15.50 also added a Random-wide capture click scheduler.
+- Under v0.15.68 those sub-second timers were clamped to the same ~900ms cadence, creating bursty overlapping work rather than a true single owner.
+
+Fix
+- Add `runtime-random-ingame-v01570.js` immediately before the historical v0.15.50-v0.15.57 stack.
+- During only that narrow bootstrap window, suppress the historical recurring `setInterval` registrations, v0.15.51 MutationObserver, and v0.15.50 Random-wide capture click scheduler.
+- Restore native timer/observer/event APIs immediately after v0.15.57 finishes loading.
+- Run one 1000ms Random In-game owner heartbeat, gated by active Random tab, In-game mode, page visibility and native-move busy state.
+- Bypass hidden base `renderRandomDetails()` and `renderRandomAnalysis()` while In-game mode owns the screen; preserve both in Pick mode.
+- Rebuild the Coach only when semantic state changes, at the <=7s respawn decision boundary, or at a coarse 30-second game-time bucket.
+- Update exact clock, respawn seconds and current gold as volatile text without forcing a full Coach body rebuild.
+- Run death-shop recipe work only when the Build tab is visible and throttle it to at most once per 1.8 seconds except after a meaningful full render.
+- Skip the v0.15.57 whole-app item-icon scan while Random In-game is active.
+- Expose runtime counters/timing maxima through `window.aramRandomIngameRuntimeV01570.getStats()` for future diagnosis.
+
+Compatibility
+- Historical v0.15.50-v0.15.57 source files remain unchanged and mapped to their historical paths.
+- v0.15.68 native window safeguards remain active.
+- v0.15.69 Golden Guard autorun protection remains active.
+- `score_logic_changed:false`: recommendation, ban, composition, threat, power, item and purchase scoring formulas are unchanged.
