@@ -1,0 +1,15 @@
+ARAM Fearless Draft v0.15.59
+
+Random Practice party-state label polish
+
+- AutoSync-held party champion rows now show a visible blue `팀원픽` pill inside the champion input row.
+- Champions explicitly entered/locked by the user now show a visible green `수동고정` pill inside the champion input row.
+- The v0.15.58 narrow slot-side state badges are hidden to avoid clipped/duplicate labels.
+- Candidate-pool `팀원픽` behavior remains unchanged.
+- v0.15.59 consumes v0.15.58 row-state classes and does not reimplement AutoSync/manual-state detection.
+- Exact target remains `#manualPartyInputs`; no broad title/body discovery is used.
+- Recommendation, composition, tier, item, and scoring logic are unchanged (`score_logic_changed:false`).
+
+Validation note
+
+GitHub CI validates source wiring, syntax, manifest/update assembly, and forward-compatible historical audits. Final Windows/DPI placement and real AutoSync team-pick mapping still require a real League champ-select screenshot.
