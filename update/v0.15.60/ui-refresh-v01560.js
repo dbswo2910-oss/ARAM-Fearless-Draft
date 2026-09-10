@@ -52,6 +52,7 @@
 
   function refreshImg(img){
     const id=itemIdFrom(img);if(!id)return;
+    if(img.dataset.aramArtFailedV01560===id)return;
     const latest=latestUrl(id);if(!latest)return;
     const old=String(img.getAttribute('src')||'');
     if(old.includes('raw.communitydragon.org/latest/')&&img.dataset.aramArtV01560===id)return;
@@ -59,6 +60,7 @@
     img.dataset.aramArtFallbackV01560=fallbackUrl(id);
     img.onerror=()=>{
       const fb=img.dataset.aramArtFallbackV01560||'';
+      img.dataset.aramArtFailedV01560=id;
       if(fb&&img.src!==fb){img.onerror=()=>{img.style.display='none'};img.src=fb;return}
       img.style.display='none';
     };
