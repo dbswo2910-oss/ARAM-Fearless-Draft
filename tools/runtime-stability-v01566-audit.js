@@ -14,14 +14,14 @@ const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
 
 ok(ge(m.version,'0.15.66'),'Manifest is v0.15.66 or newer',m.version);
-ok(!!runtimePath&&/v0\.15\.66\/item-art-runtime-v01566\.js$/.test(runtimePath)&&exists(runtimePath),'v0.15.66 responsiveness owner is delivered',runtimePath||'missing');
-ok(!!mainPath&&/v0\.15\.66\/main\.js$/.test(mainPath)&&exists(mainPath),'v0.15.66 main is delivered',mainPath||'missing');
-ok(!!pkgPath&&/v0\.15\.66\/package\.json$/.test(pkgPath)&&exists(pkgPath),'v0.15.66 package is delivered',pkgPath||'missing');
+ok(!!runtimePath&&/v0\.15\.66\/item-art-runtime-v01566\.js$/.test(runtimePath)&&exists(runtimePath),'v0.15.66 responsiveness owner remains delivered',runtimePath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current main is delivered',mainPath||'missing');
+ok(!!pkgPath&&exists(pkgPath),'Current package is delivered',pkgPath||'missing');
 
 const runtime=runtimePath&&exists(runtimePath)?read(runtimePath):'';
 const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
-for(const [code,name] of [[runtime,'v0.15.66 item-art runtime'],[main,'v0.15.66 main']]){
+for(const [code,name] of [[runtime,'v0.15.66 item-art runtime'],[main,'current main']]){
   try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}
 }
 
@@ -41,13 +41,13 @@ const ui60At=main.indexOf("'ui-refresh-v01560.js'");
 const hotfix63At=main.indexOf("'item-art-hotfix-v01563.js'");
 const unified64At=main.indexOf("'item-art-unified-v01564.js'");
 const stable65At=main.indexOf("'item-art-stable-v01565.js'");
-ok(runtimeAt>=0&&runtimeAt<ui60At&&runtimeAt<hotfix63At&&runtimeAt<unified64At&&runtimeAt<stable65At,'v0.15.66 owner loads before every historical item-art polling layer');
-ok(main.includes('__ARAM_ITEM_ART_RUNTIME_V01566__')&&main.includes('__ARAM_ITEM_ART_SINGLE_OWNER_V01566__'),'Main readiness guard covers v0.15.66 runtime owner');
+ok(runtimeAt>=0&&runtimeAt<ui60At&&runtimeAt<hotfix63At&&runtimeAt<unified64At&&runtimeAt<stable65At,'Current main keeps v0.15.66 owner before every historical item-art polling layer');
+ok(main.includes('__ARAM_ITEM_ART_RUNTIME_V01566__')&&main.includes('__ARAM_ITEM_ART_SINGLE_OWNER_V01566__'),'Current main readiness guard covers v0.15.66 runtime owner');
 const vmVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
-ok(vmVersion==='0.15.66','Current main VERSION is v0.15.66',vmVersion);
-ok(pkg.version==='0.15.66','Package version is v0.15.66',pkg.version);
+ok(ge(vmVersion,'0.15.66'),'Current main VERSION is v0.15.66 or newer',vmVersion);
+ok(ge(pkg.version,'0.15.66'),'Package version is v0.15.66 or newer',pkg.version);
 
-// Runtime preemption simulation: v0.15.66 executes first, then historical layers.
+// Runtime preemption simulation: v0.15.66 executes first, then historical item-art layers.
 try{
   let observerCount=0,intervalCount=0;
   class FakeMutationObserver{constructor(cb){this.cb=cb;observerCount++}observe(){}disconnect(){}}
@@ -73,9 +73,10 @@ try{
 }
 
 report.info={
-  scope:'Startup/UI responsiveness regression caused by stacking historical item-art MutationObservers and recurring whole-document scans. v0.15.66 preempts those layers before they execute and uses one mutation-driven owner without recurring global polling or per-session cache busting.',
+  scope:'Historical v0.15.66 startup/item-art responsiveness owner remains regression-covered while later releases may add additional performance ownership around it. Its item-art single-owner ordering, compatibility markers, no-polling guarantee, and score neutrality remain verified.',
   scoreLogicChanged:false,
-  requiresRealWindowsVisualCheck:true
+  requiresRealWindowsVisualCheck:true,
+  forwardCompatible:true
 };
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
