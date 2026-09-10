@@ -8,22 +8,26 @@ const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const patchPath=byPath.get('item-art-hotfix-v01563.js');
-const mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json'),basePath=byPath.get('main-base-v01562.js');
+const mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json');
 ok(m.version==='0.15.63','Manifest version is v0.15.63',m.version);
 ok(!!patchPath&&/v0\.15\.63\/item-art-hotfix-v01563\.js$/.test(patchPath)&&exists(patchPath),'v0.15.63 item-art hotfix delivered',patchPath||'missing');
 ok(!!mainPath&&/v0\.15\.63\/main\.js$/.test(mainPath)&&exists(mainPath),'v0.15.63 main delivered',mainPath||'missing');
 ok(!!pkgPath&&/v0\.15\.63\/package\.json$/.test(pkgPath)&&exists(pkgPath),'v0.15.63 package delivered',pkgPath||'missing');
-ok(!!basePath&&/v0\.15\.62\/main\.js$/.test(basePath)&&exists(basePath),'v0.15.62 base main is shipped for wrapper execution',basePath||'missing');
 const patch=patchPath&&exists(patchPath)?read(patchPath):'',main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
-for(const [code,name] of [[patch,'item-art hotfix'],[main,'v0.15.63 main wrapper']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
+for(const [code,name] of [[patch,'item-art hotfix'],[main,'v0.15.63 main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
 ok(/__ARAM_ITEM_ART_HOTFIX_V01563__\s*=\s*true/.test(patch),'v0.15.63 readiness marker exists');
 ok(/'3143'/.test(patch)&&/3143_randuins_omen\.png/.test(patch)&&/란두인의 예언/.test(patch),'Randuin current base-art override is explicit');
 ok(/'3075'/.test(patch)&&/3075_thornmail\.png/.test(patch)&&/가시 갑옷/.test(patch),'Thornmail current base-art override is explicit');
 ok(/latest\/game\/assets\/items\/icons2d/.test(patch),'Hotfix uses latest game current-base-art path');
 ok(/aramArtV01560/.test(patch),'Hotfix prevents v0.15.60 refresh from restoring stale catalog art');
 ok(/score_logic_changed:false/.test(patch),'Item-art hotfix is score-neutral');
-ok(/main-base-v01562\.js/.test(main)&&/item-art-hotfix-v01563\.js/.test(main)&&/__ARAM_ITEM_ART_HOTFIX_V01563__/.test(main),'v0.15.63 wrapper injects and guards item-art hotfix');
-ok(/0\.15\.63/.test(main),'v0.15.63 wrapper upgrades runtime version');
+const poolPos=main.indexOf("'random-party-pool-labels-v01562.js'");
+const artPos=main.indexOf("'item-art-hotfix-v01563.js'");
+const rolePos=main.indexOf("'role-metric-detail-v01518.js'");
+ok(poolPos>=0&&artPos>poolPos&&rolePos>artPos,'Current main injects v0.15.63 after pool labels and before role detail');
+ok(main.includes('__ARAM_ITEM_ART_HOTFIX_V01563__'),'Current main readiness guard covers v0.15.63');
+const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
+ok(vm==='0.15.63','Current main VERSION is v0.15.63',vm);
 ok(pkg.version==='0.15.63','Package version is v0.15.63',pkg.version);
 report.info={scope:'Priority-1 visual correction for Randuin\'s Omen (3143) and Thornmail (3075) across known item-bearing UI surfaces',scoreLogicChanged:false,remoteArtSource:'CommunityDragon latest game/assets/items/icons2d',ids:['3143','3075']};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
