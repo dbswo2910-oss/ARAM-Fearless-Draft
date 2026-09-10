@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.56**
+- Active updater version: **v0.15.57**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -121,7 +121,7 @@ Implementation:
 
 The user's real pick screenshot showed that TOP5 comparison still required too much scrolling. v0.15.55 keeps rank 1 as the visual hero while compressing ranks 2–5 and the external-pick status area. It also rewrites the focus summary into a more human-readable `추천 방향` sentence. Scoring remains unchanged.
 
-### v0.15.56 — Official item icons
+### v0.15.56 — Official item icons in the current in-game coach
 
 Goal: make item decisions recognizable before the text is fully read.
 
@@ -130,15 +130,36 @@ Implementation:
 - active frontend layer: `update/v0.15.56/random-item-icons-v01556.js`
 - reuses `window.aramDesktop.getItemCatalog()` and the catalog's exact Data Dragon version
 - uses official Data Dragon item image path: `/cdn/<version>/img/item/<itemId>.png`
-- decorates:
-  - LIVE `다음 구매`
-  - death `지금 살 것` recipe components
-  - `이번 판 최적화` core
-  - final core target in the shop planner
-  - up to four recognized items in `통계 기본트리`
+- decorates LIVE `다음 구매`, death `지금 살 것`, `이번 판 최적화`, final core target, and the statistical base tree
 - icons supplement rather than replace text and price
 - broken image loading is hidden so text-only UI remains usable
 - `score_logic_changed:false`
+
+### v0.15.57 — Full item-menu visual audit
+
+The user requested a review of **every menu that uses items**, not just the current coach. We re-inspected the verified installed baseline and found several item-bearing user-facing surfaces that v0.15.56 did not decorate.
+
+New active layer: `update/v0.15.57/item-icons-global-v01557.js`.
+
+Verified coverage added:
+
+- Live draft `#liveBuilds`: champion core build tree and assigned team-utility item
+- Live draft `#liveUtils`: utility/counter recommendation item column
+- Random Practice legacy/live surfaces: `#randomLiveTopbar`, `#randomLiveSummary`, `#randomLiveBuildAdvice`, `#randomBuilds`, `#randomUtils`
+- Random Practice `#randomThreatList`: observed enemy inventory names receive compact item artwork
+- Champion DB `#dataCard`: Primary Build and alternate representative build lines
+- Match Lab `#historyMatchDetail`: recommended build direction
+
+Match Lab `.matchItems` already renders actual final items with Riot/Data Dragon artwork in the base application, so v0.15.57 intentionally does not add a second icon layer there.
+
+Global icon rules:
+
+- exact known selectors only; do not discover panels by broad title/body text heuristics
+- keep the existing text; artwork is supplementary
+- cap icon strips (normally six or fewer) to avoid visual clutter
+- hide failed images but retain text
+- reuse v0.15.56 catalog when possible, otherwise the existing desktop item catalog
+- no recommendation, purchase, threat, or scoring math changes (`score_logic_changed:false`)
 
 Do not treat item icons as proof that live inventory extraction or recipe math is correct; real-match validation is still required.
 
@@ -155,7 +176,8 @@ The user strongly prefers an operational dashboard, not a long report page.
 - Explanation text defaults to one line, at most two where unavoidable.
 - Calculations can remain detailed internally while display stays concise.
 - Dead time can expose more analysis because the user has time to read.
-- For item decisions, prefer `icon + short text` over icon-only or text-only presentation.
+- For item decisions, prefer `official icon + short text` over icon-only or text-only presentation.
+- Never duplicate existing artwork just to make a newer runtime own the rendering.
 
 ## Exact installed Random Practice contract
 
@@ -176,7 +198,7 @@ Important in-game base IDs:
 - `#randomTimingPanel`
 - `#randomPowerCurve`
 
-Current runtime order:
+Current relevant runtime order:
 
 1. `random-practice-focus-v01549.js`
 2. `random-pick-density-v01555.js`
@@ -186,6 +208,7 @@ Current runtime order:
 6. `random-ingame-shop-v01553.js`
 7. `random-ingame-shop-polish-v01554.js`
 8. `random-item-icons-v01556.js`
+9. `item-icons-global-v01557.js`
 
 Do not remove earlier layers without intentionally consolidating and regression-testing their behavior.
 
@@ -196,7 +219,7 @@ First priority is **real Windows/Live Client validation of the purchase planner*
 - confirm owned-item extraction shape in an actual game
 - confirm no duplicate component recommendation
 - verify the displayed remaining-core gold against the actual shop recipe
-- verify official item icons load correctly in the Electron/WebSecurity environment
+- verify official item icons load correctly in all newly decorated Electron surfaces
 - add extractor aliases or recipe fixes only if live data proves they are needed
 
 After that, the leading feature candidate is **patch-level cached LOL.PS ARAM statistics**:
@@ -235,5 +258,6 @@ Start with:
 11. `update/v0.15.53/item-catalog-v01527.js`
 12. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
 13. `update/v0.15.56/random-item-icons-v01556.js`
+14. `update/v0.15.57/item-icons-global-v01557.js`
 
 Do not restart established design decisions from scratch unless the user asks to change direction.
