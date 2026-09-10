@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.61**  
+Current app/update version: **v0.15.62**  
 Current balance/data patch: **26.17**
 
 This repository is used for source control, automated regression validation, incremental in-app updates, Windows x64 distribution work, and durable AI/coding-agent handoff.
@@ -22,7 +22,7 @@ Do not infer Random Practice DOM from screenshots or broad Korean-title matching
 
 ## Current UI direction
 
-v0.15.50–0.15.61 establish the compact **In-game Coach HUD**, consistent visual item language, and a denser Random Practice pick workflow:
+v0.15.50–0.15.62 establish the compact **In-game Coach HUD**, consistent visual item language, and a denser Random Practice pick workflow:
 
 - alive → compact LIVE decisions
 - dead → automatic Build/analysis view
@@ -40,7 +40,8 @@ v0.15.50–0.15.61 establish the compact **In-game Coach HUD**, consistent visua
 - v0.15.58 shows current party-held champions in the Random Practice manual-party area, labels party-held pool candidates as `팀원픽`, and fixes the cramped nested status-grid layout into a full-width `현재 조합 체크` strip. Current party picks are display-only and are never auto-written into manual locks.
 - v0.15.59 makes the party-row state explicit inside the champion input itself: AutoSync-held champions show a blue `팀원픽` pill, while champions explicitly entered by the user show a green `수동고정` pill. This is UI-only and does not change recommendation scoring.
 - v0.15.60 simplifies the visible party wording so both AutoSync-held and manually locked party champions display as `팀원픽` while their internal states remain distinct. It also refreshes item artwork from the latest Riot-client lol-game-data assets mirrored by CommunityDragon, with versioned Data Dragon artwork as fallback. Recommendation and shop scoring are unchanged.
-- v0.15.61 is the real-Windows follow-up for the party label: it no longer depends on the v0.15.59 pill already existing. Active AutoSync/manual party rows directly receive a visible `팀원픽` pill, and the section title is simplified to `우리 파티 챔피언 · 고정할 픽만 선택`. Internal manual-lock behavior remains unchanged.
+- v0.15.61 is the first real-Windows follow-up for the party label: it directly derives the visible state from the actual party row instead of depending on the v0.15.59 pill.
+- v0.15.62 corrects the requested **display location** after real-Windows review: the inline `팀원픽` pill inside `우리 파티 챔피언` is hidden, and `팀원픽` is shown beside the slot number in `남은 랜덤 챔피언`, matching the existing `외부픽` location. Both manual locks and AutoSync-held party picks qualify; an existing `외부픽` still takes precedence. Scoring is unchanged.
 
 The Match Lab actual final-item row already used Riot/Data Dragon artwork in the base renderer; v0.15.60 refreshes that existing image in place rather than adding duplicate artwork.
 
@@ -48,7 +49,7 @@ The HUD layout is intentionally treated as **largely stabilized**. Current work 
 
 The shop planner uses recipe-aware Data Dragon item metadata (`ko_KR`, ARAM map 12, recipe links, combine/total gold). In real LIVE state it only gives exact component-buy instructions when currently owned components can be confirmed, avoiding unsafe duplicate-buy advice. v0.15.60 keeps that recipe/price source unchanged while using current Riot-client icon metadata for visuals; image failure falls back to versioned Data Dragon art, then text-only display.
 
-See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.61.txt`.
+See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.62.txt`.
 
 ## New-PC distribution
 
