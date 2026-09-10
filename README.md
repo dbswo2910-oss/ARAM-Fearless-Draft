@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.54**  
+Current app/update version: **v0.15.56**  
 Current balance/data patch: **26.17**
 
 This repository is used for source control, automated regression validation, incremental in-app updates, Windows x64 distribution work, and durable AI/coding-agent handoff.
@@ -22,7 +22,7 @@ Do not infer Random Practice DOM from screenshots or broad Korean-title matching
 
 ## Current in-game direction
 
-v0.15.50–0.15.54 establish the compact **In-game Coach HUD**:
+v0.15.50–0.15.56 establish the compact **In-game Coach HUD**:
 
 - alive → compact LIVE decisions
 - dead → automatic Build/analysis view
@@ -33,13 +33,15 @@ v0.15.50–0.15.54 establish the compact **In-game Coach HUD**:
 - v0.15.51 removed pick-stage noise and fixed visual hierarchy
 - v0.15.52 removed duplicate/helper text and stabilized the HUD layout
 - v0.15.53 added the death-time shop planner: `현재 골드 → 지금 살 부품 → 잔여 골드 → 최종 코어 목표`
-- v0.15.54 is a screenshot-driven cleanup: removes duplicated planner gold, shortens shop labels, and hides the actual nested Source footer in Random Practice in-game mode
+- v0.15.54 cleaned up duplicate gold/source noise from a real Windows screenshot
+- v0.15.55 compacted Random Practice pick TOP5 comparison
+- v0.15.56 adds official Data Dragon item icons to `다음 구매`, `지금 살 것`, optimized core, final target, and statistical base tree while keeping item names/prices visible
 
 The HUD layout is intentionally treated as **largely stabilized**. Current work should improve decision quality inside this hierarchy rather than restart a large redesign.
 
-The shop planner uses recipe-aware Data Dragon item metadata (`ko_KR`, ARAM map 12, recipe links, combine/total gold). In real LIVE state it only gives exact component-buy instructions when currently owned components can be confirmed, avoiding unsafe duplicate-buy advice.
+The shop planner uses recipe-aware Data Dragon item metadata (`ko_KR`, ARAM map 12, recipe links, combine/total gold). In real LIVE state it only gives exact component-buy instructions when currently owned components can be confirmed, avoiding unsafe duplicate-buy advice. Item images use the same Data Dragon catalog version; image failure falls back to text-only display.
 
-See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.54.txt`.
+See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.56.txt`.
 
 ## New-PC distribution
 
