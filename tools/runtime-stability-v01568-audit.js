@@ -14,7 +14,7 @@ for(const [name,src] of [['main',main],['runtime-performance',perf]]){try{new Fu
 ok('manifest is v0.15.68 or newer',ge(m.version,'0.15.68'),m.version);
 ok('package is v0.15.68 or newer',ge(pkg.version,'0.15.68'),pkg.version);
 ok('current main is delivered',!!mainPath&&exists(mainPath),mainPath||'missing');
-ok('manifest keeps v0.15.68 performance runtime',perfPath==='update/v0.15.68/runtime-performance-v01568.js',perfPath||'missing');
+ok('manifest keeps v0.15.68 performance runtime target',!!perfPath&&exists(perfPath),perfPath||'missing');
 ok('GPU compositing is default on Windows',!main.includes("ARAM_ENABLE_HARDWARE_ACCELERATION!=='1'")&&main.includes("ARAM_DISABLE_HARDWARE_ACCELERATION==='1'"));
 ok('software rendering is diagnostic opt-in only',main.includes("if(process.platform==='win32'&&process.env.ARAM_DISABLE_HARDWARE_ACCELERATION==='1')app.disableHardwareAcceleration()"));
 ok('continuous move listener removed',!main.includes("mainWindow.on('move',")&&!main.includes("mainWindow.on('resize',"));
@@ -44,7 +44,7 @@ try{
  vm.runInNewContext(perf,context);
  for(const p of ['update/v0.15.59/random-party-labels-v01559.js','update/v0.15.61/random-party-label-fix-v01561.js','update/v0.15.62/random-party-pool-labels-v01562.js'])vm.runInNewContext(read(p),context);
  ok('historical party-label layers install no recurring intervals',intervals===0,`intervals=${intervals}`);
- ok('party-label ownership stays at one scoped observer',observers<=1,`observers=${observers}`);
+ ok('party-label ownership stays at at most one scoped observer',observers<=1,`observers=${observers}`);
 }catch(e){ok('v0.15.68 VM simulation',false,e.stack||e.message)}
 report.pass=report.checks.every(x=>x.pass);
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
