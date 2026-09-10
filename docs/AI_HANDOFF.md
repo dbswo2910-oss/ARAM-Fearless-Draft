@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.52**
+- Active updater version: **v0.15.53**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -100,30 +100,33 @@ Based on the user's real Windows preview screenshots:
 
 Based on the second set of real Windows screenshots:
 
-- coach eyebrow now follows current version (`INGAME COACH · v0.15.52`)
-- hide helper microcopy that does not change action (`행동 한 줄만 표시`, `이번 판 상황 보정`-type captions)
-- interpret raw threat display such as `물리 · 84점` as `물리 · 위험 높음`; raw score remains available via tooltip/detail
-- death header becomes simply `사망 분석` because the large respawn countdown already exists below
-- redundant respawn explanatory middle text is hidden
-- global Source footer is hidden only while Random Practice is in in-game mode
-- recommendation/Threat/item/composition scoring remains unchanged (`score_logic_changed:false`)
+- hide helper microcopy that does not change action
+- interpret raw threat score into danger labels in the default HUD
+- death header becomes simply `사망 분석`
+- redundant respawn explanatory copy is hidden
+- global Source footer is hidden only in Random Practice in-game mode
+- recommendation/Threat/item/composition scoring remains unchanged
 
-**Treat the v0.15.52 overall HUD layout as largely locked.** Do not restart another large layout redesign unless the user explicitly asks. Future work should improve decision quality and purchase actions inside this hierarchy.
+Treat the v0.15.52+ overall HUD layout as largely locked unless the user explicitly requests a redesign.
 
-## Next in-game phase
+### v0.15.53 — Death-time shop planner
 
-The next planned functional enhancement is **death-time immediate purchase planning**:
+The Build death view now separates **final core recommendation** from **what to buy right now**.
 
-`현재 골드 → 지금 구매 가능한 하위템 → 잔여 골드 → 최종 코어 목표`
+Flow:
 
-Important design rules:
+`현재 골드 → 이번 죽음에 살 부품 → 구매 후 잔여 골드 → 최종 코어 목표 → 코어까지 남은 골드`
 
-- completed-core recommendation and immediate component purchase are separate concepts
-- death screen should answer “what do I buy right now?” before deeper analysis
-- use the existing item catalog/tree and current gold where observable
-- do not guess unavailable Live Client data
-- statistical build remains a baseline/reference; current-match optimization remains primary
-- later LOL.PS integration should be patch-level cached/refreshable data, not fragile live website scraping during a match
+Implementation:
+
+- active frontend layer: `update/v0.15.53/random-ingame-shop-v01553.js`
+- installed item-catalog filename remains `item-catalog-v01527.js`, but active manifest source is `update/v0.15.53/item-catalog-v01527.js`
+- item catalog now prefers Data Dragon `ko_KR` and keeps ARAM map 12 availability, purchasable state, `from`, `into`, `gold.base`, and `gold.total`
+- recipe tree recursively consumes already-owned components when observable
+- the planner searches the affordable recipe frontier and chooses a spend-efficient set of independent components
+- if a real LIVE state does not expose owned components reliably, exact component-buy advice is intentionally hidden to avoid duplicate-purchase guidance
+- preview may show the planner with an explicit “보유 부품 없음 가정” label
+- scoring remains unchanged (`score_logic_changed:false`)
 
 ## UI philosophy
 
@@ -161,8 +164,26 @@ Current layered runtime order:
 2. `random-ingame-coach-v01550.js`
 3. `random-ingame-ux-v01551.js`
 4. `random-ingame-ux-v01552.js`
+5. `random-ingame-shop-v01553.js`
 
 Do not remove earlier layers without intentionally consolidating and regression-testing their behavior.
+
+## Next in-game phase
+
+First priority is **real Windows/Live Client validation of v0.15.53**:
+
+- confirm owned-item extraction shape in actual games
+- confirm no duplicate component recommendation
+- verify recipe/price text is readable at normal game-time window size
+- add extractor aliases only if real Live Client shapes require them
+
+After that, the leading feature candidate is **patch-level cached LOL.PS ARAM statistics**:
+
+- do not live-scrape the website every match
+- collect/refresh by patch or controlled update job
+- keep `통계 빌드` as the baseline/reference
+- keep `이번 판 최적화` as the actionable live recommendation
+- display source/freshness clearly
 
 ## Verification workflow
 
@@ -173,7 +194,7 @@ Before saying a change is done:
 3. Verify main/package version consistency.
 4. Run Full Regression Audit.
 5. Confirm all historical forward-compatible in-game audits and the new feature audit succeed.
-6. For layout changes, request a real Windows preview/screenshot; CI does not reproduce every DPI/font condition.
+6. For layout/live-state changes, request a real Windows preview/screenshot; CI does not reproduce every DPI/font/Live Client condition.
 
 ## When another AI takes over
 
@@ -187,5 +208,7 @@ Start with:
 6. `update/v0.15.50/random-ingame-coach-v01550.js`
 7. `update/v0.15.51/random-ingame-ux-v01551.js`
 8. `update/v0.15.52/random-ingame-ux-v01552.js`
+9. `update/v0.15.53/random-ingame-shop-v01553.js`
+10. `update/v0.15.53/item-catalog-v01527.js`
 
 Do not restart established design decisions from scratch unless the user asks to change direction.
