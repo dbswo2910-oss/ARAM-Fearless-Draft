@@ -1,0 +1,19 @@
+# v0.15.69 — Automatic Golden Guard Freeze Fix
+
+## Real-Windows finding
+The v0.15.68 diagnostics archive confirmed that the installed `index.html` is the verified 35,359,059-byte base UI. Its `init()` schedules `runEngineRegressionTests(false)` only 30 ms after startup. The same base UI also calls the full regression suite automatically on the first Data-tab visit when no prior run exists.
+
+The suite contains 271 synchronous engine checks and repeatedly exercises expensive recommendation paths such as full 173-champion pick/ban ranking and team scoring. Because those checks execute on the renderer thread, the app can appear responsive for a few interactions and then stop responding while the Golden Guard monopolizes the UI thread.
+
+## Changes
+- `main.js` now performs a surgical, idempotent patch of the known installed-base `index.html` before `loadFile()`.
+- Electron production startup no longer runs the Golden Guard automatically 30 ms after `init()`.
+- Opening the Data tab no longer auto-starts the full suite when no prior result exists.
+- The existing `전체 테스트 다시 실행` button remains intact, so Golden Guard is still available when intentionally requested.
+- The original installed `index.html` is backed up once as `index.pre-v01569-auto-regression.bak.html` before the two exact replacements are written.
+- Browser/standalone HTML behavior keeps the historical background startup test; the suppression is Electron-specific.
+- v0.15.68 GPU/native-window performance safeguards remain active.
+- Recommendation, ban, team score, item, threat, and purchase algorithms are unchanged.
+
+## Validation
+`tools/runtime-stability-v01569-audit.js` verifies version wiring, exact installed-base markers, patch-before-load ordering, one-time backup behavior, Electron-only startup suppression, Data-tab autorun removal, preservation of the manual regression button, and score/recommendation implementation isolation.
