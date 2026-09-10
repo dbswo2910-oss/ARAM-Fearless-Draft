@@ -67,12 +67,13 @@ In-game base shell:
 
 Read both exact DOM fragments under `reference/installed-v0.15.49/` before changing Random Practice layout.
 
-## Current Random Practice / item UI runtime contract — v0.15.57
+## Current Random Practice / item UI runtime contract — v0.15.58
 
 Pick-side layers:
 
 1. `update/v0.15.49/random-practice-focus-v01549.js`
 2. `update/v0.15.55/random-pick-density-v01555.js`
+3. `update/v0.15.58/random-party-picks-v01558.js`
 
 In-game and item-visual layers:
 
@@ -84,7 +85,19 @@ In-game and item-visual layers:
 6. `update/v0.15.56/random-item-icons-v01556.js`
 7. `update/v0.15.57/item-icons-global-v01557.js`
 
-`v0.15.55` keeps rank 1 large while compacting ranks 2–5 and the external-pick status strip. `v0.15.56` adds official Data Dragon item icons to the current coach. `v0.15.57` audits and extends the same visual language to every verified item-bearing user-facing menu from the installed baseline without changing recommendation logic.
+`v0.15.55` keeps rank 1 large while compacting ranks 2–5. `v0.15.56` adds official Data Dragon item icons to the current coach. `v0.15.57` audits and extends the same visual language to every verified item-bearing user-facing menu from the installed baseline without changing recommendation logic. `v0.15.58` adds AutoSync party-current-pick visibility and corrects the cramped Random Practice composition-status layout.
+
+v0.15.58 Random Practice pick rules:
+
+- read party-held champions from observable AutoSync champ-select state (`party`, plus local-champion fallback)
+- display current party champions in `#manualPartyInputs` as **current picks**, but do not write them into `randomState.manual`
+- manual locks remain an explicit user choice; current party picks are display-only so the recommendation engine can still suggest swaps from the bench/candidate pool
+- mark party-held candidates in `#poolInputs` with `팀원픽`; they remain recommendation candidates
+- an existing `외부픽` remains excluded and takes precedence over `팀원픽`
+- `#externalCheck` must remain the full-width host; its child `.randomCheckGrid` owns the actual three-card desktop grid
+- visible status copy is shortened to `현재 조합 체크` with `조합 보완 / 실질 딜 밸런스 · AD / AP / 추천 계산`
+- exact selectors only: `#manualPartyInputs`, `#poolInputs`, `#externalCheck`
+- `score_logic_changed:false`
 
 Visible in-game hierarchy:
 
@@ -141,7 +154,7 @@ v0.15.57 global item-icon rules:
 
 ## Next planned phase
 
-First validate purchase math and owned-item extraction in a real Live Client match before changing shop calculations. The preview is sufficient for display polish but not for proving live inventory shape.
+First validate v0.15.58 party-current-pick rendering in a real League champ-select session and validate purchase math/owned-item extraction in a real Live Client match before changing scoring or shop calculations.
 
 After live validation, primary candidate: strengthen the statistical baseline with patch-level cached LOL.PS ARAM data.
 
