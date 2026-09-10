@@ -15,7 +15,7 @@ const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
 ok(atLeast(m.version,'0.15.53'),'Manifest is v0.15.53 or newer',m.version);
 ok(!!shopPath&&/v0\.15\.53\/random-ingame-shop-v01553\.js$/.test(shopPath)&&exists(shopPath),'v0.15.53 shop planner runtime remains delivered',shopPath||'missing');
-ok(!!catalogPath&&/v0\.15\.53\/item-catalog-v01527\.js$/.test(catalogPath)&&exists(catalogPath),'Recipe-aware item catalog remains delivered from v0.15.53',catalogPath||'missing');
+ok(!!catalogPath&&/update\/v0\.15\.(?:53|[6-9]\d)\/item-catalog-v01527\.js$/.test(catalogPath)&&exists(catalogPath),'Recipe-aware item catalog remains delivered through the stable installed filename',catalogPath||'missing');
 ok(!!mainPath&&exists(mainPath),'Current main delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package delivered',pkgPath||'missing');
 const s=shopPath&&exists(shopPath)?read(shopPath):'';
@@ -39,7 +39,7 @@ ok(main.includes('__ARAM_RANDOM_INGAME_SHOP_V01553__'),'Current main readiness g
 const mainVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
 ok(atLeast(mainVersion,'0.15.53'),'Main VERSION is v0.15.53 or newer',mainVersion);
 ok(atLeast(pkg.version,'0.15.53'),'package VERSION is v0.15.53 or newer',pkg.version);
-report.info={scope:'Forward-compatible death-time shop planner contract',scoreLogicChanged:false,catalog:'Data Dragon ko_KR recipe metadata',safety:'hide exact buy advice if real owned-component state cannot be confirmed'};
+report.info={scope:'Forward-compatible death-time shop planner contract',scoreLogicChanged:false,catalog:'Data Dragon ko_KR recipe metadata under stable installed filename; newer visual metadata may be layered without changing recipe math',safety:'hide exact buy advice if real owned-component state cannot be confirmed'};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-ingame-v01553-report.json'),JSON.stringify(report,null,2));
