@@ -1,0 +1,52 @@
+'use strict';
+const fs=require('fs'),path=require('path'),vm=require('vm');
+const ROOT=path.resolve(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
+const exists=p=>fs.existsSync(path.join(ROOT,p));
+const report={version:'0.15.68',generated_at:new Date().toISOString(),checks:[]};
+const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
+const m=JSON.parse(read('update/manifest.json'));
+const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
+const mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json'),perfPath=byPath.get('runtime-performance-v01568.js');
+const main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)): {},perf=perfPath&&exists(perfPath)?read(perfPath):'';
+for(const [name,src] of [['main',main],['runtime-performance',perf]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
+ok('manifest version 0.15.68',m.version==='0.15.68',m.version);
+ok('package version 0.15.68',pkg.version==='0.15.68',pkg.version);
+ok('manifest maps v0.15.68 main',mainPath==='update/v0.15.68/main.js',mainPath||'missing');
+ok('manifest maps v0.15.68 performance runtime',perfPath==='update/v0.15.68/runtime-performance-v01568.js',perfPath||'missing');
+ok('GPU compositing is default on Windows',!main.includes("ARAM_ENABLE_HARDWARE_ACCELERATION!=='1'")&&main.includes("ARAM_DISABLE_HARDWARE_ACCELERATION==='1'"));
+ok('software rendering is diagnostic opt-in only',main.includes("if(process.platform==='win32'&&process.env.ARAM_DISABLE_HARDWARE_ACCELERATION==='1')app.disableHardwareAcceleration()"));
+ok('continuous move listener removed',!main.includes("mainWindow.on('move',")&&!main.includes("mainWindow.on('resize',"));
+ok('terminal moved/resized events are used',main.includes("mainWindow.on('moved'")&&main.includes("mainWindow.on('resized'"));
+ok('will-move/will-resize enter native interaction once',main.includes("mainWindow.on('will-move'")&&main.includes("mainWindow.on('will-resize'")&&main.includes('nativeInteraction===busy'));
+ok('Windows DWM background material forced to none',main.includes("setBackgroundMaterial('none')"));
+const scriptsLine=(main.match(/const scripts=\[\s*\n\s*([^\n]+)/)||[])[1]||'';
+ok('performance runtime is first injected overlay',scriptsLine.trim().startsWith("'runtime-performance-v01568.js'"),scriptsLine.slice(0,120));
+ok('timer hook restored after overlay bootstrap',main.includes('aramRuntimePerformanceV01568?.restoreTimerHook?.()'));
+ok('runtime has no renderer resize listener',!perf.includes("window.addEventListener('resize'"));
+ok('runtime exposes native interaction gate',perf.includes('function setNativeInteraction(v)')&&perf.includes('setBusy:setNativeInteraction'));
+ok('governed sub-second intervals clamp to 900ms',perf.includes('requested<900?900:requested'));
+ok('governed callbacks skip while native interaction is active',perf.includes('if(busy){counters.busySkips++;return}'));
+ok('move-time visual effects are reduced',perf.includes('backdrop-filter:none!important')&&perf.includes('box-shadow:none!important')&&perf.includes('animation-play-state:paused!important'));
+ok('historical v67 compatibility marker preserved',perf.includes('__ARAM_RUNTIME_PERFORMANCE_V01567__=true')&&perf.includes('aramRuntimePerformanceV01567=window.aramRuntimePerformanceV01568'));
+ok('party-label final visual contract preserved',perf.includes("badge.textContent='팀원픽'")&&perf.includes("visible_location:'remaining-random-pool-slot'"));
+ok('death shop identical paints still deduplicated',perf.includes("this?.id==='riShopPlannerV01553'")&&perf.includes('dedupedShopPaints'));
+ok('score-neutral metadata preserved',perf.includes('score_logic_changed:false'));
+ok('old v0.15.67 runtime is removed from installed overlay',!(m.files||[]).some(x=>x.path==='runtime-performance-v01567.js')&&(m.delete||[]).includes('runtime-performance-v01567.js'));
+
+try{
+ let observers=0,intervals=0;
+ const dummy=()=>({style:{removeProperty(){}},classList:{add(){},remove(){},toggle(){},contains(){return false}},dataset:{},appendChild(){},remove(){},querySelector(){return null},querySelectorAll(){return[]},closest(){return null},parentElement:null,textContent:'',value:''});
+ const root=dummy(),document={head:dummy(),body:dummy(),documentElement:root,visibilityState:'visible',createElement:()=>dummy(),getElementById:id=>id==='random'?root:null,querySelector:s=>s==='#random'?root:null,querySelectorAll:()=>[],addEventListener(){},contains(){return true}};
+ const context={window:null,document,randomState:{manual:[]},MutationObserver:class{constructor(){observers++}observe(){}},setTimeout(){return 1},clearTimeout(){},setInterval(){intervals++;return intervals},clearInterval(){},console,Set,Map,WeakMap,Array,Object,String,Number,Math,Date,JSON,URL};
+ context.window=context;context.addEventListener=()=>{};context.setInterval=context.setInterval.bind(context);
+ vm.runInNewContext(perf,context);
+ for(const p of ['update/v0.15.59/random-party-labels-v01559.js','update/v0.15.61/random-party-label-fix-v01561.js','update/v0.15.62/random-party-pool-labels-v01562.js'])vm.runInNewContext(read(p),context);
+ ok('historical party-label layers install no recurring intervals',intervals===0,`intervals=${intervals}`);
+ ok('party-label ownership stays at one scoped observer',observers<=1,`observers=${observers}`);
+}catch(e){ok('v0.15.68 VM simulation',false,e.stack||e.message)}
+report.pass=report.checks.every(x=>x.pass);
+fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
+fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01568-report.json'),JSON.stringify(report,null,2));
+for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);
+if(!report.pass)process.exit(1);
