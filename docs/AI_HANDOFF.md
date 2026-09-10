@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.53**
+- Active updater version: **v0.15.54**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -104,14 +104,14 @@ Based on the second set of real Windows screenshots:
 - interpret raw threat score into danger labels in the default HUD
 - death header becomes simply `사망 분석`
 - redundant respawn explanatory copy is hidden
-- global Source footer is hidden only in Random Practice in-game mode
+- global Source footer is intended to be hidden only in Random Practice in-game mode
 - recommendation/Threat/item/composition scoring remains unchanged
 
 Treat the v0.15.52+ overall HUD layout as largely locked unless the user explicitly requests a redesign.
 
 ### v0.15.53 — Death-time shop planner
 
-The Build death view now separates **final core recommendation** from **what to buy right now**.
+The Build death view separates **final core recommendation** from **what to buy right now**.
 
 Flow:
 
@@ -121,12 +121,31 @@ Implementation:
 
 - active frontend layer: `update/v0.15.53/random-ingame-shop-v01553.js`
 - installed item-catalog filename remains `item-catalog-v01527.js`, but active manifest source is `update/v0.15.53/item-catalog-v01527.js`
-- item catalog now prefers Data Dragon `ko_KR` and keeps ARAM map 12 availability, purchasable state, `from`, `into`, `gold.base`, and `gold.total`
+- item catalog prefers Data Dragon `ko_KR` and keeps ARAM map 12 availability, purchasable state, `from`, `into`, `gold.base`, and `gold.total`
 - recipe tree recursively consumes already-owned components when observable
-- the planner searches the affordable recipe frontier and chooses a spend-efficient set of independent components
+- planner searches the affordable recipe frontier and chooses a spend-efficient set of independent components
 - if a real LIVE state does not expose owned components reliably, exact component-buy advice is intentionally hidden to avoid duplicate-purchase guidance
-- preview may show the planner with an explicit “보유 부품 없음 가정” label
+- preview may show the planner with an explicit no-owned-items assumption
 - scoring remains unchanged (`score_logic_changed:false`)
+
+### v0.15.54 — Real-screenshot shop cleanup
+
+The first v0.15.53 Windows preview confirmed the overall shop hierarchy works, but exposed three display issues:
+
+- current gold was shown twice: once in the death strip and again in the `지금 구매` card header
+- the global Source footer was still visible because v0.15.52 only targeted a direct-child `.footer`, while the actual footer is nested
+- two helper labels were longer than needed for a time-critical shop screen
+
+v0.15.54 fixes those without changing any recommendation or purchase calculation:
+
+- top death strip remains the single gold display
+- shop header duplicate gold hidden
+- `이번 죽음에 바로 살 것` → `지금 살 것`
+- preview assumption shortened to `보유템 없음 가정`
+- nested `.footer` hidden while Random Practice is in in-game mode
+- `score_logic_changed:false`
+
+Do not interpret this screenshot-only phase as proof that live inventory extraction or recipe cost math is correct. Those still need one real match validation.
 
 ## UI philosophy
 
@@ -165,17 +184,18 @@ Current layered runtime order:
 3. `random-ingame-ux-v01551.js`
 4. `random-ingame-ux-v01552.js`
 5. `random-ingame-shop-v01553.js`
+6. `random-ingame-shop-polish-v01554.js`
 
 Do not remove earlier layers without intentionally consolidating and regression-testing their behavior.
 
 ## Next in-game phase
 
-First priority is **real Windows/Live Client validation of v0.15.53**:
+First priority is **real Windows/Live Client validation of the purchase planner**:
 
-- confirm owned-item extraction shape in actual games
+- confirm owned-item extraction shape in an actual game
 - confirm no duplicate component recommendation
-- verify recipe/price text is readable at normal game-time window size
-- add extractor aliases only if real Live Client shapes require them
+- verify the displayed remaining-core gold against the actual shop recipe
+- add extractor aliases or recipe fixes only if live data proves they are needed
 
 After that, the leading feature candidate is **patch-level cached LOL.PS ARAM statistics**:
 
@@ -210,5 +230,6 @@ Start with:
 8. `update/v0.15.52/random-ingame-ux-v01552.js`
 9. `update/v0.15.53/random-ingame-shop-v01553.js`
 10. `update/v0.15.53/item-catalog-v01527.js`
+11. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
 
 Do not restart established design decisions from scratch unless the user asks to change direction.
