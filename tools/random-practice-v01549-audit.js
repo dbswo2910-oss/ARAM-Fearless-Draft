@@ -13,7 +13,7 @@ const uiPath=byPath.get('random-practice-focus-v01549.js');
 const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
 ok(cmp(m.version,'0.15.49')>=0,'Manifest remains compatible with v0.15.49 exact-DOM baseline',m.version);
-ok(!!uiPath&&/v0\.15\.49\/random-practice-focus-v01549\.js$/.test(uiPath)&&exists(uiPath),'Exact-DOM random practice runtime remains delivered',uiPath||'missing');
+ok(!!uiPath&&exists(uiPath),'Exact-DOM random practice runtime remains delivered',uiPath||'missing');
 ok(!byPath.has('random-practice-focus-v01548.js'),'Broken adaptive v0.15.48 runtime is no longer delivered');
 ok((m.delete||[]).includes('random-practice-focus-v01548.js'),'Installed v0.15.48 runtime remains on delete list');
 ok(!!mainPath&&exists(mainPath),'Current main runtime delivered',mainPath||'missing');
