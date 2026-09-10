@@ -49,6 +49,8 @@ jobs:
         run: node tools/random-ingame-v01552-audit.js
       - name: Run Random In-game death shop planner v0.15.53 audit
         run: node tools/random-ingame-v01553-audit.js
+      - name: Run Random In-game shop screenshot polish v0.15.54 audit
+        run: node tools/random-ingame-v01554-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -84,6 +86,7 @@ jobs:
             audit-output/random-ingame-v01551-report.json
             audit-output/random-ingame-v01552-report.json
             audit-output/random-ingame-v01553-report.json
+            audit-output/random-ingame-v01554-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
