@@ -1,0 +1,17 @@
+# v0.15.67 — Window / Screen Freeze Stability Hotfix
+
+## User-visible issue
+
+After v0.15.66 reduced stacked item-art watchers, the Windows app could still become unresponsive again when moving/resizing the native window or navigating into UI surfaces that wake multiple high-frequency cosmetic refresh loops.
+
+## Changes
+
+- Windows starts in software-rendering safe mode by calling `app.disableHardwareAcceleration()` before Electron is ready. Set `ARAM_ENABLE_HARDWARE_ACCELERATION=1` only for diagnostics/opt-in GPU rendering.
+- Added `runtime-performance-v01567.js`. During patch bootstrap it governs newly-created sub-second UI maintenance intervals, clamps them to at least 900 ms, and pauses those wrappers during native window move/resize.
+- Replaced the redundant v0.15.59/v0.15.61/v0.15.62 party-label watcher stack with one event-driven scoped owner that preserves the final v0.15.62 `팀원픽` pool-badge contract.
+- Kept the historical v0.15.53 shop source immutable, but the new runtime suppresses identical `#riShopPlannerV01553` HTML paints; its 360 ms maintenance timer is governed to 900 ms during runtime bootstrap and pauses while the native surface is busy.
+- Recommendation, composition, threat, item, and purchase scoring are unchanged (`score_logic_changed:false`).
+
+## Validation
+
+`tools/runtime-stability-v01567-audit.js` verifies version wiring, synchronous GPU safe mode, move/resize busy gating, timer governance, legacy party-label preemption, targeted shop paint dedupe, and a VM simulation showing the historical party-label scripts do not add extra recurring intervals after v0.15.67 owns the contract.
