@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.52**  
+Current app/update version: **v0.15.53**  
 Current balance/data patch: **26.17**
 
 This repository is used for source control, automated regression validation, incremental in-app updates, Windows x64 distribution work, and durable AI/coding-agent handoff.
@@ -22,7 +22,7 @@ Do not infer Random Practice DOM from screenshots or broad Korean-title matching
 
 ## Current in-game direction
 
-v0.15.50–0.15.52 establish the compact **In-game Coach HUD**:
+v0.15.50–0.15.53 establish the compact **In-game Coach HUD**:
 
 - alive → compact LIVE decisions
 - dead → automatic Build/analysis view
@@ -31,13 +31,14 @@ v0.15.50–0.15.52 establish the compact **In-game Coach HUD**:
 - program-internal `인게임 미리보기` using the same coach renderer as real LIVE
 - statistical baseline item tree vs current-match optimized item recommendation
 - v0.15.51 removed pick-stage noise and fixed visual hierarchy
-- v0.15.52 removes duplicate/helper text, converts raw threat scores to interpreted danger labels, removes duplicate death countdown copy, and hides the global Source footer only while in-game
+- v0.15.52 removed duplicate/helper text and stabilized the HUD layout
+- v0.15.53 adds a death-time shop planner: `현재 골드 → 지금 살 부품 → 잔여 골드 → 최종 코어 목표`
 
-The current HUD layout is intentionally treated as **largely stabilized**. The next functional phase is death-time purchase planning:
+The HUD layout is intentionally treated as **largely stabilized**. Current work should improve decision quality inside this hierarchy rather than restart a large redesign.
 
-`현재 골드 → 지금 구매 가능한 하위템 → 잔여 골드 → 최종 코어 목표`
+The v0.15.53 shop planner uses recipe-aware Data Dragon item metadata (`ko_KR`, ARAM map 12, recipe links, combine/total gold). In real LIVE state it only gives exact component-buy instructions when currently owned components can be confirmed, avoiding unsafe duplicate-buy advice.
 
-See `docs/CHANGELOG_v0.15.50.txt`, `docs/CHANGELOG_v0.15.51.txt`, and `docs/CHANGELOG_v0.15.52.txt`.
+See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.53.txt`.
 
 ## New-PC distribution
 
