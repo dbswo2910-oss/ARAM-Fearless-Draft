@@ -28,7 +28,8 @@ ok(/\.combo:nth-child\(n\+2\)/.test(s)&&/-webkit-line-clamp:1/.test(s),'Ranks 2-
 ok(/추천 방향:/.test(s)&&/이번 선택의 핵심/.test(s),'Focus card uses human-readable recommendation direction');
 ok(/rpPickStatusV01555/.test(s)&&/repeat\(3,minmax\(0,1fr\)\)/.test(s),'External-pick checks are compacted into a three-part status strip');
 ok(/score_logic_changed:false/.test(s),'Pick density patch is explicitly score-neutral');
-ok(main.includes("'random-practice-focus-v01549.js','random-pick-density-v01555.js','random-ingame-coach-v01550.js'"),'Current main preserves v0.15.55 injection order');
+const focusAt=main.indexOf("'random-practice-focus-v01549.js'"),densityAt=main.indexOf("'random-pick-density-v01555.js'"),coachAt=main.indexOf("'random-ingame-coach-v01550.js'");
+ok(focusAt>=0&&densityAt>focusAt&&coachAt>densityAt,'Current main preserves v0.15.55 injection order even with newer pick-side layers');
 ok(main.includes('__ARAM_RANDOM_PICK_DENSITY_V01555__'),'Current main readiness guard covers v0.15.55 pick patch');
 const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
 ok(ge(vm,'0.15.55'),'Current main VERSION is v0.15.55 or newer',vm);
