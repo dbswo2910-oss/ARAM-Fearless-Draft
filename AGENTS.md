@@ -31,6 +31,7 @@ The product is being simplified around fast decisions rather than vertically sta
 - Random Practice pick: inputs first, recommendations prioritized, detail behind tabs/collapse.
 - Random Practice in-game: **one-glance coach HUD**; alive state should be readable in roughly 1–2 seconds.
 - Recommendation engines should not repeatedly overreward a small set of champions through duplicated synergy signals.
+- Item-bearing UI should use **official icon + short existing text**, never icon-only, and should avoid duplicating artwork already present in the base UI.
 
 ## Random Practice exact installed IDs — v0.15.49 baseline
 
@@ -66,14 +67,14 @@ In-game base shell:
 
 Read both exact DOM fragments under `reference/installed-v0.15.49/` before changing Random Practice layout.
 
-## Current Random Practice runtime contract — v0.15.56
+## Current Random Practice / item UI runtime contract — v0.15.57
 
 Pick-side layers:
 
 1. `update/v0.15.49/random-practice-focus-v01549.js`
 2. `update/v0.15.55/random-pick-density-v01555.js`
 
-In-game layers:
+In-game and item-visual layers:
 
 1. `update/v0.15.50/random-ingame-coach-v01550.js`
 2. `update/v0.15.51/random-ingame-ux-v01551.js`
@@ -81,8 +82,9 @@ In-game layers:
 4. `update/v0.15.53/random-ingame-shop-v01553.js`
 5. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
 6. `update/v0.15.56/random-item-icons-v01556.js`
+7. `update/v0.15.57/item-icons-global-v01557.js`
 
-`v0.15.55` keeps rank 1 large while compacting ranks 2–5 and the external-pick status strip. `v0.15.56` adds official Data Dragon item icons without changing recommendation logic.
+`v0.15.55` keeps rank 1 large while compacting ranks 2–5 and the external-pick status strip. `v0.15.56` adds official Data Dragon item icons to the current coach. `v0.15.57` audits and extends the same visual language to every verified item-bearing user-facing menu from the installed baseline without changing recommendation logic.
 
 Visible in-game hierarchy:
 
@@ -115,22 +117,24 @@ v0.15.53 purchase-planner rules:
 - use `ko_KR` item catalog where available
 - `score_logic_changed:false`; this layer does not alter recommendation/threat/item scoring
 
-v0.15.54 screenshot-polish rules:
-
-- keep the top death strip as the single visible source for current gold
-- hide the duplicate gold amount from the `지금 구매` planner header
-- shorten `이번 죽음에 바로 살 것` to `지금 살 것`
-- shorten the preview assumption to `보유템 없음 가정`
-- hide the nested global `.footer` while Random Practice is actually in in-game mode
-- do not change purchase/recommendation math in this layer (`score_logic_changed:false`)
-
 v0.15.56 item-icon rules:
 
 - use item IDs/name mapping and Data Dragon version from the existing desktop item catalog
 - decorate `LIVE 다음 구매`, death `지금 살 것`, optimized core, final core target, and statistical base tree
 - keep item names/prices visible; icons supplement rather than replace text
-- limit statistical tree icon strip to a few recognized items to avoid clutter
 - if an image fails to load, hide the broken image and retain text-only UI
+- `score_logic_changed:false`
+
+v0.15.57 global item-icon rules:
+
+- exact verified surfaces: `#liveBuilds`, `#liveUtils`, `#randomLiveTopbar`, `#randomLiveSummary`, `#randomLiveBuildAdvice`, `#randomBuilds`, `#randomUtils`, `#randomThreatList`, `#dataCard`, `#historyMatchDetail`
+- Live draft: core build tree, assigned utility item, and counter/utility recommendation column receive icons
+- Random Practice legacy/live: next-item surfaces, owned items, full build/utility recommendations, and observed enemy inventory receive icons; current coach remains handled by v0.15.56
+- Champion DB: Primary Build and alternate representative build lines receive compact icon strips
+- Match Lab: recommended build direction receives icons; `.matchItems` actual final-item row already has Riot artwork and must not be duplicated
+- cap recognized icon strips (normally <=6) to avoid clutter
+- use exact known selectors and known item text surfaces; do not scan page-wide titles/body text heuristically
+- image failure must retain existing text
 - `score_logic_changed:false`
 
 **The overall HUD layout is considered largely stabilized. Do not begin another major layout redesign unless the user explicitly asks.**
