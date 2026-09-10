@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.61**
+- Active updater version: **v0.15.62**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -229,28 +229,26 @@ CI/source auditing validates wiring and fallbacks only. Real Windows rendering a
 
 ### v0.15.61 — Real-Windows party-label follow-up
 
-The user's real v0.15.60 Windows screenshot showed a manually entered party champion in `#manualPartyInputs` with **no visible `팀원픽` pill**. The composition-status strip and TOP5 layout were otherwise stable.
+The user's real v0.15.60 Windows screenshot showed a manually entered party champion in `#manualPartyInputs` with **no visible `팀원픽` pill**. v0.15.61 therefore directly created that pill from active party-row state instead of relying on a pre-existing v0.15.59 pill. Internal manual-lock semantics and scoring were preserved.
 
-Root cause:
+### v0.15.62 — Correct `팀원픽` display location
 
-- v0.15.60 only restyled/reworded `.rpPartyStatePillV01559`
-- if v0.15.59 did not create that pill for a particular real DOM/state timing, v0.15.60 had no element to restyle
+The next real Windows screenshot clarified that the user's intended location was **not inside the left `우리 파티 챔피언` input**. The desired location is the right-side `남은 랜덤 챔피언` candidate slot, matching where `외부픽` is shown.
 
-New active layer: `update/v0.15.61/random-party-label-fix-v01561.js`.
+New active layer: `update/v0.15.62/random-party-pool-labels-v01562.js`.
 
 Rules:
 
-- do **not** depend on a pre-existing v0.15.59 pill
-- inspect the actual party-row state directly via `rpPartySyncedV01558`, `rpManualLockedV01558`, and `randomState.manual`
-- if either AutoSync current-pick or explicit manual-lock state is active, create `.rpPartyLabelV01561` directly inside the row `.searchWrap`
-- visible copy is always `팀원픽`
-- the old v0.15.59 pill is hidden to prevent duplicate labels
-- section title is simplified to `우리 파티 챔피언 · 고정할 픽만 선택`
-- manual-vs-AutoSync origin may be retained internally for diagnostics, but is not exposed as different visible wording
-- manual inputs remain true recommendation locks; AutoSync-only current picks remain display-only/swappable
+- hide the v0.15.61 inline `.rpPartyLabelV01561` in `#manualPartyInputs`
+- keep the left area focused on which champions the party currently has and which are manually locked
+- build the visual team-pick set from both explicit `randomState.manual` locks and v0.15.58 AutoSync-displayed rows (`rpPartySyncedV01558`)
+- in `#poolInputs`, show `팀원픽` in the candidate `.slot` beneath/beside its number, visually matching the existing `외부픽` position
+- do not duplicate the historical v0.15.58 pool badge if it already exists for an AutoSync-held champion
+- if `.randomPoolTakenBadge` is present, `외부픽` wins and no `팀원픽` badge is added
+- party-marked candidates remain eligible for recommendation unless excluded by another rule
 - `score_logic_changed:false`
 
-This is a screenshot-driven rendering fix only. It does not change candidate eligibility, TOP5 scoring, composition scoring, or item logic.
+This is a screenshot-driven display-location correction only. It does not change candidate eligibility, TOP5 scoring, composition scoring, manual-lock semantics, or item logic.
 
 ## UI philosophy
 
@@ -311,6 +309,7 @@ Current relevant runtime order:
 11. `item-icons-global-v01557.js`
 12. `ui-refresh-v01560.js`
 13. `random-party-label-fix-v01561.js`
+14. `random-party-pool-labels-v01562.js`
 
 Do not remove earlier layers without intentionally consolidating and regression-testing their behavior.
 
@@ -318,9 +317,10 @@ Do not remove earlier layers without intentionally consolidating and regression-
 
 First priority is **real Windows/League Client validation**:
 
-- in Random Practice, confirm a manually entered party champion now directly receives a visible `팀원픽` pill
-- in champ select, confirm AutoSync-held party rows also visibly show `팀원픽`
-- confirm the section title reads `우리 파티 챔피언 · 고정할 픽만 선택`
+- confirm the left `우리 파티 챔피언` input no longer shows the redundant inline `팀원픽` pill
+- confirm a manually locked champion such as the screenshot's 마오카이 shows `팀원픽` in its right-side `남은 랜덤 챔피언` slot
+- confirm AutoSync-held party champions receive the same right-side pool badge
+- confirm an existing `외부픽` takes precedence without duplicate labels
 - confirm manual inputs remain true locks while AutoSync current picks remain display-only/swappable
 - confirm the full-width composition-status strip remains visually clean at the user's actual DPI/window width
 - confirm latest item artwork appears on the v0.15.56/v0.15.57 surfaces and Match Lab final-item row
@@ -362,15 +362,17 @@ Start with:
 8. `update/v0.15.59/random-party-labels-v01559.js`
 9. `update/v0.15.60/ui-refresh-v01560.js`
 10. `update/v0.15.61/random-party-label-fix-v01561.js`
-11. `update/v0.15.50/random-ingame-coach-v01550.js`
-12. `update/v0.15.51/random-ingame-ux-v01551.js`
-13. `update/v0.15.52/random-ingame-ux-v01552.js`
-14. `update/v0.15.53/random-ingame-shop-v01553.js`
-15. `update/v0.15.60/item-catalog-v01527.js`
-16. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
-17. `update/v0.15.56/random-item-icons-v01556.js`
-18. `update/v0.15.57/item-icons-global-v01557.js`
-19. `tools/v01560-audit.js`
-20. `tools/v01561-audit.js`
+11. `update/v0.15.62/random-party-pool-labels-v01562.js`
+12. `update/v0.15.50/random-ingame-coach-v01550.js`
+13. `update/v0.15.51/random-ingame-ux-v01551.js`
+14. `update/v0.15.52/random-ingame-ux-v01552.js`
+15. `update/v0.15.53/random-ingame-shop-v01553.js`
+16. `update/v0.15.60/item-catalog-v01527.js`
+17. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
+18. `update/v0.15.56/random-item-icons-v01556.js`
+19. `update/v0.15.57/item-icons-global-v01557.js`
+20. `tools/v01560-audit.js`
+21. `tools/v01561-audit.js`
+22. `tools/v01562-audit.js`
 
 Do not restart established design decisions from scratch unless the user asks to change direction.
