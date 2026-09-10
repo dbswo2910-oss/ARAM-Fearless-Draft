@@ -1,0 +1,17 @@
+ARAM Fearless Draft v0.15.73
+
+[Stability]
+- Fixed a reproduced hard-freeze in random-item-icons-v01556.js.
+- When Desktop item catalog loading returned {ok:false}, the old runtime recursively chained loadCatalog().then(sync) with no backoff.
+- This could create an unbounded Promise retry storm and freeze the entire Electron renderer regardless of the currently visible tab.
+- Failed catalog loads now keep text-only item UI usable and retry on a slow 15–30 second backoff instead of immediate recursion.
+- Added catalog retry diagnostics and a CI regression that forces getItemCatalog() to return {ok:false}.
+
+[Preserved]
+- v0.15.72 Random Practice single-owner/cooperative TOP5 stability work.
+- v0.15.71 live AutoSync governor.
+- v0.15.70 Random In-game single-owner runtime.
+- Existing item-icon UI and Data Dragon icon path.
+- Recommendation, ban, team score, item judgment, threat, and purchase scoring formulas are unchanged.
+
+score_logic_changed:false
