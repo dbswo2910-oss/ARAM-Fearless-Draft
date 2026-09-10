@@ -27,12 +27,15 @@ ok(/img\.riItemIconV01556/.test(ui)&&/img\.aramItemIconV01557/.test(ui)&&/#histo
 ok(/dataset\.aramArtFallbackV01560/.test(ui)&&/style\.display='none'/.test(ui),'v0.15.60 image failure handling remains present');
 const oldAt=main.indexOf("'random-item-icons-v01556.js'"),globalAt=main.indexOf("'item-icons-global-v01557.js'"),refreshAt=main.indexOf("'ui-refresh-v01560.js'"),roleAt=main.indexOf("'role-metric-detail-v01518.js'");
 ok(oldAt>=0&&globalAt>oldAt&&refreshAt>globalAt&&roleAt>refreshAt,'Main preserves v0.15.60 after existing item visual layers');
-ok(main.includes("'random-party-picks-v01558.js','random-party-labels-v01559.js','random-ingame-coach-v01550.js'"),'v0.15.59 party-label historical adjacency remains intact');
+const v58At=main.indexOf("'random-party-picks-v01558.js'"),v59At=main.indexOf("'random-party-labels-v01559.js'"),coachAt=main.indexOf("'random-ingame-coach-v01550.js'");
+ok(v58At>=0&&v59At>v58At&&coachAt>v59At,'v0.15.59 historical ordering remains intact between v0.15.58 and in-game coach',`${v58At}/${v59At}/${coachAt}`);
+const perfAt=main.indexOf("'runtime-performance-v01567.js'");
+if(ge(m.version,'0.15.67'))ok(perfAt>v58At&&perfAt<v59At,'v0.15.67 may insert a compatibility/performance owner before historical v0.15.59 initialization',`${v58At}/${perfAt}/${v59At}`);
 ok(main.includes('__ARAM_UI_REFRESH_V01560__'),'Main readiness guard covers v0.15.60');
 const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
 ok(ge(vm,'0.15.60'),'Current main VERSION is v0.15.60 or newer',vm);
 ok(ge(pkg.version,'0.15.60'),'Current package VERSION is v0.15.60 or newer',pkg.version);
-report.info={scope:'Historical v0.15.60 party-label and item-art layer remains regression-covered while later versions may replace the stable item catalog source with a newer unified artwork resolver.',scoreLogicChanged:false,forwardCompatible:true};
+report.info={scope:'Historical v0.15.60 party-label and item-art layer remains regression-covered while later versions may replace/preempt historical visual runtimes with compatibility owners and newer unified artwork resolvers.',scoreLogicChanged:false,forwardCompatible:true};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','v01560-report.json'),JSON.stringify(report,null,2));
