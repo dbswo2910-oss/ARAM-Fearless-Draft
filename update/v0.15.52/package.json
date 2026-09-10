@@ -1,0 +1,10 @@
+{
+  "name": "aram-fearless-draft",
+  "version": "0.15.52",
+  "private": true,
+  "description": "ARAM Fearless Draft Electron Desktop with GitHub Releases Auto Update",
+  "main": "main.js",
+  "productName": "ARAM Fearless Draft",
+  "author": "by잉디디",
+  "license": "UNLICENSED"
+}
