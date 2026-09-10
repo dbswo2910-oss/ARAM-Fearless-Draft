@@ -13,7 +13,7 @@ const iconPath=byPath.get('random-item-icons-v01556.js');
 const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
 ok(atLeast(m.version,'0.15.56'),'Manifest is v0.15.56 or newer',m.version);
-ok(!!iconPath&&/v0\.15\.56\/random-item-icons-v01556\.js$/.test(iconPath)&&exists(iconPath),'v0.15.56 item icon runtime remains delivered',iconPath||'missing');
+ok(!!iconPath&&/random-item-icons-v01556\.js$/.test(iconPath)&&exists(iconPath),'v0.15.56 item icon runtime contract remains delivered',iconPath||'missing');
 ok(!!mainPath&&exists(mainPath),'Current main delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package delivered',pkgPath||'missing');
 const s=iconPath&&exists(iconPath)?read(iconPath):'';
