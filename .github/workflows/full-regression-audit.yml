@@ -55,6 +55,8 @@ jobs:
         run: node tools/random-ingame-v01554-audit.js
       - name: Run Random item icons v0.15.56 audit
         run: node tools/random-item-icons-v01556-audit.js
+      - name: Run Global item icons v0.15.57 audit
+        run: node tools/item-icons-v01557-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -93,6 +95,7 @@ jobs:
             audit-output/random-ingame-v01553-report.json
             audit-output/random-ingame-v01554-report.json
             audit-output/random-item-icons-v01556-report.json
+            audit-output/item-icons-v01557-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
