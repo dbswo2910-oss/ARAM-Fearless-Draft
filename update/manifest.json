@@ -1,6 +1,6 @@
 {
-  "version": "0.15.65",
-  "message": "v0.15.65 · 아이템 이미지 깜빡임 제거 + 단일 렌더 소유권 안정화",
+  "version": "0.15.66",
+  "message": "v0.15.66 · 실행 먹통 방지 + 아이템 이미지 단일 감시기",
   "min_launcher": "2.0.2",
   "files": [
     {"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},
@@ -33,6 +33,7 @@
     {"path":"random-ingame-shop-polish-v01554.js","source":"update/v0.15.54/random-ingame-shop-polish-v01554.js"},
     {"path":"random-item-icons-v01556.js","source":"update/v0.15.56/random-item-icons-v01556.js"},
     {"path":"item-icons-global-v01557.js","source":"update/v0.15.57/item-icons-global-v01557.js"},
+    {"path":"item-art-runtime-v01566.js","source":"update/v0.15.66/item-art-runtime-v01566.js"},
     {"path":"ui-refresh-v01560.js","source":"update/v0.15.60/ui-refresh-v01560.js"},
     {"path":"random-party-label-fix-v01561.js","source":"update/v0.15.61/random-party-label-fix-v01561.js"},
     {"path":"random-party-pool-labels-v01562.js","source":"update/v0.15.62/random-party-pool-labels-v01562.js"},
@@ -61,8 +62,8 @@
     {"path":"riot-grade-autosnapshot-v01533.js","source":"update/v0.15.33/riot-grade-autosnapshot-v01533.js"},
     {"path":"preload.js","source":"update/v0.15.32/preload.js"},
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
-    {"path":"main.js","source":"update/v0.15.65/main.js"},
-    {"path":"package.json","source":"update/v0.15.65/package.json"},
+    {"path":"main.js","source":"update/v0.15.66/main.js"},
+    {"path":"package.json","source":"update/v0.15.66/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
     {"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"}
   ],
