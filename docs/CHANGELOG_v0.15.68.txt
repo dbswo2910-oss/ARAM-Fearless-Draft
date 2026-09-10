@@ -1,0 +1,24 @@
+v0.15.68 · Windows 창 이동/리사이즈 먹통 2차 수정
+
+실사용 확인
+- v0.15.67에서도 창을 실제로 움직이면 앱이 다시 멈추는 현상이 재현됨.
+
+추가 분석
+- v0.15.67은 Windows에서 app.disableHardwareAcceleration()을 기본 적용해 큰 UI를 CPU 소프트웨어 합성 경로로 보냈음.
+- 실제 설치 기반 index.html은 backdrop-filter 11곳, box-shadow 123곳, gradient 74곳 수준의 합성 비용이 큰 스타일을 사용함.
+- v0.15.67 main.js는 move/resize 연속 이벤트에도 콜백을 연결하고 있었음.
+- runtime-performance가 패치 체인 중간에 있어 그보다 먼저 생성된 짧은 주기 런타임 타이머는 제어하지 못했음.
+
+수정
+- Windows 하드웨어 가속/GPU 합성을 기본값으로 복구. 소프트웨어 렌더링은 ARAM_DISABLE_HARDWARE_ACCELERATION=1 진단 옵션에서만 사용.
+- mainWindow의 연속 move/resize 리스너 제거.
+- will-move/will-resize에서 이동 상태를 한 번 시작하고 moved/resized에서 한 번 종료하도록 변경.
+- Windows 시스템 background material을 none으로 명시해 불필요한 DWM backdrop 경로를 피함.
+- runtime-performance-v01568.js를 모든 injected runtime patch보다 가장 먼저 실행. 이후 생성되는 sub-second maintenance interval 전체를 900ms 이상으로 제한하고 이동 중에는 callback을 건너뜀.
+- 창 이동/리사이즈 중 animation/transition 및 주요 backdrop-filter/box-shadow 효과를 일시 중지.
+- 기존 팀원픽 위치, 아이템 아트, 인게임 코치, 구매 추천, 점수 계산은 유지. score_logic_changed:false.
+
+검증
+- runtime-stability-v01568-audit.js 추가.
+- 연속 move/resize listener 부재, GPU 기본 복구, v68 runtime 선행 주입, 이동 중 효과 감축, historical party-label timer preemption을 검사.
+- 실제 Windows 최종 체감은 사용자 환경에서 재확인 필요.

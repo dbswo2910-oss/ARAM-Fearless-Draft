@@ -24,8 +24,9 @@ ok(/rpPartyPickBadgeV01558/.test(s)&&/rpManualLockBadgeV01558/.test(s)&&/display
 ok(/score_logic_changed:false/.test(s),'Label polish remains score-neutral');
 const v58At=main.indexOf("'random-party-picks-v01558.js'"),v59At=main.indexOf("'random-party-labels-v01559.js'"),coachAt=main.indexOf("'random-ingame-coach-v01550.js'");
 ok(v58At>=0&&v59At>v58At&&coachAt>v59At,'Current main preserves historical v0.15.59 layer order between v0.15.58 state and in-game coach',`${v58At}/${v59At}/${coachAt}`);
-const perfAt=main.indexOf("'runtime-performance-v01567.js'");
-if(ge(m.version,'0.15.67'))ok(perfAt>v58At&&perfAt<v59At,'v0.15.67 performance owner may preempt v0.15.59 between v0.15.58 and v0.15.59',`${v58At}/${perfAt}/${v59At}`);
+const perf67At=main.indexOf("'runtime-performance-v01567.js'"),perf68At=main.indexOf("'runtime-performance-v01568.js'");
+if(ge(m.version,'0.15.68'))ok(perf68At>=0&&perf68At<v58At,'v0.15.68 performance owner may run before the complete historical party-label chain',`${perf68At}/${v58At}/${v59At}`);
+else if(ge(m.version,'0.15.67'))ok(perf67At>v58At&&perf67At<v59At,'v0.15.67 performance owner may preempt v0.15.59 between v0.15.58 and v0.15.59',`${v58At}/${perf67At}/${v59At}`);
 ok(main.includes('__ARAM_RANDOM_PARTY_LABELS_V01559__'),'Main readiness guard covers v0.15.59');
 const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
 ok(ge(vm,'0.15.59'),'Current main VERSION is v0.15.59 or newer',vm);

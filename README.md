@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.67**  
+Current app/update version: **v0.15.68**  
 Current balance/data patch: **26.17**
 
 This repository is used for source control, automated regression validation, incremental in-app updates, Windows x64 distribution work, and durable AI/coding-agent handoff.
@@ -13,7 +13,7 @@ If ChatGPT, Codex, Claude, Gemini, or another coding agent is continuing this pr
 
 1. **`AGENTS.md`** — source-of-truth rules and current engineering constraints
 2. **`docs/AI_HANDOFF.md`** — architecture, recent design decisions, and workflow
-3. **`docs/AI_HANDOFF_v0.15.67_ADDENDUM.md`** — current Windows responsiveness hotfix decisions
+3. **`docs/AI_HANDOFF_v0.15.67_ADDENDUM.md`** — historical first Windows responsiveness attempt; superseded where v0.15.68 differs
 4. **`docs/INSTALLED_BASELINE_v0.15.49.md`** — verified real Windows installation baseline
 5. **`reference/installed-v0.15.49/random-practice-pick-fragment.html`** — exact installed Random Practice pick DOM fragment
 6. **`reference/installed-v0.15.49/random-practice-ingame-fragment.html`** — exact installed Random Practice in-game DOM fragment
@@ -23,7 +23,7 @@ Do not infer Random Practice DOM from screenshots or broad Korean-title matching
 
 ## Current UI direction
 
-v0.15.50–0.15.67 establish the compact **In-game Coach HUD**, consistent visual item language, a denser Random Practice pick workflow, a single-owner item-art runtime, and a Windows responsiveness safety layer:
+v0.15.50–0.15.68 establish the compact **In-game Coach HUD**, consistent visual item language, a denser Random Practice pick workflow, a single-owner item-art runtime, and Windows responsiveness safeguards:
 
 - alive → compact LIVE decisions
 - dead → automatic Build/analysis view
@@ -45,7 +45,8 @@ v0.15.50–0.15.67 establish the compact **In-game Coach HUD**, consistent visua
 - v0.15.62 corrects the requested **display location** after real-Windows review: the inline `팀원픽` pill inside `우리 파티 챔피언` is hidden, and `팀원픽` is shown beside the slot number in `남은 랜덤 챔피언`, matching the existing `외부픽` location. Both manual locks and AutoSync-held party picks qualify; an existing `외부픽` still takes precedence. Scoring is unchanged.
 - v0.15.63–v0.15.65 progressively unified and stabilized current Riot-client item artwork, but retained historical image observers/pollers for compatibility.
 - v0.15.66 fixes a startup/UI responsiveness regression by loading `item-art-runtime-v01566.js` before those historical image layers, preempting their watcher initialization, and leaving one mutation-driven item-art owner with no recurring whole-document polling. Recommendation and scoring logic remain unchanged.
-- v0.15.67 addresses the remaining move/resize/screen-transition freeze path: Windows uses software-rendering safe mode by default, sub-second overlay maintenance timers created during patch bootstrap are governed to 900 ms and paused during native move/resize, obsolete party-label polling layers are replaced by one scoped event-driven owner, and identical death-shop HTML paints are deduplicated. Scoring remains unchanged.
+- v0.15.67 attempted to address native move/resize freezes with software rendering plus move/resize busy gating. Real Windows follow-up showed the app could still freeze while the native window was physically moved, so that rendering/native-event strategy is historical rather than the current recommendation.
+- v0.15.68 restores normal Chromium/GPU compositing by default, removes continuous `move`/`resize` work, uses only native interaction start/end signals, runs the performance governor before every injected runtime layer, and temporarily suppresses expensive animation/backdrop/shadow effects while moving/resizing. The v0.15.67 software-rendering mode is now diagnostic opt-in only. Scoring remains unchanged.
 
 The Match Lab actual final-item row already used Riot/Data Dragon artwork in the base renderer; the item-art runtime refreshes that existing image in place rather than adding duplicate artwork.
 
@@ -53,7 +54,7 @@ The HUD layout is intentionally treated as **largely stabilized**. Current work 
 
 The shop planner uses recipe-aware Data Dragon item metadata (`ko_KR`, ARAM map 12, recipe links, combine/total gold). In real LIVE state it only gives exact component-buy instructions when currently owned components can be confirmed, avoiding unsafe duplicate-buy advice. Item-art and responsiveness layers do not change recipe, price, purchase, recommendation, or scoring logic.
 
-See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.67.txt`.
+See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.68.txt`.
 
 ## New-PC distribution
 
@@ -62,5 +63,5 @@ The representative Windows x64 bootstrap is distributed as **`ARAM_Fearless_Draf
 See:
 - `docs/README_FIRST_RUN_v0.15.33.txt` for the original clean-install bootstrap behavior
 - `docs/AUDIT_CLEAN_INSTALL_v0.15.33.txt` for the clean-install foundation audit
-- `docs/AI_HANDOFF.md` and `docs/AI_HANDOFF_v0.15.67_ADDENDUM.md` for current project context
+- `docs/AI_HANDOFF.md` and historical responsiveness addenda for project context
 - `docs/INSTALLED_BASELINE_v0.15.49.md` for the verified installed-app baseline
