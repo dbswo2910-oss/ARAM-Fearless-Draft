@@ -45,6 +45,8 @@ jobs:
         run: node tools/random-pick-v01555-audit.js
       - name: Run Random Practice party picks v0.15.58 audit
         run: node tools/random-party-picks-v01558-audit.js
+      - name: Run Random Practice party labels v0.15.59 audit
+        run: node tools/random-party-labels-v01559-audit.js
       - name: Run Random In-game Coach + Preview v0.15.50 audit
         run: node tools/random-ingame-v01550-audit.js
       - name: Run Random In-game HUD hierarchy v0.15.51 audit
@@ -92,6 +94,7 @@ jobs:
             audit-output/random-practice-v01549-report.json
             audit-output/random-pick-v01555-report.json
             audit-output/random-party-picks-v01558-report.json
+            audit-output/random-party-labels-v01559-report.json
             audit-output/random-ingame-v01550-report.json
             audit-output/random-ingame-v01551-report.json
             audit-output/random-ingame-v01552-report.json
