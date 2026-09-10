@@ -27,10 +27,11 @@ ok(/__ARAM_RANDOM_INGAME_SHOP_POLISH_V01554__\s*=\s*true/.test(s),'v0.15.54 read
 ok(/INGAME COACH · v0\.15\.54/.test(s),'v0.15.54 layer keeps its historical coach eyebrow copy');
 ok(/body\.riRandomIngameV01552 \.footer/.test(s),'In-game source footer selector covers nested footer seen in Windows screenshot');
 ok(/\.riShopHead>b\{display:none!important\}/.test(s),'Duplicated planner-header gold is hidden');
-ok(/지금 살 것/.test(s),'Immediate purchase label is shortened for faster scanning');
+ok(/지금 살 것/.test(s),'Immediate purchase label is shortened');
 ok(/보유템 없음 가정/.test(s),'Preview assumption copy is shortened');
 ok(/score_logic_changed:false/.test(s),'v0.15.54 remains score-neutral');
-ok(main.includes("'random-ingame-shop-v01553.js','random-ingame-shop-polish-v01554.js','role-metric-detail-v01518.js'"),'Current main preserves v0.15.53 -> v0.15.54 shop layer order');
+const p53=main.indexOf("'random-ingame-shop-v01553.js'"),p54=main.indexOf("'random-ingame-shop-polish-v01554.js'"),pRole=main.indexOf("'role-metric-detail-v01518.js'");
+ok(p53>=0&&p54>p53&&pRole>p54,'Current main preserves v0.15.53 -> v0.15.54 order even with newer layers between');
 ok(main.includes('__ARAM_RANDOM_INGAME_SHOP_POLISH_V01554__'),'Current main readiness guard covers v0.15.54 polish');
 const mainVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
 ok(atLeast(mainVersion,'0.15.54'),'Main VERSION is v0.15.54 or newer',mainVersion);
