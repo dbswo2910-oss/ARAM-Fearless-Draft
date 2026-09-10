@@ -1,0 +1,23 @@
+ARAM Fearless Draft v0.15.58
+
+Random Practice party-pick visibility + composition-status cleanup
+
+Changes
+- In Random Practice pick mode, current champions held by members of the user's party are shown inside the manual-party area when League AutoSync exposes party champion state.
+- Current party picks are display-only. They are NOT written into randomState.manual and do not become automatic locks; the user can still manually lock only the champions they want to preserve.
+- Candidate-pool champions currently held by party members receive a compact `팀원픽` badge. They remain valid recommendation candidates because a party member may swap from the held champion to another bench candidate.
+- Existing `외부픽` exclusion remains authoritative and takes visual precedence over `팀원픽`.
+- The old `현재 외부 픽 기준 체크` wording is simplified to `현재 조합 체크`.
+- Fixed the nested-grid layout problem introduced by v0.15.55: `#externalCheck` is now a full-width host, while its child `.randomCheckGrid` owns the actual three-column layout.
+- Status cards are shortened to `조합 보완 / 실질 딜 밸런스 · AD / AP / 추천 계산`; missing composition functions are rendered as compact chips.
+- Narrow screens stack the status cards to one column.
+
+Scope / safety
+- Exact Random Practice selectors only: `#manualPartyInputs`, `#poolInputs`, `#externalCheck`.
+- No recommendation, composition, champion, item, or scoring math is changed (`score_logic_changed:false`).
+- Party current-pick display depends on observable AutoSync champ-select state (`party`, plus local champion fallback). If that state is absent, the existing manual UI remains usable.
+
+Validation
+- New static audit: `tools/random-party-picks-v01558-audit.js`.
+- Full Regression Audit runs the new audit together with all historical forward-compatible audits.
+- CI validates source/runtime wiring and update assembly; a real Windows/League Client screenshot is still required to prove actual party-state rendering and final DPI/font layout.
