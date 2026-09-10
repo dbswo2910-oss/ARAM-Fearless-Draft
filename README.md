@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.51**  
+Current app/update version: **v0.15.52**  
 Current balance/data patch: **26.17**
 
 This repository is used for source control, automated regression validation, incremental in-app updates, Windows x64 distribution work, and durable AI/coding-agent handoff.
@@ -22,20 +22,22 @@ Do not infer Random Practice DOM from screenshots or broad Korean-title matching
 
 ## Current in-game direction
 
-v0.15.50 introduced the compact **In-game Coach HUD** foundation. v0.15.51 is the first real Windows screenshot-driven hierarchy polish:
+v0.15.50–0.15.52 establish the compact **In-game Coach HUD**:
 
 - alive → compact LIVE decisions
 - dead → automatic Build/analysis view
 - respawn <= 7s → compact LIVE preparation view
 - 3 visible tabs: `LIVE / 빌드 / 상세`
-- program-internal `인게임 미리보기` so the real HUD can be reviewed without starting a match
-- in-game mode hides pick-stage recommendation noise
-- preview controls are compressed into one desktop toolbar
-- LIVE support cards are reduced to `최고 위협 / 내 역할 / 다음 구매`
-- death view prioritizes `이번 판 최적화` over the statistical baseline
+- program-internal `인게임 미리보기` using the same coach renderer as real LIVE
 - statistical baseline item tree vs current-match optimized item recommendation
+- v0.15.51 removed pick-stage noise and fixed visual hierarchy
+- v0.15.52 removes duplicate/helper text, converts raw threat scores to interpreted danger labels, removes duplicate death countdown copy, and hides the global Source footer only while in-game
 
-See `docs/CHANGELOG_v0.15.51.txt` and `docs/AUDIT_v0.15.51.txt`.
+The current HUD layout is intentionally treated as **largely stabilized**. The next functional phase is death-time purchase planning:
+
+`현재 골드 → 지금 구매 가능한 하위템 → 잔여 골드 → 최종 코어 목표`
+
+See `docs/CHANGELOG_v0.15.50.txt`, `docs/CHANGELOG_v0.15.51.txt`, and `docs/CHANGELOG_v0.15.52.txt`.
 
 ## New-PC distribution
 
