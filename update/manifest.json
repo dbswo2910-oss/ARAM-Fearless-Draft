@@ -1,6 +1,6 @@
 {
-  "version": "0.15.59",
-  "message": "v0.15.59 · 랜덤연습 팀원픽/수동고정 표시 명확화",
+  "version": "0.15.60",
+  "message": "v0.15.60 · 팀원픽 표기 통일 + 최신 아이템 아트",
   "min_launcher": "2.0.2",
   "files": [
     {"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},
@@ -33,6 +33,7 @@
     {"path":"random-ingame-shop-polish-v01554.js","source":"update/v0.15.54/random-ingame-shop-polish-v01554.js"},
     {"path":"random-item-icons-v01556.js","source":"update/v0.15.56/random-item-icons-v01556.js"},
     {"path":"item-icons-global-v01557.js","source":"update/v0.15.57/item-icons-global-v01557.js"},
+    {"path":"ui-refresh-v01560.js","source":"update/v0.15.60/ui-refresh-v01560.js"},
     {"path":"role-metric-detail-v01518.js","source":"update/v0.15.35/role-metric-detail-v01518.js"},
     {"path":"cc-impact-v01525.js","source":"update/v0.15.25/cc-impact-v01525.js"},
     {"path":"mission-death-fairness-v01529.js","source":"update/v0.15.29/mission-death-fairness-v01529.js"},
@@ -45,7 +46,7 @@
     {"path":"profile-ux-v01537.js","source":"update/v0.15.37/profile-ux-v01537.js"},
     {"path":"brand-header-v01538.js","source":"update/v0.15.38/brand-header-v01538.js"},
     {"path":"in-app-updater-ui-v01523.js","source":"update/v0.15.23/in-app-updater-ui-v01523.js"},
-    {"path":"item-catalog-v01527.js","source":"update/v0.15.53/item-catalog-v01527.js"},
+    {"path":"item-catalog-v01527.js","source":"update/v0.15.60/item-catalog-v01527.js"},
     {"path":"time-power-v01527.js","source":"update/v0.15.27/time-power-v01527.js"},
     {"path":"riot-grade-collector-v01528.js","source":"update/v0.15.28/riot-grade-collector-v01528.js"},
     {"path":"riot-grade-ui-v01528.js","source":"update/v0.15.28/riot-grade-ui-v01528.js"},
@@ -55,8 +56,8 @@
     {"path":"riot-grade-autosnapshot-v01533.js","source":"update/v0.15.33/riot-grade-autosnapshot-v01533.js"},
     {"path":"preload.js","source":"update/v0.15.32/preload.js"},
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
-    {"path":"main.js","source":"update/v0.15.59/main.js"},
-    {"path":"package.json","source":"update/v0.15.59/package.json"},
+    {"path":"main.js","source":"update/v0.15.60/main.js"},
+    {"path":"package.json","source":"update/v0.15.60/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
     {"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"}
   ],
