@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.58**
+- Active updater version: **v0.15.59**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -156,7 +156,7 @@ Global icon rules:
 
 - exact known selectors only; do not discover panels by broad title/body text heuristics
 - keep the existing text; artwork is supplementary
-- cap icon strips (normally six or fewer) to avoid visual clutter
+- cap icon strips (normally six or fewer) to avoid clutter
 - hide failed images but retain text
 - reuse v0.15.56 catalog when possible, otherwise the existing desktop item catalog
 - no recommendation, purchase, threat, or scoring math changes (`score_logic_changed:false`)
@@ -182,7 +182,23 @@ Rules:
 - missing functions render as compact chips instead of narrow vertical text
 - `score_logic_changed:false`
 
-CI proves source wiring and update assembly only. The first real League champ-select screenshot should verify party-state shape, slot ordering, labels, and final Windows DPI/font behavior.
+### v0.15.59 — Visible party-state labels
+
+The first post-v0.15.58 Windows screenshot showed that manually entered champions were styled as locked but the small slot-side badge was not visually obvious. The user wanted the origin of each party row to be unmistakable.
+
+New active layer: `update/v0.15.59/random-party-labels-v01559.js`.
+
+Rules:
+
+- do not duplicate AutoSync or manual-state logic; consume `rpPartySyncedV01558` and `rpManualLockedV01558` from v0.15.58
+- AutoSync current pick → blue `팀원픽`
+- explicit program/manual lock → green `수동고정`
+- render the state pill inside the row's `.searchWrap`, immediately before the clear control, so it remains visible at the user's real desktop width
+- old narrow slot badges from v0.15.58 are hidden to prevent duplicate/clipped labels
+- the candidate pool keeps the existing `팀원픽` behavior from v0.15.58
+- `score_logic_changed:false`
+
+CI proves source wiring/update assembly only. A real League champ-select screenshot is still required to confirm AutoSync team-pick mapping and final Windows DPI/font placement.
 
 ## UI philosophy
 
@@ -233,13 +249,14 @@ Current relevant runtime order:
 1. `random-practice-focus-v01549.js`
 2. `random-pick-density-v01555.js`
 3. `random-party-picks-v01558.js`
-4. `random-ingame-coach-v01550.js`
-5. `random-ingame-ux-v01551.js`
-6. `random-ingame-ux-v01552.js`
-7. `random-ingame-shop-v01553.js`
-8. `random-ingame-shop-polish-v01554.js`
-9. `random-item-icons-v01556.js`
-10. `item-icons-global-v01557.js`
+4. `random-party-labels-v01559.js`
+5. `random-ingame-coach-v01550.js`
+6. `random-ingame-ux-v01551.js`
+7. `random-ingame-ux-v01552.js`
+8. `random-ingame-shop-v01553.js`
+9. `random-ingame-shop-polish-v01554.js`
+10. `random-item-icons-v01556.js`
+11. `item-icons-global-v01557.js`
 
 Do not remove earlier layers without intentionally consolidating and regression-testing their behavior.
 
@@ -247,8 +264,8 @@ Do not remove earlier layers without intentionally consolidating and regression-
 
 First priority is **real Windows/League Client validation**:
 
-- in champ select, confirm party-current picks appear in the expected party slots and pool `팀원픽` badges match held champions without auto-locking them
-- confirm the full-width composition-status strip is visually clean at the user's actual DPI/window width
+- in champ select, confirm AutoSync-held rows show blue `팀원픽`, manually entered rows show green `수동고정`, and pool `팀원픽` badges still match held champions without auto-locking them
+- confirm the full-width composition-status strip remains visually clean at the user's actual DPI/window width
 - in an actual game, confirm owned-item extraction shape and death-shop recipe behavior
 - confirm no duplicate component recommendation
 - verify the displayed remaining-core gold against the actual shop recipe
@@ -284,13 +301,14 @@ Start with:
 5. both exact Random Practice DOM fragments under `reference/installed-v0.15.49/`
 6. `update/v0.15.55/random-pick-density-v01555.js`
 7. `update/v0.15.58/random-party-picks-v01558.js`
-8. `update/v0.15.50/random-ingame-coach-v01550.js`
-9. `update/v0.15.51/random-ingame-ux-v01551.js`
-10. `update/v0.15.52/random-ingame-ux-v01552.js`
-11. `update/v0.15.53/random-ingame-shop-v01553.js`
-12. `update/v0.15.53/item-catalog-v01527.js`
-13. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
-14. `update/v0.15.56/random-item-icons-v01556.js`
-15. `update/v0.15.57/item-icons-global-v01557.js`
+8. `update/v0.15.59/random-party-labels-v01559.js`
+9. `update/v0.15.50/random-ingame-coach-v01550.js`
+10. `update/v0.15.51/random-ingame-ux-v01551.js`
+11. `update/v0.15.52/random-ingame-ux-v01552.js`
+12. `update/v0.15.53/random-ingame-shop-v01553.js`
+13. `update/v0.15.53/item-catalog-v01527.js`
+14. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
+15. `update/v0.15.56/random-item-icons-v01556.js`
+16. `update/v0.15.57/item-icons-global-v01557.js`
 
 Do not restart established design decisions from scratch unless the user asks to change direction.
