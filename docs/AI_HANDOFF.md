@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.57**
+- Active updater version: **v0.15.58**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -163,6 +163,27 @@ Global icon rules:
 
 Do not treat item icons as proof that live inventory extraction or recipe math is correct; real-match validation is still required.
 
+### v0.15.58 — Random Practice party picks + composition status
+
+The user asked for current party-held champions to be visible without turning them into forced manual locks, and for the cramped composition-status cards to be cleaned up.
+
+New active layer: `update/v0.15.58/random-party-picks-v01558.js`.
+
+Rules:
+
+- uses exact `#manualPartyInputs`, `#poolInputs`, and `#externalCheck` selectors
+- reads current party champions from observable champ-select AutoSync state (`party`, with local-champion fallback)
+- current party picks appear in the manual-party rows as **display-only current picks**; they are not written into `randomState.manual`
+- users may still explicitly lock only the party picks they want to preserve; leaving a current pick unlocked keeps swap recommendations possible
+- a party-held champion in the candidate pool receives `팀원픽` and remains a recommendation candidate
+- `외부픽` remains an exclusion and takes precedence over `팀원픽`
+- v0.15.55 had placed a three-column grid on `#externalCheck` even though its only child `.randomCheckGrid` was itself a three-column grid; v0.15.58 makes the parent full-width and lets `.randomCheckGrid` own the actual columns
+- status copy is shortened to `현재 조합 체크`, `조합 보완`, `실질 딜 밸런스 · AD / AP`, and `추천 계산`
+- missing functions render as compact chips instead of narrow vertical text
+- `score_logic_changed:false`
+
+CI proves source wiring and update assembly only. The first real League champ-select screenshot should verify party-state shape, slot ordering, labels, and final Windows DPI/font behavior.
+
 ## UI philosophy
 
 The user strongly prefers an operational dashboard, not a long report page.
@@ -186,6 +207,15 @@ Baseline references:
 - `reference/installed-v0.15.49/random-practice-pick-fragment.html`
 - `reference/installed-v0.15.49/random-practice-ingame-fragment.html`
 
+Important pick IDs:
+
+- `#random`
+- `#externalInputs`
+- `#externalCheck`
+- `#manualPartyInputs`
+- `#poolInputs`
+- `#comboResults`
+
 Important in-game base IDs:
 
 - `#randomIngameShell`
@@ -202,27 +232,29 @@ Current relevant runtime order:
 
 1. `random-practice-focus-v01549.js`
 2. `random-pick-density-v01555.js`
-3. `random-ingame-coach-v01550.js`
-4. `random-ingame-ux-v01551.js`
-5. `random-ingame-ux-v01552.js`
-6. `random-ingame-shop-v01553.js`
-7. `random-ingame-shop-polish-v01554.js`
-8. `random-item-icons-v01556.js`
-9. `item-icons-global-v01557.js`
+3. `random-party-picks-v01558.js`
+4. `random-ingame-coach-v01550.js`
+5. `random-ingame-ux-v01551.js`
+6. `random-ingame-ux-v01552.js`
+7. `random-ingame-shop-v01553.js`
+8. `random-ingame-shop-polish-v01554.js`
+9. `random-item-icons-v01556.js`
+10. `item-icons-global-v01557.js`
 
 Do not remove earlier layers without intentionally consolidating and regression-testing their behavior.
 
 ## Next in-game phase
 
-First priority is **real Windows/Live Client validation of the purchase planner**:
+First priority is **real Windows/League Client validation**:
 
-- confirm owned-item extraction shape in an actual game
+- in champ select, confirm party-current picks appear in the expected party slots and pool `팀원픽` badges match held champions without auto-locking them
+- confirm the full-width composition-status strip is visually clean at the user's actual DPI/window width
+- in an actual game, confirm owned-item extraction shape and death-shop recipe behavior
 - confirm no duplicate component recommendation
 - verify the displayed remaining-core gold against the actual shop recipe
-- verify official item icons load correctly in all newly decorated Electron surfaces
-- add extractor aliases or recipe fixes only if live data proves they are needed
+- verify official item icons load correctly in all decorated Electron surfaces
 
-After that, the leading feature candidate is **patch-level cached LOL.PS ARAM statistics**:
+After that, the leading feature candidate remains **patch-level cached LOL.PS ARAM statistics**:
 
 - do not live-scrape the website every match
 - collect/refresh by patch or controlled update job
@@ -251,13 +283,14 @@ Start with:
 4. `docs/INSTALLED_BASELINE_v0.15.49.md`
 5. both exact Random Practice DOM fragments under `reference/installed-v0.15.49/`
 6. `update/v0.15.55/random-pick-density-v01555.js`
-7. `update/v0.15.50/random-ingame-coach-v01550.js`
-8. `update/v0.15.51/random-ingame-ux-v01551.js`
-9. `update/v0.15.52/random-ingame-ux-v01552.js`
-10. `update/v0.15.53/random-ingame-shop-v01553.js`
-11. `update/v0.15.53/item-catalog-v01527.js`
-12. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
-13. `update/v0.15.56/random-item-icons-v01556.js`
-14. `update/v0.15.57/item-icons-global-v01557.js`
+7. `update/v0.15.58/random-party-picks-v01558.js`
+8. `update/v0.15.50/random-ingame-coach-v01550.js`
+9. `update/v0.15.51/random-ingame-ux-v01551.js`
+10. `update/v0.15.52/random-ingame-ux-v01552.js`
+11. `update/v0.15.53/random-ingame-shop-v01553.js`
+12. `update/v0.15.53/item-catalog-v01527.js`
+13. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
+14. `update/v0.15.56/random-item-icons-v01556.js`
+15. `update/v0.15.57/item-icons-global-v01557.js`
 
 Do not restart established design decisions from scratch unless the user asks to change direction.
