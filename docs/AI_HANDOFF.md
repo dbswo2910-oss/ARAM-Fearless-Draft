@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.60**
+- Active updater version: **v0.15.61**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -203,7 +203,7 @@ v0.15.60 intentionally overrides only the **visible wording/style** of the manua
 
 The user decided that manual-vs-AutoSync origin does not need to be visible: both represent a champion being used by the party. They also noticed that the versioned Data Dragon images looked older than current client item artwork.
 
-New active visual layer: `update/v0.15.60/ui-refresh-v01560.js`.
+Active visual layer: `update/v0.15.60/ui-refresh-v01560.js`.
 Updated stable catalog source: `update/v0.15.60/item-catalog-v01527.js`.
 
 Party-label rules:
@@ -226,6 +226,31 @@ Latest-item-art rules:
 - no recommendation, purchase, threat, or composition scoring changes
 
 CI/source auditing validates wiring and fallbacks only. Real Windows rendering and remote image network behavior still require a real post-update screenshot.
+
+### v0.15.61 — Real-Windows party-label follow-up
+
+The user's real v0.15.60 Windows screenshot showed a manually entered party champion in `#manualPartyInputs` with **no visible `팀원픽` pill**. The composition-status strip and TOP5 layout were otherwise stable.
+
+Root cause:
+
+- v0.15.60 only restyled/reworded `.rpPartyStatePillV01559`
+- if v0.15.59 did not create that pill for a particular real DOM/state timing, v0.15.60 had no element to restyle
+
+New active layer: `update/v0.15.61/random-party-label-fix-v01561.js`.
+
+Rules:
+
+- do **not** depend on a pre-existing v0.15.59 pill
+- inspect the actual party-row state directly via `rpPartySyncedV01558`, `rpManualLockedV01558`, and `randomState.manual`
+- if either AutoSync current-pick or explicit manual-lock state is active, create `.rpPartyLabelV01561` directly inside the row `.searchWrap`
+- visible copy is always `팀원픽`
+- the old v0.15.59 pill is hidden to prevent duplicate labels
+- section title is simplified to `우리 파티 챔피언 · 고정할 픽만 선택`
+- manual-vs-AutoSync origin may be retained internally for diagnostics, but is not exposed as different visible wording
+- manual inputs remain true recommendation locks; AutoSync-only current picks remain display-only/swappable
+- `score_logic_changed:false`
+
+This is a screenshot-driven rendering fix only. It does not change candidate eligibility, TOP5 scoring, composition scoring, or item logic.
 
 ## UI philosophy
 
@@ -285,6 +310,7 @@ Current relevant runtime order:
 10. `random-item-icons-v01556.js`
 11. `item-icons-global-v01557.js`
 12. `ui-refresh-v01560.js`
+13. `random-party-label-fix-v01561.js`
 
 Do not remove earlier layers without intentionally consolidating and regression-testing their behavior.
 
@@ -292,7 +318,9 @@ Do not remove earlier layers without intentionally consolidating and regression-
 
 First priority is **real Windows/League Client validation**:
 
-- in champ select, confirm AutoSync-held and manually entered party rows both visibly show `팀원픽`
+- in Random Practice, confirm a manually entered party champion now directly receives a visible `팀원픽` pill
+- in champ select, confirm AutoSync-held party rows also visibly show `팀원픽`
+- confirm the section title reads `우리 파티 챔피언 · 고정할 픽만 선택`
 - confirm manual inputs remain true locks while AutoSync current picks remain display-only/swappable
 - confirm the full-width composition-status strip remains visually clean at the user's actual DPI/window width
 - confirm latest item artwork appears on the v0.15.56/v0.15.57 surfaces and Match Lab final-item row
@@ -333,14 +361,16 @@ Start with:
 7. `update/v0.15.58/random-party-picks-v01558.js`
 8. `update/v0.15.59/random-party-labels-v01559.js`
 9. `update/v0.15.60/ui-refresh-v01560.js`
-10. `update/v0.15.50/random-ingame-coach-v01550.js`
-11. `update/v0.15.51/random-ingame-ux-v01551.js`
-12. `update/v0.15.52/random-ingame-ux-v01552.js`
-13. `update/v0.15.53/random-ingame-shop-v01553.js`
-14. `update/v0.15.60/item-catalog-v01527.js`
-15. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
-16. `update/v0.15.56/random-item-icons-v01556.js`
-17. `update/v0.15.57/item-icons-global-v01557.js`
-18. `tools/v01560-audit.js`
+10. `update/v0.15.61/random-party-label-fix-v01561.js`
+11. `update/v0.15.50/random-ingame-coach-v01550.js`
+12. `update/v0.15.51/random-ingame-ux-v01551.js`
+13. `update/v0.15.52/random-ingame-ux-v01552.js`
+14. `update/v0.15.53/random-ingame-shop-v01553.js`
+15. `update/v0.15.60/item-catalog-v01527.js`
+16. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
+17. `update/v0.15.56/random-item-icons-v01556.js`
+18. `update/v0.15.57/item-icons-global-v01557.js`
+19. `tools/v01560-audit.js`
+20. `tools/v01561-audit.js`
 
 Do not restart established design decisions from scratch unless the user asks to change direction.
