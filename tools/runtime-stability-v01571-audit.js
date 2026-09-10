@@ -3,26 +3,35 @@ const fs=require('fs'),path=require('path'),vm=require('vm');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
-const report={version:'0.15.71',generated_at:new Date().toISOString(),checks:[]};
+const report={version:'0.15.71+',generated_at:new Date().toISOString(),checks:[]};
 const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
+const parts=v=>String(v||'0').split('.').map(x=>Number(x)||0);
+const atLeast=(v,min)=>{const a=parts(v),b=parts(min);for(let i=0;i<Math.max(a.length,b.length);i++){if((a[i]||0)!==(b[i]||0))return(a[i]||0)>(b[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const pkgPath=byPath.get('package.json'),entryPath=byPath.get('main-v01571.js'),baseMainPath=byPath.get('main.js'),nodePath=byPath.get('autosync-live-runtime-v01571.js'),rendererPath=byPath.get('runtime-live-autosync-v01571.js'),v70Path=byPath.get('runtime-random-ingame-v01570.js');
-const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},entry=entryPath&&exists(entryPath)?read(entryPath):'',baseMain=baseMainPath&&exists(baseMainPath)?read(baseMainPath):'',node=nodePath&&exists(nodePath)?read(nodePath):'',renderer=rendererPath&&exists(rendererPath)?read(rendererPath):'';
-for(const [name,src] of [['v0.15.71 entry',entry],['historical v0.15.70 main',baseMain],['main-process live runtime',node],['renderer live runtime',renderer]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
-ok('manifest version 0.15.71',m.version==='0.15.71',m.version);
-ok('package version 0.15.71',pkg.version==='0.15.71',pkg.version);
-ok('package launches v0.15.71 entry',pkg.main==='main-v01571.js',pkg.main||'missing');
-ok('v0.15.71 entry is delivered',entryPath==='update/v0.15.71/main-v01571.js',entryPath||'missing');
+const pkgPath=byPath.get('package.json'),baseMainPath=byPath.get('main.js'),nodePath=byPath.get('autosync-live-runtime-v01571.js'),rendererPath=byPath.get('runtime-live-autosync-v01571.js'),v70Path=byPath.get('runtime-random-ingame-v01570.js');
+const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
+const currentEntryTarget=String(pkg.main||'main.js'),currentEntryPath=byPath.get(currentEntryTarget)||'';
+const currentEntry=currentEntryPath&&exists(currentEntryPath)?read(currentEntryPath):'';
+const historicalEntryPath='update/v0.15.71/main-v01571.js',historicalEntry=exists(historicalEntryPath)?read(historicalEntryPath):'';
+const baseMain=baseMainPath&&exists(baseMainPath)?read(baseMainPath):'',node=nodePath&&exists(nodePath)?read(nodePath):'',renderer=rendererPath&&exists(rendererPath)?read(rendererPath):'';
+for(const [name,src] of [['historical v0.15.71 entry',historicalEntry],['current package entry',currentEntry],['historical v0.15.70 main',baseMain],['main-process live runtime',node],['renderer live runtime',renderer]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
+ok('manifest is v0.15.71 or newer',atLeast(m.version,'0.15.71'),m.version);
+ok('package is v0.15.71 or newer',atLeast(pkg.version,'0.15.71'),pkg.version);
+ok('current package main is delivered',!!currentEntryPath&&exists(currentEntryPath),`${currentEntryTarget} -> ${currentEntryPath||'missing'}`);
+ok('historical v0.15.71 entry remains in repository',!!historicalEntry);
 ok('historical v0.15.70 main remains immutable runtime base',baseMainPath==='update/v0.15.70/main.js',baseMainPath||'missing');
 ok('main-process live runtime is delivered',nodePath==='update/v0.15.71/autosync-live-runtime-v01571.js',nodePath||'missing');
 ok('renderer live runtime is delivered',rendererPath==='update/v0.15.71/runtime-live-autosync-v01571.js',rendererPath||'missing');
 ok('v0.15.70 Random In-game owner remains active',v70Path==='update/v0.15.70/runtime-random-ingame-v01570.js',v70Path||'missing');
-ok('entry patches cached AutoSync Core before compiling the historical main',entry.indexOf("require('./autosync-live-runtime-v01571').patch(autosyncCore)")>=0&&entry.indexOf('module._compile(src,__filename)')>entry.indexOf("patch(autosyncCore)"));
-ok('entry requires exact v0.15.70 base contract',entry.includes("const VERSION='0.15.70'")&&entry.includes('base main contract mismatch'));
-ok('entry promotes runtime version to v0.15.71',entry.includes("replaceAll('0.15.70','0.15.71')"));
-ok('entry injects renderer live governor immediately after performance owner',entry.includes("'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'"));
-ok('entry extends renderer readiness guard with v0.15.71 marker',entry.includes('__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__'));
+ok('historical v0.15.71 entry patches AutoSync Core',historicalEntry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
+ok('historical v0.15.71 entry requires exact v0.15.70 base contract',historicalEntry.includes("const VERSION='0.15.70'")&&historicalEntry.includes('base main contract mismatch'));
+ok('historical v0.15.71 entry promotes runtime version',historicalEntry.includes("replaceAll('0.15.70','0.15.71')"));
+ok('historical v0.15.71 entry injects renderer live governor',historicalEntry.includes("'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'"));
+ok('current entry preserves v0.15.71 AutoSync Core patch',currentEntry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
+ok('current entry preserves v0.15.71 renderer runtime',currentEntry.includes('runtime-live-autosync-v01571.js'));
+ok('current entry preserves v0.15.71 readiness marker',currentEntry.includes('__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__'));
+ok('current entry compiles from historical main base',currentEntry.includes("const basePath=path.join(__dirname,'main.js')")&&currentEntry.includes('module._compile(src,__filename)'));
 ok('historical base still contains v0.15.70 Random In-game owner',baseMain.includes("'runtime-random-ingame-v01570.js'")&&baseMain.includes('aramRandomIngameRuntimeV01570?.finishBootstrap'));
 ok('core cadence is reduced from 750ms to 1200ms',node.includes("setInterval(()=>this.tick().catch(()=>{}),1200)"));
 ok('identity/lobby refresh is throttled during live game',node.includes('t-last<15000')&&node.includes('__aramLiveIdentityAtV01571'));
@@ -36,27 +45,7 @@ ok('AutoSync status UI is deduped by stable signature',renderer.includes('syncUi
 ok('Match Lab account chrome is deduped by stable signature',renderer.includes('historyUiSkips')&&renderer.includes('lastHistorySig'));
 ok('renderer exposes live diagnostic counters',renderer.includes('aramLiveAutosyncRuntimeV01571')&&renderer.includes('maxPollMs'));
 ok('renderer live patch is score-neutral',renderer.includes('score_logic_changed:false'));
-try{
-  const scriptsOld="'runtime-performance-v01568.js','live-strength-v01513.js'",scriptsNew="'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'";
-  const readyOld='Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__) && Boolean(window.__ARAM_LIVE_STRENGTH_V01513__)',readyNew='Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__) && Boolean(window.__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__) && Boolean(window.__ARAM_LIVE_STRENGTH_V01513__)';
-  const current=baseMain.replace(scriptsOld,scriptsNew).replace(readyOld,readyNew).replaceAll('0.15.70','0.15.71');
-  new Function(current);ok('compiled current main transforms cleanly',current.includes("const VERSION='0.15.71'")&&current.includes("'runtime-live-autosync-v01571.js'"));
-}catch(e){ok('compiled current main transforms cleanly',false,e.message)}
-try{
-  let intervalDelay=0;
-  class Core{constructor(){this.state={phase:'in_game',gameflowPhase:'InProgress'};this.creds={};this.timer=null}tick(){return Promise.resolve()}captureIdentityAndParty(){return Promise.resolve()}refreshCreds(){return Promise.resolve(true)}gameflowInfo(){return Promise.resolve({phase:'InProgress',queueId:450,gameId:1})}liveGet(){return Promise.resolve({})}}
-  const mod={LeagueAutoSyncCore:Core};const context={module:{exports:{}},exports:{},require,console,setInterval:(fn,ms)=>{intervalDelay=ms;return 1},clearInterval,Date,Map,String,Number,Promise};context.exports=context.module.exports;
-  vm.runInNewContext(node,context);context.module.exports.patch(mod);const c=new Core();c.start();ok('VM core installs 1200ms timer',intervalDelay===1200,`delay=${intervalDelay}`);
-}catch(e){ok('v0.15.71 main-process VM simulation',false,e.stack||e.message)}
-try{
-  let nextId=1,intervalDelay=0,clears=0,trackCalls=0,uiCalls=0,histCalls=0,resolvePoll;const pollPromise=new Promise(r=>{resolvePoll=r});
-  const timers={setInterval(fn,ms){intervalDelay=ms;return ++nextId},clearInterval(){clears++},setTimeout(fn){fn();return ++nextId}};
-  const state={phase:'in_game',isAram:true,gameId:77,inGameOur:[1,2,3,4,5],inGameEnemy:[6,7,8,9,10],clientConnected:true,bridgeConnected:true,account:{connected:true,riotId:'x#1'}};
-  const context={window:null,console,performance:{now:()=>0},Date,JSON,Promise,...timers,lolAutoSync:{timer:123,lastState:state,enabled:true},lolAutoSyncPoll(){return pollPromise},aramTrackLinkedGame(){trackCalls++},lolAutoSyncRender(){uiCalls++},aramHistoryRenderAccount(){histCalls++},aramHistoryState:{targetMode:'current'}};context.window=context;
-  vm.runInNewContext(renderer,context);ok('VM renderer replaces existing poll timer',clears===1&&intervalDelay===1250,`clears=${clears},delay=${intervalDelay}`);
-  context.aramTrackLinkedGame(state);context.aramTrackLinkedGame(state);ok('VM renderer persists a complete live game once',trackCalls===1,`trackCalls=${trackCalls}`);
-  context.lolAutoSyncRender();context.lolAutoSyncRender();context.aramHistoryRenderAccount();context.aramHistoryRenderAccount();ok('VM renderer dedupes stable status/account paints',uiCalls===1&&histCalls===1,`ui=${uiCalls},history=${histCalls}`);
-  const p1=context.lolAutoSyncPoll(false),p2=context.lolAutoSyncPoll(false),st=context.aramLiveAutosyncRuntimeV01571.getStats();ok('VM overlapping renderer poll is skipped',st.counters.overlapSkips===1,JSON.stringify(st.counters));resolvePoll(state);void p1;void p2;
-}catch(e){ok('v0.15.71 renderer VM simulation',false,e.stack||e.message)}
-report.pass=report.checks.every(x=>x.pass);fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01571-report.json'),JSON.stringify(report,null,2));
-for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1);
+try{const scriptsOld="'runtime-performance-v01568.js','live-strength-v01513.js'",scriptsNew="'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'",readyOld='Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__) && Boolean(window.__ARAM_LIVE_STRENGTH_V01513__)',readyNew='Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__) && Boolean(window.__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__) && Boolean(window.__ARAM_LIVE_STRENGTH_V01513__)';const compiled=baseMain.replace(scriptsOld,scriptsNew).replace(readyOld,readyNew).replaceAll('0.15.70','0.15.71');new Function(compiled);ok('historical v0.15.71 transform still compiles',compiled.includes("const VERSION='0.15.71'")&&compiled.includes('runtime-live-autosync-v01571.js'))}catch(e){ok('historical v0.15.71 transform still compiles',false,e.message)}
+try{let intervalDelay=0;class Core{constructor(){this.state={phase:'in_game',gameflowPhase:'InProgress'};this.creds={};this.timer=null}tick(){return Promise.resolve()}captureIdentityAndParty(){return Promise.resolve()}refreshCreds(){return Promise.resolve(true)}gameflowInfo(){return Promise.resolve({phase:'InProgress',queueId:450,gameId:1})}liveGet(){return Promise.resolve({})}}const mod={LeagueAutoSyncCore:Core};const context={module:{exports:{}},exports:{},require,console,setInterval:(fn,ms)=>{intervalDelay=ms;return 1},clearInterval,Date,Map,String,Number,Promise};context.exports=context.module.exports;vm.runInNewContext(node,context);context.module.exports.patch(mod);const c=new Core();c.start();ok('VM core installs 1200ms timer',intervalDelay===1200,`delay=${intervalDelay}`)}catch(e){ok('v0.15.71 main-process VM simulation',false,e.stack||e.message)}
+try{let nextId=1,intervalDelay=0,clears=0,trackCalls=0,uiCalls=0,histCalls=0,resolvePoll;const pollPromise=new Promise(r=>{resolvePoll=r});const timers={setInterval(fn,ms){intervalDelay=ms;return ++nextId},clearInterval(){clears++},setTimeout(fn){fn();return ++nextId}};const state={phase:'in_game',isAram:true,gameId:77,inGameOur:[1,2,3,4,5],inGameEnemy:[6,7,8,9,10],clientConnected:true,bridgeConnected:true,account:{connected:true,riotId:'x#1'}};const context={window:null,console,performance:{now:()=>0},Date,JSON,Promise,...timers,lolAutoSync:{timer:123,lastState:state,enabled:true},lolAutoSyncPoll(){return pollPromise},aramTrackLinkedGame(){trackCalls++},lolAutoSyncRender(){uiCalls++},aramHistoryRenderAccount(){histCalls++},aramHistoryState:{targetMode:'current'}};context.window=context;vm.runInNewContext(renderer,context);ok('VM renderer replaces existing poll timer',clears===1&&intervalDelay===1250,`clears=${clears},delay=${intervalDelay}`);context.aramTrackLinkedGame(state);context.aramTrackLinkedGame(state);ok('VM renderer persists a complete live game once',trackCalls===1,`trackCalls=${trackCalls}`);context.lolAutoSyncRender();context.lolAutoSyncRender();context.aramHistoryRenderAccount();context.aramHistoryRenderAccount();ok('VM renderer dedupes stable status/account paints',uiCalls===1&&histCalls===1,`ui=${uiCalls},history=${histCalls}`);const p1=context.lolAutoSyncPoll(false),p2=context.lolAutoSyncPoll(false),st=context.aramLiveAutosyncRuntimeV01571.getStats();ok('VM overlapping renderer poll is skipped',st.counters.overlapSkips===1,JSON.stringify(st.counters));resolvePoll(state);void p1;void p2}catch(e){ok('v0.15.71 renderer VM simulation',false,e.stack||e.message)}
+report.pass=report.checks.every(x=>x.pass);fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01571-report.json'),JSON.stringify(report,null,2));for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1);
