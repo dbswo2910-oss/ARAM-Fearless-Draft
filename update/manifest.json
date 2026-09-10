@@ -1,6 +1,6 @@
 {
-  "version": "0.15.64",
-  "message": "v0.15.64 · 최신 아이템 이미지 전수 통일 + 점검 리포트",
+  "version": "0.15.65",
+  "message": "v0.15.65 · 아이템 이미지 깜빡임 제거 + 단일 렌더 소유권 안정화",
   "min_launcher": "2.0.2",
   "files": [
     {"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},
@@ -38,6 +38,7 @@
     {"path":"random-party-pool-labels-v01562.js","source":"update/v0.15.62/random-party-pool-labels-v01562.js"},
     {"path":"item-art-hotfix-v01563.js","source":"update/v0.15.63/item-art-hotfix-v01563.js"},
     {"path":"item-art-unified-v01564.js","source":"update/v0.15.64/item-art-unified-v01564.js"},
+    {"path":"item-art-stable-v01565.js","source":"update/v0.15.65/item-art-stable-v01565.js"},
     {"path":"role-metric-detail-v01518.js","source":"update/v0.15.35/role-metric-detail-v01518.js"},
     {"path":"cc-impact-v01525.js","source":"update/v0.15.25/cc-impact-v01525.js"},
     {"path":"mission-death-fairness-v01529.js","source":"update/v0.15.29/mission-death-fairness-v01529.js"},
@@ -60,8 +61,8 @@
     {"path":"riot-grade-autosnapshot-v01533.js","source":"update/v0.15.33/riot-grade-autosnapshot-v01533.js"},
     {"path":"preload.js","source":"update/v0.15.32/preload.js"},
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
-    {"path":"main.js","source":"update/v0.15.64/main.js"},
-    {"path":"package.json","source":"update/v0.15.64/package.json"},
+    {"path":"main.js","source":"update/v0.15.65/main.js"},
+    {"path":"package.json","source":"update/v0.15.65/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
     {"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"}
   ],
