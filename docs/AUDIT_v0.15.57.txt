@@ -1,0 +1,39 @@
+ARAM Fearless Draft v0.15.57 — Item Surface Audit
+
+Basis
+- Verified installed v0.15.49 baseline and its exact DOM/functions
+- Current updater runtime through v0.15.56
+
+Finding
+v0.15.56 correctly decorated the new Random Practice in-game coach, but several other user-facing item surfaces remained text-only.
+
+Newly covered exact surfaces
+- #liveBuilds
+- #liveUtils
+- #randomLiveTopbar
+- #randomLiveSummary
+- #randomLiveBuildAdvice
+- #randomBuilds
+- #randomUtils
+- #randomThreatList
+- #dataCard
+- #historyMatchDetail
+
+Already visualized / intentionally unchanged
+- Match Lab .matchItems actual final-item row already uses Riot/Data Dragon item artwork in the base application. v0.15.57 must not duplicate it.
+- Random Practice current coach remains primarily handled by v0.15.56; v0.15.57 extends coverage around it.
+
+Safety / UX rules
+- Official icon + existing text; never replace the only readable item name with an image.
+- Failed image load => hide image only, keep text.
+- Cap recognized icon strips to avoid clutter.
+- Use exact known selectors and item text surfaces; no broad heading/body discovery.
+- Recommendation/item/purchase/scoring math unchanged.
+
+Automated audit
+- tools/item-icons-v01557-audit.js
+- verifies all listed exact targets, Riot/Data Dragon path, fallback behavior, icon caps, no broad text discovery, version wiring, and score neutrality.
+
+Limits
+- CI/source audit cannot prove Windows DPI/font spacing or that remote item images render in every live Electron network state.
+- Real-match owned-item extraction and purchase-planner recipe math still require live validation before logic changes.
