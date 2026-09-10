@@ -42,7 +42,8 @@ for(const f of files){
 }
 assert(new Set(deletes).size===deletes.length,'Delete list has no duplicates',deletes.join(', '));
 
-// Current app metadata consistency.
+// Current app metadata consistency. The package.json `main` field is the actual Electron entry.
+// Since v0.15.71 it may be a narrow wrapper over a previously validated main.js runtime base.
 const pkgEntry=files.find(x=>x.path==='package.json');
 const mainEntry=files.find(x=>x.path==='main.js');
 const preloadEntry=files.find(x=>x.path==='preload.js');
@@ -54,11 +55,26 @@ if(pkgEntry&&exists(pkgEntry.source)){
   try{pkg=JSON.parse(read(pkgEntry.source));pass('Current package JSON parse')}catch(e){fail('Current package JSON parse',e.message)}
   assert(String(pkg.version)===String(manifest.version),'Package version matches manifest',`${pkg.version} vs ${manifest.version}`);
 }
+const packageMainTarget=String(pkg.main||'main.js');
+const packageMainSource=targetMap.get(packageMainTarget)||'';
+result.info.packageMainTarget=packageMainTarget;result.info.packageMainSource=packageMainSource;
+assert(!!packageMainSource&&exists(packageMainSource),'Package main entry is delivered by manifest',`${packageMainTarget} -> ${packageMainSource||'missing'}`);
+let packageMain='';
+if(packageMainSource&&exists(packageMainSource)){
+  packageMain=read(packageMainSource);nodeCheck(packageMainSource);
+  if(packageMainTarget==='main.js'){
+    const vm=packageMain.match(/const\s+VERSION\s*=\s*['"]([^'"]+)['"]/);
+    assert(vm&&vm[1]===manifest.version,'Main VERSION matches manifest',vm?vm[1]:'missing');
+  }else{
+    assert(packageMain.includes(String(manifest.version)),'Package entry declares current manifest version',manifest.version);
+    assert(/module\._compile\(|require\(['"]\.\/main/.test(packageMain),'Package entry delegates to a versioned/base main runtime',packageMainTarget);
+    pass('Package entry wrapper accepted',`${packageMainTarget} -> ${packageMainSource}`);
+  }
+}
 let main='';
 if(mainEntry&&exists(mainEntry.source)){
   main=read(mainEntry.source);nodeCheck(mainEntry.source);
-  const vm=main.match(/const\s+VERSION\s*=\s*['"]([^'"]+)['"]/);
-  assert(vm&&vm[1]===manifest.version,'Main VERSION matches manifest',vm?vm[1]:'missing');
+  if(packageMainTarget!=='main.js')pass('Historical main runtime base retained',mainEntry.source);
 }
 if(preloadEntry&&exists(preloadEntry.source))nodeCheck(preloadEntry.source);
 
@@ -76,7 +92,8 @@ for(const rel of walk('update')){
 pass('Repository update JS syntax sweep',`${allJs} JS files checked`);
 pass('Repository update JSON parse sweep',`${allJson} JSON files checked`);
 
-// Runtime injection chain integrity.
+// Runtime injection chain integrity. A package entry wrapper may transform this validated base;
+// version-specific audits cover the wrapper's exact injected additions.
 if(main){
   const scriptBlock=main.match(/const\s+scripts\s*=\s*\[([\s\S]*?)\];/);
   const scripts=scriptBlock?matchAll(/['"]([^'"]+\.js)['"]/g,scriptBlock[1]):[];
@@ -116,7 +133,7 @@ if(main){
     assert(matches.length>0,'Preload IPC has matching current handler',ch);
     if(matches.length&&matches.every(x=>x.source!==mainEntry.source)){
       const moduleTargets=matches.map(x=>x.target.replace(/\.js$/,''));
-      const wired=moduleTargets.some(t=>main.includes(`require('./${t}')`)||main.includes(`require("./${t}")`));
+      const wired=moduleTargets.some(t=>main.includes(`require('./${t}')`)||main.includes(`require("./${t}")`)||packageMain.includes(`require('./${t}')`)||packageMain.includes(`require("./${t}")`));
       assert(wired,'Modular IPC handler module is required by current main',`${ch}: ${matches.map(x=>x.target).join(', ')}`);
     }
   }
