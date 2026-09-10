@@ -3,6 +3,8 @@ name: Full Regression Audit
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -59,6 +61,8 @@ jobs:
         run: node tools/item-art-v01564-audit.js
       - name: Run v0.15.65 no-flicker item-art owner audit
         run: node tools/item-art-v01565-audit.js
+      - name: Run v0.15.66 startup responsiveness audit
+        run: node tools/runtime-stability-v01566-audit.js
       - name: Run Random In-game Coach + Preview v0.15.50 audit
         run: node tools/random-ingame-v01550-audit.js
       - name: Run Random In-game HUD hierarchy v0.15.51 audit
@@ -113,6 +117,7 @@ jobs:
             audit-output/v01563-report.json
             audit-output/item-art-v01564-report.json
             audit-output/item-art-v01565-report.json
+            audit-output/runtime-stability-v01566-report.json
             audit-output/random-ingame-v01550-report.json
             audit-output/random-ingame-v01551-report.json
             audit-output/random-ingame-v01552-report.json
