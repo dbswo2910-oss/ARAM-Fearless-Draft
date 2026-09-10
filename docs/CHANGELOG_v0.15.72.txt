@@ -1,0 +1,33 @@
+ARAM Fearless Draft v0.15.72
+
+Random Practice full-path responsiveness consolidation
+
+Observed symptom
+- The app could still freeze after repeated interaction inside Random Practice, even outside a live League game.
+- Previous fixes reduced several isolated workloads but historical Random Practice decorators still owned overlapping observers/listeners and unrelated global observers were reacting to Random DOM churn.
+
+Changes
+- v0.15.49 Random Practice focus polish keeps only exact control hooks; its recurring subtree observer is removed.
+- v0.15.55 pick-density polish no longer owns a MutationObserver or document-wide click/input listener.
+- v0.15.58 party-pick UI no longer owns a 650 ms interval, subtree observer, or document-wide click/input listeners. AutoSync party/current-pick display remains available through explicit refresh and includes a team-minus-external fallback when party state is incomplete.
+- v0.15.68 performance compatibility layer keeps native move/resize gating but no longer owns another Random Practice observer/document listener set.
+- In-app updater UI binds directly to the stable #topUpdateBadge instead of observing/scanning the whole document and calling layout reads after arbitrary mutations.
+- Player-profile champion-detail sticky behavior is scoped to the active #data view instead of observing document.body and reacting to Random Practice churn.
+- New runtime-random-practice-v01572.js is the single maintenance coordinator for Random Practice pick mode.
+- Exhaustive TOP5 calculation is preserved but processed cooperatively in short chunks so up to 3,003 combinations do not monopolize the renderer event loop.
+- Heavy Random analysis/detail refreshes are coalesced and deferred instead of being recursively rebuilt inside the same interaction turn.
+- v0.15.71 live AutoSync single-flight / throttling remains active and forwards meaningful state changes to the Random Practice coordinator.
+
+UI contract
+- Current party picks remain display-only unless the user explicitly locks them.
+- Candidate-pool team picks remain marked as 팀원픽.
+- Existing 외부픽 state keeps precedence and remains excluded from candidate recommendations.
+
+Safety
+- recommendation/team-score/item/threat/purchase formulas are unchanged.
+- score_logic_changed:false
+
+Validation
+- tools/runtime-stability-v01572-audit.js checks syntax, manifest wiring, removal of redundant watchers, scoped global observers, cooperative exhaustive TOP5 ranking equivalence, and scoring isolation.
+- Full Regression Audit continues to run all historical forward-compatible audits.
+- Final Windows behavior still requires real interaction testing because static CI cannot reproduce the user's Electron/GPU/League environment.

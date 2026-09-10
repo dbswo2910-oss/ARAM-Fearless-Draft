@@ -11,14 +11,15 @@ const histMainPath='update/v0.15.69/main.js',histPkgPath='update/v0.15.69/packag
 const histMain=exists(histMainPath)?read(histMainPath):'',histPkg=exists(histPkgPath)?JSON.parse(read(histPkgPath)):{};
 const currentMainPath=byPath.get('main.js'),currentPkgPath=byPath.get('package.json'),perfPath=byPath.get('runtime-performance-v01568.js');
 const currentMain=currentMainPath&&exists(currentMainPath)?read(currentMainPath):'',currentPkg=currentPkgPath&&exists(currentPkgPath)?JSON.parse(read(currentPkgPath)):{};
-for(const [name,src] of [['historical v0.15.69 main',histMain],['current main',currentMain]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
+const perf=perfPath&&exists(perfPath)?read(perfPath):'';
+for(const [name,src] of [['historical v0.15.69 main',histMain],['current main',currentMain],['current v0.15.68 performance runtime',perf]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
 ok('manifest is v0.15.69 or newer',ge(m.version,'0.15.69'),m.version);
 ok('historical v0.15.69 main remains available',exists(histMainPath));
 ok('historical v0.15.69 package remains available',exists(histPkgPath));
 ok('historical package version is v0.15.69',histPkg.version==='0.15.69',histPkg.version);
 ok('current main/package are delivered',!!currentMainPath&&!!currentPkgPath&&exists(currentMainPath)&&exists(currentPkgPath),`${currentMainPath}/${currentPkgPath}`);
 ok('current main/package are v0.15.69 or newer',ge((currentMain.match(/const VERSION='([^']+)'/)||[])[1],'0.15.69')&&ge(currentPkg.version,'0.15.69'),`${currentPkg.version}`);
-ok('v0.15.68 performance runtime remains active',perfPath==='update/v0.15.68/runtime-performance-v01568.js',perfPath||'missing');
+ok('v0.15.68 performance runtime remains active',!!perfPath&&exists(perfPath)&&perf.includes('__ARAM_RUNTIME_PERFORMANCE_V01568__=true'),perfPath||'missing');
 const startupOld="setTimeout(()=>runEngineRegressionTests(false),30)";
 const startupNew="setTimeout(()=>{if(!window.aramDesktop?.isElectron)runEngineRegressionTests(false)},30)";
 const dataOld="function ensureRegressionRun(){if(!regressionLastRun)runEngineRegressionTests(true);else renderRegressionResults()}";

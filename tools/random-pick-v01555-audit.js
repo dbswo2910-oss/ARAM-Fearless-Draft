@@ -12,7 +12,7 @@ const pickPath=byPath.get('random-pick-density-v01555.js');
 const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.55'),'Manifest is v0.15.55 or newer',m.version);
-ok(!!pickPath&&/v0\.15\.55\/random-pick-density-v01555\.js$/.test(pickPath)&&exists(pickPath),'v0.15.55 pick density runtime remains delivered',pickPath||'missing');
+ok(!!pickPath&&exists(pickPath),'v0.15.55 pick density runtime remains delivered',pickPath||'missing');
 ok(!!mainPath&&exists(mainPath),'Current main is delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package is delivered',pkgPath||'missing');
 const s=pickPath&&exists(pickPath)?read(pickPath):'';

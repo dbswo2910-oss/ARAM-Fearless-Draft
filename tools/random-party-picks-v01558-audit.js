@@ -12,7 +12,7 @@ const patchPath=byPath.get('random-party-picks-v01558.js');
 const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.58'),'Manifest is v0.15.58 or newer',m.version);
-ok(!!patchPath&&/v0\.15\.58\/random-party-picks-v01558\.js$/.test(patchPath)&&exists(patchPath),'v0.15.58 party-pick runtime is delivered',patchPath||'missing');
+ok(!!patchPath&&exists(patchPath),'v0.15.58 party-pick runtime is delivered',patchPath||'missing');
 ok(!!mainPath&&exists(mainPath),'Current main is delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package is delivered',pkgPath||'missing');
 const s=patchPath&&exists(patchPath)?read(patchPath):'';
