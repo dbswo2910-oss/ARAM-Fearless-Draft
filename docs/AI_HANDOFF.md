@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.51**
+- Active updater version: **v0.15.52**
 - Balance/data patch tracked by project: **26.17**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -29,69 +29,42 @@ When sources disagree:
 
 1. A newly supplied real installed-app snapshot from the user.
 2. `update/manifest.json` for current in-app distribution.
-3. `main.js` / `package.json` from the real installed snapshot for the installed runtime version.
+3. `main.js` / `package.json` from the real installed snapshot for installed runtime version.
 4. Versioned files under `update/v*/`.
 5. README/changelogs/audits.
 
-Do not rely on installed `appfiles/manifest.json` for runtime version; it was stale in the v0.15.49 captured install.
+Do not rely on installed `appfiles/manifest.json` for runtime version; it was stale in the captured v0.15.49 install.
 
 ## Architecture
 
-### Base UI
-
-The app loads a large monolithic `index.html`. Historical UI/logic live there. Newer features are injected as runtime JS patches from `main.js` on `dom-ready`.
-
-### Runtime patches
+The app loads a large monolithic `index.html`; newer features are injected as runtime JS patches by `main.js` on `dom-ready`.
 
 For a new version:
 
 - create patch under `update/vX.Y.Z/`
 - add installed filename mapping to `update/manifest.json`
 - inject it in `main.js` in deterministic order
-- add a readiness marker (`window.__ARAM_...__`)
-- add/update an audit script
+- add readiness marker (`window.__ARAM_...__`)
+- add/update audit script
 - update Full Regression Audit workflow
 - synchronize README/changelog/audit/agent docs
 - wait for CI before declaring completion
 
-### League Client bridge
+`autosync-core.js` is a local read-only League Client bridge. Standard ARAM is queue 450; Mayhem/아수라장 is separate.
 
-`autosync-core.js` is a local read-only League Client bridge. Important behavior:
+## Critical historical decisions
 
-- credential/lockfile discovery
-- current summoner / Riot ID identity
-- ARAM queue discrimination
-- ChampSelect party/bench state
-- in-game 10-player state and observable stats
-- ARAM match history
+### v0.15.48 failure → v0.15.49 correction
 
-Standard ARAM is queue 450. Mayhem/아수라장 is separated from standard ARAM.
+v0.15.48 discovered Random Practice panels heuristically from Korean headings/regex and rearranged wrong parent containers. Result: near-zero-width columns and Korean text wrapping vertically.
 
-## Recent design/balance decisions
+Do not repeat this approach. Use exact DOM IDs from the user's installed baseline.
 
-### v0.15.43 — synergy concentration damping
+### v0.15.50 — In-game Coach HUD + Preview
 
-Highly connected synergy champions could appear too often because large duo bonuses stacked with route/structure bonuses. Direction: global diminishing/overlap control, not champion-specific hardcoding.
+Goal: transform the feature-rich in-game dashboard into a **one-glance operational coach**, not a report page.
 
-### v0.15.45 — stable Draft layout
-
-Independent left/right vertical flows are preferred. Avoid row-height coupling and aggressive DOM moving.
-
-### v0.15.46–47 — Pick Judgment
-
-Compact tabbed information area: Summary / Risk detection / Composition matchup. High enemy risk is not automatically enemy composition counter; matchup analysis is bidirectional.
-
-### v0.15.48 failure and v0.15.49 correction
-
-v0.15.48 discovered Random Practice panels heuristically from Korean headings/regex and rearranged wrong parent containers. Result: narrow columns and Korean text wrapping one character per line.
-
-Do not repeat this approach. v0.15.49 uses exact DOM IDs from the user's real installed `index.html`.
-
-### v0.15.50 — In-game Coach HUD + Preview (Phase 1)
-
-Goal: turn the existing feature-rich in-game dashboard into a **one-glance operational coach**, not a report page.
-
-Existing embedded live engines are preserved and reused:
+Existing embedded live engines are preserved and reused, including:
 
 - `randomLiveContext`
 - `randomLiveThreatRows`
@@ -101,73 +74,56 @@ Existing embedded live engines are preserved and reused:
 - `randomLiveFightPlan`
 - `randomLiveLocalJob`
 
-The old visible dashboard had 5 tabs (`라이브 요약 / 아이템 / 위협 분석 / 한타 가이드 / 파워·타이밍`) plus duplicated topbar metrics. v0.15.50 hides that legacy shell visually and presents 3 tabs:
+Visible coach is reduced to `LIVE / 빌드 / 상세`.
 
-- `LIVE`
-- `빌드`
-- `상세`
-
-AUTO life-state behavior:
+AUTO behavior:
 
 - alive → LIVE combat mode
 - dead with respawn > 7s → Build/analysis mode
 - dead with respawn <= 7s → LIVE respawn-prep mode
-- user can turn AUTO off and manually stay on a tab
+- AUTO can be disabled by the user
 
-LIVE default information budget:
+Program-internal `🎮 인게임 미리보기` uses the same coach renderer with synthetic data and must clearly show `PREVIEW · 실제 게임 데이터 아님`.
 
-1. NOW CALL / current fight decision
-2. highest threat
-3. local role/action in one short line
-4. next purchase TOP1
-5. current matchup + at most one critical warning
+### v0.15.51 — Screenshot-driven hierarchy polish
 
-Secondary numbers such as average item value/average level are not shown in the combat default view. They remain under Detail.
+Based on the user's real Windows preview screenshots:
 
-### v0.15.51 — Screenshot-driven HUD hierarchy polish (Phase 2)
+- hide pick-stage UI while in in-game mode
+- compress preview controls into a desktop one-row toolbar
+- remove duplicate current-situation card because NOW CALL already covers it
+- support cards become `최고 위협 / 내 역할 / 다음 구매`
+- give role/action the largest width
+- make current-match optimized death recommendation primary and statistical build secondary
 
-The user reviewed real Windows preview screenshots at 1480x940. The screenshots showed that the coach foundation worked, but several layout problems remained:
+### v0.15.52 — HUD micro-polish / layout stabilization
 
-- pick-stage `완성 조합 TOP5` still occupied a large block above the coach while in in-game mode
-- preview scenario/role selects each consumed a full row
-- LIVE repeated `현재 구도` in both NOW CALL and a separate fourth metric card
-- the four equal LIVE metric cards made the actionable `내 역할` text too narrow/small
-- on death, the generic statistical build and current-match recommendation had equal visual priority, even though the current-match purchase is the primary action
+Based on the second set of real Windows screenshots:
 
-v0.15.51 is a **UI-only layer** (`random-ingame-ux-v01551.js`) loaded immediately after the v0.15.50 coach renderer. It does not change score/recommendation logic.
+- coach eyebrow now follows current version (`INGAME COACH · v0.15.52`)
+- hide helper microcopy that does not change action (`행동 한 줄만 표시`, `이번 판 상황 보정`-type captions)
+- interpret raw threat display such as `물리 · 84점` as `물리 · 위험 높음`; raw score remains available via tooltip/detail
+- death header becomes simply `사망 분석` because the large respawn countdown already exists below
+- redundant respawn explanatory middle text is hidden
+- global Source footer is hidden only while Random Practice is in in-game mode
+- recommendation/Threat/item/composition scoring remains unchanged (`score_logic_changed:false`)
 
-Current visual contract:
+**Treat the v0.15.52 overall HUD layout as largely locked.** Do not restart another large layout redesign unless the user explicitly asks. Future work should improve decision quality and purchase actions inside this hierarchy.
 
-- in in-game mode, hide pick-stage headers/recommendation shells so the coach starts near the top
-- preview controls use one compact desktop toolbar
-- LIVE supporting metrics are exactly three visible cards: highest threat / local action / next purchase
-- NOW CALL owns the current-fight/current-matchup summary; do not repeat the same `현재 구도` card below
-- give `내 역할` the widest LIVE support card
-- in dead Build view, place `이번 판 최적화` first and give it substantially more width than `통계 기본트리`
-- keep the statistical build visible as reference, not as the primary action
+## Next in-game phase
 
-### Preview design rule
+The next planned functional enhancement is **death-time immediate purchase planning**:
 
-Random Practice has `🎮 인게임 미리보기`.
+`현재 골드 → 지금 구매 가능한 하위템 → 잔여 골드 → 최종 코어 목표`
 
-Preview state/scenario controls:
+Important design rules:
 
-- alive / dead 23s / respawn 5s
-- even / numbers advantage / numbers disadvantage / enemy carry fed
-- tank / ADC / mage / support / bruiser
-
-Important: preview uses the **same coach renderer** as actual LIVE. It must always show `PREVIEW · 실제 게임 데이터 아님`. If a real ARAM live context appears while preview is active, preview yields to real LIVE data.
-
-### Item presentation
-
-The item view compares:
-
-- **통계 기본트리**: embedded champion DB `기본 트리` + `통계 기준`
-- **이번 판 최적화**: existing LIVE item engine TOP1 + alternatives
-
-The embedded DB already contains source metadata such as `26.17 ARAM · MetaSRC + LOL.PS 교차` for many champions. Current builds may display this metadata, but the app does **not** crawl/fetch LOL.PS live during a match.
-
-Future item-statistics phase can automate a cached external-statistics refresh separately. Do not make in-game rendering depend on fragile live website scraping.
+- completed-core recommendation and immediate component purchase are separate concepts
+- death screen should answer “what do I buy right now?” before deeper analysis
+- use the existing item catalog/tree and current gold where observable
+- do not guess unavailable Live Client data
+- statistical build remains a baseline/reference; current-match optimization remains primary
+- later LOL.PS integration should be patch-level cached/refreshable data, not fragile live website scraping during a match
 
 ## UI philosophy
 
@@ -180,44 +136,33 @@ The user strongly prefers an operational dashboard, not a long report page.
 - Same information should not be repeated in multiple cards.
 - Red styling is reserved for genuinely high-priority danger.
 - Explanation text defaults to one line, at most two where unavoidable.
-- Calculations may stay detailed internally while display is concise.
+- Calculations can remain detailed internally while display stays concise.
 - Dead time can expose more analysis because the user has time to read.
 
-## Random Practice intended hierarchy
+## Exact installed Random Practice in-game contract
 
-### Pick mode
+Baseline reference: `reference/installed-v0.15.49/random-practice-ingame-fragment.html`
 
-1. Queue size / party context
-2. External fixed picks + manual party fixed picks
-3. Candidate pool up to 15
-4. `이번 선택의 핵심`
-5. Completion recommendation TOP5
-6. Lower analysis behind tabs/collapse
+Important base IDs:
 
-### In-game mode
+- `#randomIngameShell`
+- `#randomLiveTopbar`
+- `#randomIngameSubnav`
+- `#randomLiveSummary`
+- `#randomLiveBuildAdvice`
+- `#randomThreatList`
+- `#randomFightGuide`
+- `#randomTimingPanel`
+- `#randomPowerCurve`
 
-Alive:
+Current layered runtime order:
 
-1. NOW CALL
-2. highest threat
-3. my action/role
-4. next purchase
-5. one important warning if needed
+1. `random-practice-focus-v01549.js`
+2. `random-ingame-coach-v01550.js`
+3. `random-ingame-ux-v01551.js`
+4. `random-ingame-ux-v01552.js`
 
-Dead:
-
-1. respawn time + current gold
-2. current-match optimized build as the primary action
-3. statistical base build as a secondary reference
-4. TOP1 + alternatives
-5. next-fight action line
-6. more detail only on request
-
-Respawn <= 7s:
-
-1. respawn countdown
-2. next-fight action
-3. highest threat / one warning
+Do not remove earlier layers without intentionally consolidating and regression-testing their behavior.
 
 ## Verification workflow
 
@@ -227,8 +172,8 @@ Before saying a change is done:
 2. Verify `update/manifest.json` points at intended version/files.
 3. Verify main/package version consistency.
 4. Run Full Regression Audit.
-5. Confirm the new feature-specific audit step succeeds.
-6. For layout changes, request one real Windows preview/screenshot after update; CI cannot reproduce every DPI/font/layout condition.
+5. Confirm all historical forward-compatible in-game audits and the new feature audit succeed.
+6. For layout changes, request a real Windows preview/screenshot; CI does not reproduce every DPI/font condition.
 
 ## When another AI takes over
 
@@ -238,9 +183,9 @@ Start with:
 2. `update/manifest.json`
 3. this file
 4. `docs/INSTALLED_BASELINE_v0.15.49.md`
-5. `reference/installed-v0.15.49/random-practice-pick-fragment.html`
-6. `reference/installed-v0.15.49/random-practice-ingame-fragment.html`
-7. `update/v0.15.50/random-ingame-coach-v01550.js` — coach renderer/state machine
-8. `update/v0.15.51/random-ingame-ux-v01551.js` — current screenshot-driven visual hierarchy layer
+5. both exact Random Practice DOM fragments under `reference/installed-v0.15.49/`
+6. `update/v0.15.50/random-ingame-coach-v01550.js`
+7. `update/v0.15.51/random-ingame-ux-v01551.js`
+8. `update/v0.15.52/random-ingame-ux-v01552.js`
 
-Do not restart design decisions from scratch unless the user asks to change direction.
+Do not restart established design decisions from scratch unless the user asks to change direction.
