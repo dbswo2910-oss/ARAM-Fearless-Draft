@@ -2,59 +2,73 @@
 const fs=require('fs'),path=require('path'),vm=require('vm');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
+const exists=p=>fs.existsSync(path.join(ROOT,p));
 const report={version:'0.15.72',generated_at:new Date().toISOString(),checks:[]};
 const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const m=JSON.parse(read('update/manifest.json')),byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const runtime=read('update/v0.15.72/runtime-random-practice-v01572.js'),entry=read('update/v0.15.72/main-v01572.js'),pkg=JSON.parse(read('update/v0.15.72/package.json'));
-for(const [n,s] of [['runtime',runtime],['entry',entry]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
-ok('manifest version',m.version==='0.15.72',m.version);ok('package version',pkg.version==='0.15.72',pkg.version);ok('package entry',pkg.main==='main-v01572.js',pkg.main||'');
-ok('manifest delivers Random owner',byPath.get('runtime-random-practice-v01572.js')==='update/v0.15.72/runtime-random-practice-v01572.js',byPath.get('runtime-random-practice-v01572.js')||'');
-ok('Random owner injected before v0.15.68',entry.includes("'runtime-random-practice-v01572.js','runtime-performance-v01568.js','runtime-live-autosync-v01571.js'"));
-ok('runtime filename tagging installed',entry.includes('__ARAM_LOADING_RUNTIME_V01572__=${JSON.stringify(file)}'));
-ok('Random owner bootstrap finishes before v0.15.68 timer hook restore',entry.includes('aramRandomPracticeRuntimeV01572?.finishBootstrap?.()'));
-ok('readiness requires v0.15.72 owner',entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
-ok('v0.15.71 live core patch preserved',entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
-ok('historical v58 is preempted',runtime.includes("window.__ARAM_RANDOM_PARTY_PICKS_V01558__=true"));
-ok('compat v58 API exposed by single owner',runtime.includes('window.aramRandomPartyPicksV01558='));
-ok('v49/v55/v68 observers are bootstrap-suppressed',runtime.includes("'random-practice-focus-v01549.js'")&&runtime.includes("'random-pick-density-v01555.js'")&&runtime.includes("'runtime-performance-v01568.js'"));
-ok('updater whole-document observer is suppressed',runtime.includes("'in-app-updater-ui-v01523.js'"));
-ok('Data sticky whole-body observer is suppressed',runtime.includes("'player-profile-data-sticky-v01521.js'"));
-ok('Data sticky broad click listener is suppressed',runtime.includes("['player-profile-data-sticky-v01521.js',new Set(['click'])]"));
-ok('Random density broad input/click listeners suppressed',runtime.includes("['random-pick-density-v01555.js',new Set(['input','click'])]"));
-ok('v68 broad document refresh listeners suppressed',runtime.includes("['runtime-performance-v01568.js',new Set(['input','change','click','visibilitychange'])]"));
-ok('single owner itself adds no recurring interval',!runtime.includes('setInterval('));
-ok('single owner itself adds no MutationObserver',!runtime.includes('new MutationObserver('));
-ok('party fallback derives team minus external',runtime.includes('for(const n of unique(s.team||[]))')&&runtime.includes('external.has(n)'));
-ok('party display is marked as display-only',runtime.includes('팀원 현재픽 · 수동 고정 아님')&&runtime.includes('party_current_pick_is_display_only:true'));
-ok('candidate pool team badge restored',runtime.includes("badge.textContent='팀원픽'"));
-ok('external badge keeps precedence',runtime.includes("external=!!$('.randomPoolTakenBadge',item)")&&runtime.includes('&&team.has(name)&&!external'));
+const get=target=>{const p=byPath.get(target);return p&&exists(p)?read(p):''};
+const runtime=get('runtime-random-practice-v01572.js'),entry=get('main-v01572.js'),pkg=JSON.parse(get('package.json')||'{}');
+const focus=get('random-practice-focus-v01549.js'),density=get('random-pick-density-v01555.js'),party=get('random-party-picks-v01558.js'),perf=get('runtime-performance-v01568.js');
+const updater=get('in-app-updater-ui-v01523.js'),sticky=get('player-profile-data-sticky-v01521.js'),live=get('runtime-live-autosync-v01571.js');
+for(const [n,s] of [['runtime',runtime],['entry',entry],['focus',focus],['density',density],['party',party],['perf',perf],['updater',updater],['sticky',sticky],['live',live]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
+ok('manifest version',m.version==='0.15.72',m.version);
+ok('package version',pkg.version==='0.15.72',pkg.version);
+ok('package entry',pkg.main==='main-v01572.js',pkg.main||'');
+ok('runtime delivered',byPath.get('runtime-random-practice-v01572.js')==='update/v0.15.72/runtime-random-practice-v01572.js');
+ok('runtime injected after Random compatibility stack',entry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js'"));
+ok('readiness includes v0.15.72 runtime',entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
+ok('v0.15.71 core governor preserved',entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
+
+ok('v49 recurring subtree observer removed',!focus.includes('new MutationObserver('));
+ok('v55 observer removed',!density.includes('new MutationObserver('));
+ok('v55 broad document click/input refresh removed',!density.includes("document.addEventListener('click'")&&!density.includes("document.addEventListener('input'"));
+ok('v58 observer removed',!party.includes('new MutationObserver('));
+ok('v58 interval removed',!party.includes('setInterval('));
+ok('v58 broad document click/input refresh removed',!party.includes("document.addEventListener('click'")&&!party.includes("document.addEventListener('input'"));
+ok('v58 has team-minus-external fallback',party.includes('for(const n of unique(s.team||[]))')&&party.includes('external.has(n)'));
+ok('v68 Random observer removed',!perf.includes('new MutationObserver('));
+ok('v68 broad Random document listeners removed',!perf.includes("document.addEventListener('input'")&&!perf.includes("document.addEventListener('change'")&&!perf.includes("document.addEventListener('click'"));
+
+ok('updater exact badge binding',updater.includes("document.getElementById('topUpdateBadge')"));
+ok('updater no whole-document MutationObserver',!updater.includes('new MutationObserver('));
+ok('updater no layout-wide getBoundingClientRect scan',!updater.includes('getBoundingClientRect'));
+ok('Data sticky exits outside active Data view',sticky.includes("if(!dataView?.classList?.contains('active'))return false"));
+ok('Data sticky observer scoped to dataView',sticky.includes("obs.observe(dataView,{childList:true,subtree:true})"));
+ok('Data sticky click listener scoped to #data',sticky.includes("#data [class*=\"champ\"]"));
+ok('Data sticky no body observer',!sticky.includes('obs.observe(document.body'));
+
+ok('Random runtime has no MutationObserver',!runtime.includes('MutationObserver'));
+ok('Random runtime has no recurring interval',!runtime.includes('setInterval('));
+ok('Random runtime coalesces compatibility refresh',runtime.includes('scheduleMaintenance')&&runtime.includes('aramRandomPracticeFocusV01549?.refresh')&&runtime.includes('aramRandomPartyPicksV01558?.refresh'));
 ok('TOP5 computation is cooperative',runtime.includes('function* comboIter')&&runtime.includes('setTimeout(step,0)')&&runtime.includes('now()-a<11'));
-ok('TOP5 keeps only five rows while enumerating',runtime.includes('if(top.length>5)top.pop()'));
+ok('TOP5 keeps only five rows during exhaustive enumeration',runtime.includes('if(top.length>5)top.pop()'));
 ok('TOP5 tie order preserved',runtime.includes("localeCompare(b.party.join('|'),'ko')"));
-ok('heavy analysis/details deferred in pick mode',runtime.includes('scheduleAnalysis')&&runtime.includes('scheduleDetails')&&runtime.includes('pickVisible()'));
-ok('same teamScore function remains scoring source',runtime.includes('const v=teamScore(names,modes)'));
+ok('heavy Random analysis/details are deferred in pick view',runtime.includes('scheduleAnalysis')&&runtime.includes('scheduleDetails')&&runtime.includes('pickVisible()'));
 ok('score logic unchanged flag',runtime.includes('score_logic_changed:false'));
+ok('live AutoSync forwards state without extra polling',live.includes('aramRandomPracticeRuntimeV01572?.onAutoSyncState?.(out)')&&!live.includes('setInterval(()=>window.aramRandomPracticeRuntimeV01572'));
+
 async function vmTest(){
-  const docListeners=[];let nativeObservers=0;
-  class NMO{constructor(){nativeObservers++}observe(){}disconnect(){}takeRecords(){return[]}}
-  const classes=new Set(['active']),random={classList:{contains:x=>classes.has(x)},getAttribute:()=> 'pick'},result={innerHTML:'',firstChild:{textContent:''}},detail={innerHTML:''};
-  const document={visibilityState:'visible',head:{appendChild(){}},createElement(){return{id:'',textContent:'',classList:{add(){},remove(){},toggle(){}}}},querySelector(sel){if(sel==='#random.active'||sel==='#random')return random;if(sel==='#comboResults')return result;if(sel==='#comboDetail')return detail;if(sel==='[data-rp72-progress]')return null;if(sel==='#rp72PartyStyle')return {id:'rp72PartyStyle'};return null},querySelectorAll(){return[]},addEventListener(t,fn,o){docListeners.push([t,fn,o])},removeEventListener(){}};
-  const names=['A','B','C','D','E'],randomState={ourModes:{},manual:[],pool:names,external:['X','Y','Z'],combos:[],selectedCombo:0,shortlist:[],lastComboCount:0};
+  const listeners={};
+  const result={innerHTML:'',firstChild:{textContent:''}},detail={innerHTML:''},random={classList:{contains:x=>x==='active'},getAttribute:()=> 'pick'};
+  const document={visibilityState:'visible',querySelector(sel){if(sel==='#random.active')return random;if(sel==='#random')return random;if(sel==='#comboResults')return result;if(sel==='#comboDetail')return detail;if(sel==='[data-rp72-progress]')return null;return null},addEventListener(t,fn){(listeners[t]??=[]).push(fn)}};
+  const names=['A','B','C','D','E'];
+  const randomState={ourModes:{},combos:[],selectedCombo:0,shortlist:[],lastComboCount:0};
   const score=xs=>xs.reduce((a,x)=>a+x.charCodeAt(0),0);
-  const ctx={window:null,document,MutationObserver:NMO,performance:{now:()=>Date.now()},PerformanceObserver:undefined,setTimeout,clearTimeout,Date,Math,Set,Map,Object,String,Number,Array,JSON,console,randomViewMode:'pick',randomState,randomDraftPlan:()=>({queue:2,external:['X','Y','Z'],locked:[],needed:2,pool:names,duplicates:[],provisional:false,totalCombos:10}),teamScore:xs=>({s:score(xs),direction:'d',reason:'r',warning:'w',structure:'s',parts:{},pair:{}}),renderRandomInputs(){},renderRandomAnalysis(){},renderRandomDetails(){},runRandomCombos(){},renderRandomComboResults(){},renderComboDetail(){},renderExternalCheck(){},persist(){}};
-  ctx.window=ctx;ctx.window.window=ctx.window;ctx.window.document=document;ctx.window.addEventListener=()=>{};ctx.window.lolAutoSyncResolveChamp=x=>typeof x==='string'?x:(x?.name||'');
+  const ctx={window:null,document,performance:{now:()=>Date.now()},PerformanceObserver:undefined,setTimeout,clearTimeout,Date,Math,Set,Map,Object,String,Number,Array,JSON,console,
+    randomViewMode:'pick',randomState,
+    randomDraftPlan:()=>({queue:2,external:['X','Y','Z'],locked:[],needed:2,pool:names,duplicates:[],provisional:false,totalCombos:10}),
+    teamScore:xs=>({s:score(xs),direction:'d',reason:'r',warning:'w',structure:'s',parts:{},pair:{}}),
+    renderRandomInputs(){},renderRandomAnalysis(){},renderRandomDetails(){},runRandomCombos(){},renderRandomComboResults(){},renderComboDetail(){},renderExternalCheck(){},persist(){},
+  };
+  ctx.window=ctx;ctx.window.addEventListener=()=>{};ctx.window.aramRandomPracticeFocusV01549={refresh(){}};ctx.window.aramRandomPickDensityV01555={refresh(){}};ctx.window.aramRandomPartyPicksV01558={refresh(){}};ctx.window.aramRuntimePerformanceV01568={refresh(){}};
   vm.runInNewContext(runtime,ctx);
-  ctx.window.__ARAM_LOADING_RUNTIME_V01572__='random-pick-density-v01555.js';new ctx.window.MutationObserver(()=>{}).observe(random,{});document.addEventListener('click',()=>{},true);document.addEventListener('input',()=>{},true);
-  ctx.window.__ARAM_LOADING_RUNTIME_V01572__='in-app-updater-ui-v01523.js';new ctx.window.MutationObserver(()=>{}).observe(random,{});
-  ctx.window.__ARAM_LOADING_RUNTIME_V01572__='player-profile-data-sticky-v01521.js';new ctx.window.MutationObserver(()=>{}).observe(random,{});document.addEventListener('click',()=>{},true);
-  ctx.window.__ARAM_LOADING_RUNTIME_V01572__='some-safe-layer.js';new ctx.window.MutationObserver(()=>{}).observe(random,{});document.addEventListener('click',()=>{},true);
-  ctx.window.__ARAM_LOADING_RUNTIME_V01572__='';
-  const pre=ctx.window.aramRandomPracticeRuntimeV01572.getStats().counters;
-  ok('VM suppresses exactly targeted observers',pre.observerSuppressed===3&&nativeObservers===1,`suppressed=${pre.observerSuppressed},native=${nativeObservers}`);
-  ok('VM suppresses targeted document listeners only',pre.documentListenerSuppressed===3&&docListeners.filter(x=>x[0]==='click').length>=2,`suppressed=${pre.documentListenerSuppressed},nativeListeners=${docListeners.length}`);
-  ctx.window.runRandomCombos();await new Promise(r=>setTimeout(r,120));
-  const brute=[];for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++){const party=[names[i],names[j]],xs=['X','Y','Z',...party];brute.push({party,score:score(xs)})}brute.sort((a,b)=>b.score-a.score||a.party.join('|').localeCompare(b.party.join('|'),'ko'));
-  ok('VM cooperative TOP5 equals exhaustive ranking',JSON.stringify(randomState.combos.map(x=>[x.party,x.score]))===JSON.stringify(brute.slice(0,5).map(x=>[x.party,x.score])),JSON.stringify(randomState.combos.map(x=>[x.party,x.score])));
-  ok('VM evaluates all combinations',ctx.window.aramRandomPracticeRuntimeV01572.getStats().counters.comboTeams===10,String(ctx.window.aramRandomPracticeRuntimeV01572.getStats().counters.comboTeams));
+  ctx.window.runRandomCombos();
+  await new Promise(r=>setTimeout(r,120));
+  const brute=[];for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++){const party=[names[i],names[j]],xs=['X','Y','Z',...party];brute.push({party,score:score(xs)})}
+  brute.sort((a,b)=>b.score-a.score||a.party.join('|').localeCompare(b.party.join('|'),'ko'));
+  ok('VM cooperative TOP5 produces exact exhaustive ranking',JSON.stringify(randomState.combos.map(x=>[x.party,x.score]))===JSON.stringify(brute.slice(0,5).map(x=>[x.party,x.score])),JSON.stringify(randomState.combos.map(x=>[x.party,x.score])));
+  ok('VM reports all ten combinations processed',ctx.window.aramRandomPracticeRuntimeV01572.getStats().counters.comboTeams===10,String(ctx.window.aramRandomPracticeRuntimeV01572.getStats().counters.comboTeams));
 }
-(async()=>{try{await vmTest()}catch(e){ok('VM stability simulation',false,e.stack||e.message)}report.pass=report.checks.every(x=>x.pass);fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output','runtime-stability-v01572-report.json'),JSON.stringify(report,null,2));for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1)})();
+
+(async()=>{try{await vmTest()}catch(e){ok('VM cooperative calculation test',false,e.stack||e.message)}
+report.pass=report.checks.every(x=>x.pass);fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output','runtime-stability-v01572-report.json'),JSON.stringify(report,null,2));for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1)})();
