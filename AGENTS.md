@@ -66,7 +66,7 @@ In-game base shell:
 
 Read both exact DOM fragments under `reference/installed-v0.15.49/` before changing Random Practice layout.
 
-## Current in-game runtime contract — v0.15.52
+## Current in-game runtime contract — v0.15.53
 
 The active visible HUD is layered deliberately:
 
@@ -74,8 +74,9 @@ The active visible HUD is layered deliberately:
 2. `update/v0.15.50/random-ingame-coach-v01550.js`
 3. `update/v0.15.51/random-ingame-ux-v01551.js`
 4. `update/v0.15.52/random-ingame-ux-v01552.js`
+5. `update/v0.15.53/random-ingame-shop-v01553.js`
 
-`v0.15.50` supplies the coach renderer/state machine/preview. `v0.15.51` fixes screenshot-driven visual hierarchy. `v0.15.52` removes remaining duplicate/noise copy without altering calculation logic.
+`v0.15.50` supplies the coach renderer/state machine/preview. `v0.15.51` fixes screenshot-driven visual hierarchy. `v0.15.52` removes remaining duplicate/noise copy. `v0.15.53` adds death-time immediate-purchase planning using recipe-aware Data Dragon data.
 
 Visible hierarchy:
 
@@ -92,35 +93,34 @@ Visible hierarchy:
   - at most one critical warning
 - Build death view:
   - respawn countdown + current gold
+  - `지금 구매` recipe/component planner
   - current-match optimized build primary
   - statistical base build secondary
   - next-fight action line
-- Preview uses the same coach renderer and always identifies synthetic data as preview.
+- Preview uses the same coach renderer and clearly marks synthetic data.
 
-v0.15.52 presentation rules:
+v0.15.53 purchase-planner rules:
 
-- coach eyebrow version must match current release
-- raw threat score should be translated into an actionable danger label in the default HUD; exact score can remain in tooltip/detail
-- helper copy with no decision value is hidden
-- duplicate respawn text is hidden
-- global Source footer is hidden only while Random Practice is actually in in-game mode
-- `score_logic_changed:false`
+- completed-core recommendation and immediate component purchase are separate concepts
+- use current gold plus actual Data Dragon recipe metadata (`from`, `into`, `gold.base`, `gold.total`)
+- account for already-owned components when they are observable from Live Context
+- if real owned-component state cannot be confirmed, hide exact component-buy advice instead of risking duplicate purchases
+- display immediate buy(s), purchase cost, leftover gold, final core target, and remaining core cost
+- use `ko_KR` item catalog where available
+- `score_logic_changed:false`; this layer does not alter recommendation/threat/item scoring
 
-**The overall HUD layout is now considered largely stabilized. Do not begin another major layout redesign unless the user explicitly asks.**
+**The overall HUD layout is considered largely stabilized. Do not begin another major layout redesign unless the user explicitly asks.**
 
 ## Next planned phase
 
-Build a death-time purchase planner that answers the immediate shop decision:
-
-`현재 골드 → 지금 구매 가능한 하위템 → 잔여 골드 → 최종 코어 목표`
+Primary candidate: strengthen the statistical baseline with patch-level cached LOL.PS ARAM data, while keeping current-match optimization separate.
 
 Requirements:
 
-- distinguish “final recommended core” from “component(s) to buy right now”
-- use current gold and actual item recipe/catalog data where available
-- prioritize the current-match optimized path over generic statistical reference
-- do not invent unavailable gold/items/live-state fields
-- retain deeper item reasoning behind Build/Detail instead of bloating LIVE
-- future LOL.PS support should be cached/patch-refresh data, not live-match website scraping
+- do not scrape LOL.PS repeatedly during a live match
+- refresh/cache external statistics by patch or controlled update job
+- show source and freshness clearly
+- keep `통계 빌드` as reference and `이번 판 최적화` as the actionable recommendation
+- first verify v0.15.53 real Windows/Live Client component extraction before expanding the shop planner further
 
-See `docs/AI_HANDOFF.md` and `docs/CHANGELOG_v0.15.52.txt` before starting this phase.
+See `docs/AI_HANDOFF.md` and `docs/CHANGELOG_v0.15.53.txt` before starting this phase.
