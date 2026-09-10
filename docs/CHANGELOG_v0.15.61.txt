@@ -1,0 +1,16 @@
+ARAM Fearless Draft v0.15.61
+
+랜덤연습 팀원픽 표시 실환경 보강
+
+- 실제 Windows 화면에서 수동 입력한 우리 파티 챔피언에 `팀원픽` pill이 보이지 않던 케이스를 수정.
+- v0.15.59가 미리 만든 pill의 존재 여부에 의존하지 않고, v0.15.58 행 상태(`rpPartySyncedV01558`, `rpManualLockedV01558`)와 `randomState.manual`을 직접 읽어 표시 여부를 결정.
+- AutoSync 현재픽과 수동 고정픽 모두 화면에서는 동일하게 `팀원픽`으로 표시.
+- 내부 수동 고정 상태와 추천 계산 의미는 그대로 유지.
+- 섹션 제목을 `우리 파티 챔피언 · 고정할 픽만 선택`으로 단순화.
+- v0.15.60 최신 아이템 아트 동작은 그대로 유지.
+- score_logic_changed:false
+
+검증
+- 새 v0.15.61 전용 회귀감사 추가.
+- 기존 v0.15.58~v0.15.60 랜덤연습/아이템 관련 감사와 함께 Full Regression Audit에서 검증.
+- CI는 소스/배포 조립 검증이며, 실제 Windows DPI/폰트 및 League Client 상태는 실화면 확인 필요.
