@@ -13,7 +13,9 @@ ok('watchdog wired',entry.includes("require('./freeze-watchdog-v01574').install(
 ok('shop53 unsafe retry is patched before execute',entry.includes("file==='random-ingame-shop-v01553.js'")&&entry.includes("Date.now()-Number(catalog.loadedAt||0)>15000")&&entry.includes("loadCatalog().then(x=>{if(x?.ok)sync()})"));
 ok('icons57 failure is retained and throttled',entry.includes("file==='item-icons-global-v01557.js'")&&entry.includes("else catalog=x||null")&&entry.includes("loadCatalog().then(x=>{if(x?.ok)sync()})"));
 ok('art66 mutation retries are throttled',entry.includes("file==='item-art-runtime-v01566.js'")&&entry.includes("if(!catalog||Date.now()-Number(catalog.loadedAt||0)>15000)loadCatalog().then(x=>{if(x?.ok)scan(root)})"));
-ok('script patch happens before sourceURL append',entry.indexOf("file==='random-ingame-shop-v01553.js'")<entry.indexOf("code+=`\\n//# sourceURL=${file}`"));
+const sourceUrlAt=entry.lastIndexOf('sourceURL=${file}');
+const patchA=entry.lastIndexOf("file==='random-ingame-shop-v01553.js'"),patchB=entry.lastIndexOf("file==='item-icons-global-v01557.js'"),patchC=entry.lastIndexOf("file==='item-art-runtime-v01566.js'");
+ok('script patches happen before final sourceURL append',sourceUrlAt>0&&patchA>0&&patchB>patchA&&patchC>patchB&&patchC<sourceUrlAt,`shop=${patchA},global=${patchB},art=${patchC},sourceURL=${sourceUrlAt}`);
 ok('watchdog records Electron unresponsive',watch.includes("wc.on('unresponsive'"));
 ok('watchdog records render-process-gone',watch.includes("wc.on('render-process-gone'"));
 ok('watchdog records last interaction and runtime stats',watch.includes('__ARAM_FREEZE_TRACE_V01574__')&&watch.includes('shop53:')&&watch.includes('icons57:')&&watch.includes('art66:'));
