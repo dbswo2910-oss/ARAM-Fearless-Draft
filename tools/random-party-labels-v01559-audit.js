@@ -22,12 +22,15 @@ ok(/rpManualLockedV01558/.test(s)&&/rpPartySyncedV01558/.test(s),'v0.15.59 consu
 ok(/rpPartyStatePillV01559/.test(s)&&/right:38px/.test(s),'Visible pill is placed inside champion input row');
 ok(/rpPartyPickBadgeV01558/.test(s)&&/rpManualLockBadgeV01558/.test(s)&&/display:none!important/.test(s),'Old narrow slot badges are hidden');
 ok(/score_logic_changed:false/.test(s),'Label polish remains score-neutral');
-ok(main.includes("'random-party-picks-v01558.js','random-party-labels-v01559.js','random-ingame-coach-v01550.js'"),'Main injects v0.15.59 immediately after v0.15.58 party-state layer');
+const v58At=main.indexOf("'random-party-picks-v01558.js'"),v59At=main.indexOf("'random-party-labels-v01559.js'"),coachAt=main.indexOf("'random-ingame-coach-v01550.js'");
+ok(v58At>=0&&v59At>v58At&&coachAt>v59At,'Current main preserves historical v0.15.59 layer order between v0.15.58 state and in-game coach',`${v58At}/${v59At}/${coachAt}`);
+const perfAt=main.indexOf("'runtime-performance-v01567.js'");
+if(ge(m.version,'0.15.67'))ok(perfAt>v58At&&perfAt<v59At,'v0.15.67 performance owner may preempt v0.15.59 between v0.15.58 and v0.15.59',`${v58At}/${perfAt}/${v59At}`);
 ok(main.includes('__ARAM_RANDOM_PARTY_LABELS_V01559__'),'Main readiness guard covers v0.15.59');
 const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
 ok(ge(vm,'0.15.59'),'Current main VERSION is v0.15.59 or newer',vm);
 ok(ge(pkg.version,'0.15.59'),'Current package VERSION is v0.15.59 or newer',pkg.version);
-report.info={scope:'Random Practice manual-party state labels: visible blue 팀원픽 vs green 수동고정 inside the champion input row',scoreLogicChanged:false,forwardCompatible:true};
+report.info={scope:'Historical v0.15.59 manual-party state-label contract remains source/regression covered; newer event-driven owners may preempt its runtime initialization while preserving ordering and score neutrality.',scoreLogicChanged:false,forwardCompatible:true};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-party-labels-v01559-report.json'),JSON.stringify(report,null,2));
