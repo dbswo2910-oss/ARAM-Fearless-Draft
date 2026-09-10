@@ -59,7 +59,6 @@
     {"path":"riot-grade-autosnapshot-v01533.js","source":"update/v0.15.33/riot-grade-autosnapshot-v01533.js"},
     {"path":"preload.js","source":"update/v0.15.32/preload.js"},
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
-    {"path":"main-base-v01562.js","source":"update/v0.15.62/main.js"},
     {"path":"main.js","source":"update/v0.15.63/main.js"},
     {"path":"package.json","source":"update/v0.15.63/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
