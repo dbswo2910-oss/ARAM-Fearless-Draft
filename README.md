@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.71**  
+Current app/update version: **v0.15.72**  
 Current balance/data patch: **26.17**
 
 This repository is the source of truth for incremental in-app updates, regression validation, Windows distribution work, and coding-agent handoff.
@@ -13,16 +13,17 @@ Read these first when continuing development:
 
 1. `AGENTS.md` — engineering rules and invariants
 2. `docs/AI_HANDOFF.md` — architecture and product direction
-3. `docs/AI_HANDOFF_v0.15.71_ADDENDUM.md` — latest real-game-only AutoSync freeze diagnosis and live transport governor
-4. `docs/AI_HANDOFF_v0.15.70_ADDENDUM.md` — Random In-game single-owner runtime
-5. `docs/AI_HANDOFF_v0.15.69_ADDENDUM.md` — historical Golden Guard autorun diagnosis
-6. `docs/INSTALLED_BASELINE_v0.15.49.md` — verified installed base UI/core
-7. `reference/installed-v0.15.49/` — exact installed Random Practice DOM fragments
-8. `update/manifest.json` — active update payload and current version
+3. `docs/AI_HANDOFF_v0.15.72_ADDENDUM.md` — latest Random Practice stability consolidation and UI responsiveness work
+4. `docs/AI_HANDOFF_v0.15.71_ADDENDUM.md` — real-game AutoSync transport governor
+5. `docs/AI_HANDOFF_v0.15.70_ADDENDUM.md` — Random In-game single-owner runtime
+6. `docs/AI_HANDOFF_v0.15.69_ADDENDUM.md` — historical Golden Guard autorun diagnosis
+7. `docs/INSTALLED_BASELINE_v0.15.49.md` — verified installed base UI/core
+8. `reference/installed-v0.15.49/` — exact installed Random Practice DOM fragments
+9. `update/manifest.json` — active update payload and current version
 
 ## Current runtime direction
 
-v0.15.50–v0.15.71 establish the compact Random Practice in-game coach, unified current item art, denser pick workflow, event-driven compatibility owners, and Windows responsiveness safeguards. The HUD is considered largely stabilized; new work should improve decision quality rather than restart a broad layout redesign unless explicitly requested.
+v0.15.50–v0.15.72 establish the compact Random Practice in-game coach, unified current item art, denser pick workflow, event-driven compatibility owners, and Windows responsiveness safeguards. The HUD is considered largely stabilized; new work should improve decision quality rather than restart a broad layout redesign unless explicitly requested.
 
 Important recent stability changes:
 
@@ -31,11 +32,12 @@ Important recent stability changes:
 - **v0.15.68**: restored normal GPU compositing, removed continuous native `move`/`resize` work, moved the performance governor to the front of runtime injection, and reduces expensive visual effects only during native move/resize.
 - **v0.15.69**: disabled the installed base UI's automatic 271-check Golden Guard at production startup and first Data-tab entry while retaining the manual regression button.
 - **v0.15.70**: consolidates the heavily layered Random In-game runtime. Historical v0.15.50–v0.15.57 UI modules still provide their UI/features, but their recurring timers/observer/random-wide click scheduler are suppressed during bootstrap and replaced by one active-view heartbeat. The hidden legacy `renderRandomDetails()` and `renderRandomAnalysis()` paths are bypassed while Random In-game owns the screen. Exact clock/gold/respawn seconds update without rebuilding the whole coach, and the death-shop planner is throttled to the visible Build view.
-- **v0.15.71**: follows the real-game-only freeze signal into AutoSync. Renderer polling is single-flight at 1250 ms, Match Lab live linkage writes once per complete game, stable AutoSync/account UI paints are deduped, and the main Core runs at 1200 ms with live identity/gameflow/event request throttles. The v0.15.71 Electron entry layers this over the immutable v0.15.70 main runtime base.
+- **v0.15.71**: follows the real-game-only freeze signal into AutoSync. Renderer polling is single-flight at 1250 ms, Match Lab live linkage writes once per complete game, stable AutoSync/account UI paints are deduped, and the main Core runs at 1200 ms with live identity/gameflow/event request throttles.
+- **v0.15.72**: consolidates Random Practice pick maintenance, removes overlapping v49/v55/v58/v68 recurring observers/listeners, scopes unrelated updater/Data observers away from Random Practice, changes exhaustive TOP5 enumeration to cooperative time-sliced execution, and restores AutoSync party/current-pick visual state without changing score math.
 
-Recommendation, ban, team-score, item, threat, and purchase algorithms are unchanged by v0.15.66–v0.15.71 responsiveness work.
+Recommendation, ban, team-score, item, threat, and purchase algorithms are unchanged by v0.15.66–v0.15.72 responsiveness work.
 
-See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.71.txt` for release history.
+See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.72.txt` for release history.
 
 ## Distribution
 
