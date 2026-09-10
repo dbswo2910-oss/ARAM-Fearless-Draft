@@ -5,20 +5,22 @@ const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
 const report={generatedAt:new Date().toISOString(),pass:[],fail:[],info:{}};
 const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail});
+const parts=v=>String(v||'0').split('.').map(x=>Number.parseInt(x,10)||0);
+const atLeast=(a,b)=>{const A=parts(a),B=parts(b),L=Math.max(A.length,B.length);for(let i=0;i<L;i++){const x=A[i]||0,y=B[i]||0;if(x!==y)return x>y}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const uiPath=byPath.get('random-ingame-ux-v01552.js');
 const mainPath=byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
-ok(m.version==='0.15.52','Manifest is v0.15.52',m.version);
-ok(!!uiPath&&/v0\.15\.52\/random-ingame-ux-v01552\.js$/.test(uiPath)&&exists(uiPath),'v0.15.52 HUD polish runtime delivered',uiPath||'missing');
-ok(!!mainPath&&/v0\.15\.52\/main\.js$/.test(mainPath)&&exists(mainPath),'v0.15.52 main delivered',mainPath||'missing');
-ok(!!pkgPath&&/v0\.15\.52\/package\.json$/.test(pkgPath)&&exists(pkgPath),'v0.15.52 package delivered',pkgPath||'missing');
+ok(atLeast(m.version,'0.15.52'),'Manifest is v0.15.52 or newer',m.version);
+ok(!!uiPath&&/v0\.15\.52\/random-ingame-ux-v01552\.js$/.test(uiPath)&&exists(uiPath),'v0.15.52 HUD polish runtime remains delivered',uiPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current main delivered',mainPath||'missing');
+ok(!!pkgPath&&exists(pkgPath),'Current package delivered',pkgPath||'missing');
 const s=uiPath&&exists(uiPath)?read(uiPath):'';
 const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
 try{new Function(s);ok(true,'v0.15.52 HUD polish parses')}catch(e){ok(false,'v0.15.52 HUD polish parses',e.message)}
-try{new Function(main);ok(true,'v0.15.52 main parses')}catch(e){ok(false,'v0.15.52 main parses',e.message)}
+try{new Function(main);ok(true,'Current main parses')}catch(e){ok(false,'Current main parses',e.message)}
 ok(/__ARAM_RANDOM_INGAME_UX_V01552__\s*=\s*true/.test(s),'v0.15.52 readiness marker exists');
 ok(/INGAME COACH · v\$\{V\}/.test(s),'Coach eyebrow version follows patch constant');
 ok(/data-ri51="role"\] small/.test(s)&&/data-ri51="buy"\] small/.test(s),'Non-action helper captions are hidden from LIVE cards');
@@ -27,11 +29,12 @@ ok(/title\.textContent='사망 분석'/.test(s),'Death header removes duplicated
 ok(/ri52Dead \.riRespawnStrip span\{display:none!important\}/.test(s),'Death strip removes duplicated explanatory middle copy');
 ok(/body\.riRandomIngameV01552 > \.footer\{display:none!important\}/.test(s),'Global source footer is hidden only while Random Practice in-game mode is active');
 ok(/score_logic_changed:false/.test(s),'HUD polish is explicitly score-neutral');
-ok(main.includes("'random-ingame-coach-v01550.js','random-ingame-ux-v01551.js','random-ingame-ux-v01552.js','role-metric-detail-v01518.js'"),'Main injects v0.15.52 after prior coach layers');
+ok(main.includes("'random-ingame-coach-v01550.js','random-ingame-ux-v01551.js','random-ingame-ux-v01552.js'"),'Main keeps coach -> v0.15.51 -> v0.15.52 injection order');
 ok(main.includes('__ARAM_RANDOM_INGAME_UX_V01552__'),'Main readiness guard covers v0.15.52');
-ok(/const VERSION='0\.15\.52'/.test(main),'Main VERSION is v0.15.52');
-ok(pkg.version==='0.15.52','package VERSION is v0.15.52',pkg.version);
-report.info={scope:'Screenshot-driven micro-polish only: remove duplicate/noise text and preserve one-glance hierarchy',scoreLogicChanged:false,nextPhase:'current-gold immediate purchase / component planning'};
+const mainVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
+ok(atLeast(mainVersion,'0.15.52'),'Main VERSION is v0.15.52 or newer',mainVersion);
+ok(atLeast(pkg.version,'0.15.52'),'package VERSION is v0.15.52 or newer',pkg.version);
+report.info={scope:'Forward-compatible regression contract for v0.15.52 micro-polish',scoreLogicChanged:false,nextPhase:'current-gold immediate purchase / component planning'};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-ingame-v01552-report.json'),JSON.stringify(report,null,2));
