@@ -1,0 +1,46 @@
+ARAM Fearless Draft v0.15.77
+
+[Why]
+- Real Windows freezes persisted after v0.15.75 transition isolation and the v0.15.76 hard-safe live experiment.
+- That result rules out treating one live feature as the only root cause and requires structural instrumentation.
+
+[Structural audit findings]
+1. Runtime injection used one Promise chain. A single overlay init failure aborted every later overlay and could skip bootstrap/timer restoration, leaving a partially initialized renderer.
+2. The v0.15.75 watchdog timed out a renderer probe with Promise.race but could not cancel the underlying executeJavaScript; repeated freezes could therefore leave probe work queued.
+3. Attaching Chromium Debugger only after a hard JavaScript stall can be too late. The debugger must be prepared while the renderer is healthy.
+4. Active item/profile compatibility layers still contained document-wide MutationObservers. Their callbacks were often guarded, but delivery cost was still global.
+
+[Fix / diagnostics]
+- Add a fault-isolated runtime loader. Every runtime receives RTI-### START/END/ERROR records and one failure does not abort later runtime injection.
+- Always run Random In-game bootstrap completion, performance timer-hook restoration, and blackbox rescan in the loader finalization path.
+- Add a renderer blackbox for global JS errors, Promise rejections, long tasks, and slow synchronous operations.
+- Add a single-flight main-process renderer heartbeat. Never enqueue a second executeJavaScript probe while the previous probe is unresolved.
+- Prepare Chromium Debugger while the renderer is responsive. On freeze/unresponsive, issue Debugger.pause and persist up to 16 real call frames with function/file/line/column as FRZ-003.
+- Scope v0.15.66 item-art observation from documentElement attributes to known item-bearing roots only.
+- Scope profile compatibility MutationObservers to #pp19ov instead of the entire document.
+- Keep v0.15.73/v0.15.74 catalog retry backoff and v0.15.75 in-game transition isolation.
+
+[Diagnostic codes]
+- RTI-###: runtime injection stage; ERROR identifies the exact overlay that failed initialization.
+- IDX-001: installed index transition patch contract failure.
+- JS-E001 / JS-E002 / JS-E003: renderer JavaScript exception.
+- JS-P001 / JS-P002: unhandled or wrapped Promise rejection.
+- OP-SLOW / OP-CRIT: synchronous operation exceeded 120 ms / 700 ms.
+- LT-001 / LT-002: renderer long task >=180 ms / >=900 ms.
+- FRZ-001: single-flight heartbeat exceeded 1200 ms.
+- FRZ-002: Electron emitted webContents unresponsive.
+- FRZ-003: Chromium Debugger captured the running JavaScript call stack.
+- FRZ-004: freeze stack capture unavailable/failed.
+- FRZ-005: renderer recovered after a timeout/unresponsive event.
+- FRZ-006: renderer probe rejected.
+- CRS-001: renderer process exited/crashed.
+- CON-001: renderer console error reported by Electron.
+
+[Validation]
+- Current v0.15.75 production sources pass all v0.15.77 source-transform contracts and idempotence checks.
+- Synthetic middle-runtime failure test completed later runtime injection and the mandatory finalizer.
+- Current v0.15.75 main.js transforms and parses successfully with the isolated loader.
+- Chromium synthetic infinite-loop testing confirmed Debugger.pause returns the running function stack when Debugger is enabled before the stall.
+- v0.15.77 dedicated audit executes source transforms and fault-isolation behavior.
+
+score_logic_changed:false
