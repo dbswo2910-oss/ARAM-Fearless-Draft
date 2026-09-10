@@ -31,7 +31,7 @@ The product is being simplified around fast decisions rather than vertically sta
 - Random Practice pick: inputs first, recommendations prioritized, detail behind tabs/collapse.
 - Random Practice in-game: **one-glance coach HUD**; alive state should be readable in roughly 1–2 seconds.
 - Recommendation engines should not repeatedly overreward a small set of champions through duplicated synergy signals.
-- Item-bearing UI should use **official icon + short existing text**, never icon-only, and should avoid duplicating artwork already present in the base UI.
+- Item-bearing UI should use **current Riot-client item art + short existing text**, never icon-only, and should avoid duplicating artwork already present in the base UI.
 
 ## Random Practice exact installed IDs — v0.15.49 baseline
 
@@ -67,7 +67,7 @@ In-game base shell:
 
 Read both exact DOM fragments under `reference/installed-v0.15.49/` before changing Random Practice layout.
 
-## Current Random Practice / item UI runtime contract — v0.15.59
+## Current Random Practice / item UI runtime contract — v0.15.60
 
 Pick-side layers:
 
@@ -75,6 +75,7 @@ Pick-side layers:
 2. `update/v0.15.55/random-pick-density-v01555.js`
 3. `update/v0.15.58/random-party-picks-v01558.js`
 4. `update/v0.15.59/random-party-labels-v01559.js`
+5. `update/v0.15.60/ui-refresh-v01560.js` — final visible label override only; internal state stays distinct
 
 In-game and item-visual layers:
 
@@ -85,22 +86,24 @@ In-game and item-visual layers:
 5. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
 6. `update/v0.15.56/random-item-icons-v01556.js`
 7. `update/v0.15.57/item-icons-global-v01557.js`
+8. `update/v0.15.60/ui-refresh-v01560.js` — refreshes existing image elements to latest Riot-client artwork
 
-`v0.15.55` keeps rank 1 large while compacting ranks 2–5. `v0.15.56` adds official Data Dragon item icons to the current coach. `v0.15.57` audits and extends the same visual language to every verified item-bearing user-facing menu from the installed baseline without changing recommendation logic. `v0.15.58` adds AutoSync party-current-pick visibility and corrects the cramped Random Practice composition-status layout. `v0.15.59` makes manual-vs-AutoSync state labels visible inside the champion input row.
+Installed item-catalog filename remains `item-catalog-v01527.js`; active source is `update/v0.15.60/item-catalog-v01527.js`.
 
-v0.15.58–0.15.59 Random Practice pick rules:
+`v0.15.55` keeps rank 1 large while compacting ranks 2–5. `v0.15.56` adds item icons to the current coach. `v0.15.57` audits and extends the same visual language across verified item-bearing menus. `v0.15.58` adds AutoSync party-current-pick visibility and fixes the cramped composition-status layout. `v0.15.59` made manual-vs-AutoSync state visible. `v0.15.60` deliberately simplifies the visible wording again: both states display as `팀원픽`, while the internal manual-lock distinction remains intact.
+
+v0.15.58–0.15.60 Random Practice pick rules:
 
 - read party-held champions from observable AutoSync champ-select state (`party`, plus local-champion fallback)
-- display current party champions in `#manualPartyInputs` as **display-only current picks**, but do not write them into `randomState.manual`
-- manual locks remain an explicit user choice; current party picks are display-only so the recommendation engine can still suggest swaps from the bench/candidate pool
+- display current party champions in `#manualPartyInputs` as display-only current picks, but do not write them into `randomState.manual`
+- explicit manual locks remain an internal user choice; current AutoSync picks stay swappable unless manually locked
+- **visible UI wording is unified**: AutoSync-held and manually locked party rows both display `팀원픽`
+- do not collapse the underlying distinction: manual locks still affect recommendation state, AutoSync current picks alone do not
 - mark party-held candidates in `#poolInputs` with `팀원픽`; they remain recommendation candidates
 - an existing `외부픽` remains excluded and takes precedence over `팀원픽`
 - `#externalCheck` remains the full-width host; its child `.randomCheckGrid` owns the actual three-card desktop grid
-- visible status copy is shortened to `현재 조합 체크` with `조합 보완 / 실질 딜 밸런스 · AD / AP / 추천 계산`
-- v0.15.59 consumes the v0.15.58 row-state classes instead of reimplementing AutoSync logic
-- AutoSync-held row → blue `팀원픽` pill inside `.searchWrap`
-- explicit manual lock → green `수동고정` pill inside `.searchWrap`
-- old narrow slot badges are hidden to avoid duplicate or clipped labels
+- visible status copy is `현재 조합 체크` with `조합 보완 / 실질 딜 밸런스 · AD / AP / 추천 계산`
+- old narrow slot badges remain hidden to avoid duplicate or clipped labels
 - exact selectors only: `#manualPartyInputs`, `#poolInputs`, `#externalCheck`
 - `score_logic_changed:false`
 
@@ -128,38 +131,46 @@ Visible in-game hierarchy:
 v0.15.53 purchase-planner rules:
 
 - completed-core recommendation and immediate component purchase are separate concepts
-- use current gold plus actual Data Dragon recipe metadata (`from`, `into`, `gold.base`, `gold.total`)
+- use current gold plus Data Dragon recipe metadata (`from`, `into`, `gold.base`, `gold.total`)
 - account for already-owned components when they are observable from Live Context
 - if real owned-component state cannot be confirmed, hide exact component-buy advice instead of risking duplicate purchases
 - display immediate buy(s), purchase cost, leftover gold, final core target, and remaining core cost
 - use `ko_KR` item catalog where available
+- v0.15.60 does **not** replace Data Dragon recipe/price/map metadata with CommunityDragon data
 - `score_logic_changed:false`; this layer does not alter recommendation/threat/item scoring
 
-v0.15.56 item-icon rules:
+v0.15.56–0.15.57 item-icon rules:
 
-- use item IDs/name mapping and Data Dragon version from the existing desktop item catalog
-- decorate `LIVE 다음 구매`, death `지금 살 것`, optimized core, final core target, and statistical base tree
-- keep item names/prices visible; icons supplement rather than replace text
-- if an image fails to load, hide the broken image and retain text-only UI
+- decorate existing exact item-bearing UI surfaces; keep names/prices visible
+- icons supplement rather than replace text
+- cap recognized icon strips (normally <=6) to avoid clutter
+- no broad page-title/body-text UI discovery
+- image failure must retain existing text
+- Match Lab `.matchItems` actual final-item row already owns its image element and must not receive duplicate artwork
 - `score_logic_changed:false`
 
-v0.15.57 global item-icon rules:
+v0.15.60 latest-item-art rules:
 
-- exact verified surfaces: `#liveBuilds`, `#liveUtils`, `#randomLiveTopbar`, `#randomLiveSummary`, `#randomLiveBuildAdvice`, `#randomBuilds`, `#randomUtils`, `#randomThreatList`, `#dataCard`, `#historyMatchDetail`
-- Live draft: core build tree, assigned utility item, and counter/utility recommendation column receive icons
-- Random Practice legacy/live: next-item surfaces, owned items, full build/utility recommendations, and observed enemy inventory receive icons; current coach remains handled by v0.15.56
-- Champion DB: Primary Build and alternate representative build lines receive compact icon strips
-- Match Lab: recommended build direction receives icons; `.matchItems` actual final-item row already has Riot artwork and must not be duplicated
-- cap recognized icon strips (normally <=6) to avoid clutter
-- use exact known selectors and known item text surfaces; do not scan page-wide titles/body text heuristically
-- image failure must retain existing text
+- recipe/price/ARAM-map metadata stays Data Dragon based
+- current artwork metadata is read from CommunityDragon `latest`, which mirrors Riot client `lol-game-data` item metadata and `iconPath`
+- do not describe CommunityDragon itself as an official Riot service; it is a mirror of Riot-client assets
+- each catalog item exposes `iconUrl`; visual refresh prefers this latest Riot-client artwork
+- versioned Data Dragon artwork remains the fallback if the latest mirror image cannot load
+- refresh only known image surfaces: v0.15.56 item images, v0.15.57 item images, and existing Match Lab `#historyMatchDetail .matchItems img`
+- do not create a second Match Lab final-item image row
+- a failed latest-art request must not enter a retry loop; fall back once and retain text if both images fail
 - `score_logic_changed:false`
 
 **The overall HUD layout is considered largely stabilized. Do not begin another major layout redesign unless the user explicitly asks.**
 
 ## Next planned phase
 
-First validate v0.15.59 party-state labels in a real League champ-select session and validate purchase math/owned-item extraction in a real Live Client match before changing scoring or shop calculations.
+First validate v0.15.60 in a real Windows/League session:
+
+- confirm both manually entered and AutoSync party picks visibly say `팀원픽`
+- confirm internal manual-lock behavior is unchanged
+- confirm latest item art appears on actual item-bearing screens and falls back cleanly if the mirror is unavailable
+- validate purchase math/owned-item extraction in a real Live Client death/shop state before changing shop calculations
 
 After live validation, primary candidate: strengthen the statistical baseline with patch-level cached LOL.PS ARAM data.
 
