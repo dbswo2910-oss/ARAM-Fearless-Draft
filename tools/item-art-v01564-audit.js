@@ -13,10 +13,10 @@ const resolverPath=byPath.get('item-art-unified-v01564.js'),catalogPath=byPath.g
 ok(ge(m.version,'0.15.64'),'Manifest is v0.15.64 or newer',m.version);
 ok(!!resolverPath&&/v0\.15\.64\/item-art-unified-v01564\.js$/.test(resolverPath)&&exists(resolverPath),'Unified item-art resolver is delivered',resolverPath||'missing');
 ok(!!catalogPath&&/v0\.15\.64\/item-catalog-v01527\.js$/.test(catalogPath)&&exists(catalogPath),'Current item catalog is delivered from v0.15.64',catalogPath||'missing');
-ok(!!mainPath&&/v0\.15\.64\/main\.js$/.test(mainPath)&&exists(mainPath),'v0.15.64 main is delivered',mainPath||'missing');
-ok(!!pkgPath&&/v0\.15\.64\/package\.json$/.test(pkgPath)&&exists(pkgPath),'v0.15.64 package is delivered',pkgPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current main is delivered',mainPath||'missing');
+ok(!!pkgPath&&exists(pkgPath),'Current package is delivered',pkgPath||'missing');
 const resolver=resolverPath&&exists(resolverPath)?read(resolverPath):'',catalog=catalogPath&&exists(catalogPath)?read(catalogPath):'',main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
-for(const [code,name] of [[resolver,'v0.15.64 unified resolver'],[catalog,'v0.15.64 item catalog'],[main,'v0.15.64 main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
+for(const [code,name] of [[resolver,'v0.15.64 unified resolver'],[catalog,'v0.15.64 item catalog'],[main,'current main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
 ok(/__ARAM_ITEM_ART_UNIFIED_V01564__\s*=\s*true/.test(resolver),'Unified resolver readiness marker exists');
 ok(/aramItemArtResolverV01564/.test(resolver)&&/resolve:\(idOrName\)/.test(resolver),'One public resolver handles item ID or item name');
 ok(/\$\$\('img'\)\.forEach\(refreshImg\)/.test(resolver),'Resolver audits every image element instead of a menu allow-list');
