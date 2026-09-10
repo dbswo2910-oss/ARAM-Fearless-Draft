@@ -1,0 +1,28 @@
+v0.15.72 · Global UI Performance Stabilization
+
+Observed real-Windows symptom
+- freeze is not limited to live games or Random In-game
+- repeated interaction in any menu can eventually stall the renderer
+- maximized / large viewport reproduces much faster than a smaller window
+- app feels generally less responsive before the full stall
+
+Audit findings
+- current updater overlay contains 60+ JS runtime layers accumulated over many releases
+- static inventory contains dozens of MutationObserver / timer / document-event / innerHTML sites
+- several feature-specific observers remain global even while their owning view is hidden
+- Random Pick v0.15.49 / v0.15.55 / v0.15.58 / v0.15.68 independently watch overlapping DOM and interaction surfaces
+- installed base UI contains large-area blur/backdrop/shadow/gradient surfaces whose raster/compositor cost scales with viewport area
+
+Fix
+- add runtime-global-performance-v01572.js as the first overlay runtime
+- tag each subsequently injected overlay with its source filename
+- active-view gate feature-owned timers, MutationObservers and document interaction callbacks
+- coalesce observer bursts instead of executing every mutation callback immediately
+- clamp noncritical sub-1500ms overlay intervals
+- consolidate overlapping Random Pick maintenance watchers into one owner pipeline + 2s active-view heartbeat
+- when the viewport area is large/maximized, automatically remove backdrop blur, broad container shadows and transitions and use a solid body background
+- preserve normal visual mode when the window is smaller
+- retain v0.15.70 Random In-game single-owner and v0.15.71 Live AutoSync governors
+- expose per-owner callback timing and Long Task counters via aramGlobalPerformanceV01572.getStats()
+
+Scoring/recommendation algorithms changed: false
