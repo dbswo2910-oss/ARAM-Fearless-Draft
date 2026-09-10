@@ -1,0 +1,11 @@
+ARAM Fearless Draft v0.15.74
+
+- Follow-up to v0.15.73 hard-freeze reproduction.
+- Found another active unconditional item-catalog retry in random-ingame-shop-v01553.js.
+- Guard v0.15.53 so failed catalogs do not immediately recurse back into sync().
+- Throttle failed-catalog retries in item-icons-global-v01557.js and item-art-runtime-v01566.js to at least 15 seconds.
+- Preserve existing text-only UI when item metadata/art is unavailable.
+- Add freeze-watchdog-v01574.js in the Electron main process.
+- Watchdog records renderer unresponsive / render-process-gone events, bounded heartbeat timeouts, last interaction, active view, runtime counters and renderer heap snapshot.
+- Recommendation, ban, team-score, item judgment, threat and purchase formulas unchanged.
+- score_logic_changed:false
