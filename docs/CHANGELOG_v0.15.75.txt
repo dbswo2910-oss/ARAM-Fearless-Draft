@@ -1,0 +1,36 @@
+ARAM Fearless Draft v0.15.75
+
+[Freeze evidence]
+- v0.15.74 watchdog logs captured repeated renderer `probe-timeout` stalls without `render-process-gone`.
+- The strongest common boundary was the live `IN GAME` transition / Random in-game mode entry.
+- AutoSync transport itself was not showing multi-second request times in the captured probes; the remaining overlap was renderer-side transition work.
+
+[Root transition overlap]
+- The installed base `lolAutoSyncApplyState()` applied the live 5v5 team and then still synchronously ran `persist() -> renderRandomInputs() -> runRandomCombos()` for `plan.kind === 'in_game'`.
+- `runRandomCombos()` belongs to Random Practice pick selection and can continue into analysis/detail rendering even though champion selection is already over.
+- The same live poll could separately call `renderRandomDetails()` while the v0.15.70 Random In-game single-owner was also active.
+- Entering Random in-game mode and reopening the Random tab also had legacy detail/analysis entry points.
+
+[Fix]
+- Before the installed UI loads, v0.15.75 patches four exact transition contracts in the verified installed `index.html`.
+- `in_game` AutoSync now updates live state, cancels any pending cooperative TOP5 work, defers persistence out of the critical stack, and returns without entering the pick-practice render pipeline.
+- Live detail refresh, Random in-game mode entry, and Random tab entry delegate asynchronously to `aramRandomIngameRuntimeV01570` when in in-game mode.
+- Champion-select / pick-practice behavior remains unchanged.
+- The original installed index is backed up once as `index.pre-v01575-ingame-transition.bak.html` before mutation.
+- Exact source contracts are required; the app refuses a silent partial patch if the installed base no longer matches.
+
+[Black-box diagnostics]
+- `preload.js` exposes a one-way renderer-to-main trace channel.
+- The v0.15.75 watchdog writes a separate durable `freeze-stage-v01575.log` in addition to the heartbeat watchdog log.
+- Stage codes: IG110 AUTOSYNC_APPLY_INGAME_START, IG119 AUTOSYNC_APPLY_INGAME_END, IG120 INGAME_OWNER_REFRESH_START, IG121 INGAME_OWNER_REFRESH_END, IG130 LIVE_DETAIL_OWNER_REFRESH_QUEUED, IG200 INGAME_MODE_CLICK_QUEUED.
+- If another stall occurs, the last persisted stage code identifies which transition block started/finished even when the renderer can no longer answer JavaScript probes.
+
+[Validation]
+- The patch was applied to the verified installed 35 MB base UI and the current v0.15.74 runtime overlay in a local Chromium stress harness.
+- First live `in_game` state did not add any `runRandomCombos`, `renderRandomAnalysis`, or legacy `renderRandomDetails` executions.
+- 30 rapid Random pick/in-game mode transitions completed without a stall.
+- The v0.15.70 in-game owner continued rendering; observed transition test coach/tick work stayed in the low-millisecond range.
+- CI adds a dedicated v0.15.75 transition regression and keeps all historical audits.
+
+score_logic_changed:false
+Recommendation, ban, team score, threat, item judgment, and purchase formulas are unchanged.
