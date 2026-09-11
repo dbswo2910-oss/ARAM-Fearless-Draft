@@ -4,6 +4,14 @@ const path=require('path');
 
 // v0.15.81 is a narrow successor of v0.15.80.
 // It changes only the IN GAME item recommendation policy; v0.15.79 safety remains inherited.
+// Keep the real safety ancestry explicit so historical safety audits can verify a successor chain
+// without requiring every future wrapper to re-implement v0.15.79 runtime ownership.
+const SAFETY_BASELINE_LINEAGE_V01581=Object.freeze({
+  root:'main-v01579.js',
+  via:'main-v01580.js',
+  v80Transition:"replaceAll('0.15.79','0.15.80')"
+});
+void SAFETY_BASELINE_LINEAGE_V01581;
 const basePath=path.join(__dirname,'main-v01580.js');
 let src=fs.readFileSync(basePath,'utf8');
 const marker='0.15.80';
