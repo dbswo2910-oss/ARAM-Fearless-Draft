@@ -1,0 +1,12 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const basePath=path.join(__dirname,'main-v01579.js');
+let src=fs.readFileSync(basePath,'utf8');
+const marker='0.15.79';
+const hits=src.split(marker).length-1;
+if(hits<6)throw new Error('v0.15.80 safety-baseline successor contract mismatch: v0.15.79 markers='+hits);
+const sourceStabilityOld="runtime-source-stability-v01579";
+if(src.split(sourceStabilityOld).length-1!==1)throw new Error('v0.15.80 runtime source-stability contract mismatch');
+src=src.replaceAll('0.15.79','0.15.80').replace(sourceStabilityOld,'runtime-source-stability-v01580');
+module._compile(src,__filename);
