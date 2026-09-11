@@ -12,13 +12,15 @@ const runtime=get('runtime-random-practice-v01572.js'),pkg=JSON.parse(get('packa
 const historicalEntry=exists('update/v0.15.72/main-v01572.js')?read('update/v0.15.72/main-v01572.js'):'';
 const focus=get('random-practice-focus-v01549.js'),density=get('random-pick-density-v01555.js'),party=get('random-party-picks-v01558.js'),perf=get('runtime-performance-v01568.js');
 const updater=get('in-app-updater-ui-v01523.js'),sticky=get('player-profile-data-sticky-v01521.js'),live=get('runtime-live-autosync-v01571.js');
+function collectMainChain(startTarget){const out=[],seen=new Set();let target=startTarget;while(target&&byPath.has(target)&&!seen.has(target)&&out.length<16){seen.add(target);const text=get(target);out.push(target);const refs=[...text.matchAll(/['"](main-v\d+\.js)['"]/g)].map(x=>x[1]);target=refs.find(x=>byPath.has(x)&&!seen.has(x))||''}return out}
+const entryChain=collectMainChain(entryTarget);
 for(const [n,s] of [['runtime',runtime],['current entry',entry],['v0.15.79 safety successor base',v79Entry],['historical v0.15.72 entry',historicalEntry],['focus',focus],['density',density],['party',party],['perf',perf],['updater',updater],['sticky',sticky],['live',live]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
 ok('manifest is v0.15.72 or newer',ge(m.version,'0.15.72'),m.version);
 ok('package is v0.15.72 or newer',ge(pkg.version,'0.15.72'),pkg.version);
 ok('current package entry delivered',!!byPath.get(entryTarget)&&!!entry,`${entryTarget} -> ${byPath.get(entryTarget)||'missing'}`);
 ok('historical v0.15.72 entry remains available',!!historicalEntry);
 ok('runtime delivered',byPath.get('runtime-random-practice-v01572.js')==='update/v0.15.72/runtime-random-practice-v01572.js');
-ok('current entry inherits v0.15.79 safety successor',entry.includes("main-v01579.js")&&entry.includes("replaceAll('0.15.79','0.15.80')"));
+ok('current entry inherits v0.15.79 safety successor',entryChain.includes('main-v01579.js'),entryChain.join(' -> '));
 ok('successor chain preserves Random v0.15.72 injection',v79Entry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js'"));
 ok('successor chain readiness includes v0.15.72 runtime',v79Entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
 ok('v0.15.71 core governor preserved through successor base',v79Entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));

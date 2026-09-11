@@ -116,8 +116,9 @@ if(main){
   }
 
   // IPC bridge contract. Some handlers are registered by current main-process modules (e.g. itemCatalog.register).
-  // Successor package wrappers can inherit those requires through a delivered versioned main wrapper,
-  // so include directly referenced delivered JS wrappers in the static wiring view.
+  // Successor package wrappers may inherit those requires through multiple delivered versioned wrappers.
+  // Follow the delivered JS wrapper/reference chain recursively so the audit proves actual ancestry instead of
+  // assuming a fixed one-wrapper release shape.
   const preload=preloadEntry&&exists(preloadEntry.source)?read(preloadEntry.source):'';
   const invokes=matchAll(/ipcRenderer\.invoke\(['"]([^'"]+)['"]/g,preload);
   const defs=[];
@@ -130,10 +131,17 @@ if(main){
   const duplicateChannels=[...byChannel.entries()].filter(([,xs])=>new Set(xs.map(x=>x.source)).size>1).map(([ch])=>ch);
   result.info.preloadInvokes=invokes;result.info.ipcDefinitions=defs;
   assert(!duplicateChannels.length,'Current IPC channel definitions have no cross-module duplicates',duplicateChannels.join(', '));
-  const wiringTexts=[main,packageMain];
-  for(const target of matchAll(/['"]([^'"]+\.js)['"]/g,packageMain)){
-    const source=targetMap.get(target);if(source&&exists(source))wiringTexts.push(read(source));
+  const wiringTexts=[main,packageMain],wiringQueue=[main,packageMain];
+  const wiringSeen=new Set([mainEntry?.source,packageMainSource].filter(Boolean));
+  for(let qi=0;qi<wiringQueue.length&&qi<128;qi++){
+    const text=wiringQueue[qi];
+    for(const target of matchAll(/['"]([^'"]+\.js)['"]/g,text)){
+      const source=targetMap.get(target);
+      if(!source||!exists(source)||wiringSeen.has(source))continue;
+      wiringSeen.add(source);const child=read(source);wiringTexts.push(child);wiringQueue.push(child);
+    }
   }
+  result.info.ipcWiringSources=[...wiringSeen];
   const wiringText=wiringTexts.join('\n');
   for(const ch of invokes){
     const matches=defs.filter(x=>x.channel===ch);
