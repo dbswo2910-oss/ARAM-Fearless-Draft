@@ -1,0 +1,32 @@
+name: v0.15.80 In-game Build Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run v0.15.80 in-game build audit
+        run: node tools/ingame-build-v01580-audit.js
+      - name: Upload v0.15.80 audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingame-build-v01580-report
+          path: audit-output/ingame-build-v01580-report.json
+          if-no-files-found: error
