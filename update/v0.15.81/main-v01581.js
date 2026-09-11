@@ -7,8 +7,8 @@ const path=require('path');
 // Keep the real safety ancestry explicit so historical safety audits can verify a successor chain
 // without requiring every future wrapper to re-implement v0.15.79 runtime ownership.
 const SAFETY_BASELINE_LINEAGE_V01581=Object.freeze({
-  root:'main-v01579.js',
   via:'main-v01580.js',
+  root:'main-v01579.js',
   v80Transition:"replaceAll('0.15.79','0.15.80')"
 });
 void SAFETY_BASELINE_LINEAGE_V01581;
