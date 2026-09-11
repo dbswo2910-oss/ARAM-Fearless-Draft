@@ -116,6 +116,8 @@ if(main){
   }
 
   // IPC bridge contract. Some handlers are registered by current main-process modules (e.g. itemCatalog.register).
+  // Successor package wrappers can inherit those requires through a delivered versioned main wrapper,
+  // so include directly referenced delivered JS wrappers in the static wiring view.
   const preload=preloadEntry&&exists(preloadEntry.source)?read(preloadEntry.source):'';
   const invokes=matchAll(/ipcRenderer\.invoke\(['"]([^'"]+)['"]/g,preload);
   const defs=[];
@@ -128,12 +130,17 @@ if(main){
   const duplicateChannels=[...byChannel.entries()].filter(([,xs])=>new Set(xs.map(x=>x.source)).size>1).map(([ch])=>ch);
   result.info.preloadInvokes=invokes;result.info.ipcDefinitions=defs;
   assert(!duplicateChannels.length,'Current IPC channel definitions have no cross-module duplicates',duplicateChannels.join(', '));
+  const wiringTexts=[main,packageMain];
+  for(const target of matchAll(/['"]([^'"]+\.js)['"]/g,packageMain)){
+    const source=targetMap.get(target);if(source&&exists(source))wiringTexts.push(read(source));
+  }
+  const wiringText=wiringTexts.join('\n');
   for(const ch of invokes){
     const matches=defs.filter(x=>x.channel===ch);
     assert(matches.length>0,'Preload IPC has matching current handler',ch);
     if(matches.length&&matches.every(x=>x.source!==mainEntry.source)){
       const moduleTargets=matches.map(x=>x.target.replace(/\.js$/,''));
-      const wired=moduleTargets.some(t=>main.includes(`require('./${t}')`)||main.includes(`require("./${t}")`)||packageMain.includes(`require('./${t}')`)||packageMain.includes(`require("./${t}")`));
+      const wired=moduleTargets.some(t=>wiringText.includes(`require('./${t}')`)||wiringText.includes(`require("./${t}")`));
       assert(wired,'Modular IPC handler module is required by current main',`${ch}: ${matches.map(x=>x.target).join(', ')}`);
     }
   }
