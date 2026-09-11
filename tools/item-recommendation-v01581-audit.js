@@ -33,11 +33,13 @@ const catalog={ok:true,items:{
  '6620':{id:'6620',name:'헬리아의 메아리',tags:['SpellDamage','ManaRegen','HealAndShieldPower'],full:true,map12:true,purchasable:true,standardLiveId:true}
 }};
 function expose(src){
- const repl="\n  window.__V81_TEST__={rebuildBuildCatalogV01581,buildGateV01581,itemClassV01581,coreStageV01581,buildIdentityV01581};\n})();\n";
- return src.replace(/\n\s*start\(\);\s*\n\}\)\(\);\s*$/,repl);
+ const anchor='  ensureShell();document.addEventListener';
+ const injected="  window.__V81_TEST__={rebuildBuildCatalogV01581,buildGateV01581,itemClassV01581,coreStageV01581,buildIdentityV01581};\n"+anchor;
+ if(!src.includes(anchor))throw new Error('coach startup anchor missing');
+ return src.replace(anchor,injected);
 }
 try{
- const testCode=expose(code),document={querySelector:()=>null,querySelectorAll:()=>[],getElementById:()=>null,createElement:()=>({style:{},dataset:{},classList:{add(){},toggle(){}},appendChild(){},addEventListener(){}}),head:{appendChild(){}}};
+ const testCode=expose(code),document={querySelector:()=>null,querySelectorAll:()=>[],getElementById:()=>null,addEventListener:()=>{},createElement:()=>({style:{},dataset:{},classList:{add(){},toggle(){}},appendChild(){},addEventListener(){}}),head:{appendChild(){}}};
  const ctx={console,document,localStorage:{getItem:()=>null,setItem:()=>{}},setTimeout:()=>0,clearTimeout:()=>{},setInterval:()=>0,clearInterval:()=>{},Promise,Date,Number,String,Object,Array,Map,Set,Math,JSON};ctx.window=ctx;ctx.aramDesktop={};vm.createContext(ctx);vm.runInContext(testCode,ctx);const api=ctx.__V81_TEST__;api.rebuildBuildCatalogV01581(catalog);
  const gate=(tree,items,itemIds=[],threat=90)=>api.buildGateV01581(items,{tree},{local:{itemIds}}, {score:threat});
  const damageCases=[
