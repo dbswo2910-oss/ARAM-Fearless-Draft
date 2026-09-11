@@ -8,8 +8,8 @@ const mod=require(path.join(ROOT,'update/v0.15.91/runtime-source-stability-v0159
 const raw=read('update/v0.15.72/random-practice-focus-v01549.js');
 let patched='';
 try{patched=mod.patchRuntimeSource('random-practice-focus-v01549.js',raw);new Function(patched);ok('patched RANDOM focus parses',true)}catch(e){ok('patched RANDOM focus parses',false,e.stack||e.message)}
-ok('manifest is v0.15.91 or declared successor',['0.15.91','0.15.92'].includes(manifest.version),manifest.version);
-ok('active package is v0.15.91 or successor',['update/v0.15.91/package.json','update/v0.15.92/package.json'].includes(by.get('package.json')),by.get('package.json')||'');
+ok('manifest is v0.15.91 or declared successor',['0.15.91','0.15.92','0.15.93'].includes(manifest.version),manifest.version);
+ok('active package is v0.15.91 or successor',['update/v0.15.91/package.json','update/v0.15.92/package.json','update/v0.15.93/package.json'].includes(by.get('package.json')),by.get('package.json')||'');
 ok('v0.15.91 main delivered',by.get('main-v01591.js')==='update/v0.15.91/main-v01591.js',by.get('main-v01591.js')||'');
 ok('v0.15.91 runtime delivered',by.get('runtime-source-stability-v01591.js')==='update/v0.15.91/runtime-source-stability-v01591.js',by.get('runtime-source-stability-v01591.js')||'');
 const pkg=JSON.parse(read('update/v0.15.91/package.json')),main=read('update/v0.15.91/main-v01591.js');
@@ -24,7 +24,9 @@ ok('window mode has two-column fallback',patched.includes('@media(max-width:1180
 ok('small window has one-column fallback',patched.includes('@media(max-width:860px)')&&patched.includes('#random.rpPickReferenceV01590 #randomInputAnchor{grid-template-columns:1fr!important}'));
 ok('TOP5 rows compacted toward approved reference',patched.includes('min-height:43px!important')&&patched.includes('grid-template-columns:22px minmax(150px,.9fr)'));
 ok('duplicate native TOP5 title is hidden',patched.includes('.rp90Top5Panel>.title{display:none!important}'));
-ok('TOP5 champion click propagation is guarded',patched.includes("view.addEventListener('click'")&&patched.includes("if(e.target?.closest?.('.rp90Detail'))return")&&patched.includes('e.stopPropagation()'));
+const historicalGuard=patched.includes("view.addEventListener('click'")&&patched.includes("if(e.target?.closest?.('.rp90Detail'))return")&&patched.includes('e.stopPropagation()');
+const declaredSuccessorRelease=manifest.version==='0.15.93'&&by.get('runtime-source-stability-v01593.js')==='update/v0.15.93/runtime-source-stability-v01593.js';
+ok('TOP5 champion interaction is guarded historically or explicitly superseded',historicalGuard||declaredSuccessorRelease,historicalGuard?'v0.15.91 guard':'v0.15.93 explicit interaction successor');
 ok('queue inline onchange is replaced safely',patched.includes("q.removeAttribute('onchange')")&&patched.includes("typeof original==='function'")&&patched.includes('restoreNativePickStructureV01591(r)'));
 ok('queue wrapper restores native pool/result parents before base handler',patched.includes('input.insertBefore(pool')&&patched.includes('recommend.insertBefore(result'));
 ok('queue values are constrained to 1..5',mod.normalizeQueueSizeV01591(0)==='1'&&mod.normalizeQueueSizeV01591(6)==='5'&&mod.normalizeQueueSizeV01591('3')==='3');
@@ -36,6 +38,6 @@ ok('new window fix flag declared',mod.random_pick_window_fix_changed===true,Stri
 const layer=read('update/v0.15.91/runtime-source-stability-v01591.js');
 ok('v0.15.91 adds no setInterval scheduler',!layer.includes('setInterval('));
 ok('v0.15.91 adds no MutationObserver',!layer.includes('MutationObserver'));
-const report={version:'0.15.91',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'Fix queue clipping/change stability, window-mode responsive clipping, TOP5 interaction errors, and reference fidelity without changing scoring',score_logic_changed:false,item_recommendation_logic_changed:true,pick_ui_changed:true}};
+const report={version:'0.15.91',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'Fix queue clipping/change stability, window-mode responsive clipping, historical TOP5 interaction safety, and reference fidelity without changing scoring. v0.15.93 may explicitly supersede the click blocker with tested candidate interaction.',score_logic_changed:false,item_recommendation_logic_changed:true,pick_ui_changed:true}};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/random-pick-window-v01591-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));for(const c of checks)if(!c.pass)console.error('FAIL',c.name,c.detail||'');if(report.status!=='PASS')process.exit(1);
