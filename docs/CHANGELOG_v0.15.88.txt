@@ -1,0 +1,8 @@
+v0.15.88 · RANDOM TOP1 LABEL DEDUPE
+
+- Fixes duplicate champion text in RANDOM > 선택 판단 > 빠른 판단 > 현재 TOP1.
+- Example: `신 짜오신 짜오` / `신 짜오 신 짜오` -> `신 짜오`.
+- The fix is display-only and does not change champion scoring, candidate ranking, or composition calculation.
+- Preserves v0.15.87 user-choice-aware route adoption and next-item recommendation behavior.
+- Preserves v0.15.79 transactional update / rollback safety lineage.
+- Adds a dedicated v0.15.88 regression audit for duplicate TOP1 labels.
