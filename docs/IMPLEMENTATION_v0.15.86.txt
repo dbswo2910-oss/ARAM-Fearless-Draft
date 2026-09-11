@@ -1,0 +1,7 @@
+Implementation boundaries:
+- UI/presentation update only for the Build tab.
+- Reuses v0.15.81 recommendation results; does not alter recommendation scores.
+- Reuses v0.15.83 champion portraits.
+- Reuses latest item catalog art via iconPrimaryUrl.
+- Preserves v0.15.84 LIVE reference layout and v0.15.85 fight-status scale.
+- Preserves v0.15.79 safety lineage.
