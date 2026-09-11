@@ -1,0 +1,18 @@
+name: v0.15.91 RANDOM Pick Window Audit
+
+on:
+  push:
+    branches: [ main, 'fix/v0.15.91-*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run v0.15.91 pick window audit
+        run: node tools/random-pick-window-v01591-audit.js
