@@ -1,0 +1,10 @@
+{
+  "name": "aram-fearless-draft",
+  "version": "0.15.81",
+  "private": true,
+  "description": "ARAM Fearless Draft Electron Desktop - role/core-stage aware in-game item recommendation on v0.15.80",
+  "main": "main-v01581.js",
+  "productName": "ARAM Fearless Draft",
+  "author": "by잉디디",
+  "license": "UNLICENSED"
+}
