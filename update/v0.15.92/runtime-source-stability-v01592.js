@@ -22,7 +22,7 @@ function patchCoach(src){
     return out.slice(0,6);
   }
 `;
-  src=replaceRange(src,'  function ri86Inventory(m){','  function ri86Optimized(m){',invReplacement,'const out=[],seen=new Set(),b=[m?.ctx?.local?.items','inventory Poro-Snax filter');
+  src=replaceRange(src,'  function ri86Inventory(m){','  function ri86Optimized(m){',invReplacement,'ri92BuildItemAllowed(n,rid)','inventory Poro-Snax filter');
 
   src=replaceExact(
     src,
