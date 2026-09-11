@@ -8,19 +8,20 @@ const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json')),byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const get=target=>{const p=byPath.get(target);return p&&exists(p)?read(p):''};
-const runtime=get('runtime-random-practice-v01572.js'),pkg=JSON.parse(get('package.json')||'{}'),entryTarget=String(pkg.main||'main.js'),entry=get(entryTarget);
+const runtime=get('runtime-random-practice-v01572.js'),pkg=JSON.parse(get('package.json')||'{}'),entryTarget=String(pkg.main||'main.js'),entry=get(entryTarget),v79Entry=get('main-v01579.js');
 const historicalEntry=exists('update/v0.15.72/main-v01572.js')?read('update/v0.15.72/main-v01572.js'):'';
 const focus=get('random-practice-focus-v01549.js'),density=get('random-pick-density-v01555.js'),party=get('random-party-picks-v01558.js'),perf=get('runtime-performance-v01568.js');
 const updater=get('in-app-updater-ui-v01523.js'),sticky=get('player-profile-data-sticky-v01521.js'),live=get('runtime-live-autosync-v01571.js');
-for(const [n,s] of [['runtime',runtime],['current entry',entry],['historical v0.15.72 entry',historicalEntry],['focus',focus],['density',density],['party',party],['perf',perf],['updater',updater],['sticky',sticky],['live',live]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
+for(const [n,s] of [['runtime',runtime],['current entry',entry],['v0.15.79 safety successor base',v79Entry],['historical v0.15.72 entry',historicalEntry],['focus',focus],['density',density],['party',party],['perf',perf],['updater',updater],['sticky',sticky],['live',live]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
 ok('manifest is v0.15.72 or newer',ge(m.version,'0.15.72'),m.version);
 ok('package is v0.15.72 or newer',ge(pkg.version,'0.15.72'),pkg.version);
 ok('current package entry delivered',!!byPath.get(entryTarget)&&!!entry,`${entryTarget} -> ${byPath.get(entryTarget)||'missing'}`);
 ok('historical v0.15.72 entry remains available',!!historicalEntry);
 ok('runtime delivered',byPath.get('runtime-random-practice-v01572.js')==='update/v0.15.72/runtime-random-practice-v01572.js');
-ok('current entry preserves Random v0.15.72 injection',entry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js'"));
-ok('current entry readiness includes v0.15.72 runtime',entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
-ok('v0.15.71 core governor preserved',entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
+ok('current entry inherits v0.15.79 safety successor',entry.includes("main-v01579.js")&&entry.includes("replaceAll('0.15.79','0.15.80')"));
+ok('successor chain preserves Random v0.15.72 injection',v79Entry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js'"));
+ok('successor chain readiness includes v0.15.72 runtime',v79Entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
+ok('v0.15.71 core governor preserved through successor base',v79Entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
 
 ok('v49 recurring subtree observer removed',!focus.includes('new MutationObserver('));
 ok('v55 observer removed',!density.includes('new MutationObserver('));
