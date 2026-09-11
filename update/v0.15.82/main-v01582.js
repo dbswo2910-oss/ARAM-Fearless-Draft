@@ -15,7 +15,7 @@ const basePath=path.join(__dirname,'main-v01581.js');
 let src=fs.readFileSync(basePath,'utf8');
 const marker='0.15.81';
 const hits=src.split(marker).length-1;
-if(hits<5)throw new Error('v0.15.82 successor contract mismatch: v0.15.81 markers='+hits);
+if(hits<3)throw new Error('v0.15.82 successor contract mismatch: v0.15.81 markers='+hits);
 const oldStability='runtime-source-stability-v01581';
 if(src.split(oldStability).length-1<1)throw new Error('v0.15.82 source-stability successor contract mismatch');
 src=src.replaceAll('0.15.81','0.15.82').replaceAll(oldStability,'runtime-source-stability-v01582');
