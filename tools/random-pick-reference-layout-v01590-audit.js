@@ -22,7 +22,7 @@ ok('reference-aligned three-area layout injected',patched.includes('rp90CenterSt
 ok('candidate and TOP5 share center stack',patched.includes('center.appendChild(pool)')&&patched.includes('center.appendChild(r.resultPanel)'));
 ok('TOP5 header uses requested current-queue wording',patched.includes('현재 큐 인원 기준 완성 조합 TOP5'));
 ok('TOP5 compact row renderer exists',patched.includes('rp90ComboView')&&patched.includes("rows=[...results.querySelectorAll('.combo')].slice(0,5)"));
-ok('rank one strong recommendation badge exists',patched.includes("['강력 추천',...tags]")&&patched.includes('rp90Badge strong'));
+ok('rank one strong recommendation badge exists',patched.includes("['강력 추천',...tags]")&&patched.includes("?' strong'"));
 ok('TOP5 uses existing engine score and description',patched.includes("txt(row.querySelector('.comboScore'))")&&patched.includes("txt(row.querySelector('.desc'))"));
 ok('canonical champion label resolver is active in topCombo',patched.includes('canonicalChampionNameV01590(dedupeTop1LabelV01588('));
 ok('old focus strip hidden to match reference hierarchy',patched.includes('.rpFocusCardV01549{display:none!important}'));
