@@ -1,0 +1,10 @@
+v0.15.86 · IN GAME BUILD ANALYSIS
+
+- Build tab is now a dedicated analysis workspace instead of mirroring LIVE.
+- Side-by-side comparison: statistical baseline build vs current-match optimized build.
+- Shows complete-build examples, major core order, current inventory, purchase priority, component path, situational pivots, divergence reasons, and one-line build conclusion.
+- Current-match side reuses v0.15.81 recommendation engine output; scoring/recommendation policy is unchanged.
+- Death/next-death shop planner is moved into the purchase-priority area while keeping legacy compatibility selectors.
+- New build UI uses current item catalog iconPrimaryUrl only; no legacy Data Dragon fallback is introduced.
+- Champion portraits and v0.15.84/v0.15.85 LIVE layout/fight-status changes are preserved.
+- v0.15.79 permanent safety baseline remains inherited.
