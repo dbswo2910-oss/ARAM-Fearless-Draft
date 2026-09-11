@@ -23,7 +23,7 @@ jobs:
           node-version: '20'
       - name: Detect release version
         id: release
-        run: echo "version=$(node -p \"require('./update/manifest.json').version\")" >> "$GITHUB_OUTPUT"
+        run: node -e "console.log('version='+require('./update/manifest.json').version)" >> "$GITHUB_OUTPUT"
       - name: Run v0.15.80 in-game build audit
         if: steps.release.outputs.version == '0.15.80'
         run: node tools/ingame-build-v01580-audit.js
@@ -32,7 +32,7 @@ jobs:
         run: node tools/item-art-latest-v01580-audit.js
       - name: Successor note
         if: steps.release.outputs.version != '0.15.80'
-        run: echo "v0.15.80 exact-release audit is historical; successor-specific CI owns version $(node -p \"require('./update/manifest.json').version\")."
+        run: echo "v0.15.80 exact-release audit is historical; successor-specific CI owns this release."
       - name: Upload v0.15.80 audit reports
         if: always() && steps.release.outputs.version == '0.15.80'
         uses: actions/upload-artifact@v4
