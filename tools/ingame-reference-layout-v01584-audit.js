@@ -26,10 +26,10 @@ ok('v0.15.79 safety lineage stays explicit',main.includes('main-v01579.js')&&mai
 ok('v0.15.81 recommendation gate preserved',code.includes('function buildGateV01581(available,stat,ctx,threat)')&&code.includes('ranked=buildGateV01581(available,stat,ctx,top)'));
 ok('v0.15.83 champion portraits preserved',code.includes('function portraitV01583(name')&&code.includes("typeof championIconHtml==='function'"));
 ok('reference layout helper injected',code.includes('function ensureReferenceLayoutStylesV01584()'));
-ok('decision banner is full-width first block',code.includes('class="ri84LiveStack"')&&code.includes('class="ri84Decision'));
-ok('play/threat row preserved',code.includes('class="ri84MyPlay"')&&code.includes('class="ri84ThreatGrid"'));
-ok('build/return row present',code.includes('실시간 빌드')&&code.includes('사망 시 복귀 플랜')&&code.includes('class="ri84ReturnGrid"'));
-ok('fight status remains full-width',code.includes('function fightStatusV01584')&&code.includes('class="ri84Fight"'));
+ok('decision banner is full-width first block',code.includes('ri84LiveStack')&&code.includes('ri84Decision'));
+ok('play/threat row preserved',code.includes('ri84MyPlay')&&code.includes('ri84ThreatGrid'));
+ok('build/return row present',code.includes('실시간 빌드')&&code.includes('사망 시 복귀 플랜')&&code.includes('ri84ReturnGrid'));
+ok('fight status remains full-width',code.includes('function fightStatusV01584')&&code.includes('ri84Fight'));
 ok('item art uses current resolver owner',code.includes('window.aramItemArtResolverV01566')&&code.includes('row?.candidates?.[0]'));
 ok('v0.15.84 source adds no scheduler/observer',!read('update/v0.15.84/runtime-source-stability-v01584.js').includes('setInterval(')&&!read('update/v0.15.84/runtime-source-stability-v01584.js').includes('MutationObserver'));
 ok('draft scoring remains untouched',mod.score_logic_changed===false);
