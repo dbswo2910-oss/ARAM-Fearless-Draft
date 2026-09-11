@@ -1,0 +1,18 @@
+ARAM Fearless Draft v0.15.89
+
+RANDOM PICK COMMAND CENTER
+
+- Redesigns RANDOM > 픽창 around the approved premium dark command-center reference.
+- Preserves the existing queue-size, AutoSync, external fixed picks, manual party locks, remaining-random pool, TOP5 calculation, tabs, and recommendation behavior.
+- Adds a right-side composition-intel panel on wide desktop layouts.
+- Composition intel is factual and derived from existing pick-state surfaces only: fixed-pick progress, candidate readiness, live AD/AP summary, calculation state, existing composition-gap chips, and the current TOP1 explanation.
+- Strengthens the visual hierarchy of party rows, remaining-random inputs, TOP5 ranking, first-place recommendation, AutoSync state, and quick judgment.
+- Adds responsive two-column and one-column fallbacks for narrower windows.
+- Keeps the v0.15.88 TOP1 name dedupe.
+- No new setInterval or MutationObserver.
+- Draft/champion scoring is unchanged.
+- v0.15.87 item route-adoption behavior is inherited unchanged.
+- v0.15.79 safety baseline remains explicit.
+
+score_logic_changed: false
+random_pick_command_center_changed: true

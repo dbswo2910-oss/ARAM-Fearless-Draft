@@ -9,16 +9,16 @@ const by=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
 const mod=require(path.join(ROOT,'update/v0.15.88/runtime-source-stability-v01588.js'));
 const raw=read('update/v0.15.72/random-practice-focus-v01549.js');
 let patched='';
-try{patched=mod.patchRuntimeSource('random-practice-focus-v01549.js',raw);new Function(patched);ok('patched RANDOM focus parses',true)}catch(e){ok('patched RANDOM focus parses',false,e.stack||e.message)}
+try{patched=mod.patchRuntimeSource('random-practice-focus-v01549.js',raw);new Function(patched);ok('historical v0.15.88 RANDOM focus parses',true)}catch(e){ok('historical v0.15.88 RANDOM focus parses',false,e.stack||e.message)}
 
-ok('manifest version is v0.15.88',manifest.version==='0.15.88',manifest.version);
-ok('active package is v0.15.88',by.get('package.json')==='update/v0.15.88/package.json',by.get('package.json')||'');
-ok('v0.15.88 main delivered',by.get('main-v01588.js')==='update/v0.15.88/main-v01588.js',by.get('main-v01588.js')||'');
-ok('v0.15.88 runtime stability delivered',by.get('runtime-source-stability-v01588.js')==='update/v0.15.88/runtime-source-stability-v01588.js',by.get('runtime-source-stability-v01588.js')||'');
+const versionParts=String(manifest.version||'0').split('.').map(Number);const versionAtLeast88=(versionParts[0]>0)||(versionParts[1]>15)||(versionParts[1]===15&&versionParts[2]>=88);
+ok('manifest is v0.15.88 or successor',versionAtLeast88,manifest.version);
+ok('v0.15.88 main remains delivered',by.get('main-v01588.js')==='update/v0.15.88/main-v01588.js',by.get('main-v01588.js')||'');
+ok('v0.15.88 runtime remains delivered',by.get('runtime-source-stability-v01588.js')==='update/v0.15.88/runtime-source-stability-v01588.js',by.get('runtime-source-stability-v01588.js')||'');
 
 const pkg=JSON.parse(read('update/v0.15.88/package.json'));
-ok('package version matches',pkg.version==='0.15.88',pkg.version);
-ok('package entry matches',pkg.main==='main-v01588.js',pkg.main);
+ok('historical package version matches',pkg.version==='0.15.88',pkg.version);
+ok('historical package entry matches',pkg.main==='main-v01588.js',pkg.main);
 const main=read('update/v0.15.88/main-v01588.js');
 ok('v0.15.88 inherits v0.15.87',main.includes("main-v01587.js")&&main.includes("replaceAll('0.15.87','0.15.88')"));
 ok('v0.15.79 safety lineage remains explicit',main.includes("main-v01579.js")&&main.includes("replaceAll('0.15.79','0.15.80')"));
@@ -37,7 +37,7 @@ const layer=read('update/v0.15.88/runtime-source-stability-v01588.js');
 ok('v0.15.88 adds no scheduler',!layer.includes('setInterval('));
 ok('v0.15.88 adds no observer',!layer.includes('MutationObserver'));
 
-const report={version:'0.15.88',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'prevent duplicate champion names in RANDOM > 선택 판단 > 현재 TOP1 without changing scoring or v0.15.87 route-adoption behavior',score_logic_changed:false,item_recommendation_logic_changed:true,display_only_fix:true}};
+const report={version:'0.15.88',active_version:manifest.version,generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'forward-compatible historical contract for RANDOM TOP1 label dedupe',score_logic_changed:false,item_recommendation_logic_changed:true,display_only_fix:true}};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output/random-top1-label-v01588-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));

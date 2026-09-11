@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.83**  
+Current app/update version: **v0.15.89**  
 Current balance/data patch: **26.17**
 
 This repository is the source of truth for incremental in-app updates, regression validation, Windows distribution work, and coding-agent handoff.
@@ -13,25 +13,26 @@ Read these first when continuing development:
 
 1. `AGENTS.md` — engineering rules and invariants
 2. `docs/AI_HANDOFF.md` — architecture and product direction
-3. `docs/AI_HANDOFF_v0.15.83_ADDENDUM.md` — IN GAME champion portraits, visual target cues, roster strip, and preview behavior
-4. `docs/AI_HANDOFF_v0.15.79_ADDENDUM.md` — permanent safety baseline: transactional updater rollback, stable heartbeat, renderer circuit breakers, CI safety policy
-5. `docs/AI_HANDOFF_v0.15.78_ADDENDUM.md` — BLACKBOX evidence-driven user-state fix + independent dual heartbeat watchdog
-6. `docs/AI_HANDOFF_v0.15.77_ADDENDUM.md` — renderer blackbox, CDP freeze stack capture, fault-isolated runtime loader
-7. `docs/STABILITY_AUDIT_v0.15.77.md` — full freeze-risk audit and remaining instrumented risks
-8. `docs/AI_HANDOFF_v0.15.75_ADDENDUM.md` — freeze-log-grounded IN GAME transition isolation + durable stage codes
-9. `docs/AI_HANDOFF_v0.15.74_ADDENDUM.md` — remaining item-catalog retry freeze guard + main-process watchdog
-10. `docs/AI_HANDOFF_v0.15.73_ADDENDUM.md` — reproduced item-catalog hard-freeze diagnosis and first fix
-11. `docs/AI_HANDOFF_v0.15.72_ADDENDUM.md` — Random Practice stability consolidation and UI responsiveness work
-12. `docs/AI_HANDOFF_v0.15.71_ADDENDUM.md` — real-game AutoSync transport governor
-13. `docs/AI_HANDOFF_v0.15.70_ADDENDUM.md` — Random In-game single-owner runtime
-14. `docs/AI_HANDOFF_v0.15.69_ADDENDUM.md` — historical Golden Guard autorun diagnosis
-15. `docs/INSTALLED_BASELINE_v0.15.49.md` — verified installed base UI/core
-16. `reference/installed-v0.15.49/` — exact installed Random Practice DOM fragments
-17. `update/manifest.json` — active update payload and current version
+3. `docs/AI_HANDOFF_v0.15.89_ADDENDUM.md` — RANDOM pick command center, composition intel rail, responsive hierarchy, and regression contract
+4. `docs/AI_HANDOFF_v0.15.83_ADDENDUM.md` — IN GAME champion portraits, visual target cues, roster strip, and preview behavior
+5. `docs/AI_HANDOFF_v0.15.79_ADDENDUM.md` — permanent safety baseline: transactional updater rollback, stable heartbeat, renderer circuit breakers, CI safety policy
+6. `docs/AI_HANDOFF_v0.15.78_ADDENDUM.md` — BLACKBOX evidence-driven user-state fix + independent dual heartbeat watchdog
+7. `docs/AI_HANDOFF_v0.15.77_ADDENDUM.md` — renderer blackbox, CDP freeze stack capture, fault-isolated runtime loader
+8. `docs/STABILITY_AUDIT_v0.15.77.md` — full freeze-risk audit and remaining instrumented risks
+9. `docs/AI_HANDOFF_v0.15.75_ADDENDUM.md` — freeze-log-grounded IN GAME transition isolation + durable stage codes
+10. `docs/AI_HANDOFF_v0.15.74_ADDENDUM.md` — remaining item-catalog retry freeze guard + main-process watchdog
+11. `docs/AI_HANDOFF_v0.15.73_ADDENDUM.md` — reproduced item-catalog hard-freeze diagnosis and first fix
+12. `docs/AI_HANDOFF_v0.15.72_ADDENDUM.md` — Random Practice stability consolidation and UI responsiveness work
+13. `docs/AI_HANDOFF_v0.15.71_ADDENDUM.md` — real-game AutoSync transport governor
+14. `docs/AI_HANDOFF_v0.15.70_ADDENDUM.md` — Random In-game single-owner runtime
+15. `docs/AI_HANDOFF_v0.15.69_ADDENDUM.md` — historical Golden Guard autorun diagnosis
+16. `docs/INSTALLED_BASELINE_v0.15.49.md` — verified installed base UI/core
+17. `reference/installed-v0.15.49/` — exact installed Random Practice DOM fragments
+18. `update/manifest.json` — active update payload and current version
 
 ## Current runtime direction
 
-v0.15.50–v0.15.79 establish the compact Random Practice in-game coach, unified current item art, denser pick workflow, event-driven compatibility owners, Windows responsiveness safeguards, and a permanent update/runtime safety baseline. v0.15.80–v0.15.83 build on that baseline with current-only item visuals, role/core-stage aware item recommendations, the IN GAME command center, and champion-portrait visual guidance. Future work should improve decision quality while preserving the v0.15.79 safety baseline.
+v0.15.50–v0.15.79 establish the compact Random Practice in-game coach, unified current item art, denser pick workflow, event-driven compatibility owners, Windows responsiveness safeguards, and a permanent update/runtime safety baseline. v0.15.80–v0.15.89 build on that baseline with current-only item visuals, role/core-stage aware item recommendations, the IN GAME command center, champion-portrait guidance, build-route adoption, and a premium RANDOM pick command center. Future work should improve decision quality while preserving the v0.15.79 safety baseline.
 
 Important recent stability and feature changes:
 
@@ -52,10 +53,14 @@ Important recent stability and feature changes:
 - **v0.15.81**: introduces the role/core-stage aware Item Recommendation Engine v2 so early cores preserve champion build identity while later situational defensive items remain available when justified.
 - **v0.15.82**: rebuilds IN GAME into a command center centered on current judgment, player action, Threat TOP3, live build direction, and death-return planning.
 - **v0.15.83**: adds champion portraits to the local-player card, Threat TOP3, inline named targets, death-return guidance, and ally/enemy team-composition strips. Preview and live use the same renderer.
+- **v0.15.84–v0.15.86**: align the IN GAME reference layout, enlarge the fight-status board, and introduce a dedicated build-analysis tab that separates statistical baseline from current-match optimization.
+- **v0.15.87**: makes valid completed user purchases a new build anchor so a deliberate B-route choice stops the app from repeatedly forcing the original A route.
+- **v0.15.88**: removes duplicated champion labels in RANDOM quick judgment without changing scoring.
+- **v0.15.89**: redesigns RANDOM > 픽창 as a command center with a factual composition-intel rail, stronger party/pool hierarchy, clearer TOP5 ranking, responsive desktop layouts, and the existing scoring/AutoSync/manual-lock contracts preserved.
 
-Draft/pick/ban/team scoring is unchanged by v0.15.80–v0.15.83. v0.15.81 intentionally changes only item recommendation policy; v0.15.82–v0.15.83 are HUD/visual successors.
+Draft/pick/ban/team scoring is unchanged by v0.15.80–v0.15.89 except where explicitly documented for item recommendations; v0.15.89 is a pick-side UI/information-hierarchy change only.
 
-See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.83.txt` for release history.
+See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.89.txt` for release history.
 
 ## Distribution
 
