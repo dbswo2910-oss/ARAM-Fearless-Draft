@@ -1,0 +1,33 @@
+ARAM Fearless Draft v0.15.78
+
+[Evidence from real Windows BLACKBOX]
+- v0.15.77 captured a concrete renderer exception immediately before the reported freeze:
+  lolAutoSyncPoll -> aramTrackLinkedGame -> activateOwner -> applyUserState -> renderAll
+- renderAll then attempted to write textContent to a removed legacy DOM counter (#champCount), producing:
+  Cannot set properties of null (setting 'textContent')
+- The same renderAll call also synchronously triggered multiple full-app render paths, including Random Practice input/TOP5 work, during Riot owner activation.
+
+[Fix]
+- Per-user Riot owner activation no longer calls the monolithic renderAll() path.
+- aramTrackLinkedGame defers first owner activation to a later task instead of entering user-state restoration inside the AutoSync poll call stack.
+- User-state restoration is split into small guarded stages (USR-R01..USR-R09). A single optional UI failure no longer aborts the whole restore.
+- No runRandomCombos/TOP5 call is made by owner-state restoration.
+- Historical owner sync polling is relaxed from 320 ms to 1500 ms.
+- The installed base renderAll() is patched so removed legacy counters are null-safe.
+
+[Independent hang classification]
+- Renderer preload writes heartbeat-renderer-v01578.json directly to disk every 500 ms, bypassing main-process IPC.
+- Electron main writes heartbeat-main-v01578.json independently every 500 ms.
+- A detached Electron-as-Node watchdog process monitors both heartbeats outside the app event loops.
+- HNG-M001 = main process heartbeat stalled while renderer heartbeat continued.
+- HNG-R001 = renderer heartbeat stalled while main heartbeat continued.
+- HNG-B001 = both heartbeats stalled.
+- This remains useful even if the in-process CDP/FRZ watchdog cannot run during a main-process stall.
+
+[Regression safety]
+- v0.15.78 audit transforms the real v0.15.16 multi-user runtime and VM-executes activateOwner(). It requires renderAll=0 and runRandomCombos=0.
+- Existing v0.15.77 isolated runtime loader and BLACKBOX diagnostics remain active.
+- Existing v0.15.75 IN GAME transition protection, v0.15.74 catalog guards, v0.15.73 retry fix, v0.15.72 cooperative TOP5, v0.15.71 AutoSync governor, and v0.15.70 in-game owner remain active.
+- Recommendation/ban/team-score/item/threat/purchase scoring is unchanged.
+
+score_logic_changed:false

@@ -83,6 +83,8 @@ jobs:
         run: node tools/runtime-stability-v01575-audit.js
       - name: Run v0.15.77 blackbox + isolated loader audit
         run: node tools/runtime-stability-v01577-audit.js
+      - name: Run v0.15.78 user-state + dual heartbeat audit
+        run: node tools/runtime-stability-v01578-audit.js
       - name: Run Random In-game Coach + Preview v0.15.50 audit
         run: node tools/random-ingame-v01550-audit.js
       - name: Run Random In-game HUD hierarchy v0.15.51 audit
@@ -148,6 +150,7 @@ jobs:
             audit-output/runtime-stability-v01574-report.json
             audit-output/runtime-stability-v01575-report.json
             audit-output/runtime-stability-v01577-report.json
+            audit-output/runtime-stability-v01578-report.json
             audit-output/random-ingame-v01550-report.json
             audit-output/random-ingame-v01551-report.json
             audit-output/random-ingame-v01552-report.json
