@@ -157,8 +157,8 @@ function refreshPickWindowV01591(r){
 
 function patchRandomPracticeV01591(src){
   const signature='function ensurePickWindowStylesV01591()';if(src.includes(signature))return src;
-  const insertAnchor='  function stageHead(id,title,sub,before){';
-  if(countOf(src,insertAnchor)!==1)throw new Error(`v0.15.91 source contract mismatch stageHead count=${countOf(src,insertAnchor)}`);
+  const insertAnchor='  function canonicalChampionNameV01590(value,row){';
+  if(countOf(src,insertAnchor)!==1)throw new Error(`v0.15.91 source contract mismatch canonical anchor count=${countOf(src,insertAnchor)}`);
   const helpers=[normalizeQueueSizeV01591,ensurePickWindowStylesV01591,restoreNativePickStructureV01591,bindQueueSelectV01591,guardTop5InteractionV01591,refreshPickWindowV01591].map(fn=>'  '+fn.toString().replace(/\n/g,'\n  ')).join('\n\n')+'\n\n';
   src=src.replace(insertAnchor,helpers+insertAnchor);
   const hook='    refreshPickReferenceV01590(r);';
@@ -179,6 +179,8 @@ module.exports={
   score_logic_changed:false,
   item_recommendation_logic_changed:prior.item_recommendation_logic_changed===true,
   route_adoption_changed:prior.route_adoption_changed===true,
+  ingame_hud_changed:prior.ingame_hud_changed===true,
+  champion_visuals_changed:prior.champion_visuals_changed===true,
   random_pick_reference_layout_changed:prior.random_pick_reference_layout_changed===true,
   random_pick_window_fix_changed:true,
   policy_version:'0.15.91'
