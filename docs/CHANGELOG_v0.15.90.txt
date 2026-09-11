@@ -1,0 +1,14 @@
+v0.15.90 · RANDOM PICK REFERENCE LAYOUT
+
+- Rebuilds RANDOM > 픽창 around the approved reference image instead of layering more CSS on the old vertical layout.
+- Moves candidate input and current-queue TOP5 into one center stack, with the external/team state on the left and composition DNA on the right.
+- Re-renders existing engine TOP5 rows as compact horizontal recommendation rows. Rank 1 is explicitly marked 강력 추천. Engine order, scores and descriptions are reused; scoring is unchanged.
+- Adds a canonical champion-label resolver that prefers committed pool/external/manual champion names, preventing overlapping labels such as 오리아나오오리아나 and 신 짜오신 짜오.
+- Replaces the quick selection judgment content with a six-card bottom dashboard: 현재 큐 / 후보 계산 / 현재 결론 / 실전 AD·AP / TOP1 점수 / 추천 방향.
+- Reworks 조합 DNA into reference-style lanes for Engage, Poke, Frontline, Sustain and CC. These lanes are role-coverage states derived from the existing shortage signals; they are not new combat-strength scores.
+- Fixes RANDOM queue readiness math: external fixed players no longer reduce the number of own-party picks still needed.
+- Hides the redundant ‘이번 선택의 핵심’ strip because the same conclusion is now represented in TOP1 and 선택 판단.
+- Preserves AutoSync, external fixed picks, manual party locks, candidate inputs, TOP5 engine behavior, v0.15.87 route adoption, v0.15.88 label-dedupe lineage, and v0.15.79 safety baseline.
+- score_logic_changed: false
+- new setInterval: none
+- new MutationObserver: none
