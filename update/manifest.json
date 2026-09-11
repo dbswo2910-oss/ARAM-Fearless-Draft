@@ -1,6 +1,6 @@
 {
-  "version": "0.15.91",
-  "message": "v0.15.91 · RANDOM PICK WINDOW STABILITY — queue selector visibility + window-safe reference layout + compact TOP5 + safe TOP5 clicks; scoring unchanged",
+  "version": "0.15.92",
+  "message": "v0.15.92 · IN GAME PORO-SNAX FILTER — exclude Poro-Snax from build/core/route recommendations while preserving scoring and route adoption",
   "min_launcher": "2.0.2",
   "files": [
     {"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},
@@ -68,7 +68,7 @@
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
     {"path":"main.js","source":"update/v0.15.70/main.js"},
     {"path":"ingame-transition-patch-v01575.js","source":"update/v0.15.75/ingame-transition-patch-v01575.js"},
-    {"path":"package.json","source":"update/v0.15.91/package.json"},
+    {"path":"package.json","source":"update/v0.15.92/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
     {"path":"autosync-live-runtime-v01571.js","source":"update/v0.15.71/autosync-live-runtime-v01571.js"},
     {"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"},
@@ -117,7 +117,9 @@
     {"path":"main-v01590.js","source":"update/v0.15.90/main-v01590.js"},
     {"path":"runtime-source-stability-v01590.js","source":"update/v0.15.90/runtime-source-stability-v01590.js"},
     {"path":"main-v01591.js","source":"update/v0.15.91/main-v01591.js"},
-    {"path":"runtime-source-stability-v01591.js","source":"update/v0.15.91/runtime-source-stability-v01591.js"}
+    {"path":"runtime-source-stability-v01591.js","source":"update/v0.15.91/runtime-source-stability-v01591.js"},
+    {"path":"main-v01592.js","source":"update/v0.15.92/main-v01592.js"},
+    {"path":"runtime-source-stability-v01592.js","source":"update/v0.15.92/runtime-source-stability-v01592.js"}
   ],
   "delete": [
     "draft-layout-hotfix-v01544.js",
