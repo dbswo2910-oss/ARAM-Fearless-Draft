@@ -10,7 +10,8 @@ const SAFETY_BASELINE_LINEAGE_V01585=Object.freeze({
   via83:'main-v01582.js',
   via82:'main-v01581.js',
   via81:'main-v01580.js',
-  root:'main-v01579.js'
+  root:'main-v01579.js',
+  v80Transition:"replaceAll('0.15.79','0.15.80')"
 });
 void SAFETY_BASELINE_LINEAGE_V01585;
 const basePath=path.join(__dirname,'main-v01584.js');
