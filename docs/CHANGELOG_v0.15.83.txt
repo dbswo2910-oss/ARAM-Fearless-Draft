@@ -1,0 +1,23 @@
+ARAM Fearless Draft v0.15.83
+
+IN GAME CHAMPION VISUALS
+
+- IN GAME 실시간 커맨드센터에 챔피언 초상화를 추가했습니다.
+- 앱에 이미 존재하는 championIconHtml() 렌더러를 재사용하므로 별도의 챔피언 이미지 서버/중복 로더를 추가하지 않습니다.
+- 내 플레이: 현재 챔피언의 큰 초상화 + 이름 + 현재 역할을 함께 표시합니다.
+- 위협 TOP3: 각 적 챔피언의 초상화 + 이름 + 피해 유형 + 위협 상태를 함께 표시합니다.
+- 행동 지침: 문장 안에 실제 챔피언 이름이 등장하면 작은 초상화를 이름 옆에 함께 표시합니다.
+- 현재 판단: 주의 대상 TOP3 초상화를 짧게 노출합니다.
+- 한타 현황: 아군/적군 5인 조합을 챔피언 초상화 스트립으로 보여주고 LIVE 파워/생존/골드/내 상태를 함께 표시합니다.
+- 사망/빌드 화면: 복귀 후 첫 행동에서 내 챔피언과 최고위협 초상화를 함께 표시합니다.
+- 인게임 미리보기에서도 샘플 아군/적군 조합의 초상화가 즉시 보이도록 했습니다.
+- 초상화 로드에 실패하더라도 챔피언 이름과 행동 텍스트는 유지됩니다.
+
+Compatibility / safety
+- v0.15.82 IN GAME Command Center를 그대로 상속합니다.
+- v0.15.81 Item Recommendation Engine v2를 그대로 상속합니다.
+- v0.15.79 transactional updater / heartbeat / BLACKBOX / circuit-breaker safety baseline을 그대로 상속합니다.
+- score_logic_changed:false
+- item_recommendation_logic_changed:false
+- champion_visuals_changed:true
+- 새 setInterval / MutationObserver를 추가하지 않습니다.
