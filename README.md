@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.75**  
+Current app/update version: **v0.15.77**  
 Current balance/data patch: **26.17**
 
 This repository is the source of truth for incremental in-app updates, regression validation, Windows distribution work, and coding-agent handoff.
@@ -13,20 +13,22 @@ Read these first when continuing development:
 
 1. `AGENTS.md` — engineering rules and invariants
 2. `docs/AI_HANDOFF.md` — architecture and product direction
-3. `docs/AI_HANDOFF_v0.15.75_ADDENDUM.md` — freeze-log-grounded IN GAME transition isolation + durable stage codes
-4. `docs/AI_HANDOFF_v0.15.74_ADDENDUM.md` — remaining item-catalog retry freeze guard + main-process watchdog
-5. `docs/AI_HANDOFF_v0.15.73_ADDENDUM.md` — reproduced item-catalog hard-freeze diagnosis and first fix
-6. `docs/AI_HANDOFF_v0.15.72_ADDENDUM.md` — Random Practice stability consolidation and UI responsiveness work
-7. `docs/AI_HANDOFF_v0.15.71_ADDENDUM.md` — real-game AutoSync transport governor
-8. `docs/AI_HANDOFF_v0.15.70_ADDENDUM.md` — Random In-game single-owner runtime
-9. `docs/AI_HANDOFF_v0.15.69_ADDENDUM.md` — historical Golden Guard autorun diagnosis
-10. `docs/INSTALLED_BASELINE_v0.15.49.md` — verified installed base UI/core
-11. `reference/installed-v0.15.49/` — exact installed Random Practice DOM fragments
-12. `update/manifest.json` — active update payload and current version
+3. `docs/AI_HANDOFF_v0.15.77_ADDENDUM.md` — renderer blackbox, CDP freeze stack capture, fault-isolated runtime loader
+4. `docs/STABILITY_AUDIT_v0.15.77.md` — full freeze-risk audit and remaining instrumented risks
+5. `docs/AI_HANDOFF_v0.15.75_ADDENDUM.md` — freeze-log-grounded IN GAME transition isolation + durable stage codes
+6. `docs/AI_HANDOFF_v0.15.74_ADDENDUM.md` — remaining item-catalog retry freeze guard + main-process watchdog
+7. `docs/AI_HANDOFF_v0.15.73_ADDENDUM.md` — reproduced item-catalog hard-freeze diagnosis and first fix
+8. `docs/AI_HANDOFF_v0.15.72_ADDENDUM.md` — Random Practice stability consolidation and UI responsiveness work
+9. `docs/AI_HANDOFF_v0.15.71_ADDENDUM.md` — real-game AutoSync transport governor
+10. `docs/AI_HANDOFF_v0.15.70_ADDENDUM.md` — Random In-game single-owner runtime
+11. `docs/AI_HANDOFF_v0.15.69_ADDENDUM.md` — historical Golden Guard autorun diagnosis
+12. `docs/INSTALLED_BASELINE_v0.15.49.md` — verified installed base UI/core
+13. `reference/installed-v0.15.49/` — exact installed Random Practice DOM fragments
+14. `update/manifest.json` — active update payload and current version
 
 ## Current runtime direction
 
-v0.15.50–v0.15.75 establish the compact Random Practice in-game coach, unified current item art, denser pick workflow, event-driven compatibility owners, and Windows responsiveness safeguards. The HUD is considered largely stabilized; new work should improve decision quality rather than restart a broad layout redesign unless explicitly requested.
+v0.15.50–v0.15.77 establish the compact Random Practice in-game coach, unified current item art, denser pick workflow, event-driven compatibility owners, and Windows responsiveness safeguards. The HUD is considered largely stabilized; new work should improve decision quality rather than restart a broad layout redesign unless explicitly requested.
 
 Important recent stability changes:
 
@@ -39,11 +41,12 @@ Important recent stability changes:
 - **v0.15.72**: consolidates Random Practice pick maintenance, removes overlapping v49/v55/v58/v68 recurring observers/listeners, scopes unrelated updater/Data observers away from Random Practice, changes exhaustive TOP5 enumeration to cooperative time-sliced execution, and restores AutoSync party/current-pick visual state without changing score math.
 - **v0.15.73**: fixes the first independently reproduced hard-freeze. `random-item-icons-v01556.js` could enter an unbounded Promise retry loop whenever the desktop item catalog returned `{ok:false}`.
 - **v0.15.74**: fixes the remaining active unconditional catalog retry in the v0.15.53 death-shop layer, throttles failed catalog re-entry in v0.15.57/v0.15.66, and adds a main-process freeze watchdog.
-- **v0.15.75**: uses the v0.15.74 freeze log to isolate the `champ_select → in_game` transition. Once a live game begins, AutoSync no longer synchronously re-enters Random Practice TOP5, analysis, or legacy detail rendering while the v0.15.70 in-game owner is active. In-game tab/mode refreshes delegate to that single owner, and durable main-process stage codes (`IG110`/`IG119`/`IG120`/`IG121`/`IG130`/`IG200`) bracket the transition for exact post-freeze diagnosis.
+- **v0.15.75**: uses the v0.15.74 freeze log to isolate the `champ_select → in_game` transition. Once a live game begins, AutoSync no longer synchronously re-enters Random Practice TOP5, analysis, or legacy detail rendering while the v0.15.70 in-game owner is active.
+- **v0.15.77**: after freezes persisted even with live analysis hard-disabled, moves from speculative subsystem fixes to structural diagnosis. Runtime overlays are injected independently with deterministic `RTI-###` codes, cleanup/finalization is mandatory, document-wide item/profile MutationObservers are scoped, renderer heartbeat is single-flight, and Chromium Debugger is armed while healthy so `FRZ-003` can persist the exact running JavaScript call stack on a freeze.
 
-Recommendation, ban, team-score, item, threat, and purchase algorithms are unchanged by v0.15.66–v0.15.75 responsiveness work.
+Recommendation, ban, team-score, item, threat, and purchase algorithms are unchanged by v0.15.66–v0.15.77 responsiveness work.
 
-See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.75.txt` for release history.
+See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.77.txt` for release history.
 
 ## Distribution
 
