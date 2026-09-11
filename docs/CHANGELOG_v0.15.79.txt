@@ -1,0 +1,16 @@
+ARAM Fearless Draft v0.15.79
+
+SAFETY BASELINE release. No recommendation/scoring logic changes.
+
+- Preserves the user-confirmed v0.15.78 freeze fix as the baseline behavior.
+- Makes future in-app updates transactional with a persistent pre-update snapshot.
+- Adds next-launch automatic rollback after an abnormal probation boot or watchdog hang.
+- Snapshots all manifest-touched files plus index.html, autosync-core.js, main.js, preload.js, and package.json.
+- Removes files that were newly introduced by a failed update when rolling back.
+- Introduces stable heartbeat-main.json / heartbeat-renderer.json / external-hang.log diagnostics while preserving v0.15.78 legacy filenames.
+- External watchdog writes a safety-failure marker for HNG-M001 / HNG-R001 / HNG-B001.
+- Adds renderer safety guards for renderAll, runRandomCombos, renderRandomAnalysis, renderRandomDetails, renderDataExplorer, and renderAramHistoryFeedback.
+- Blocks recursive heavy-function re-entry and opens short circuit breakers after repeated errors or repeated critical blocking calls.
+- Adds a permanent v0.15.79 CI gate covering transactional rollback, live renderAll/TOP5 policy, document-wide observer policy, runtime re-entry protection, and scoring neutrality.
+
+score_logic_changed:false
