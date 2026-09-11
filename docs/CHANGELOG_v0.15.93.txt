@@ -1,0 +1,9 @@
+v0.15.93 · RANDOM PICK INTERACTION HOTFIX
+
+- Expand RANDOM pick layout on large/fullscreen windows so TOP5/result content uses available width instead of staying cramped.
+- Fix queue-size selector clipping: preserve a visible label and readable values 1–5 with explicit width, padding and native select rendering.
+- Replace the repeated global AD/AP bar in TOP5 rows with a candidate-aware preview. The runtime first uses candidate/row metadata when available, then observed champion metadata/type, and only falls back to the current balance when no candidate damage information is observable.
+- Release the v0.15.91 capture-phase TOP5 click blocker.
+- Clicking a TOP5 candidate now creates a visible selected-preview state and updates the right-side DNA AD/AP, TOP1 summary, and bottom decision cards for that candidate. The separate detail button remains isolated.
+- Preserve v0.15.92 Poro-Snax filtering, route-adoption behavior, recommendation scoring, and the v0.15.79 safety lineage.
+- score_logic_changed: false
