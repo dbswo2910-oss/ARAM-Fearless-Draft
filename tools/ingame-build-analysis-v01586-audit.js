@@ -35,7 +35,8 @@ ok('component path panel exists',coach.includes('부품 경로')&&coach.includes
 ok('situational pivot guide exists',coach.includes('상황별 전환 가이드')&&coach.includes('상대 AD 강함')&&coach.includes('상대 AP 강함'));
 ok('difference explanation exists',coach.includes('왜 기본 빌드와 달라졌나?'));
 ok('one-line conclusion exists',coach.includes('한 줄 빌드 결론'));
-ok('legacy shop compatibility selectors preserved',coach.includes('riBuildCompare')&&coach.includes('riBuildCard opt')&&coach.includes('riBuildMain ri86HiddenTarget'));
+ok('legacy shop compatibility selectors preserved',coach.includes('class="riBuildCompare"')&&coach.includes('class="riBuildCard opt"')&&coach.includes('class="riBuildMain"')&&coach.includes('ri86HiddenTarget'));
+ok('death/respawn return-plan contract preserved',coach.includes('class="ri82ReturnPlan"')&&coach.includes('복귀 후 첫 행동')&&coach.includes('위치 확인 전 무리 진입 금지'));
 ok('shop planner moves into build analysis slot',shop.includes("const slot=$('.ri86ShopSlot',shell)")&&shop.includes('slot.appendChild(box)'));
 ok('latest-only item art used in new build UI',coach.includes("r?.it?.iconPrimaryUrl||''")&&!['runtime-source-stability-v01586.js','build-analysis-style-v01586.js','build-analysis-logic-v01586.js'].some(f=>read('update/v0.15.86/'+f).includes('ddragon.leagueoflegends.com')));
 ok('v0.15.85 fight board scale preserved',coach.includes('function ensureFightStatusScaleStylesV01585()'));
@@ -45,7 +46,7 @@ ok('draft scoring remains untouched',mod.score_logic_changed===false);
 ok('item recommendation scoring remains inherited',mod.item_recommendation_logic_changed===false);
 ok('build analysis change declared',mod.build_analysis_changed===true);
 ok('v0.15.86 source adds no scheduler/observer',!['runtime-source-stability-v01586.js','build-analysis-style-v01586.js','build-analysis-logic-v01586.js'].some(f=>/setInterval\(|MutationObserver/.test(read('update/v0.15.86/'+f))));
-const report={version:'0.15.86',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'dedicated Build-tab analysis comparing statistical baseline with current-match optimized build while preserving live/recommendation/safety behavior',score_logic_changed:false,item_recommendation_logic_changed:false,build_analysis_changed:true}};
+const report={version:'0.15.86',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'dedicated Build-tab analysis comparing statistical baseline with current-match optimized build while preserving live/recommendation/safety behavior',score_logic_changed:false,item_recommendation_logic_changed:false,build_analysis_changed:true,return_plan_preserved:true}};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output/ingame-build-analysis-v01586-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));
