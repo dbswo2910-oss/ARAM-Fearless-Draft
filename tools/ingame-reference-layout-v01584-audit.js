@@ -10,8 +10,9 @@ const raw=read('update/v0.15.50/random-ingame-coach-v01550.js');
 let code='';
 try{code=mod.patchRuntimeSource('random-ingame-coach-v01550.js',raw);new Function(code);ok('patched coach parses',true)}catch(e){ok('patched coach parses',false,e.stack||e.message)}
 
-ok('manifest is v0.15.84',manifest.version==='0.15.84',manifest.version);
-ok('package points to v0.15.84 entry',by.get('package.json')==='update/v0.15.84/package.json',by.get('package.json')||'');
+const patchNo=Number(String(manifest.version||'0.0.0').split('.')[2]||0);
+ok('manifest is v0.15.84 or successor',String(manifest.version).startsWith('0.15.')&&patchNo>=84,manifest.version);
+ok('package points to current manifest version',by.get('package.json')===`update/v${manifest.version}/package.json`,by.get('package.json')||'');
 ok('v0.15.84 main delivered',by.get('main-v01584.js')==='update/v0.15.84/main-v01584.js',by.get('main-v01584.js')||'');
 ok('v0.15.84 source stability delivered',by.get('runtime-source-stability-v01584.js')==='update/v0.15.84/runtime-source-stability-v01584.js',by.get('runtime-source-stability-v01584.js')||'');
 
@@ -61,7 +62,7 @@ try{
   ok('VM renders full-width fight status last',live.lastIndexOf('ri84Fight')>live.lastIndexOf('ri84ReturnGrid'));
 }catch(e){ok('VM reference layout render',false,e.stack||e.message)}
 
-const report={version:'0.15.84',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'align IN GAME preview/live layout with approved visual reference while preserving recommendation and safety behavior',score_logic_changed:false,item_recommendation_logic_changed:false,ingame_hud_changed:true,champion_visuals_changed:true,reference_layout_changed:true}};
+const report={version:'0.15.84',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'align IN GAME preview/live layout with approved visual reference while preserving recommendation and safety behavior',score_logic_changed:false,item_recommendation_logic_changed:false,ingame_hud_changed:true,champion_visuals_changed:true,reference_layout_changed:true,successor_aware:true}};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output/ingame-reference-layout-v01584-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));

@@ -1,0 +1,32 @@
+name: v0.15.85 IN GAME Fight Status Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run IN GAME fight-status audit
+        run: node tools/ingame-fight-status-v01585-audit.js
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingame-fight-status-v01585-report
+          path: audit-output/ingame-fight-status-v01585-report.json
+          if-no-files-found: error

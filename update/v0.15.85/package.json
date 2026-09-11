@@ -1,0 +1,10 @@
+{
+  "name": "aram-fearless-draft",
+  "version": "0.15.85",
+  "private": true,
+  "description": "ARAM Fearless Draft Electron Desktop - enlarged IN GAME fight-status board on v0.15.84 reference layout",
+  "main": "main-v01585.js",
+  "productName": "ARAM Fearless Draft",
+  "author": "by잉디디",
+  "license": "UNLICENSED"
+}
