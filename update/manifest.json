@@ -1,6 +1,6 @@
 {
-  "version": "0.15.88",
-  "message": "v0.15.88 · RANDOM TOP1 LABEL DEDUPE — fixes repeated champion names in 선택 판단 > 현재 TOP1 without changing scoring",
+  "version": "0.15.89",
+  "message": "v0.15.89 · RANDOM PICK COMMAND CENTER — premium pick layout + composition intel rail + stronger TOP5 hierarchy; scoring unchanged",
   "min_launcher": "2.0.2",
   "files": [
     {"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},
@@ -68,7 +68,7 @@
     {"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},
     {"path":"main.js","source":"update/v0.15.70/main.js"},
     {"path":"ingame-transition-patch-v01575.js","source":"update/v0.15.75/ingame-transition-patch-v01575.js"},
-    {"path":"package.json","source":"update/v0.15.88/package.json"},
+    {"path":"package.json","source":"update/v0.15.89/package.json"},
     {"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},
     {"path":"autosync-live-runtime-v01571.js","source":"update/v0.15.71/autosync-live-runtime-v01571.js"},
     {"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"},
@@ -111,7 +111,9 @@
     {"path":"live-route-logic-v01587.js","source":"update/v0.15.87/live-route-logic-v01587.js"},
     {"path":"route-adoption-gate-v01587.js","source":"update/v0.15.87/route-adoption-gate-v01587.js"},
     {"path":"main-v01588.js","source":"update/v0.15.88/main-v01588.js"},
-    {"path":"runtime-source-stability-v01588.js","source":"update/v0.15.88/runtime-source-stability-v01588.js"}
+    {"path":"runtime-source-stability-v01588.js","source":"update/v0.15.88/runtime-source-stability-v01588.js"},
+    {"path":"main-v01589.js","source":"update/v0.15.89/main-v01589.js"},
+    {"path":"runtime-source-stability-v01589.js","source":"update/v0.15.89/runtime-source-stability-v01589.js"}
   ],
   "delete": [
     "draft-layout-hotfix-v01544.js",
