@@ -8,10 +8,10 @@ const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const pkgPath=byPath.get('package.json'),baseMainPath=byPath.get('main.js'),nodePath=byPath.get('autosync-live-runtime-v01571.js'),rendererPath=byPath.get('runtime-live-autosync-v01571.js'),v70Path=byPath.get('runtime-random-ingame-v01570.js');
+const pkgPath=byPath.get('package.json'),baseMainPath=byPath.get('main.js'),nodePath=byPath.get('autosync-live-runtime-v01571.js'),rendererPath=byPath.get('runtime-live-autosync-v01571.js'),v70Path=byPath.get('runtime-random-ingame-v01570.js'),v79Path=byPath.get('main-v01579.js');
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},entryTarget=String(pkg.main||'main.js'),entryPath=byPath.get(entryTarget);
-const entry=entryPath&&exists(entryPath)?read(entryPath):'',baseMain=baseMainPath&&exists(baseMainPath)?read(baseMainPath):'',node=nodePath&&exists(nodePath)?read(nodePath):'',renderer=rendererPath&&exists(rendererPath)?read(rendererPath):'';
-for(const [name,src] of [['current Electron entry',entry],['historical v0.15.70 main',baseMain],['main-process live runtime',node],['renderer live runtime',renderer]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
+const entry=entryPath&&exists(entryPath)?read(entryPath):'',baseMain=baseMainPath&&exists(baseMainPath)?read(baseMainPath):'',node=nodePath&&exists(nodePath)?read(nodePath):'',renderer=rendererPath&&exists(rendererPath)?read(rendererPath):'',v79Entry=v79Path&&exists(v79Path)?read(v79Path):'';
+for(const [name,src] of [['current Electron entry',entry],['v0.15.79 safety successor base',v79Entry],['historical v0.15.70 main',baseMain],['main-process live runtime',node],['renderer live runtime',renderer]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
 ok('manifest is v0.15.71 or newer',ge(m.version,'0.15.71'),m.version);
 ok('package is v0.15.71 or newer',ge(pkg.version,'0.15.71'),pkg.version);
 ok('package current entry is delivered',!!entryPath&&exists(entryPath),`${entryTarget} -> ${entryPath||'missing'}`);
@@ -19,11 +19,13 @@ ok('historical v0.15.70 main remains immutable runtime base',baseMainPath==='upd
 ok('main-process live runtime is delivered',nodePath==='update/v0.15.71/autosync-live-runtime-v01571.js',nodePath||'missing');
 ok('renderer live runtime target is delivered',!!rendererPath&&exists(rendererPath),rendererPath||'missing');
 ok('v0.15.70 Random In-game owner remains active',v70Path==='update/v0.15.70/runtime-random-ingame-v01570.js',v70Path||'missing');
-ok('current entry patches cached AutoSync Core before compiling historical main',entry.indexOf("require('./autosync-live-runtime-v01571').patch(autosyncCore)")>=0&&entry.indexOf('module._compile(src,__filename)')>entry.indexOf("patch(autosyncCore)"));
-ok('current entry requires exact v0.15.70 base contract',entry.includes("const VERSION='0.15.70'")&&entry.includes('base main contract mismatch'));
-ok('current entry promotes runtime version to current manifest',entry.includes(`replaceAll('0.15.70','${m.version}')`),m.version);
-ok('current entry injects renderer live governor after performance owner',entry.includes("'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'"));
-ok('current entry preserves v0.15.71 renderer readiness marker',entry.includes('__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__'));
+ok('v0.15.79 safety successor base is delivered',!!v79Path&&exists(v79Path),v79Path||'missing');
+ok('current entry inherits v0.15.79 safety successor',entry.includes("main-v01579.js")&&entry.includes("replaceAll('0.15.79','0.15.80')"));
+ok('inherited entry patches cached AutoSync Core before compiling historical main',v79Entry.indexOf("require('./autosync-live-runtime-v01571').patch(autosyncCore)")>=0&&v79Entry.indexOf('module._compile(src,__filename)')>v79Entry.indexOf("patch(autosyncCore)"));
+ok('inherited entry requires exact v0.15.70 base contract',v79Entry.includes("const VERSION='0.15.70'")&&v79Entry.includes('base main contract mismatch'));
+ok('successor chain promotes runtime version to current manifest',v79Entry.includes("replaceAll('0.15.70','0.15.79')")&&entry.includes(`replaceAll('0.15.79','${m.version}')`),m.version);
+ok('inherited entry injects renderer live governor after performance owner',v79Entry.includes("'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'"));
+ok('inherited entry preserves v0.15.71 renderer readiness marker',v79Entry.includes('__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__'));
 ok('historical base still contains v0.15.70 Random In-game owner',baseMain.includes("'runtime-random-ingame-v01570.js'")&&baseMain.includes('aramRandomIngameRuntimeV01570?.finishBootstrap'));
 ok('core cadence is reduced from 750ms to 1200ms',node.includes("setInterval(()=>this.tick().catch(()=>{}),1200)"));
 ok('identity/lobby refresh is throttled during live game',node.includes('t-last<15000')&&node.includes('__aramLiveIdentityAtV01571'));
