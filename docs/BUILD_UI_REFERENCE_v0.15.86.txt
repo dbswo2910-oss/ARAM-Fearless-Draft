@@ -1,0 +1,8 @@
+BUILD TAB REFERENCE HIERARCHY
+1. Build analysis summary
+2. Statistical baseline build | Current-match optimized build
+3. Current inventory | Next purchase priority | Component path
+4. Situational pivot guide
+5. Why baseline changed | One-line conclusion
+
+LIVE remains the fast command-center page. BUILD is the detailed item-analysis page.

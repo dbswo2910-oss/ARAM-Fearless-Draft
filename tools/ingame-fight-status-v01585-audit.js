@@ -9,13 +9,14 @@ const mod=require(path.join(ROOT,'update/v0.15.85/runtime-source-stability-v0158
 const raw=read('update/v0.15.50/random-ingame-coach-v01550.js');
 let code='';
 try{code=mod.patchRuntimeSource('random-ingame-coach-v01550.js',raw);new Function(code);ok('patched coach parses',true)}catch(e){ok('patched coach parses',false,e.stack||e.message)}
-ok('manifest promoted to v0.15.85',manifest.version==='0.15.85',manifest.version);
-ok('v0.15.85 package delivered',by.get('package.json')==='update/v0.15.85/package.json',by.get('package.json')||'');
-ok('v0.15.85 main delivered',by.get('main-v01585.js')==='update/v0.15.85/main-v01585.js',by.get('main-v01585.js')||'');
-ok('v0.15.85 source stability delivered',by.get('runtime-source-stability-v01585.js')==='update/v0.15.85/runtime-source-stability-v01585.js',by.get('runtime-source-stability-v01585.js')||'');
+const patchNo=Number(String(manifest.version||'0.0.0').split('.')[2]||0);
+ok('manifest is v0.15.85 or successor',String(manifest.version).startsWith('0.15.')&&patchNo>=85,manifest.version);
+ok('package points to current manifest version',by.get('package.json')===`update/v${manifest.version}/package.json`,by.get('package.json')||'');
+ok('v0.15.85 main remains delivered',by.get('main-v01585.js')==='update/v0.15.85/main-v01585.js',by.get('main-v01585.js')||'');
+ok('v0.15.85 source stability remains delivered',by.get('runtime-source-stability-v01585.js')==='update/v0.15.85/runtime-source-stability-v01585.js',by.get('runtime-source-stability-v01585.js')||'');
 const pkg=JSON.parse(read('update/v0.15.85/package.json'));
-ok('package version is v0.15.85',pkg.version==='0.15.85',pkg.version);
-ok('package entry is main-v01585.js',pkg.main==='main-v01585.js',pkg.main);
+ok('historical package version is v0.15.85',pkg.version==='0.15.85',pkg.version);
+ok('historical package entry is main-v01585.js',pkg.main==='main-v01585.js',pkg.main);
 const main=read('update/v0.15.85/main-v01585.js');
 try{new Function(main);ok('v0.15.85 main parses',true)}catch(e){ok('v0.15.85 main parses',false,e.message)}
 ok('v0.15.85 inherits v0.15.84',main.includes("main-v01584.js")&&main.includes("replaceAll('0.15.84','0.15.85')"));
@@ -33,7 +34,7 @@ ok('draft scoring remains untouched',mod.score_logic_changed===false);
 ok('item recommendation scoring remains inherited',mod.item_recommendation_logic_changed===false);
 ok('fight-status scale change declared',mod.fight_status_scale_changed===true);
 ok('v0.15.85 source adds no scheduler/observer',!read('update/v0.15.85/runtime-source-stability-v01585.js').includes('setInterval(')&&!read('update/v0.15.85/runtime-source-stability-v01585.js').includes('MutationObserver'));
-const report={version:'0.15.85',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'enlarge the full-width fight-status board without changing scoring or item recommendations',score_logic_changed:false,item_recommendation_logic_changed:false,ingame_hud_changed:true,fight_status_scale_changed:true}};
+const report={version:'0.15.85',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'enlarge the full-width fight-status board without changing scoring or item recommendations',score_logic_changed:false,item_recommendation_logic_changed:false,ingame_hud_changed:true,fight_status_scale_changed:true,successor_aware:true}};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output/ingame-fight-status-v01585-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));
