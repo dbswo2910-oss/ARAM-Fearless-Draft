@@ -1,0 +1,15 @@
+v0.15.84 · IN GAME REFERENCE LAYOUT
+
+- Aligns IN GAME live/preview layout with the approved reference mockup.
+- Full-width current-judgment banner appears first.
+- Second row: My Play + Threat TOP3 with larger champion portraits and richer cards.
+- Third row: Realtime Build + Death/Return Plan shown together.
+- Full-width fight-status strip remains at the bottom.
+- Current item row uses the existing latest item-art resolver only.
+- Champion portraits continue using the existing championIconHtml renderer.
+- Preserves v0.15.81 item recommendation behavior and v0.15.79 safety baseline.
+- score_logic_changed:false
+- item_recommendation_logic_changed:false
+- ingame_hud_changed:true
+- champion_visuals_changed:true
+- reference_layout_changed:true
