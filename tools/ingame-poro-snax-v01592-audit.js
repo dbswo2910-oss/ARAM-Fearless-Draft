@@ -14,10 +14,10 @@ const by=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
 
 ok('package version',pkg.version==='0.15.92',pkg.version);
 ok('package entry',pkg.main==='main-v01592.js',pkg.main);
-ok('manifest version',manifest.version==='0.15.92',manifest.version);
+ok('manifest version',['0.15.92','0.15.93'].includes(manifest.version),manifest.version);
 ok('manifest delivers main',by.get('main-v01592.js')==='update/v0.15.92/main-v01592.js',by.get('main-v01592.js')||'');
 ok('manifest delivers runtime',by.get('runtime-source-stability-v01592.js')==='update/v0.15.92/runtime-source-stability-v01592.js',by.get('runtime-source-stability-v01592.js')||'');
-ok('manifest delivers package',by.get('package.json')==='update/v0.15.92/package.json',by.get('package.json')||'');
+ok('manifest delivers package',['update/v0.15.92/package.json','update/v0.15.93/package.json'].includes(by.get('package.json')),by.get('package.json')||'');
 
 let mod=null,patched='';
 try{
@@ -44,7 +44,7 @@ ok('v0.15.79 safety lineage preserved',main.includes("root:'main-v01579.js'")&&m
 ok('v0.15.92 layer adds no scheduler',!runtime.includes('setInterval('));
 ok('v0.15.92 layer adds no MutationObserver',!runtime.includes('MutationObserver'));
 
-const report={version:'0.15.92',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'Exclude Poro-Snax from every build/core/route recommendation surface without changing scoring or route-adoption behavior'}};
+const report={version:'0.15.92',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'Exclude Poro-Snax from every build/core/route recommendation surface without changing scoring or route-adoption behavior; permit declared successor distributions that keep the v0.15.92 files active.'}};
 fs.mkdirSync(path.join(root,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(root,'audit-output/ingame-poro-snax-v01592-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));
