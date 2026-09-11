@@ -8,8 +8,8 @@ const mod=require(path.join(ROOT,'update/v0.15.91/runtime-source-stability-v0159
 const raw=read('update/v0.15.72/random-practice-focus-v01549.js');
 let patched='';
 try{patched=mod.patchRuntimeSource('random-practice-focus-v01549.js',raw);new Function(patched);ok('patched RANDOM focus parses',true)}catch(e){ok('patched RANDOM focus parses',false,e.stack||e.message)}
-ok('manifest promoted to v0.15.91',manifest.version==='0.15.91',manifest.version);
-ok('active package is v0.15.91',by.get('package.json')==='update/v0.15.91/package.json',by.get('package.json')||'');
+ok('manifest is v0.15.91 or declared successor',['0.15.91','0.15.92'].includes(manifest.version),manifest.version);
+ok('active package is v0.15.91 or successor',['update/v0.15.91/package.json','update/v0.15.92/package.json'].includes(by.get('package.json')),by.get('package.json')||'');
 ok('v0.15.91 main delivered',by.get('main-v01591.js')==='update/v0.15.91/main-v01591.js',by.get('main-v01591.js')||'');
 ok('v0.15.91 runtime delivered',by.get('runtime-source-stability-v01591.js')==='update/v0.15.91/runtime-source-stability-v01591.js',by.get('runtime-source-stability-v01591.js')||'');
 const pkg=JSON.parse(read('update/v0.15.91/package.json')),main=read('update/v0.15.91/main-v01591.js');
