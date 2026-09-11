@@ -172,7 +172,7 @@ const LIVE_RENDER=`
 `;
 
 function patchCoach(src){
-  src=insertBefore(src,'  function stateMeta(m)',REFERENCE_LAYOUT_HELPERS,'function ensureReferenceLayoutStylesV01584()','reference layout helpers');
+  src=insertBefore(src,'  function renderLive(m){',REFERENCE_LAYOUT_HELPERS,'function ensureReferenceLayoutStylesV01584()','reference layout helpers');
   src=replaceRange(src,'  function renderLive(m){','  function renderBuild(m){',LIVE_RENDER,'class="ri84LiveStack"','reference-aligned live layout');
   return src;
 }
