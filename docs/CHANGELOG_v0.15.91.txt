@@ -1,0 +1,12 @@
+v0.15.91 · RANDOM PICK WINDOW / QUEUE / TOP5 STABILITY
+
+- Fix 큐 인원 label/select clipping in RANDOM > 픽창.
+- Keep the approved left team / center candidate+TOP5 / right DNA layout on normal desktop and windowed widths.
+- Add explicit 3-column, 2-column, and 1-column responsive breakpoints to prevent horizontal/vertical clipping in window mode.
+- Compact TOP5 rows to match the approved reference image more closely so all five recommendations fit without oversized cards.
+- Hide the duplicated native TOP5 title under the custom TOP5 header.
+- Guard clicks on the new TOP5 champion/identity surface so old parent-row click handlers do not throw; the explicit 상세보기 button remains the interaction path.
+- Replace the queue selector inline onchange with a safe wrapper. Before invoking the legacy queue handler, temporarily restore pool/result panels to their native baseline parents, then re-apply the v0.15.90 layout after the queue update.
+- Clamp queue values to 1..5 and add fallback refresh if the legacy handler throws.
+- Preserve recommendation scoring, v0.15.87 route adoption, v0.15.90 canonical champion names, and the v0.15.79 safety baseline.
+- score_logic_changed: false
