@@ -1,0 +1,10 @@
+{
+  "name": "aram-fearless-draft",
+  "version": "0.15.78",
+  "private": true,
+  "description": "ARAM Fearless Draft Electron Desktop - user-state freeze fix and dual heartbeat watchdog",
+  "main": "main-v01578.js",
+  "productName": "ARAM Fearless Draft",
+  "author": "by잉디디",
+  "license": "UNLICENSED"
+}
