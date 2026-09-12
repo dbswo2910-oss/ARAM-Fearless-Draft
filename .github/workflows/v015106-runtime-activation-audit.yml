@@ -1,0 +1,30 @@
+name: v0.15.106 RANDOM/Data Runtime Activation Audit
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.106/**'
+      - 'tools/v015106-runtime-activation-audit.js'
+      - 'update/manifest.json'
+      - '.github/workflows/v015106-runtime-activation-audit.yml'
+  pull_request:
+    paths:
+      - 'update/v0.15.106/**'
+      - 'tools/v015106-runtime-activation-audit.js'
+      - 'update/manifest.json'
+      - '.github/workflows/v015106-runtime-activation-audit.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run v0.15.106 runtime-effect audit
+        run: node tools/v015106-runtime-activation-audit.js
+      - name: Run full regression audit
+        run: node tools/full-regression-audit.js
