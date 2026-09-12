@@ -1,0 +1,63 @@
+name: v0.15.101 Activate Startup Package Hotfix
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015101-activate-startup-hotfix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Patch v0.15.101 manifest and README
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const manifestPath='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
+          m.version='0.15.101';
+          m.message='v0.15.101 · STARTUP PACKAGE PATH HOTFIX — fixed packaged predecessor resolution after v0.15.100';
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(!pkg) throw new Error('manifest package.json entry missing');
+          pkg.source='update/v0.15.101/package.json';
+          m.files=m.files.filter(x=>x.path!=='main-v015101.js');
+          const idx=m.files.findIndex(x=>x.path==='main-v015100.js');
+          if(idx<0) throw new Error('manifest main-v015100.js entry missing');
+          m.files.splice(idx+1,0,{path:'main-v015101.js',source:'update/v0.15.101/main-v015101.js'});
+          fs.writeFileSync(manifestPath,JSON.stringify(m,null,2)+'\n');
+
+          const readmePath='README.md';
+          let r=fs.readFileSync(readmePath,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.101**');
+          const note='- **v0.15.101**: fixes the Windows startup ENOENT caused by v0.15.99/v0.15.100 looking for predecessor main files in deleted sibling version folders. Successor mains now resolve predecessors from the assembled active overlay directory; scoring and renderer behavior are unchanged.';
+          if(!r.includes('**v0.15.101**')) r += '\n'+note+'\n';
+          fs.writeFileSync(readmePath,r);
+          NODE
+      - name: Audit packaged startup chain
+        run: node tools/runtime-packaging-v015101-audit.js
+      - name: Core regression before activation
+        run: node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.101 startup package hotfix'
+            git push
+          fi
