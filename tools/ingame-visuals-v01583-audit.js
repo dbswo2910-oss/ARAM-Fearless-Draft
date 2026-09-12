@@ -14,7 +14,9 @@ try{code=mod.patchRuntimeSource('random-ingame-coach-v01550.js',raw);new Functio
 ok('manifest remains v0.15.83 or newer',atLeast(manifest.version,'0.15.83'),manifest.version);
 ok('v0.15.83 main remains delivered',by.get('main-v01583.js')==='update/v0.15.83/main-v01583.js',by.get('main-v01583.js')||'');
 ok('v0.15.83 source stability remains delivered',by.get('runtime-source-stability-v01583.js')==='update/v0.15.83/runtime-source-stability-v01583.js',by.get('runtime-source-stability-v01583.js')||'');
-const activePkg=by.get('package.json')||'';ok('active package is v0.15.83 or successor',/^update\/v0\.15\.(?:8[3-9]|9\d)\/package\.json$/.test(activePkg),activePkg);
+const activePkg=by.get('package.json')||'';
+const activePkgMatch=activePkg.match(/^update\/v(\d+\.\d+\.\d+)\/package\.json$/);
+ok('active package is v0.15.83 or successor',!!activePkgMatch&&atLeast(activePkgMatch[1],'0.15.83'),activePkg);
 
 const pkg=JSON.parse(read('update/v0.15.83/package.json'));
 ok('historical package stays v0.15.83',pkg.version==='0.15.83',pkg.version);
