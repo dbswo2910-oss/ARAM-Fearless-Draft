@@ -1,0 +1,9 @@
+v0.15.97 · IN GAME RESULTS PARSER HOTFIX
+
+- Fixes the Result dashboard showing only win/loss while champion, KDA, damage and final items appeared empty.
+- Supports League Client / Match Lab history where player stats live under participant.stats (plus compatible nested variants).
+- Resolves the local participant through participantIdentities/account identity when needed.
+- Resolves championId through the existing AutoSync champion resolver and safe fallbacks.
+- Reads final item0-item6 values from nested stats, so existing recent matches can populate after a history refresh; this is not limited to games played after v0.15.97.
+- Keeps v0.15.96 post-game auto-refresh/retry/stale-result guard intact.
+- No draft, champion, composition, or item recommendation scoring changes.
