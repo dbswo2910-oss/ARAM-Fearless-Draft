@@ -11,6 +11,11 @@ const main=read('update/v0.15.97/main-v01597.js');
 const pkg=JSON.parse(read('update/v0.15.97/package.json'));
 const manifest=JSON.parse(read('update/manifest.json'));
 const by=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
+const mv=String(manifest.version||'').match(/^0\.15\.(\d+)$/);
+const manifestSuccessor=!!mv&&Number(mv[1])>=97;
+const activePackage=String(by.get('package.json')||'');
+const activePackageVersion=(activePackage.match(/^update\/v0\.15\.(\d+)\/package\.json$/)||[])[1];
+const packageMatchesManifest=manifestSuccessor&&Number(activePackageVersion)===Number(mv[1]);
 let mod=null,prior=null,patched='';
 try{
   prior=require(path.join(root,'update/v0.15.96/runtime-source-stability-v01596.js'));
@@ -22,8 +27,8 @@ try{
 
 ok('package version',pkg.version==='0.15.97',pkg.version);
 ok('package entry',pkg.main==='main-v01597.js',pkg.main);
-ok('manifest version',manifest.version==='0.15.97',manifest.version);
-ok('manifest package',by.get('package.json')==='update/v0.15.97/package.json',by.get('package.json')||'');
+ok('manifest version is v0.15.97 or successor',manifestSuccessor,manifest.version);
+ok('manifest package follows active successor version',packageMatchesManifest,activePackage);
 ok('manifest main',by.get('main-v01597.js')==='update/v0.15.97/main-v01597.js',by.get('main-v01597.js')||'');
 ok('manifest runtime',by.get('runtime-source-stability-v01597.js')==='update/v0.15.97/runtime-source-stability-v01597.js',by.get('runtime-source-stability-v01597.js')||'');
 ok('v0.15.96 result sync retained',patched.includes('syncResultHistoryV01596(m)')&&patched.includes('renderResultSyncV01596()'));
