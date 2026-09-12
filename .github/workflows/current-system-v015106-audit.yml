@@ -1,0 +1,42 @@
+name: Current Whole-System Audit v0.15.106
+
+on:
+  push:
+    branches:
+      - main
+      - 'audit/**'
+    paths:
+      - 'update/**'
+      - 'tools/**'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'update/**'
+      - 'tools/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+jobs:
+  whole-system:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Current manifest + runtime + safety audit
+        run: node tools/current-system-v015106-audit.js
+      - name: v0.15.106 runtime activation + functional safety audit
+        run: node tools/v015106-runtime-activation-audit.js
+      - name: Existing full regression audit
+        run: node tools/full-regression-audit.js
+      - name: Upload whole-system reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-system-v015106-reports
+          path: |
+            audit-output/current-system-v015106-report.json
+            audit-output/full-regression-report.json
+          if-no-files-found: warn
