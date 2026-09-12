@@ -1,0 +1,10 @@
+v0.15.95 · IN GAME RESULTS
+
+- Replaces the old IN GAME 상세 tab with 결과.
+- When an observed live ARAM match ends, AUTO moves the coach to 결과 without adding another polling loop.
+- Uses the existing Match Lab / aramHistoryState history as the result source.
+- Adds game result hero, own match summary, result analysis, final build, recent 5 games, recent up-to-20 trend, and next improvement cards.
+- Missing stats remain '-' / 동기화 대기 instead of being fabricated.
+- LIVE and 빌드 behavior remains unchanged.
+- Preserves v0.15.94 candidate DNA preview, v0.15.92 Poro-Snax filtering, v0.15.79 safety lineage.
+- score_logic_changed:false
