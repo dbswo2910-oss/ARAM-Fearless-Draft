@@ -1,6 +1,6 @@
 {
-  "version": "0.15.105",
-  "message": "v0.15.105 · RANDOM TOP5 INTERACTION + DETAIL / DATA PATCH FULL-WIDTH — restores clickable TOP5 DNA preview, AD/AP row detail, and full-width patch notes",
+  "version": "0.15.106",
+  "message": "v0.15.106 · RANDOM/DATA UI RUNTIME ACTIVATION FIX — makes the TOP5/DNA and full-width Patch Notes UI actually load through independent runtime paths",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -552,12 +552,20 @@
       "source": "update/v0.15.105/random-data-ui-hotfix-v015105.js"
     },
     {
+      "path": "random-data-ui-hotfix-v015106.js",
+      "source": "update/v0.15.106/random-data-ui-hotfix-v015106.js"
+    },
+    {
       "path": "runtime-source-stability-v015104.js",
       "source": "update/v0.15.104/runtime-source-stability-v015104.js"
     },
     {
       "path": "runtime-source-stability-v015105.js",
       "source": "update/v0.15.105/runtime-source-stability-v015105.js"
+    },
+    {
+      "path": "runtime-source-stability-v015106.js",
+      "source": "update/v0.15.106/runtime-source-stability-v015106.js"
     },
     {
       "path": "main-v015104.js",
@@ -568,8 +576,12 @@
       "source": "update/v0.15.105/main-v015105.js"
     },
     {
+      "path": "main-v015106.js",
+      "source": "update/v0.15.106/main-v015106.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.105/package.json"
+      "source": "update/v0.15.106/package.json"
     }
   ],
   "delete": [
