@@ -189,3 +189,10 @@ Requirements:
 - only change purchase math after verifying real live inventory/recipe behavior
 
 See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
+
+## v0.15.107 view-boundary rule
+
+- Data layout discovery must stay inside the view containing exact `#dataCard`; never use document-wide `.panel` + title matching.
+- Random Practice pick layout ownership is exact-ID only: `#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, `#rpPickIntelV01589`.
+- Patch Notes hides only the verified Data tier pane; Data UI must never be allowed to participate in `#random` layout.
+- `score_logic_changed:false`.

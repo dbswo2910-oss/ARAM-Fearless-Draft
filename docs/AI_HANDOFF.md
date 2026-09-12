@@ -16,8 +16,8 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.62**
-- Balance/data patch tracked by project: **26.17**
+- Active updater version: **v0.15.107**
+- Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
 
@@ -376,3 +376,7 @@ Start with:
 22. `tools/v01562-audit.js`
 
 Do not restart established design decisions from scratch unless the user asks to change direction.
+
+### v0.15.107 — DATA/RANDOM view boundary repair
+
+The v0.15.103 Data layout helper used a document-wide `.panel` + Korean-title search. v0.15.107 supersedes that ownership with view-scoped discovery rooted at exact `#dataCard`, removes legacy cross-view layout classes, makes Patch Notes own the Data workspace, and rebuilds Random Practice pick layout only from exact installed IDs (`#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, `#rpPickIntelV01589`). Do not reintroduce document-wide panel discovery. Scoring remains unchanged.

@@ -1,6 +1,6 @@
 {
-  "version": "0.15.106",
-  "message": "v0.15.106 · RANDOM/DATA UI RUNTIME ACTIVATION FIX — makes the TOP5/DNA and full-width Patch Notes UI actually load through independent runtime paths",
+  "version": "0.15.107",
+  "message": "v0.15.107 · DATA/RANDOM VIEW BOUNDARY + RANDOM PICK REPAIR — isolates Patch Notes from the tier browser and repairs the Random Practice pick workspace",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -556,6 +556,10 @@
       "source": "update/v0.15.106/random-data-ui-hotfix-v015106.js"
     },
     {
+      "path": "view-boundary-repair-v015107.js",
+      "source": "update/v0.15.107/view-boundary-repair-v015107.js"
+    },
+    {
       "path": "runtime-source-stability-v015104.js",
       "source": "update/v0.15.104/runtime-source-stability-v015104.js"
     },
@@ -566,6 +570,10 @@
     {
       "path": "runtime-source-stability-v015106.js",
       "source": "update/v0.15.106/runtime-source-stability-v015106.js"
+    },
+    {
+      "path": "runtime-source-stability-v015107.js",
+      "source": "update/v0.15.107/runtime-source-stability-v015107.js"
     },
     {
       "path": "main-v015104.js",
@@ -580,8 +588,12 @@
       "source": "update/v0.15.106/main-v015106.js"
     },
     {
+      "path": "main-v015107.js",
+      "source": "update/v0.15.107/main-v015107.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.106/package.json"
+      "source": "update/v0.15.107/package.json"
     }
   ],
   "delete": [
