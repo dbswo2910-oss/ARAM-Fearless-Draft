@@ -6,6 +6,16 @@ const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').
 const m=JSON.parse(read('update/manifest.json')),by=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const checks=[];const ok=(n,p,d='')=>checks.push({name:n,pass:!!p,detail:d});const src=t=>by.get(t)&&exists(by.get(t))?read(by.get(t)):'';
 const pkg=JSON.parse(src('package.json')||'{}'),entryTarget=String(pkg.main||''),entry=src(entryTarget),v79Entry=src('main-v01579.js'),patchSrc=src('ingame-transition-patch-v01575.js');
+function collectMainChain(startTarget){
+  const out=[],seen=new Set();let target=startTarget;
+  while(target&&by.get(target)&&!seen.has(target)&&out.length<40){
+    seen.add(target);const source=by.get(target);if(!source||!exists(source))break;const text=read(source);out.push({target,source,text});
+    const refs=[...text.matchAll(/['"](main-v\d+\.js)['"]/g)].map(x=>x[1]);
+    target=refs.find(x=>by.has(x)&&!seen.has(x))||'';
+  }
+  return out;
+}
+const entryChain=collectMainChain(entryTarget),entryChainTargets=entryChain.map(x=>x.target);
 const historicalEntry=exists('update/v0.15.75/main-v01575.js')?read('update/v0.15.75/main-v01575.js'):'';
 const historicalPreload=exists('update/v0.15.75/preload.js')?read('update/v0.15.75/preload.js'):'';
 const historicalWatch=exists('update/v0.15.75/freeze-watchdog-v01575.js')?read('update/v0.15.75/freeze-watchdog-v01575.js'):'';
@@ -14,9 +24,9 @@ ok('manifest is v0.15.75 or newer',ge(m.version,'0.15.75'),m.version);ok('packag
 ok('transition patch remains delivered',by.get('ingame-transition-patch-v01575.js')==='update/v0.15.75/ingame-transition-patch-v01575.js',by.get('ingame-transition-patch-v01575.js')||'');
 ok('historical v75 trace implementation remains available',historicalPreload.includes("traceFreeze: payload => ipcRenderer.send('diagnostics:freeze-trace-v01575'")&&historicalWatch.includes("ipcMain.on('diagnostics:freeze-trace-v01575'"));
 ok('historical v75 durable stage log remains available',historicalWatch.includes('freeze-stage-v01575.log')&&historicalWatch.includes('writeStage'));
-ok('current entry inherits v0.15.79 safety successor',entry.includes("main-v01579.js")&&entry.includes("replaceAll('0.15.79','0.15.80')"));
+ok('current entry inherits v0.15.79 safety successor',entryChainTargets.includes('main-v01579.js'),entryChainTargets.join(' -> '));
 ok('successor chain still patches installed index before core/main compile',v79Entry.includes("require('./ingame-transition-patch-v01575')")&&v79Entry.indexOf('patchInstalledIndex')>0&&v79Entry.indexOf('patchInstalledIndex')<v79Entry.indexOf("const autosyncCore=require('./autosync-core')"));
 let patch=null;try{patch=require(path.join(ROOT,by.get('ingame-transition-patch-v01575.js')))}catch(e){ok('transition patch module loads',false,e.message)}
 if(patch){ok('transition patch module loads',true);const fixture=patch.RULES.map((r,i)=>`/*${i}*/${r.old}`).join('\n'),first=patch.patchIndexText(fixture),second=patch.patchIndexText(first.text);ok('fixture patches all four transition contracts',first.ok&&first.changed&&first.results.filter(x=>x.status==='patched').length===4,JSON.stringify(first.results));ok('transition patch is idempotent',second.ok&&!second.changed&&second.results.every(x=>x.status==='already-patched'),JSON.stringify(second.results));ok('in-game apply cancels pending pick combinations',first.text.includes('aramRandomPracticeRuntimeV01572?.cancelCombos?.()'));ok('in-game apply avoids synchronous pick render pipeline',first.text.includes("if(plan.kind==='in_game')")&&first.text.includes("return true}persist();renderRandomInputs();runRandomCombos();return true}"));ok('live detail delegates to single in-game owner',first.text.includes('LIVE_DETAIL_OWNER_REFRESH_QUEUED')&&first.text.includes("setTimeout(()=>window.aramRandomIngameRuntimeV01570?.refresh?.(),0)"));ok('in-game mode avoids legacy renderRandomDetails',first.text.includes('INGAME_MODE_CLICK_QUEUED')&&!first.text.includes("if(randomViewMode==='ingame')renderRandomDetails();"));ok('Random tab avoids analysis in in-game mode',first.text.includes("if(randomViewMode==='ingame'){setTimeout(()=>window.aramRandomIngameRuntimeV01570?.refresh?.(),0)}else renderRandomAnalysis()"));ok('function-stage codes bracket owner refresh',first.text.includes("code:'IG120'")&&first.text.includes("code:'IG121'"))}
 ok('score logic untouched by current wrapper',!entry.includes('teamScore(')&&!entry.includes('recommendPicks(')&&!entry.includes('recommendBans(')&&patchSrc.includes('score_logic_changed:false'));
-const report={version:'0.15.75-historical',checks,pass:checks.every(x=>x.pass),score_logic_changed:false,forwardCompatible:true};fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01575-report.json'),JSON.stringify(report,null,2));for(const c of checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1);
+const report={version:'0.15.75-historical',checks,pass:checks.every(x=>x.pass),score_logic_changed:false,forwardCompatible:true,entryChain:entryChainTargets};fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01575-report.json'),JSON.stringify(report,null,2));for(const c of checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1);
