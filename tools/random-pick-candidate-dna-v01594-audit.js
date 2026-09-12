@@ -11,11 +11,12 @@ const main=read('update/v0.15.94/main-v01594.js');
 const pkg=JSON.parse(read('update/v0.15.94/package.json'));
 const manifest=JSON.parse(read('update/manifest.json'));
 const by=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
+const activePatch=Number(String(manifest.version||'').split('.').pop())||0;
 
 ok('package version',pkg.version==='0.15.94',pkg.version);
 ok('package entry',pkg.main==='main-v01594.js',pkg.main);
-ok('manifest version',manifest.version==='0.15.94',manifest.version);
-ok('manifest delivers active package',by.get('package.json')==='update/v0.15.94/package.json',by.get('package.json')||'');
+ok('manifest version is v0.15.94 or successor',String(manifest.version||'').startsWith('0.15.')&&activePatch>=94,manifest.version);
+ok('manifest delivers active package',by.get('package.json')===`update/v${manifest.version}/package.json`,by.get('package.json')||'');
 ok('manifest delivers main',by.get('main-v01594.js')==='update/v0.15.94/main-v01594.js',by.get('main-v01594.js')||'');
 ok('manifest delivers runtime',by.get('runtime-source-stability-v01594.js')==='update/v0.15.94/runtime-source-stability-v01594.js',by.get('runtime-source-stability-v01594.js')||'');
 

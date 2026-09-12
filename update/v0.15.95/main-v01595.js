@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const SAFETY_BASELINE_LINEAGE_V01595=Object.freeze({via:'main-v01594.js',via94:'main-v01593.js',via93:'main-v01592.js',via92:'main-v01591.js',via91:'main-v01590.js',via90:'main-v01589.js',via89:'main-v01588.js',via88:'main-v01587.js',via87:'main-v01586.js',via86:'main-v01585.js',via85:'main-v01584.js',via84:'main-v01583.js',via83:'main-v01582.js',via82:'main-v01581.js',via81:'main-v01580.js',root:'main-v01579.js',v80Transition:"replaceAll('0.15.79','0.15.80')"});
+void SAFETY_BASELINE_LINEAGE_V01595;
+const basePath=path.join(__dirname,'main-v01594.js');
+let src=fs.readFileSync(basePath,'utf8');
+const marker='0.15.94';
+const hits=src.split(marker).length-1;
+if(hits<3)throw new Error('v0.15.95 successor contract mismatch: v0.15.94 markers='+hits);
+const oldStability='runtime-source-stability-v01594';
+if(src.split(oldStability).length-1<1)throw new Error('v0.15.95 source-stability successor contract mismatch');
+src=src.replaceAll('0.15.94','0.15.95').replaceAll(oldStability,'runtime-source-stability-v01595');
+module._compile(src,__filename);

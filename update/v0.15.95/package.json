@@ -1,0 +1,10 @@
+{
+  "name": "aram-fearless-draft",
+  "version": "0.15.95",
+  "private": true,
+  "description": "ARAM Fearless Draft Electron Desktop - IN GAME post-match result dashboard and recent history",
+  "main": "main-v01595.js",
+  "productName": "ARAM Fearless Draft",
+  "author": "by잉디디",
+  "license": "UNLICENSED"
+}

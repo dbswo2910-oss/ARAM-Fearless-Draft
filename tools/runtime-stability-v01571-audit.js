@@ -13,7 +13,7 @@ const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},entryTarget=Stri
 const entry=entryPath&&exists(entryPath)?read(entryPath):'',baseMain=baseMainPath&&exists(baseMainPath)?read(baseMainPath):'',node=nodePath&&exists(nodePath)?read(nodePath):'',renderer=rendererPath&&exists(rendererPath)?read(rendererPath):'',v79Entry=v79Path&&exists(v79Path)?read(v79Path):'';
 function collectMainChain(startTarget){
   const out=[],seen=new Set();let target=startTarget;
-  while(target&&byPath.get(target)&&!seen.has(target)&&out.length<16){
+  while(target&&byPath.get(target)&&!seen.has(target)&&out.length<32){
     seen.add(target);const source=byPath.get(target);if(!source||!exists(source))break;const text=read(source);out.push({target,source,text});
     const refs=[...text.matchAll(/['"](main-v\d+\.js)['"]/g)].map(x=>x[1]);target=refs.find(x=>byPath.has(x)&&!seen.has(x))||'';
   }
