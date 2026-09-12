@@ -1,0 +1,32 @@
+name: v0.15.100 RANDOM Candidate Preview Lock Audit
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015100-random-pick-preview-lock-audit.yml'
+      - 'update/v0.15.100/**'
+      - 'tools/random-pick-preview-lock-v015100-audit.js'
+      - 'update/manifest.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v015100-random-pick-preview-lock-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit v0.15.100 Random candidate preview lock
+        run: node tools/random-pick-preview-lock-v015100-audit.js
