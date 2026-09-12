@@ -1,0 +1,74 @@
+name: v0.15.100 Activate Random Preview Lock
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015100-activate-random-preview-lock.yml'
+      - 'update/v0.15.100/**'
+      - 'tools/random-pick-preview-lock-v015100-audit.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v015100-activate-random-preview-lock
+  cancel-in-progress: true
+
+jobs:
+  activate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit v0.15.100 Random candidate preview lock
+        run: node tools/random-pick-preview-lock-v015100-audit.js
+      - name: Full regression before activation
+        run: node tools/full-regression-audit.js
+      - name: Activate v0.15.100 manifest and README
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          m.version='0.15.100';
+          m.message='v0.15.100 · RANDOM PICK PREVIEW LOCK — manually selected TOP5 candidate stays authoritative across refreshes';
+          const set=(path,source)=>{
+            const row=(m.files||[]).find(x=>x.path===path);
+            if(row) row.source=source;
+            else (m.files||(m.files=[])).push({path,source});
+          };
+          set('package.json','update/v0.15.100/package.json');
+          set('main-v015100.js','update/v0.15.100/main-v015100.js');
+          set('runtime-source-stability-v015100.js','update/v0.15.100/runtime-source-stability-v015100.js');
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';
+          if(fs.existsSync(rp)){
+            let r=fs.readFileSync(rp,'utf8');
+            r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.100**');
+            const bullet='- **v0.15.100 RANDOM Pick Preview Lock:** RANDOM > 픽창에서 TOP5/남은 챔피언을 직접 클릭했을 때 오른쪽 조합 DNA·AD/AP·현재 결론·점수·추천 방향이 잠깐 바뀐 뒤 TOP1으로 되돌아가던 상태 덮어쓰기 오류를 수정했습니다. 수동 선택 후보는 실제 TOP5에서 사라질 때까지 자동 refresh보다 우선하며, 추천/점수 산식은 변경하지 않았습니다.\n';
+            if(!r.includes('v0.15.100 RANDOM Pick Preview Lock')) r=r.trimEnd()+'\n'+bullet;
+            fs.writeFileSync(rp,r);
+          }
+          NODE
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to activate.'
+          else
+            git commit -m 'activate v0.15.100 Random preview lock'
+            git push
+          fi
