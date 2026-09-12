@@ -1,0 +1,10 @@
+{
+  "name": "aram-fearless-draft",
+  "version": "0.15.97",
+  "private": true,
+  "description": "ARAM Fearless Draft Electron Desktop - Match Lab result parser compatibility hotfix",
+  "main": "main-v01597.js",
+  "productName": "ARAM Fearless Draft",
+  "author": "by잉디디",
+  "license": "UNLICENSED"
+}
