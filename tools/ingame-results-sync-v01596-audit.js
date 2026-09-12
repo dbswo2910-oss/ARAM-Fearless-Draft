@@ -27,7 +27,8 @@ ok('manifest main',by.get('main-v01596.js')==='update/v0.15.96/main-v01596.js',b
 ok('manifest runtime',by.get('runtime-source-stability-v01596.js')==='update/v0.15.96/runtime-source-stability-v01596.js',by.get('runtime-source-stability-v01596.js')||'');
 ok('v0.15.95 result UI retained',patched.includes('data-ri-tab="result">결과</button>')&&patched.includes('renderResultV01595'));
 ok('game-end history sync wired',patched.includes('syncResultHistoryV01596(m)')&&patched.includes("requestResultHistorySyncV01596('game-end')"));
-ok('manual result tab refresh wired',patched.includes("if(ui.tab==='result')requestResultHistorySyncV01596('tab')"));
+ok('manual result tab refresh wired',patched.includes("requestResultHistorySyncV01596(syncReasonForResultTabV01596())"));
+ok('manual retry preserves post-game stale guard',patched.includes("resultSyncV01596.expectedKey&&(resultSyncV01596.failed||resultSyncV01596.blocking)?'game-end':'tab'"));
 ok('Match Lab loader reused',patched.includes("typeof loadAramHistory==='function'")&&patched.includes('loadAramHistory(true)'));
 ok('current account forced for result',patched.includes("h.targetMode='current'")&&patched.includes('h.target=null'));
 ok('standard ARAM forced for result',patched.includes("h.queueMode='standard'"));
