@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const SAFETY_BASELINE_LINEAGE_V015103=Object.freeze({via:'main-v015102.js',root:'main-v01579.js',reason:'restore-random-reference-layout-and-promote-data-subnav'});
+void SAFETY_BASELINE_LINEAGE_V015103;
+const basePath=path.join(__dirname,'main-v015102.js');
+let src=fs.readFileSync(basePath,'utf8');
+const marker='0.15.102';
+const hits=src.split(marker).length-1;
+if(hits<3)throw new Error('v0.15.103 successor contract mismatch: v0.15.102 markers='+hits);
+const scriptAnchor="'input-interaction-stability-v01539.js'";
+if(src.split(scriptAnchor).length-1!==1)throw new Error('v0.15.103 runtime script anchor mismatch');
+src=src.replace(scriptAnchor,scriptAnchor+",'ui-layout-restore-v015103.js'").replaceAll('0.15.102','0.15.103');
+module._compile(src,__filename);

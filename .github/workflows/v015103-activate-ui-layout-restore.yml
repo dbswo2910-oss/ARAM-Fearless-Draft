@@ -1,0 +1,58 @@
+name: v0.15.103 Activate UI Layout Restore
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015103-activate-ui-layout-restore.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Patch v0.15.103 manifest and README
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(p,'utf8'));
+          m.version='0.15.103';
+          m.message='v0.15.103 · UI LAYOUT RESTORE — restores the proven v0.15.90 RANDOM pick command center and promotes Data tier/patch navigation to the page top';
+          function upsert(path,source){m.files=m.files.filter(x=>x.path!==path);m.files.push({path,source})}
+          upsert('ui-layout-restore-v015103.js','update/v0.15.103/ui-layout-restore-v015103.js');
+          upsert('main-v015103.js','update/v0.15.103/main-v015103.js');
+          upsert('package.json','update/v0.15.103/package.json');
+          fs.writeFileSync(p,JSON.stringify(m,null,2)+'\n');
+          const rp='README.md';let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.103**');
+          const note='- **v0.15.103**: restores the v0.15.90 RANDOM pick reference layout (left confirmed picks, center TOP5/pool, right DNA), re-enables automatic TOP5 calculation when enough remaining candidates exist, and moves Data tier-list / patch-note navigation to a full-width top subnav. No scoring changes.';
+          if(!r.includes('**v0.15.103**'))r+='\n'+note+'\n';
+          fs.writeFileSync(rp,r);
+          NODE
+      - name: UI layout restore audit
+        run: node tools/ui-layout-restore-v015103-audit.js
+      - name: Core regression before activation
+        run: node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '4189824+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.103 UI layout restore'
+            git push
+          fi
