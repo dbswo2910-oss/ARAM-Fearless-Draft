@@ -101,6 +101,10 @@ jobs:
         run: node tools/random-item-icons-v01556-audit.js
       - name: Run Global item icons v0.15.57 audit
         run: node tools/item-icons-v01557-audit.js
+      - name: Run IN GAME result dashboard v0.15.95 audit
+        run: node tools/ingame-results-v01595-audit.js
+      - name: Run IN GAME post-match result sync v0.15.96 audit
+        run: node tools/ingame-results-sync-v01596-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -161,6 +165,8 @@ jobs:
             audit-output/random-ingame-v01554-report.json
             audit-output/random-item-icons-v01556-report.json
             audit-output/item-icons-v01557-report.json
+            audit-output/ingame-results-v01595-report.json
+            audit-output/ingame-results-sync-v01596-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
