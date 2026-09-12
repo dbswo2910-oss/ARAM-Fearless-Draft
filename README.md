@@ -72,4 +72,5 @@ See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.96.txt` for rele
 
 The Windows bootstrap is distributed as `ARAM_Fearless_Draft.exe`. Historical bootstrap assets may lag behind the active runtime; `update/manifest.json` is authoritative for incremental application updates.
 
+- **v0.15.98 IN GAME Results Integrity + Visual:** 결과 탭의 `킬 관여`를 실제 팀 킬 기준 KP%로 수정하고 팀 내 피해/받은 피해 순위·딜 비중·CC 단위를 추가했습니다. 숫자 itemId는 공용 아이템 아트 resolver를 통해 아이콘으로 표시하며, 챔피언 초상은 정사각 프레임을 강제해 레터박스/비율 깨짐을 수정했습니다. 결과 카드/최근 경기/추이 UI도 레퍼런스에 맞춰 재정리했고 INGAME COACH 표시 버전도 현재 버전으로 동기화합니다. 추천/점수 엔진은 변경하지 않았습니다.
 - **v0.15.97 IN GAME Results Parser:** 기존 Q450 Match Lab 전적의 `participant.stats` / `participantIdentities` / `championId` / `item0~item6` 구조까지 해석하여, 핫픽스 이전 최근 경기에서도 챔피언·KDA·피해량·최종 아이템이 결과 탭에 표시되도록 수정했습니다. 추천/점수 로직은 변경하지 않았습니다.
