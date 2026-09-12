@@ -5,6 +5,9 @@ const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const checks=[];
 const ok=(name,pass,detail='')=>checks.push({name,pass:!!pass,detail});
+const atLeast=(a,b)=>{
+  const A=String(a).split('.').map(Number),B=String(b).split('.').map(Number);for(let i=0;i<Math.max(A.length,B.length);i++){const x=A[i]||0,y=B[i]||0;if(x!==y)return x>y}return true;
+};
 
 const runtime=read('update/v0.15.96/runtime-source-stability-v01596.js');
 const main=read('update/v0.15.96/main-v01596.js');
@@ -20,12 +23,12 @@ try{
   ok('patched in-game coach parses',true);
 }catch(e){ok('patched in-game coach parses',false,e.stack||e.message)}
 
-ok('package version',pkg.version==='0.15.96',pkg.version);
-ok('package entry',pkg.main==='main-v01596.js',pkg.main);
-ok('manifest version',manifest.version==='0.15.96',manifest.version);
-ok('manifest package',by.get('package.json')==='update/v0.15.96/package.json',by.get('package.json')||'');
-ok('manifest main',by.get('main-v01596.js')==='update/v0.15.96/main-v01596.js',by.get('main-v01596.js')||'');
-ok('manifest runtime',by.get('runtime-source-stability-v01596.js')==='update/v0.15.96/runtime-source-stability-v01596.js',by.get('runtime-source-stability-v01596.js')||'');
+ok('historical package version',pkg.version==='0.15.96',pkg.version);
+ok('historical package entry',pkg.main==='main-v01596.js',pkg.main);
+ok('active manifest is v0.15.96 or newer',atLeast(manifest.version,'0.15.96'),manifest.version);
+ok('active manifest package follows active version',by.get('package.json')===`update/v${manifest.version}/package.json`,by.get('package.json')||'');
+ok('historical main retained',by.get('main-v01596.js')==='update/v0.15.96/main-v01596.js',by.get('main-v01596.js')||'');
+ok('historical runtime retained',by.get('runtime-source-stability-v01596.js')==='update/v0.15.96/runtime-source-stability-v01596.js',by.get('runtime-source-stability-v01596.js')||'');
 ok('v0.15.95 result UI retained',patched.includes('data-ri-tab="result">결과</button>')&&patched.includes('renderResultV01595'));
 ok('game-end history sync wired',patched.includes('syncResultHistoryV01596(m)')&&patched.includes("requestResultHistorySyncV01596('game-end')"));
 ok('manual result tab refresh wired',patched.includes("requestResultHistorySyncV01596(syncReasonForResultTabV01596())"));
@@ -46,7 +49,7 @@ ok('Poro-Snax inherited',mod&&mod.poro_snax_filtered===true,String(mod&&mod.poro
 ok('candidate DNA preview inherited',mod&&mod.random_pick_candidate_full_dna_preview_changed===true,String(mod&&mod.random_pick_candidate_full_dna_preview_changed));
 ok('v0.15.79 safety lineage',main.includes("root:'main-v01579.js'")&&main.includes("replaceAll('0.15.79','0.15.80')"));
 
-const report={version:'0.15.96',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'Hotfix IN GAME post-match results so game end actively refreshes current-account standard-ARAM Match Lab history with bounded retries and never presents the previous match as the just-finished result.'}};
+const report={version:'0.15.96',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'Historical v0.15.96 post-match result-sync contract, forward-compatible with newer active updater manifests.'}};
 fs.mkdirSync(path.join(root,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(root,'audit-output/ingame-results-sync-v01596-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));
