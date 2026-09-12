@@ -71,3 +71,5 @@ See `docs/CHANGELOG_v0.15.50.txt` through `docs/CHANGELOG_v0.15.96.txt` for rele
 ## Distribution
 
 The Windows bootstrap is distributed as `ARAM_Fearless_Draft.exe`. Historical bootstrap assets may lag behind the active runtime; `update/manifest.json` is authoritative for incremental application updates.
+
+- **v0.15.97 IN GAME Results Parser:** 기존 Q450 Match Lab 전적의 `participant.stats` / `participantIdentities` / `championId` / `item0~item6` 구조까지 해석하여, 핫픽스 이전 최근 경기에서도 챔피언·KDA·피해량·최종 아이템이 결과 탭에 표시되도록 수정했습니다. 추천/점수 로직은 변경하지 않았습니다.
