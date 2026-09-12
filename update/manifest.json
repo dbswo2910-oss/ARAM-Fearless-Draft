@@ -1,6 +1,6 @@
 {
-  "version": "0.15.100",
-  "message": "v0.15.100 · RANDOM PICK PREVIEW LOCK — manually selected TOP5 candidate stays authoritative across refreshes",
+  "version": "0.15.101",
+  "message": "v0.15.101 · STARTUP PACKAGE PATH HOTFIX — fixed packaged predecessor resolution after v0.15.100",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -265,7 +265,7 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.100/package.json"
+      "source": "update/v0.15.101/package.json"
     },
     {
       "path": "autosync-telemetry-v01534.js",
@@ -530,6 +530,10 @@
     {
       "path": "main-v015100.js",
       "source": "update/v0.15.100/main-v015100.js"
+    },
+    {
+      "path": "main-v015101.js",
+      "source": "update/v0.15.101/main-v015101.js"
     },
     {
       "path": "runtime-source-stability-v015100.js",
