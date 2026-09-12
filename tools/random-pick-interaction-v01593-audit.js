@@ -11,13 +11,14 @@ const main=read('update/v0.15.93/main-v01593.js');
 const pkg=JSON.parse(read('update/v0.15.93/package.json'));
 const manifest=JSON.parse(read('update/manifest.json'));
 const by=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
+const activePatch=Number(String(manifest.version||'').split('.').pop())||0;
 
 ok('package version',pkg.version==='0.15.93',pkg.version);
 ok('package entry',pkg.main==='main-v01593.js',pkg.main);
-ok('manifest version',['0.15.93','0.15.94'].includes(manifest.version),manifest.version);
+ok('manifest version',String(manifest.version||'').startsWith('0.15.')&&activePatch>=93,manifest.version);
 ok('manifest delivers main',by.get('main-v01593.js')==='update/v0.15.93/main-v01593.js',by.get('main-v01593.js')||'');
 ok('manifest delivers runtime',by.get('runtime-source-stability-v01593.js')==='update/v0.15.93/runtime-source-stability-v01593.js',by.get('runtime-source-stability-v01593.js')||'');
-ok('manifest delivers package',['update/v0.15.93/package.json','update/v0.15.94/package.json'].includes(by.get('package.json')),by.get('package.json')||'');
+ok('manifest delivers package',by.get('package.json')===`update/v${manifest.version}/package.json`,by.get('package.json')||'');
 
 let mod=null,patched='';
 try{
@@ -44,7 +45,7 @@ ok('v0.15.79 safety lineage preserved',main.includes("root:'main-v01579.js'")&&m
 ok('v0.15.93 layer adds no scheduler',!runtime.includes('setInterval('));
 ok('v0.15.93 layer adds no MutationObserver',!runtime.includes('MutationObserver'));
 
-const report={version:'0.15.93',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'RANDOM pick fullscreen density, queue visibility, candidate-specific balance preview, and TOP5 click interaction hotfix without scoring changes; v0.15.94 may supersede the preview renderer while retaining this layer.'}};
+const report={version:'0.15.93',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'RANDOM pick fullscreen density, queue visibility, candidate-specific balance preview, and TOP5 click interaction hotfix without scoring changes; later versions may supersede the preview renderer while retaining this layer.'}};
 fs.mkdirSync(path.join(root,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(root,'audit-output/random-pick-interaction-v01593-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));
