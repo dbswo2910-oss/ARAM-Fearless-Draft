@@ -1,0 +1,22 @@
+name: v0.15.96 IN GAME Results Sync Audit
+
+on:
+  push:
+    branches: [ main, 'feat/v0.15.96-ingame-results-sync' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node tools/ingame-results-v01595-audit.js
+      - run: node tools/ingame-results-sync-v01596-audit.js
