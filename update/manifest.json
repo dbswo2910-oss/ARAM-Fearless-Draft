@@ -1,1 +1,553 @@
-{"version":"0.15.98","message":"v0.15.98 · RESULTS INTEGRITY + VISUAL HOTFIX — real team KP/ranks, item artwork, square champion portraits, upgraded result coaching and reference-style UI","min_launcher":"2.0.2","files":[{"path":"live-strength-v01513.js","source":"update/v0.15.13/live-strength-v01513.js"},{"path":"role-grade-v01513.js","source":"update/v0.15.13/role-grade-v01513.js"},{"path":"match-lab-favorites-v01514.js","source":"update/v0.15.14/match-lab-favorites-v01514.js"},{"path":"role-grade-fairs-v01515.js","source":"update/v0.15.15/role-grade-fairs-v01515.js"},{"path":"match-lab-replay-v01515.js","source":"update/v0.15.15/match-lab-replay-v01515.js"},{"path":"multi-user-isolation-v01516.js","source":"update/v0.15.16/multi-user-isolation-v01516.js"},{"path":"autosync-queue-v01517.js","source":"update/v0.15.17/autosync-queue-v01517.js"},{"path":"autosync-cc-impact-v01525.js","source":"update/v0.15.25/autosync-cc-impact-v01525.js"},{"path":"autosync-mission-timeline-v01529.js","source":"update/v0.15.29/autosync-mission-timeline-v01529.js"},{"path":"match-lab-queue-v01517.js","source":"update/v0.15.17/match-lab-queue-v01517.js"},{"path":"draft-pick-balance-v01517.js","source":"update/v0.15.17/draft-pick-balance-v01517.js"},{"path":"catch-resilience-v01540.js","source":"update/v0.15.40/catch-resilience-v01540.js"},{"path":"draft-side-order-v01540.js","source":"update/v0.15.40/draft-side-order-v01540.js"},{"path":"builder-champion-pool-v01541.js","source":"update/v0.15.41/builder-champion-pool-v01541.js"},{"path":"draft-live-context-v01542.js","source":"update/v0.15.42/draft-live-context-v01542.js"},{"path":"draft-balance-alerts-v01543.js","source":"update/v0.15.45/draft-balance-alerts-v01543-clean.js"},{"path":"draft-layout-v01545.js","source":"update/v0.15.45/draft-layout-v01545.js"},{"path":"draft-risk-board-v01546.js","source":"update/v0.15.46/draft-risk-board-v01546.js"},{"path":"draft-judgment-tabs-v01547.js","source":"update/v0.15.47/draft-judgment-tabs-v01547.js"},{"path":"random-practice-focus-v01549.js","source":"update/v0.15.72/random-practice-focus-v01549.js"},{"path":"random-pick-density-v01555.js","source":"update/v0.15.72/random-pick-density-v01555.js"},{"path":"random-party-picks-v01558.js","source":"update/v0.15.72/random-party-picks-v01558.js"},{"path":"runtime-performance-v01568.js","source":"update/v0.15.72/runtime-performance-v01568.js"},{"path":"runtime-live-autosync-v01571.js","source":"update/v0.15.72/runtime-live-autosync-v01571.js"},{"path":"random-party-labels-v01559.js","source":"update/v0.15.59/random-party-labels-v01559.js"},{"path":"runtime-random-ingame-v01570.js","source":"update/v0.15.70/runtime-random-ingame-v01570.js"},{"path":"random-ingame-coach-v01550.js","source":"update/v0.15.50/random-ingame-coach-v01550.js"},{"path":"random-ingame-ux-v01551.js","source":"update/v0.15.51/random-ingame-ux-v01551.js"},{"path":"random-ingame-ux-v01552.js","source":"update/v0.15.52/random-ingame-ux-v01552.js"},{"path":"random-ingame-shop-v01553.js","source":"update/v0.15.53/random-ingame-shop-v01553.js"},{"path":"random-ingame-shop-polish-v01554.js","source":"update/v0.15.54/random-ingame-shop-polish-v01554.js"},{"path":"random-item-icons-v01556.js","source":"update/v0.15.73/random-item-icons-v01556.js"},{"path":"item-icons-global-v01557.js","source":"update/v0.15.57/item-icons-global-v01557.js"},{"path":"item-art-runtime-v01566.js","source":"update/v0.15.66/item-art-runtime-v01566.js"},{"path":"ui-refresh-v01560.js","source":"update/v0.15.60/ui-refresh-v01560.js"},{"path":"random-party-label-fix-v01561.js","source":"update/v0.15.61/random-party-label-fix-v01561.js"},{"path":"random-party-pool-labels-v01562.js","source":"update/v0.15.62/random-party-pool-labels-v01562.js"},{"path":"runtime-random-practice-v01572.js","source":"update/v0.15.72/runtime-random-practice-v01572.js"},{"path":"item-art-hotfix-v01563.js","source":"update/v0.15.63/item-art-hotfix-v01563.js"},{"path":"item-art-unified-v01564.js","source":"update/v0.15.64/item-art-unified-v01564.js"},{"path":"item-art-stable-v01565.js","source":"update/v0.15.65/item-art-stable-v01565.js"},{"path":"role-metric-detail-v01518.js","source":"update/v0.15.35/role-metric-detail-v01518.js"},{"path":"cc-impact-v01525.js","source":"update/v0.15.25/cc-impact-v01525.js"},{"path":"mission-death-fairness-v01529.js","source":"update/v0.15.29/mission-death-fairness-v01529.js"},{"path":"player-profile-v01519.js","source":"update/v0.15.19/player-profile-v01519.js"},{"path":"live-item-memory-v01520.js","source":"update/v0.15.20/live-item-memory-v01520.js"},{"path":"player-profile-data-sticky-v01521.js","source":"update/v0.15.72/player-profile-data-sticky-v01521.js"},{"path":"role-mastery-drilldown-v01522.js","source":"update/v0.15.22/role-mastery-drilldown-v01522.js"},{"path":"role-profile-context-v01523.js","source":"update/v0.15.23/role-profile-context-v01523.js"},{"path":"role-profile-specialized-v01530.js","source":"update/v0.15.30/role-profile-specialized-v01530.js"},{"path":"profile-ux-v01537.js","source":"update/v0.15.37/profile-ux-v01537.js"},{"path":"brand-header-v01538.js","source":"update/v0.15.38/brand-header-v01538.js"},{"path":"in-app-updater-ui-v01523.js","source":"update/v0.15.72/in-app-updater-ui-v01523.js"},{"path":"item-catalog-v01527.js","source":"update/v0.15.64/item-catalog-v01527.js"},{"path":"time-power-v01527.js","source":"update/v0.15.27/time-power-v01527.js"},{"path":"riot-grade-collector-v01528.js","source":"update/v0.15.28/riot-grade-collector-v01528.js"},{"path":"riot-grade-ui-v01528.js","source":"update/v0.15.28/riot-grade-ui-v01528.js"},{"path":"riot-grade-calibration-v01531.js","source":"update/v0.15.31/riot-grade-calibration-v01531.js"},{"path":"riot-grade-collector-v01532.js","source":"update/v0.15.32/riot-grade-collector-v01532.js"},{"path":"riot-grade-calibration-history-v01532.js","source":"update/v0.15.32/riot-grade-calibration-history-v01532.js"},{"path":"riot-grade-autosnapshot-v01533.js","source":"update/v0.15.33/riot-grade-autosnapshot-v01533.js"},{"path":"preload.js","source":"update/v0.15.79/preload.js"},{"path":"input-interaction-stability-v01539.js","source":"update/v0.15.39/input-interaction-stability-v01539.js"},{"path":"main.js","source":"update/v0.15.70/main.js"},{"path":"ingame-transition-patch-v01575.js","source":"update/v0.15.75/ingame-transition-patch-v01575.js"},{"path":"package.json","source":"update/v0.15.98/package.json"},{"path":"autosync-telemetry-v01534.js","source":"update/v0.15.34/autosync-telemetry-v01534.js"},{"path":"autosync-live-runtime-v01571.js","source":"update/v0.15.71/autosync-live-runtime-v01571.js"},{"path":"community-calibration-v01534.js","source":"update/v0.15.34/community-calibration-v01534.js"},{"path":"main-v01578.js","source":"update/v0.15.78/main-v01578.js"},{"path":"freeze-blackbox-v01577.js","source":"update/v0.15.77/freeze-blackbox-v01577.js"},{"path":"runtime-blackbox-v01577.js","source":"update/v0.15.77/runtime-blackbox-v01577.js"},{"path":"runtime-source-stability-v01577.js","source":"update/v0.15.77/runtime-source-stability-v01577.js"},{"path":"runtime-loader-v01577.js","source":"update/v0.15.77/runtime-loader-v01577.js"},{"path":"safe-index-patch-v01578.js","source":"update/v0.15.78/safe-index-patch-v01578.js"},{"path":"runtime-source-stability-v01578.js","source":"update/v0.15.78/runtime-source-stability-v01578.js"},{"path":"hang-heartbeat-v01578.js","source":"update/v0.15.78/hang-heartbeat-v01578.js"},{"path":"external-watchdog-v01578.js","source":"update/v0.15.78/external-watchdog-v01578.js"},{"path":"main-v01579.js","source":"update/v0.15.79/main-v01579.js"},{"path":"update-safety-v01579.js","source":"update/v0.15.79/update-safety-v01579.js"},{"path":"updater-safety-patch-v01579.js","source":"update/v0.15.79/updater-safety-patch-v01579.js"},{"path":"runtime-safety-net-v01579.js","source":"update/v0.15.79/runtime-safety-net-v01579.js"},{"path":"runtime-loader-v01579.js","source":"update/v0.15.79/runtime-loader-v01579.js"},{"path":"runtime-source-stability-v01579.js","source":"update/v0.15.79/runtime-source-stability-v01579.js"},{"path":"hang-heartbeat-v01579.js","source":"update/v0.15.79/hang-heartbeat-v01579.js"},{"path":"external-watchdog-v01579.js","source":"update/v0.15.79/external-watchdog-v01579.js"},{"path":"main-v01580.js","source":"update/v0.15.80/main-v01580.js"},{"path":"runtime-source-stability-v01580.js","source":"update/v0.15.80/runtime-source-stability-v01580.js"},{"path":"main-v01581.js","source":"update/v0.15.81/main-v01581.js"},{"path":"runtime-source-stability-v01581.js","source":"update/v0.15.81/runtime-source-stability-v01581.js"},{"path":"main-v01582.js","source":"update/v0.15.82/main-v01582.js"},{"path":"runtime-source-stability-v01582.js","source":"update/v0.15.82/runtime-source-stability-v01582.js"},{"path":"main-v01583.js","source":"update/v0.15.83/main-v01583.js"},{"path":"runtime-source-stability-v01583.js","source":"update/v0.15.83/runtime-source-stability-v01583.js"},{"path":"main-v01584.js","source":"update/v0.15.84/main-v01584.js"},{"path":"runtime-source-stability-v01584.js","source":"update/v0.15.84/runtime-source-stability-v01584.js"},{"path":"main-v01585.js","source":"update/v0.15.85/main-v01585.js"},{"path":"runtime-source-stability-v01585.js","source":"update/v0.15.85/runtime-source-stability-v01585.js"},{"path":"main-v01586.js","source":"update/v0.15.86/main-v01586.js"},{"path":"runtime-source-stability-v01586.js","source":"update/v0.15.86/runtime-source-stability-v01586.js"},{"path":"build-analysis-style-v01586.js","source":"update/v0.15.86/build-analysis-style-v01586.js"},{"path":"build-analysis-logic-v01586.js","source":"update/v0.15.86/build-analysis-logic-v01586.js"},{"path":"main-v01587.js","source":"update/v0.15.87/main-v01587.js"},{"path":"runtime-source-stability-v01587.js","source":"update/v0.15.87/runtime-source-stability-v01587.js"},{"path":"live-route-style-v01587.js","source":"update/v0.15.87/live-route-style-v01587.js"},{"path":"live-route-logic-v01587.js","source":"update/v0.15.87/live-route-logic-v01587.js"},{"path":"route-adoption-gate-v01587.js","source":"update/v0.15.87/route-adoption-gate-v01587.js"},{"path":"main-v01588.js","source":"update/v0.15.88/main-v01588.js"},{"path":"runtime-source-stability-v01588.js","source":"update/v0.15.88/runtime-source-stability-v01588.js"},{"path":"main-v01589.js","source":"update/v0.15.89/main-v01589.js"},{"path":"runtime-source-stability-v01589.js","source":"update/v0.15.89/runtime-source-stability-v01589.js"},{"path":"main-v01590.js","source":"update/v0.15.90/main-v01590.js"},{"path":"runtime-source-stability-v01590.js","source":"update/v0.15.90/runtime-source-stability-v01590.js"},{"path":"main-v01591.js","source":"update/v0.15.91/main-v01591.js"},{"path":"runtime-source-stability-v01591.js","source":"update/v0.15.91/runtime-source-stability-v01591.js"},{"path":"main-v01592.js","source":"update/v0.15.92/main-v01592.js"},{"path":"runtime-source-stability-v01592.js","source":"update/v0.15.92/runtime-source-stability-v01592.js"},{"path":"main-v01593.js","source":"update/v0.15.93/main-v01593.js"},{"path":"runtime-source-stability-v01593.js","source":"update/v0.15.93/runtime-source-stability-v01593.js"},{"path":"main-v01594.js","source":"update/v0.15.94/main-v01594.js"},{"path":"runtime-source-stability-v01594.js","source":"update/v0.15.94/runtime-source-stability-v01594.js"},{"path":"main-v01595.js","source":"update/v0.15.95/main-v01595.js"},{"path":"runtime-source-stability-v01595.js","source":"update/v0.15.95/runtime-source-stability-v01595.js"},{"path":"main-v01596.js","source":"update/v0.15.96/main-v01596.js"},{"path":"runtime-source-stability-v01596.js","source":"update/v0.15.96/runtime-source-stability-v01596.js"},{"path":"main-v01597.js","source":"update/v0.15.97/main-v01597.js"},{"path":"runtime-source-stability-v01597.js","source":"update/v0.15.97/runtime-source-stability-v01597.js"},{"path":"main-v01598.js","source":"update/v0.15.98/main-v01598.js"},{"path":"runtime-source-stability-v01598.js","source":"update/v0.15.98/runtime-source-stability-v01598.js"}],"delete":["draft-layout-hotfix-v01544.js","freeze-watchdog-v01574.js","freeze-watchdog-v01575.js","item-catalog-v01526.js","live-hard-safe-v01576.js","live-strength-v01510.js","live-strength-v01511.js","live-strength-v01512.js","main-v01571.js","main-v01572.js","main-v01573.js","main-v01574.js","main-v01575.js","main-v01576-safe.js","profile-ux-v01536.js","random-practice-focus-v01548.js","runtime-performance-v01567.js","time-power-fix-v01526.js","time-power-v01524.js","main-v01577.js"]}
+{
+  "version": "0.15.99",
+  "message": "v0.15.99 · DATA PATCH NOTES — Data submenu, 26.18 normal ARAM patch hub and detailed champion changes",
+  "min_launcher": "2.0.2",
+  "files": [
+    {
+      "path": "live-strength-v01513.js",
+      "source": "update/v0.15.13/live-strength-v01513.js"
+    },
+    {
+      "path": "role-grade-v01513.js",
+      "source": "update/v0.15.13/role-grade-v01513.js"
+    },
+    {
+      "path": "match-lab-favorites-v01514.js",
+      "source": "update/v0.15.14/match-lab-favorites-v01514.js"
+    },
+    {
+      "path": "role-grade-fairs-v01515.js",
+      "source": "update/v0.15.15/role-grade-fairs-v01515.js"
+    },
+    {
+      "path": "match-lab-replay-v01515.js",
+      "source": "update/v0.15.15/match-lab-replay-v01515.js"
+    },
+    {
+      "path": "multi-user-isolation-v01516.js",
+      "source": "update/v0.15.16/multi-user-isolation-v01516.js"
+    },
+    {
+      "path": "autosync-queue-v01517.js",
+      "source": "update/v0.15.17/autosync-queue-v01517.js"
+    },
+    {
+      "path": "autosync-cc-impact-v01525.js",
+      "source": "update/v0.15.25/autosync-cc-impact-v01525.js"
+    },
+    {
+      "path": "autosync-mission-timeline-v01529.js",
+      "source": "update/v0.15.29/autosync-mission-timeline-v01529.js"
+    },
+    {
+      "path": "match-lab-queue-v01517.js",
+      "source": "update/v0.15.17/match-lab-queue-v01517.js"
+    },
+    {
+      "path": "draft-pick-balance-v01517.js",
+      "source": "update/v0.15.17/draft-pick-balance-v01517.js"
+    },
+    {
+      "path": "catch-resilience-v01540.js",
+      "source": "update/v0.15.40/catch-resilience-v01540.js"
+    },
+    {
+      "path": "draft-side-order-v01540.js",
+      "source": "update/v0.15.40/draft-side-order-v01540.js"
+    },
+    {
+      "path": "builder-champion-pool-v01541.js",
+      "source": "update/v0.15.41/builder-champion-pool-v01541.js"
+    },
+    {
+      "path": "draft-live-context-v01542.js",
+      "source": "update/v0.15.42/draft-live-context-v01542.js"
+    },
+    {
+      "path": "draft-balance-alerts-v01543.js",
+      "source": "update/v0.15.45/draft-balance-alerts-v01543-clean.js"
+    },
+    {
+      "path": "draft-layout-v01545.js",
+      "source": "update/v0.15.45/draft-layout-v01545.js"
+    },
+    {
+      "path": "draft-risk-board-v01546.js",
+      "source": "update/v0.15.46/draft-risk-board-v01546.js"
+    },
+    {
+      "path": "draft-judgment-tabs-v01547.js",
+      "source": "update/v0.15.47/draft-judgment-tabs-v01547.js"
+    },
+    {
+      "path": "random-practice-focus-v01549.js",
+      "source": "update/v0.15.72/random-practice-focus-v01549.js"
+    },
+    {
+      "path": "random-pick-density-v01555.js",
+      "source": "update/v0.15.72/random-pick-density-v01555.js"
+    },
+    {
+      "path": "random-party-picks-v01558.js",
+      "source": "update/v0.15.72/random-party-picks-v01558.js"
+    },
+    {
+      "path": "runtime-performance-v01568.js",
+      "source": "update/v0.15.72/runtime-performance-v01568.js"
+    },
+    {
+      "path": "runtime-live-autosync-v01571.js",
+      "source": "update/v0.15.72/runtime-live-autosync-v01571.js"
+    },
+    {
+      "path": "random-party-labels-v01559.js",
+      "source": "update/v0.15.59/random-party-labels-v01559.js"
+    },
+    {
+      "path": "runtime-random-ingame-v01570.js",
+      "source": "update/v0.15.70/runtime-random-ingame-v01570.js"
+    },
+    {
+      "path": "random-ingame-coach-v01550.js",
+      "source": "update/v0.15.50/random-ingame-coach-v01550.js"
+    },
+    {
+      "path": "random-ingame-ux-v01551.js",
+      "source": "update/v0.15.51/random-ingame-ux-v01551.js"
+    },
+    {
+      "path": "random-ingame-ux-v01552.js",
+      "source": "update/v0.15.52/random-ingame-ux-v01552.js"
+    },
+    {
+      "path": "random-ingame-shop-v01553.js",
+      "source": "update/v0.15.53/random-ingame-shop-v01553.js"
+    },
+    {
+      "path": "random-ingame-shop-polish-v01554.js",
+      "source": "update/v0.15.54/random-ingame-shop-polish-v01554.js"
+    },
+    {
+      "path": "random-item-icons-v01556.js",
+      "source": "update/v0.15.73/random-item-icons-v01556.js"
+    },
+    {
+      "path": "item-icons-global-v01557.js",
+      "source": "update/v0.15.57/item-icons-global-v01557.js"
+    },
+    {
+      "path": "item-art-runtime-v01566.js",
+      "source": "update/v0.15.66/item-art-runtime-v01566.js"
+    },
+    {
+      "path": "ui-refresh-v01560.js",
+      "source": "update/v0.15.60/ui-refresh-v01560.js"
+    },
+    {
+      "path": "random-party-label-fix-v01561.js",
+      "source": "update/v0.15.61/random-party-label-fix-v01561.js"
+    },
+    {
+      "path": "random-party-pool-labels-v01562.js",
+      "source": "update/v0.15.62/random-party-pool-labels-v01562.js"
+    },
+    {
+      "path": "runtime-random-practice-v01572.js",
+      "source": "update/v0.15.72/runtime-random-practice-v01572.js"
+    },
+    {
+      "path": "item-art-hotfix-v01563.js",
+      "source": "update/v0.15.63/item-art-hotfix-v01563.js"
+    },
+    {
+      "path": "item-art-unified-v01564.js",
+      "source": "update/v0.15.64/item-art-unified-v01564.js"
+    },
+    {
+      "path": "item-art-stable-v01565.js",
+      "source": "update/v0.15.65/item-art-stable-v01565.js"
+    },
+    {
+      "path": "role-metric-detail-v01518.js",
+      "source": "update/v0.15.35/role-metric-detail-v01518.js"
+    },
+    {
+      "path": "cc-impact-v01525.js",
+      "source": "update/v0.15.25/cc-impact-v01525.js"
+    },
+    {
+      "path": "mission-death-fairness-v01529.js",
+      "source": "update/v0.15.29/mission-death-fairness-v01529.js"
+    },
+    {
+      "path": "player-profile-v01519.js",
+      "source": "update/v0.15.19/player-profile-v01519.js"
+    },
+    {
+      "path": "live-item-memory-v01520.js",
+      "source": "update/v0.15.20/live-item-memory-v01520.js"
+    },
+    {
+      "path": "player-profile-data-sticky-v01521.js",
+      "source": "update/v0.15.72/player-profile-data-sticky-v01521.js"
+    },
+    {
+      "path": "role-mastery-drilldown-v01522.js",
+      "source": "update/v0.15.22/role-mastery-drilldown-v01522.js"
+    },
+    {
+      "path": "role-profile-context-v01523.js",
+      "source": "update/v0.15.23/role-profile-context-v01523.js"
+    },
+    {
+      "path": "role-profile-specialized-v01530.js",
+      "source": "update/v0.15.30/role-profile-specialized-v01530.js"
+    },
+    {
+      "path": "profile-ux-v01537.js",
+      "source": "update/v0.15.37/profile-ux-v01537.js"
+    },
+    {
+      "path": "brand-header-v01538.js",
+      "source": "update/v0.15.38/brand-header-v01538.js"
+    },
+    {
+      "path": "in-app-updater-ui-v01523.js",
+      "source": "update/v0.15.72/in-app-updater-ui-v01523.js"
+    },
+    {
+      "path": "item-catalog-v01527.js",
+      "source": "update/v0.15.64/item-catalog-v01527.js"
+    },
+    {
+      "path": "time-power-v01527.js",
+      "source": "update/v0.15.27/time-power-v01527.js"
+    },
+    {
+      "path": "riot-grade-collector-v01528.js",
+      "source": "update/v0.15.28/riot-grade-collector-v01528.js"
+    },
+    {
+      "path": "riot-grade-ui-v01528.js",
+      "source": "update/v0.15.28/riot-grade-ui-v01528.js"
+    },
+    {
+      "path": "riot-grade-calibration-v01531.js",
+      "source": "update/v0.15.31/riot-grade-calibration-v01531.js"
+    },
+    {
+      "path": "riot-grade-collector-v01532.js",
+      "source": "update/v0.15.32/riot-grade-collector-v01532.js"
+    },
+    {
+      "path": "riot-grade-calibration-history-v01532.js",
+      "source": "update/v0.15.32/riot-grade-calibration-history-v01532.js"
+    },
+    {
+      "path": "riot-grade-autosnapshot-v01533.js",
+      "source": "update/v0.15.33/riot-grade-autosnapshot-v01533.js"
+    },
+    {
+      "path": "preload.js",
+      "source": "update/v0.15.79/preload.js"
+    },
+    {
+      "path": "input-interaction-stability-v01539.js",
+      "source": "update/v0.15.39/input-interaction-stability-v01539.js"
+    },
+    {
+      "path": "main.js",
+      "source": "update/v0.15.70/main.js"
+    },
+    {
+      "path": "ingame-transition-patch-v01575.js",
+      "source": "update/v0.15.75/ingame-transition-patch-v01575.js"
+    },
+    {
+      "path": "package.json",
+      "source": "update/v0.15.99/package.json"
+    },
+    {
+      "path": "autosync-telemetry-v01534.js",
+      "source": "update/v0.15.34/autosync-telemetry-v01534.js"
+    },
+    {
+      "path": "autosync-live-runtime-v01571.js",
+      "source": "update/v0.15.71/autosync-live-runtime-v01571.js"
+    },
+    {
+      "path": "community-calibration-v01534.js",
+      "source": "update/v0.15.34/community-calibration-v01534.js"
+    },
+    {
+      "path": "main-v01578.js",
+      "source": "update/v0.15.78/main-v01578.js"
+    },
+    {
+      "path": "freeze-blackbox-v01577.js",
+      "source": "update/v0.15.77/freeze-blackbox-v01577.js"
+    },
+    {
+      "path": "runtime-blackbox-v01577.js",
+      "source": "update/v0.15.77/runtime-blackbox-v01577.js"
+    },
+    {
+      "path": "runtime-source-stability-v01577.js",
+      "source": "update/v0.15.77/runtime-source-stability-v01577.js"
+    },
+    {
+      "path": "runtime-loader-v01577.js",
+      "source": "update/v0.15.77/runtime-loader-v01577.js"
+    },
+    {
+      "path": "safe-index-patch-v01578.js",
+      "source": "update/v0.15.78/safe-index-patch-v01578.js"
+    },
+    {
+      "path": "runtime-source-stability-v01578.js",
+      "source": "update/v0.15.78/runtime-source-stability-v01578.js"
+    },
+    {
+      "path": "hang-heartbeat-v01578.js",
+      "source": "update/v0.15.78/hang-heartbeat-v01578.js"
+    },
+    {
+      "path": "external-watchdog-v01578.js",
+      "source": "update/v0.15.78/external-watchdog-v01578.js"
+    },
+    {
+      "path": "main-v01579.js",
+      "source": "update/v0.15.79/main-v01579.js"
+    },
+    {
+      "path": "update-safety-v01579.js",
+      "source": "update/v0.15.79/update-safety-v01579.js"
+    },
+    {
+      "path": "updater-safety-patch-v01579.js",
+      "source": "update/v0.15.79/updater-safety-patch-v01579.js"
+    },
+    {
+      "path": "runtime-safety-net-v01579.js",
+      "source": "update/v0.15.79/runtime-safety-net-v01579.js"
+    },
+    {
+      "path": "runtime-loader-v01579.js",
+      "source": "update/v0.15.79/runtime-loader-v01579.js"
+    },
+    {
+      "path": "runtime-source-stability-v01579.js",
+      "source": "update/v0.15.79/runtime-source-stability-v01579.js"
+    },
+    {
+      "path": "hang-heartbeat-v01579.js",
+      "source": "update/v0.15.79/hang-heartbeat-v01579.js"
+    },
+    {
+      "path": "external-watchdog-v01579.js",
+      "source": "update/v0.15.79/external-watchdog-v01579.js"
+    },
+    {
+      "path": "main-v01580.js",
+      "source": "update/v0.15.80/main-v01580.js"
+    },
+    {
+      "path": "runtime-source-stability-v01580.js",
+      "source": "update/v0.15.80/runtime-source-stability-v01580.js"
+    },
+    {
+      "path": "main-v01581.js",
+      "source": "update/v0.15.81/main-v01581.js"
+    },
+    {
+      "path": "runtime-source-stability-v01581.js",
+      "source": "update/v0.15.81/runtime-source-stability-v01581.js"
+    },
+    {
+      "path": "main-v01582.js",
+      "source": "update/v0.15.82/main-v01582.js"
+    },
+    {
+      "path": "runtime-source-stability-v01582.js",
+      "source": "update/v0.15.82/runtime-source-stability-v01582.js"
+    },
+    {
+      "path": "main-v01583.js",
+      "source": "update/v0.15.83/main-v01583.js"
+    },
+    {
+      "path": "runtime-source-stability-v01583.js",
+      "source": "update/v0.15.83/runtime-source-stability-v01583.js"
+    },
+    {
+      "path": "main-v01584.js",
+      "source": "update/v0.15.84/main-v01584.js"
+    },
+    {
+      "path": "runtime-source-stability-v01584.js",
+      "source": "update/v0.15.84/runtime-source-stability-v01584.js"
+    },
+    {
+      "path": "main-v01585.js",
+      "source": "update/v0.15.85/main-v01585.js"
+    },
+    {
+      "path": "runtime-source-stability-v01585.js",
+      "source": "update/v0.15.85/runtime-source-stability-v01585.js"
+    },
+    {
+      "path": "main-v01586.js",
+      "source": "update/v0.15.86/main-v01586.js"
+    },
+    {
+      "path": "runtime-source-stability-v01586.js",
+      "source": "update/v0.15.86/runtime-source-stability-v01586.js"
+    },
+    {
+      "path": "build-analysis-style-v01586.js",
+      "source": "update/v0.15.86/build-analysis-style-v01586.js"
+    },
+    {
+      "path": "build-analysis-logic-v01586.js",
+      "source": "update/v0.15.86/build-analysis-logic-v01586.js"
+    },
+    {
+      "path": "main-v01587.js",
+      "source": "update/v0.15.87/main-v01587.js"
+    },
+    {
+      "path": "runtime-source-stability-v01587.js",
+      "source": "update/v0.15.87/runtime-source-stability-v01587.js"
+    },
+    {
+      "path": "live-route-style-v01587.js",
+      "source": "update/v0.15.87/live-route-style-v01587.js"
+    },
+    {
+      "path": "live-route-logic-v01587.js",
+      "source": "update/v0.15.87/live-route-logic-v01587.js"
+    },
+    {
+      "path": "route-adoption-gate-v01587.js",
+      "source": "update/v0.15.87/route-adoption-gate-v01587.js"
+    },
+    {
+      "path": "main-v01588.js",
+      "source": "update/v0.15.88/main-v01588.js"
+    },
+    {
+      "path": "runtime-source-stability-v01588.js",
+      "source": "update/v0.15.88/runtime-source-stability-v01588.js"
+    },
+    {
+      "path": "main-v01589.js",
+      "source": "update/v0.15.89/main-v01589.js"
+    },
+    {
+      "path": "runtime-source-stability-v01589.js",
+      "source": "update/v0.15.89/runtime-source-stability-v01589.js"
+    },
+    {
+      "path": "main-v01590.js",
+      "source": "update/v0.15.90/main-v01590.js"
+    },
+    {
+      "path": "runtime-source-stability-v01590.js",
+      "source": "update/v0.15.90/runtime-source-stability-v01590.js"
+    },
+    {
+      "path": "main-v01591.js",
+      "source": "update/v0.15.91/main-v01591.js"
+    },
+    {
+      "path": "runtime-source-stability-v01591.js",
+      "source": "update/v0.15.91/runtime-source-stability-v01591.js"
+    },
+    {
+      "path": "main-v01592.js",
+      "source": "update/v0.15.92/main-v01592.js"
+    },
+    {
+      "path": "runtime-source-stability-v01592.js",
+      "source": "update/v0.15.92/runtime-source-stability-v01592.js"
+    },
+    {
+      "path": "main-v01593.js",
+      "source": "update/v0.15.93/main-v01593.js"
+    },
+    {
+      "path": "runtime-source-stability-v01593.js",
+      "source": "update/v0.15.93/runtime-source-stability-v01593.js"
+    },
+    {
+      "path": "main-v01594.js",
+      "source": "update/v0.15.94/main-v01594.js"
+    },
+    {
+      "path": "runtime-source-stability-v01594.js",
+      "source": "update/v0.15.94/runtime-source-stability-v01594.js"
+    },
+    {
+      "path": "main-v01595.js",
+      "source": "update/v0.15.95/main-v01595.js"
+    },
+    {
+      "path": "runtime-source-stability-v01595.js",
+      "source": "update/v0.15.95/runtime-source-stability-v01595.js"
+    },
+    {
+      "path": "main-v01596.js",
+      "source": "update/v0.15.96/main-v01596.js"
+    },
+    {
+      "path": "runtime-source-stability-v01596.js",
+      "source": "update/v0.15.96/runtime-source-stability-v01596.js"
+    },
+    {
+      "path": "main-v01597.js",
+      "source": "update/v0.15.97/main-v01597.js"
+    },
+    {
+      "path": "runtime-source-stability-v01597.js",
+      "source": "update/v0.15.97/runtime-source-stability-v01597.js"
+    },
+    {
+      "path": "main-v01598.js",
+      "source": "update/v0.15.98/main-v01598.js"
+    },
+    {
+      "path": "runtime-source-stability-v01598.js",
+      "source": "update/v0.15.98/runtime-source-stability-v01598.js"
+    },
+    {
+      "path": "main-v01599.js",
+      "source": "update/v0.15.99/main-v01599.js"
+    },
+    {
+      "path": "runtime-source-stability-v01599.js",
+      "source": "update/v0.15.99/runtime-source-stability-v01599.js"
+    }
+  ],
+  "delete": [
+    "draft-layout-hotfix-v01544.js",
+    "freeze-watchdog-v01574.js",
+    "freeze-watchdog-v01575.js",
+    "item-catalog-v01526.js",
+    "live-hard-safe-v01576.js",
+    "live-strength-v01510.js",
+    "live-strength-v01511.js",
+    "live-strength-v01512.js",
+    "main-v01571.js",
+    "main-v01572.js",
+    "main-v01573.js",
+    "main-v01574.js",
+    "main-v01575.js",
+    "main-v01576-safe.js",
+    "profile-ux-v01536.js",
+    "random-practice-focus-v01548.js",
+    "runtime-performance-v01567.js",
+    "time-power-fix-v01526.js",
+    "time-power-v01524.js",
+    "main-v01577.js"
+  ]
+}
