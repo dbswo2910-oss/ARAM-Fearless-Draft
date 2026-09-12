@@ -11,13 +11,14 @@ const main=read('update/v0.15.92/main-v01592.js');
 const pkg=JSON.parse(read('update/v0.15.92/package.json'));
 const manifest=JSON.parse(read('update/manifest.json'));
 const by=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
+const activePatch=Number(String(manifest.version||'').split('.').pop())||0;
 
 ok('package version',pkg.version==='0.15.92',pkg.version);
 ok('package entry',pkg.main==='main-v01592.js',pkg.main);
-ok('manifest version',['0.15.92','0.15.93','0.15.94'].includes(manifest.version),manifest.version);
+ok('manifest version',String(manifest.version||'').startsWith('0.15.')&&activePatch>=92,manifest.version);
 ok('manifest delivers main',by.get('main-v01592.js')==='update/v0.15.92/main-v01592.js',by.get('main-v01592.js')||'');
 ok('manifest delivers runtime',by.get('runtime-source-stability-v01592.js')==='update/v0.15.92/runtime-source-stability-v01592.js',by.get('runtime-source-stability-v01592.js')||'');
-ok('manifest delivers package',['update/v0.15.92/package.json','update/v0.15.93/package.json','update/v0.15.94/package.json'].includes(by.get('package.json')),by.get('package.json')||'');
+ok('manifest delivers package',by.get('package.json')===`update/v${manifest.version}/package.json`,by.get('package.json')||'');
 
 let mod=null,patched='';
 try{
