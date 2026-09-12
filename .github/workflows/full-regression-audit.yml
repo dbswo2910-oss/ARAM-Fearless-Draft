@@ -105,6 +105,8 @@ jobs:
         run: node tools/ingame-results-v01595-audit.js
       - name: Run IN GAME post-match result sync v0.15.96 audit
         run: node tools/ingame-results-sync-v01596-audit.js
+      - name: Run v0.15.107 DATA/RANDOM view-boundary repair audit
+        run: node tools/v015107-view-boundary-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -167,6 +169,7 @@ jobs:
             audit-output/item-icons-v01557-report.json
             audit-output/ingame-results-v01595-report.json
             audit-output/ingame-results-sync-v01596-report.json
+            audit-output/v015107-view-boundary-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()

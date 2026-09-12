@@ -1,0 +1,100 @@
+name: v0.15.107 Activate DATA/RANDOM View Boundary Repair
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015107-activate-view-boundary-repair.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015107-view-boundary-audit.js
+          node tools/v015106-runtime-activation-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.107 manifest + docs
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          m.version='0.15.107';
+          m.message='v0.15.107 · DATA/RANDOM VIEW BOUNDARY + RANDOM PICK REPAIR — isolates Patch Notes from the tier browser and repairs the Random Practice pick workspace';
+
+          const remove=new Set([
+            'view-boundary-repair-v015107.js',
+            'runtime-source-stability-v015107.js',
+            'main-v015107.js'
+          ]);
+          m.files=(m.files||[]).filter(x=>!remove.has(x.path));
+
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(!pkg)throw new Error('manifest package.json missing');
+          pkg.source='update/v0.15.107/package.json';
+
+          let idx=m.files.findIndex(x=>x.path==='random-data-ui-hotfix-v015106.js');
+          if(idx<0)throw new Error('v0.15.106 UI anchor missing');
+          m.files.splice(idx+1,0,{path:'view-boundary-repair-v015107.js',source:'update/v0.15.107/view-boundary-repair-v015107.js'});
+
+          idx=m.files.findIndex(x=>x.path==='runtime-source-stability-v015106.js');
+          if(idx<0)throw new Error('v0.15.106 runtime anchor missing');
+          m.files.splice(idx+1,0,{path:'runtime-source-stability-v015107.js',source:'update/v0.15.107/runtime-source-stability-v015107.js'});
+
+          idx=m.files.findIndex(x=>x.path==='main-v015106.js');
+          if(idx<0)throw new Error('v0.15.106 main anchor missing');
+          m.files.splice(idx+1,0,{path:'main-v015107.js',source:'update/v0.15.107/main-v015107.js'});
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';
+          let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.107**');
+          r=r.replace(/Current balance\/data patch: \*\*[^*]+\*\*/,'Current balance/data patch: **26.18**');
+          const note='- **v0.15.107**: isolates Data/Patch Notes from the champion-tier browser, removes cross-view layout leakage, and repairs Random Practice pick layout using exact installed IDs. TOP5/AD-AP/recommendation scoring are unchanged.';
+          if(!r.includes('**v0.15.107**'))r+='\n'+note+'\n';
+          fs.writeFileSync(rp,r);
+
+          const hp='docs/AI_HANDOFF.md';
+          let h=fs.readFileSync(hp,'utf8');
+          h=h.replace(/- Active updater version: \*\*v[^*]+\*\*/,'- Active updater version: **v0.15.107**');
+          h=h.replace(/- Balance\/data patch tracked by project: \*\*[^*]+\*\*/,'- Balance/data patch tracked by project: **26.18**');
+          const hnote='\n### v0.15.107 — DATA/RANDOM view boundary repair\n\nThe v0.15.103 Data layout helper used a document-wide `.panel` + Korean-title search. v0.15.107 supersedes that ownership with view-scoped discovery rooted at exact `#dataCard`, removes legacy cross-view layout classes, makes Patch Notes own the Data workspace, and rebuilds Random Practice pick layout only from exact installed IDs (`#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, `#rpPickIntelV01589`). Do not reintroduce document-wide panel discovery. Scoring remains unchanged.\n';
+          if(!h.includes('### v0.15.107 — DATA/RANDOM view boundary repair'))h+=hnote;
+          fs.writeFileSync(hp,h);
+
+          const ap='AGENTS.md';
+          let a=fs.readFileSync(ap,'utf8');
+          const anote='\n## v0.15.107 view-boundary rule\n\n- Data layout discovery must stay inside the view containing exact `#dataCard`; never use document-wide `.panel` + title matching.\n- Random Practice pick layout ownership is exact-ID only: `#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, `#rpPickIntelV01589`.\n- Patch Notes hides only the verified Data tier pane; Data UI must never be allowed to participate in `#random` layout.\n- `score_logic_changed:false`.\n';
+          if(!a.includes('## v0.15.107 view-boundary rule'))a+=anote;
+          fs.writeFileSync(ap,a);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015107-view-boundary-audit.js
+          node tools/v015106-runtime-activation-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md docs/AI_HANDOFF.md AGENTS.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.107 view boundary repair'
+            git push
+          fi
