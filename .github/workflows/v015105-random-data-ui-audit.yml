@@ -1,0 +1,30 @@
+name: v0.15.105 RANDOM TOP5 + Data Patch Width Audit
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.105/**'
+      - 'tools/v015105-random-data-ui-audit.js'
+      - '.github/workflows/v015105-random-data-ui-audit.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.105/**'
+      - 'tools/v015105-random-data-ui-audit.js'
+      - '.github/workflows/v015105-random-data-ui-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node tools/v015105-random-data-ui-audit.js
