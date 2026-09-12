@@ -1,0 +1,17 @@
+name: v0.15.94 RANDOM Pick Candidate DNA Audit
+
+on:
+  push:
+    branches: [ main, 'fix/v0.15.94-candidate-dna-preview' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node tools/random-pick-candidate-dna-v01594-audit.js
