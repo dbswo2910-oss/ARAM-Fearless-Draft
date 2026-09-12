@@ -1,6 +1,6 @@
 {
-  "version": "0.15.99",
-  "message": "v0.15.99 · DATA PATCH NOTES — Data submenu, 26.18 normal ARAM patch hub and detailed champion changes",
+  "version": "0.15.100",
+  "message": "v0.15.100 · RANDOM PICK PREVIEW LOCK — manually selected TOP5 candidate stays authoritative across refreshes",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -265,7 +265,7 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.99/package.json"
+      "source": "update/v0.15.100/package.json"
     },
     {
       "path": "autosync-telemetry-v01534.js",
@@ -526,6 +526,14 @@
     {
       "path": "runtime-source-stability-v01599.js",
       "source": "update/v0.15.99/runtime-source-stability-v01599.js"
+    },
+    {
+      "path": "main-v015100.js",
+      "source": "update/v0.15.100/main-v015100.js"
+    },
+    {
+      "path": "runtime-source-stability-v015100.js",
+      "source": "update/v0.15.100/runtime-source-stability-v015100.js"
     }
   ],
   "delete": [
