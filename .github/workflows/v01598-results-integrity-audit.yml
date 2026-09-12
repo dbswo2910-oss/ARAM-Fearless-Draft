@@ -1,0 +1,35 @@
+name: v0.15.98 Results Integrity Audit
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v01598-results-integrity-audit.yml'
+      - 'update/v0.15.98/**'
+      - 'tools/ingame-results-integrity-v01598-audit.js'
+      - 'update/manifest.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run v0.15.98 result integrity audit
+        run: node tools/ingame-results-integrity-v01598-audit.js
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingame-results-integrity-v01598-report
+          path: audit-output/ingame-results-integrity-v01598-report.json
+          if-no-files-found: error
