@@ -42,6 +42,7 @@ function patchCoachV01596(src){
     if(resultStateV01595.endedAt&&resultStateV01595.endedAt!==resultSyncV01596.handledEndedAt){resultSyncV01596.handledEndedAt=resultStateV01595.endedAt;requestResultHistorySyncV01596('game-end')}
     pumpResultHistorySyncV01596();
   }
+  function syncReasonForResultTabV01596(){return resultSyncV01596.expectedKey&&(resultSyncV01596.failed||resultSyncV01596.blocking)?'game-end':'tab'}
   function resultSyncSignatureV01596(){return [resultSyncV01596.active,resultSyncV01596.blocking,resultSyncV01596.synced,resultSyncV01596.failed,resultSyncV01596.attempt,resultSyncV01596.lastError].join('|')}
   function renderResultSyncV01596(){
     const tries=Math.min(10,resultSyncV01596.attempt||0);if(resultSyncV01596.failed)return '<div class="ri95Empty"><div><b>방금 경기 결과를 아직 불러오지 못했습니다</b><span>League Client의 전적 반영이 늦을 수 있습니다. 결과 탭을 다시 누르면 즉시 다시 조회합니다.</span></div></div>';
@@ -62,7 +63,7 @@ function patchCoachV01596(src){
   if(countOf(src,sigHook)!==1)throw new Error(`v0.15.96 result-sync contract mismatch signature=${countOf(src,sigHook)}`);src=src.replace(sigHook,sigNew);
 
   const tabHook="ui.tab=b.dataset.riTab||'live';render(true)";
-  const tabNew="ui.tab=b.dataset.riTab||'live';if(ui.tab==='result')requestResultHistorySyncV01596('tab');render(true)";
+  const tabNew="ui.tab=b.dataset.riTab||'live';if(ui.tab==='result')requestResultHistorySyncV01596(syncReasonForResultTabV01596());render(true)";
   if(countOf(src,tabHook)!==1)throw new Error(`v0.15.96 result-sync contract mismatch tab=${countOf(src,tabHook)}`);src=src.replace(tabHook,tabNew);
 
   return src;
