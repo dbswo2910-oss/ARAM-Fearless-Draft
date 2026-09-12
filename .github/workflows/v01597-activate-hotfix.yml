@@ -1,0 +1,60 @@
+name: v0.15.97 Activate Hotfix
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v01597-activate-hotfix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    if: ${{ !contains(github.event.head_commit.message, '[v01597-activate]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Activate v0.15.97 manifest and README
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mf='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mf,'utf8'));
+          m.version='0.15.97';
+          m.message='v0.15.97 · RESULTS PARSER HOTFIX — existing Q450 Match Lab history now resolves nested participant stats, championId and final items in IN GAME Results';
+          const by=new Map((m.files||[]).map((x,i)=>[x.path,i]));
+          function set(path,source){
+            const x={path,source};
+            if(by.has(path))m.files[by.get(path)]=x;
+            else {by.set(path,m.files.length);m.files.push(x)}
+          }
+          set('package.json','update/v0.15.97/package.json');
+          set('main-v01597.js','update/v0.15.97/main-v01597.js');
+          set('runtime-source-stability-v01597.js','update/v0.15.97/runtime-source-stability-v01597.js');
+          fs.writeFileSync(mf,JSON.stringify(m));
+
+          const rf='README.md';
+          let r=fs.readFileSync(rf,'utf8');
+          r=r.replace(/\*\*Active update:\*\* `v0\.15\.96 · IN GAME Results Sync`/,'**Active update:** `v0.15.97 · IN GAME Results Parser Hotfix`');
+          const anchor='- **v0.15.96 IN GAME Results Sync:**';
+          const bullet='- **v0.15.97 IN GAME Results Parser:** 기존 Q450 Match Lab 전적의 `participant.stats` / `participantIdentities` / `championId` / `item0~item6` 구조까지 해석하여, 핫픽스 이전 최근 경기에서도 챔피언·KDA·피해량·최종 아이템이 결과 탭에 표시되도록 수정했습니다. 추천/점수 로직은 변경하지 않았습니다.\n';
+          if(!r.includes('**v0.15.97 IN GAME Results Parser:**')){
+            const i=r.indexOf(anchor);
+            if(i>=0)r=r.slice(0,i)+bullet+r.slice(i);
+            else r+='\n'+bullet;
+          }
+          fs.writeFileSync(rf,r);
+          NODE
+          node tools/ingame-results-parser-v01597-audit.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update/manifest.json README.md
+          git commit -m "[v01597-activate] activate results parser hotfix"
+          git push
