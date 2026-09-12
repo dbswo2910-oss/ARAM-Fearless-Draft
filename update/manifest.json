@@ -1,6 +1,6 @@
 {
-  "version": "0.15.102",
-  "message": "v0.15.102 · FULL PACKAGE RESTORE — forces a complete manifest refresh after the emergency v0.15.101 startup repair",
+  "version": "0.15.103",
+  "message": "v0.15.103 · UI LAYOUT RESTORE — restores the proven v0.15.90 RANDOM pick command center and promotes Data tier/patch navigation to the page top",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -262,10 +262,6 @@
     {
       "path": "ingame-transition-patch-v01575.js",
       "source": "update/v0.15.75/ingame-transition-patch-v01575.js"
-    },
-    {
-      "path": "package.json",
-      "source": "update/v0.15.102/package.json"
     },
     {
       "path": "autosync-telemetry-v01534.js",
@@ -542,6 +538,18 @@
     {
       "path": "runtime-source-stability-v015100.js",
       "source": "update/v0.15.100/runtime-source-stability-v015100.js"
+    },
+    {
+      "path": "ui-layout-restore-v015103.js",
+      "source": "update/v0.15.103/ui-layout-restore-v015103.js"
+    },
+    {
+      "path": "main-v015103.js",
+      "source": "update/v0.15.103/main-v015103.js"
+    },
+    {
+      "path": "package.json",
+      "source": "update/v0.15.103/package.json"
     }
   ],
   "delete": [
