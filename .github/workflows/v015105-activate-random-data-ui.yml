@@ -1,0 +1,76 @@
+name: v0.15.105 Activate RANDOM TOP5 + Data Patch Width
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015105-activate-random-data-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015105-random-data-ui-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.105 manifest + README
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          m.version='0.15.105';
+          m.message='v0.15.105 · RANDOM TOP5 INTERACTION + DETAIL / DATA PATCH FULL-WIDTH — restores clickable TOP5 DNA preview, AD/AP row detail, and full-width patch notes';
+          const remove=new Set(['random-data-ui-hotfix-v015105.js','runtime-source-stability-v015105.js','main-v015105.js']);
+          m.files=(m.files||[]).filter(x=>!remove.has(x.path));
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(!pkg)throw new Error('manifest package.json missing');
+          pkg.source='update/v0.15.105/package.json';
+
+          const uiIdx=m.files.findIndex(x=>x.path==='ui-layout-restore-v015103.js');
+          const rt104=m.files.findIndex(x=>x.path==='runtime-source-stability-v015104.js');
+          const main104=m.files.findIndex(x=>x.path==='main-v015104.js');
+          if(uiIdx<0||rt104<0||main104<0)throw new Error('v0.15.104/103 activation anchors missing');
+          m.files.splice(uiIdx+1,0,{path:'random-data-ui-hotfix-v015105.js',source:'update/v0.15.105/random-data-ui-hotfix-v015105.js'});
+          let insert=m.files.findIndex(x=>x.path==='runtime-source-stability-v015104.js');
+          m.files.splice(insert+1,0,{path:'runtime-source-stability-v015105.js',source:'update/v0.15.105/runtime-source-stability-v015105.js'});
+          insert=m.files.findIndex(x=>x.path==='main-v015104.js');
+          m.files.splice(insert+1,0,{path:'main-v015105.js',source:'update/v0.15.105/main-v015105.js'});
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';
+          let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.105**');
+          r=r.replace(/Current balance\/data patch: \*\*[^*]+\*\*/,'Current balance/data patch: **26.18**');
+          const note='- **v0.15.105**: restores RANDOM TOP5 card selection so the clicked candidate drives the right-side composition DNA and persists through refresh; restores per-row AD/AP split detail; and makes Data > Patch Notes use the full content width with a rebalanced desktop layout. Scoring is unchanged.';
+          if(!r.includes('**v0.15.105**'))r+='\n'+note+'\n';
+          fs.writeFileSync(rp,r);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015105-random-data-ui-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.105 random top5 data layout hotfix'
+            git push
+          fi
