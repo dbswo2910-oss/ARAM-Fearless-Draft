@@ -1,6 +1,6 @@
 {
-  "version": "0.15.101",
-  "message": "v0.15.101 · STARTUP PACKAGE PATH HOTFIX — fixed packaged predecessor resolution after v0.15.100",
+  "version": "0.15.102",
+  "message": "v0.15.102 · FULL PACKAGE RESTORE — forces a complete manifest refresh after the emergency v0.15.101 startup repair",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -265,7 +265,7 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.101/package.json"
+      "source": "update/v0.15.102/package.json"
     },
     {
       "path": "autosync-telemetry-v01534.js",
@@ -534,6 +534,10 @@
     {
       "path": "main-v015101.js",
       "source": "update/v0.15.101/main-v015101.js"
+    },
+    {
+      "path": "main-v015102.js",
+      "source": "update/v0.15.102/main-v015102.js"
     },
     {
       "path": "runtime-source-stability-v015100.js",
