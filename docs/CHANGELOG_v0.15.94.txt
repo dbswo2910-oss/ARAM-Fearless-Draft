@@ -1,0 +1,8 @@
+v0.15.94 · RANDOM CANDIDATE DNA PREVIEW
+
+- TOP5 candidate click now refreshes the full right-side composition DNA preview instead of only the selected border / bottom cards.
+- Candidate-aware preview covers Engage, Poke, Frontline, Sustain, CC, AD/AP balance, shortage chips, selected candidate summary, and the six-card judgment area.
+- Selected candidate preview is reapplied after the base DNA refresh so periodic RANDOM refreshes no longer revert the right rail to the original TOP1.
+- Candidate preview uses existing composition shortage signals plus the selected combo row / available champion metadata. It is a preview layer; recommendation scoring and TOP5 order are unchanged.
+- v0.15.93 fullscreen/queue/click fixes and v0.15.92 Poro-Snax filtering are preserved.
+- score_logic_changed: false
