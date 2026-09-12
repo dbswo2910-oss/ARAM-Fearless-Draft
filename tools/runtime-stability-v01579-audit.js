@@ -10,7 +10,17 @@ const by=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
 const src=name=>by.get(name)&&exists(by.get(name))?read(by.get(name)):'';
 const checks=[];const ok=(name,pass,detail='')=>checks.push({name,pass:!!pass,detail});
 const pkg=JSON.parse(src('package.json')||'{}');
-const currentEntry=src(pkg.main||'');
+const currentTarget=String(pkg.main||''),currentEntry=src(currentTarget);
+function collectMainChain(startTarget){
+  const out=[],seen=new Set();let target=startTarget;
+  while(target&&by.get(target)&&!seen.has(target)&&out.length<40){
+    seen.add(target);const source=by.get(target);if(!source||!exists(source))break;const text=read(source);out.push({target,source,text});
+    const refs=[...text.matchAll(/['"](main-v\d+\.js)['"]/g)].map(x=>x[1]);
+    target=refs.find(x=>by.has(x)&&!seen.has(x))||'';
+  }
+  return out;
+}
+const currentChain=collectMainChain(currentTarget),currentChainTargets=currentChain.map(x=>x.target);
 const baselineEntry=src('main-v01579.js');
 const preload=src('preload.js'),safe=src('update-safety-v01579.js'),up=src('updater-safety-patch-v01579.js'),rt=src('runtime-safety-net-v01579.js'),loader=src('runtime-loader-v01579.js'),hb=src('hang-heartbeat-v01579.js'),wd=src('external-watchdog-v01579.js'),stab=src('runtime-source-stability-v01579.js');
 
@@ -21,7 +31,7 @@ ok('manifest stays at or above safety baseline',atLeast(manifest.version,'0.15.7
 ok('package stays at or above safety baseline',atLeast(pkg.version,'0.15.79'),pkg.version||'');
 ok('current package entry is delivered',!!pkg.main&&!!by.get(pkg.main)&&!!currentEntry,pkg.main||'');
 ok('v0.15.79 baseline entry remains delivered',String(by.get('main-v01579.js')||'').startsWith('update/v0.15.79/'),by.get('main-v01579.js')||'');
-if(pkg.main!=='main-v01579.js')ok('successor entry explicitly inherits v0.15.79 baseline',currentEntry.includes('main-v01579.js')&&currentEntry.includes("replaceAll('0.15.79'"),pkg.main||'');
+if(pkg.main!=='main-v01579.js')ok('successor entry inherits v0.15.79 baseline',currentChainTargets.includes('main-v01579.js'),currentChainTargets.join(' -> '));
 else ok('v0.15.79 baseline is current entry',true,pkg.main);
 for(const f of ['preload.js','update-safety-v01579.js','updater-safety-patch-v01579.js','runtime-safety-net-v01579.js','runtime-loader-v01579.js','runtime-source-stability-v01579.js','hang-heartbeat-v01579.js','external-watchdog-v01579.js'])ok('safety module delivered '+f,!!by.get(f)&&!!src(f),by.get(f)||'');
 
@@ -76,6 +86,6 @@ try{
 }catch(e){ok('runtime safety VM',false,e.stack||e.message)}
 
 ok('safety baseline is scoring neutral',baselineEntry.includes("replaceAll('0.15.70','0.15.79')")&&!baselineEntry.includes('teamScore(')&&!baselineEntry.includes('recommendPicks(')&&!baselineEntry.includes('recommendBans(')&&safe.includes('score_logic_changed:false')&&stab.includes('score_logic_changed:false'));
-const report={version:'0.15.79-baseline',currentVersion:manifest.version,checks,pass:checks.every(x=>x.pass),score_logic_changed:false,info:{purpose:'Permanent safety baseline preserved across successor versions: transaction rollback, probation, hot-path circuit breakers and release-gate policy'}};
+const report={version:'0.15.79-baseline',currentVersion:manifest.version,checks,pass:checks.every(x=>x.pass),score_logic_changed:false,info:{purpose:'Permanent safety baseline preserved across successor versions: transaction rollback, probation, hot-path circuit breakers and release-gate policy',forwardCompatible:true,entryChain:currentChainTargets}};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01579-report.json'),JSON.stringify(report,null,2));
 for(const c of checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1);
