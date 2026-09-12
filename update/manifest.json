@@ -1,6 +1,6 @@
 {
-  "version": "0.15.103",
-  "message": "v0.15.103 · UI LAYOUT RESTORE — restores the proven v0.15.90 RANDOM pick command center and promotes Data tier/patch navigation to the page top",
+  "version": "0.15.104",
+  "message": "v0.15.104 · STARTUP HOTFIX — fixes the v0.15.103 main-process anchor mismatch while preserving the restored RANDOM layout and Data top navigation",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -540,16 +540,24 @@
       "source": "update/v0.15.100/runtime-source-stability-v015100.js"
     },
     {
-      "path": "ui-layout-restore-v015103.js",
-      "source": "update/v0.15.103/ui-layout-restore-v015103.js"
-    },
-    {
       "path": "main-v015103.js",
       "source": "update/v0.15.103/main-v015103.js"
     },
     {
+      "path": "ui-layout-restore-v015103.js",
+      "source": "update/v0.15.103/ui-layout-restore-v015103.js"
+    },
+    {
+      "path": "runtime-source-stability-v015104.js",
+      "source": "update/v0.15.104/runtime-source-stability-v015104.js"
+    },
+    {
+      "path": "main-v015104.js",
+      "source": "update/v0.15.104/main-v015104.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.103/package.json"
+      "source": "update/v0.15.104/package.json"
     }
   ],
   "delete": [
