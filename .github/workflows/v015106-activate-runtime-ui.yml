@@ -1,0 +1,86 @@
+name: v0.15.106 Activate RANDOM/Data Runtime UI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015106-activate-runtime-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015106-runtime-activation-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.106 manifest + README
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          m.version='0.15.106';
+          m.message='v0.15.106 · RANDOM/DATA UI RUNTIME ACTIVATION FIX — makes the TOP5/DNA and full-width Patch Notes UI actually load through independent runtime paths';
+
+          const remove=new Set([
+            'random-data-ui-hotfix-v015106.js',
+            'runtime-source-stability-v015106.js',
+            'main-v015106.js'
+          ]);
+          m.files=(m.files||[]).filter(x=>!remove.has(x.path));
+
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(!pkg)throw new Error('manifest package.json missing');
+          pkg.source='update/v0.15.106/package.json';
+
+          let idx=m.files.findIndex(x=>x.path==='random-data-ui-hotfix-v015105.js');
+          if(idx<0)idx=m.files.findIndex(x=>x.path==='ui-layout-restore-v015103.js');
+          if(idx<0)throw new Error('UI activation anchor missing');
+          m.files.splice(idx+1,0,{path:'random-data-ui-hotfix-v015106.js',source:'update/v0.15.106/random-data-ui-hotfix-v015106.js'});
+
+          idx=m.files.findIndex(x=>x.path==='runtime-source-stability-v015105.js');
+          if(idx<0)throw new Error('v0.15.105 runtime anchor missing');
+          m.files.splice(idx+1,0,{path:'runtime-source-stability-v015106.js',source:'update/v0.15.106/runtime-source-stability-v015106.js'});
+
+          idx=m.files.findIndex(x=>x.path==='main-v015105.js');
+          if(idx<0)throw new Error('v0.15.105 main anchor missing');
+          m.files.splice(idx+1,0,{path:'main-v015106.js',source:'update/v0.15.106/main-v015106.js'});
+
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';
+          let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.106**');
+          r=r.replace(/Current balance\/data patch: \*\*[^*]+\*\*/,'Current balance/data patch: **26.18**');
+          const note='- **v0.15.106**: fixes the v0.15.105 visible-UI activation gap by loading the RANDOM TOP5/DNA + Data Patch Notes wide-layout layer through two independent late-runtime paths. Data > Patch Notes now hides the champion-tier pane and owns the available workspace. Scoring is unchanged.';
+          if(!r.includes('**v0.15.106**'))r+='\n'+note+'\n';
+          fs.writeFileSync(rp,r);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015106-runtime-activation-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.106 runtime UI activation fix'
+            git push
+          fi
