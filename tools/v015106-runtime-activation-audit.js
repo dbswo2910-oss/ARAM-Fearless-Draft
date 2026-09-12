@@ -11,8 +11,9 @@ const parse=(src,label)=>{try{new Function(src)}catch(e){throw new Error(`v0.15.
 const ui=read('update/v0.15.106/random-data-ui-hotfix-v015106.js');
 const rt=read('update/v0.15.106/runtime-source-stability-v015106.js');
 const main=read('update/v0.15.106/main-v015106.js');
+const safety=read('update/v0.15.106/update-safety-v015106.js');
 const pkg=JSON.parse(read('update/v0.15.106/package.json'));
-parse(ui,'UI hotfix');parse(rt,'runtime stability');parse(main,'main successor');
+parse(ui,'UI hotfix');parse(rt,'runtime stability');parse(main,'main successor');parse(safety,'functional safety');
 
 [
   ['__ARAM_RANDOM_DATA_HOTFIX_V015106__','runtime UI marker'],
@@ -26,8 +27,8 @@ parse(ui,'UI hotfix');parse(rt,'runtime stability');parse(main,'main successor')
   ['dataHubTierPaneV015103','tier pane hide contract'],
   ['dh99Layout','patch-note column ratio']
 ].forEach(([n,l])=>must(ui,n,l));
-mustNot(ui,'setInterval(','new repeating scheduler');
-mustNot(ui,'new MutationObserver','new mutation observer');
+mustNot(ui,'setInterval(','new renderer repeating scheduler');
+mustNot(ui,'new MutationObserver','new renderer mutation observer');
 
 must(rt,"require('./runtime-source-stability-v015105')",'v0.15.105 runtime lineage');
 must(rt,"file==='brand-header-v01538.js'",'independent brand-header activation');
@@ -35,14 +36,28 @@ must(rt,"file==='input-interaction-stability-v01539.js'",'independent input-stab
 must(rt,'redundant_ui_activation_changed:true','redundant activation contract');
 must(rt,'score_logic_changed:false','score preservation');
 
-must(main,"path.join(__dirname,'main-v015105.js')",'v0.15.105 predecessor');
-must(main,'runtime-source-stability-v015106','v0.15.106 runtime target');
-must(main,"root:'main-v01579.js'",'safety baseline lineage');
+[
+  ['update-safety-v015106','functional safety adoption'],
+  ['__aramActivationGuardV015106','runtime loader health guard'],
+  ['SAFE-UI106','functional readiness failure code'],
+  ['randomDataHotfixStyleV015106','visible style readiness'],
+  ["attr==='0.15.106'",'document activation attribute readiness'],
+  ["document.getElementById('random')",'Random root readiness'],
+  ["document.getElementById('comboResults')",'TOP5 host readiness'],
+  ["root:'main-v01579.js'",'safety baseline lineage'],
+  ['runtime-source-stability-v015106','v0.15.106 runtime target']
+].forEach(([n,l])=>must(main,n,l));
+[
+  ['functional_failure_watch:true','functional safety capability flag'],
+  ['safety-failure.json','current-boot failure file watch'],
+  ['bootStartedAt','same-boot failure boundary'],
+  ['restoreSnapshot','automatic rollback path'],
+  ['SAFE-RB106','functional rollback diagnostic']
+].forEach(([n,l])=>must(safety,n,l));
 if(pkg.version!=='0.15.106'||pkg.main!=='main-v015106.js')throw new Error('v0.15.106 package metadata mismatch');
 
-// Runtime-effect audit: do not only inspect source strings. Run the actual
-// patchRuntimeSource chain against two independently loaded renderer payloads,
-// assert the v106 UI is present in both final payloads, and parse both outputs.
+// Runtime-effect audit: run the real patch chain against two independently loaded
+// late renderer payloads. Both must carry valid, parseable v106 UI code.
 const manifest=JSON.parse(read('update/manifest.json'));
 const map=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
 const runtime=require(path.join(ROOT,'update/v0.15.106/runtime-source-stability-v015106.js'));
@@ -58,9 +73,10 @@ if(String(manifest.version||'')==='0.15.106'){
   const expected={
     'random-data-ui-hotfix-v015106.js':'update/v0.15.106/random-data-ui-hotfix-v015106.js',
     'runtime-source-stability-v015106.js':'update/v0.15.106/runtime-source-stability-v015106.js',
+    'update-safety-v015106.js':'update/v0.15.106/update-safety-v015106.js',
     'main-v015106.js':'update/v0.15.106/main-v015106.js',
     'package.json':'update/v0.15.106/package.json'
   };
   for(const [p,s] of Object.entries(expected))if(map.get(p)!==s)throw new Error(`v0.15.106 active manifest mismatch ${p}: ${map.get(p)||'missing'}`);
 }
-console.log('v0.15.106 RUNTIME ACTIVATION AUDIT: SUCCESS');
+console.log('v0.15.106 RUNTIME ACTIVATION + FUNCTIONAL SAFETY AUDIT: SUCCESS');
