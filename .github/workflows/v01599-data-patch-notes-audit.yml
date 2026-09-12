@@ -1,0 +1,35 @@
+name: v0.15.99 Data Patch Notes Audit
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v01599-data-patch-notes-audit.yml'
+      - 'update/v0.15.99/**'
+      - 'tools/data-patch-notes-v01599-audit.js'
+      - 'update/manifest.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run v0.15.99 Data patch notes audit
+        run: node tools/data-patch-notes-v01599-audit.js
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-patch-notes-v01599-report
+          path: audit-output/data-patch-notes-v01599-report.json
+          if-no-files-found: error
