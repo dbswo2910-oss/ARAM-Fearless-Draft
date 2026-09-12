@@ -4,12 +4,13 @@ const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const checks=[];const ok=(name,pass,detail='')=>checks.push({name,pass:!!pass,detail});
 const manifest=JSON.parse(read('update/manifest.json')),by=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
+const activePatch=Number(String(manifest.version||'').split('.').pop())||0;
 const mod=require(path.join(ROOT,'update/v0.15.91/runtime-source-stability-v01591.js'));
 const raw=read('update/v0.15.72/random-practice-focus-v01549.js');
 let patched='';
 try{patched=mod.patchRuntimeSource('random-practice-focus-v01549.js',raw);new Function(patched);ok('patched RANDOM focus parses',true)}catch(e){ok('patched RANDOM focus parses',false,e.stack||e.message)}
-ok('manifest is v0.15.91 or declared successor',['0.15.91','0.15.92','0.15.93','0.15.94'].includes(manifest.version),manifest.version);
-ok('active package is v0.15.91 or successor',['update/v0.15.91/package.json','update/v0.15.92/package.json','update/v0.15.93/package.json','update/v0.15.94/package.json'].includes(by.get('package.json')),by.get('package.json')||'');
+ok('manifest is v0.15.91 or declared successor',String(manifest.version||'').startsWith('0.15.')&&activePatch>=91,manifest.version);
+ok('active package is v0.15.91 or successor',by.get('package.json')===`update/v${manifest.version}/package.json`,by.get('package.json')||'');
 ok('v0.15.91 main delivered',by.get('main-v01591.js')==='update/v0.15.91/main-v01591.js',by.get('main-v01591.js')||'');
 ok('v0.15.91 runtime delivered',by.get('runtime-source-stability-v01591.js')==='update/v0.15.91/runtime-source-stability-v01591.js',by.get('runtime-source-stability-v01591.js')||'');
 const pkg=JSON.parse(read('update/v0.15.91/package.json')),main=read('update/v0.15.91/main-v01591.js');
@@ -25,7 +26,7 @@ ok('small window has one-column fallback',patched.includes('@media(max-width:860
 ok('TOP5 rows compacted toward approved reference',patched.includes('min-height:43px!important')&&patched.includes('grid-template-columns:22px minmax(150px,.9fr)'));
 ok('duplicate native TOP5 title is hidden',patched.includes('.rp90Top5Panel>.title{display:none!important}'));
 const historicalGuard=patched.includes("view.addEventListener('click'")&&patched.includes("if(e.target?.closest?.('.rp90Detail'))return")&&patched.includes('e.stopPropagation()');
-const declaredSuccessorRelease=['0.15.93','0.15.94'].includes(manifest.version)&&['update/v0.15.93/runtime-source-stability-v01593.js','update/v0.15.94/runtime-source-stability-v01594.js'].includes(by.get(`runtime-source-stability-v${manifest.version.replaceAll('.','')}.js`))||by.get('runtime-source-stability-v01593.js')==='update/v0.15.93/runtime-source-stability-v01593.js';
+const declaredSuccessorRelease=activePatch>=93&&by.get('runtime-source-stability-v01593.js')==='update/v0.15.93/runtime-source-stability-v01593.js';
 ok('TOP5 champion interaction is guarded historically or explicitly superseded',historicalGuard||declaredSuccessorRelease,historicalGuard?'v0.15.91 guard':'v0.15.93+ explicit interaction successor');
 ok('queue inline onchange is replaced safely',patched.includes("q.removeAttribute('onchange')")&&patched.includes("typeof original==='function'")&&patched.includes('restoreNativePickStructureV01591(r)'));
 ok('queue wrapper restores native pool/result parents before base handler',patched.includes('input.insertBefore(pool')&&patched.includes('recommend.insertBefore(result'));
