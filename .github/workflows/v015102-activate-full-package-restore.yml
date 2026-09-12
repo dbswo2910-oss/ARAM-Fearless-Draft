@@ -1,0 +1,83 @@
+name: v0.15.102 Activate Full Package Restore
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015102-activate-full-package-restore.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Patch v0.15.102 manifest and README
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const manifestPath='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
+          m.version='0.15.102';
+          m.message='v0.15.102 · FULL PACKAGE RESTORE — forces a complete manifest refresh after the emergency v0.15.101 startup repair';
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(!pkg) throw new Error('manifest package.json entry missing');
+          pkg.source='update/v0.15.102/package.json';
+          m.files=m.files.filter(x=>x.path!=='main-v015102.js');
+          const idx=m.files.findIndex(x=>x.path==='main-v015101.js');
+          if(idx<0) throw new Error('manifest main-v015101.js entry missing');
+          m.files.splice(idx+1,0,{path:'main-v015102.js',source:'update/v0.15.102/main-v015102.js'});
+
+          const required=[
+            'main-v01598.js','main-v01599.js','main-v015100.js','main-v015101.js','main-v015102.js',
+            'runtime-source-stability-v01598.js','runtime-source-stability-v01599.js','runtime-source-stability-v015100.js'
+          ];
+          for(const p of required){if(!m.files.some(x=>x.path===p))throw new Error('restore manifest missing '+p)}
+          fs.writeFileSync(manifestPath,JSON.stringify(m,null,2)+'\n');
+
+          const readmePath='README.md';
+          let r=fs.readFileSync(readmePath,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.102**');
+          const note='- **v0.15.102**: full-package restore release. Forces the normal updater to re-apply the complete manifest after the emergency v0.15.101 manual startup repair, restoring the latest Random Pick/DNA, Data Patch Notes, IN GAME Results and all inherited renderer modules. Scoring logic is unchanged.';
+          if(!r.includes('**v0.15.102**')) r += '\n'+note+'\n';
+          fs.writeFileSync(readmePath,r);
+          NODE
+      - name: Audit full restore manifest
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
+          if(m.version!=='0.15.102')throw new Error('manifest not 0.15.102');
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(pkg?.source!=='update/v0.15.102/package.json')throw new Error('package source mismatch');
+          const main=m.files.find(x=>x.path==='main-v015102.js');
+          if(main?.source!=='update/v0.15.102/main-v015102.js')throw new Error('main source mismatch');
+          const must=['main-v01599.js','main-v015100.js','main-v015101.js','runtime-source-stability-v015100.js'];
+          for(const p of must)if(!m.files.some(x=>x.path===p))throw new Error('missing packaged predecessor '+p);
+          const src=fs.readFileSync('update/v0.15.102/main-v015102.js','utf8');
+          if(!src.includes("path.join(__dirname,'main-v015101.js')"))throw new Error('same-dir predecessor contract missing');
+          console.log('v0.15.102 full package restore audit: SUCCESS');
+          NODE
+      - name: Core regression before activation
+        run: node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '4189824+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.102 full package restore'
+            git push
+          fi
