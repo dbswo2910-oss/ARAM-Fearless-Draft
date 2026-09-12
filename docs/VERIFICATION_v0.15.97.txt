@@ -1,0 +1,3 @@
+v0.15.97 post-activation verification trigger.
+
+Purpose: run the dedicated IN GAME Results Parser Audit and the full regression suite against the activated v0.15.97 manifest on main.
