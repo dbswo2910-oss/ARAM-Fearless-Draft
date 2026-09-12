@@ -35,13 +35,14 @@ function selectedCandidateSnapshotV015100(options={}){
   const ad=Number(row.dataset.rp93Ad),ap=Number(row.dataset.rp93Ap);
   const score=txt(row.querySelector('.comboScore'))||txt(row.querySelector('.rp90Score'))||results.dataset.selectedCandidateScore||'-';
   const desc=txt(row.querySelector('.desc'))||txt(row.querySelector('.rp90Desc'))||results.dataset.selectedCandidateDesc||'선택한 후보를 포함한 조합 미리보기입니다.';
-  return{row,name,profile:{adPct:Number.isFinite(ad)&&ad>0?ad:50,apPct:Number.isFinite(ap)&&ap>0?ap:50},score,desc};
+  return{row,name,profile:{adPct:Number.isFinite(ad)?ad:50,apPct:Number.isFinite(ap)?ap:50},score,desc};
 }
 
 function applyCandidatePreviewV015100(row,name,profile,score,desc){
   const results=document.querySelector('#comboResults');if(!results)return false;
   const selected=normalizeNameV01593(name);if(!selected)return false;
-  const p={adPct:Number(profile?.adPct)||50,apPct:Number(profile?.apPct)||50};
+  const ad=Number(profile?.adPct),ap=Number(profile?.apPct);
+  const p={adPct:Number.isFinite(ad)?ad:50,apPct:Number.isFinite(ap)?ap:50};
   results.dataset.selectedCandidate=selected;
   results.dataset.selectedCandidateScore=String(score||'-');
   results.dataset.selectedCandidateDesc=String(desc||'선택한 후보를 포함한 조합 미리보기입니다.');
