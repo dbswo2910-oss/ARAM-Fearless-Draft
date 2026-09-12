@@ -1,0 +1,74 @@
+name: v0.15.99 Activate Data Patch Notes
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v01599-activate-data-patch-notes.yml'
+      - 'update/v0.15.99/**'
+      - 'tools/data-patch-notes-v01599-audit.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v01599-activate-data-patch-notes
+  cancel-in-progress: true
+
+jobs:
+  activate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit v0.15.99 Data patch notes
+        run: node tools/data-patch-notes-v01599-audit.js
+      - name: Full regression before activation
+        run: node tools/full-regression-audit.js
+      - name: Activate v0.15.99 manifest and README
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          m.version='0.15.99';
+          m.message='v0.15.99 · DATA PATCH NOTES — Data submenu, 26.18 normal ARAM patch hub and detailed champion changes';
+          const set=(path,source)=>{
+            const row=(m.files||[]).find(x=>x.path===path);
+            if(row) row.source=source;
+            else (m.files||(m.files=[])).push({path,source});
+          };
+          set('package.json','update/v0.15.99/package.json');
+          set('main-v01599.js','update/v0.15.99/main-v01599.js');
+          set('runtime-source-stability-v01599.js','update/v0.15.99/runtime-source-stability-v01599.js');
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';
+          if(fs.existsSync(rp)){
+            let r=fs.readFileSync(rp,'utf8');
+            r=r.replace(/0\.15\.98/g,'0.15.99')
+               .replace(/main-v01598\.js/g,'main-v01599.js')
+               .replace(/runtime-source-stability-v01598\.js/g,'runtime-source-stability-v01599.js');
+            fs.writeFileSync(rp,r);
+          }
+          NODE
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to activate.'
+          else
+            git commit -m 'activate v0.15.99 Data patch notes'
+            git push
+          fi
