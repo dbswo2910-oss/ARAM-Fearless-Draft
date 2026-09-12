@@ -1,4 +1,5 @@
 'use strict';
+// Post-activation verification for v0.15.99 Data patch notes.
 const fs=require('fs');
 const path=require('path');
 const root=path.resolve(__dirname,'..');
