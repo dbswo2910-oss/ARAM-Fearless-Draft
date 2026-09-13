@@ -21,7 +21,7 @@ The Rating run already uses PUUID as the canonical identity join: `identity.puui
 
 The UI-side bug was target resolution and refresh ownership. The old helper chose `state.account || state.target || state.localAccount` as one mixed fallback and only remounted on profile mutation when the Research card was absent. A searched player could therefore retain the current account/stale PUUID or leave an existing card unrefreshed.
 
-The repair makes **resolved PUUID the only canonical Research join key**. In searched mode the resolver never falls back to the logged-in local PUUID. Resolution order is searched target PUUID -> searched account PUUID -> exact Riot ID match inside the returned searched match participants -> searched match `me` PUUID. Current-account mode remains local-account-first. Target changes now trigger a card remount even when the card already exists.
+The repair makes **resolved PUUID the only canonical Research join key**. In searched mode the resolver never falls back to the logged-in local PUUID. Resolution order is searched target PUUID -> explicit targetPuuid -> searched account PUUID -> exact Riot ID match inside the returned searched match participants -> searched match `me` PUUID. Current-account mode remains local-account-first. Target changes now trigger a card remount even when the card already exists.
 
 Local diagnostic output masks PUUID and prints:
 
@@ -49,6 +49,8 @@ Candidate features:
 - threshold potential for 2+ / 5+ / 10+
 - new-player proxy penalty
 - duplicate waste / saturation / request cost
+
+`already_observed_recent_matches` uses the candidate's exact match-id appearances already present in the current checkpoint, capped to the 20-match history window. It is the strongest no-extra-request overlap evidence available before querying that candidate. v0.3 did not persist a candidate's full pre-request 20-match history, so the counterfactual report labels any retrospective use of realized duplicate count explicitly as an oracle rather than pretending it was available at request time.
 
 Default saturation skip:
 
@@ -103,6 +105,8 @@ The helper uses the existing IndexedDB database/key exactly:
 - checkpoint: `checkpoint-v03`
 
 It refuses B2 if the checkpoint contains fewer than 159 accepted matches. It does not re-import/restart from the 20-match Phase-A seed. B2 limits are fixed to Top 25, 20 matches/player, 500 accepted matches total. Loading the helper performs **zero network requests**. Network collection begins only after the user explicitly calls `runB2()`.
+
+The initial anonymous Top-25 preview is a before-request snapshot. During B2 the candidate pool is **recomputed after every completed request from the updated checkpoint**, so newly created repeat observations and saturation can change the next candidate. The same player is never recursively expanded twice in the B2 completion set. If the final request would exceed the 500-match cap, density/new-player/threshold metrics are calculated only from the rows actually accepted; fetched-but-rejected rows are not credited.
 
 After 10 completed B2 candidates it stores an interim snapshot with network KPIs and, when the bundled Research rating engine is available, Frozen/Walk-forward cold-start. B1/B2 totals include both `new_unique_matches_per_request` and `density_gain_per_request`.
 
