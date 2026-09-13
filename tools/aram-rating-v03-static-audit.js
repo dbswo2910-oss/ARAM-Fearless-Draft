@@ -28,6 +28,28 @@ assert(helper.includes('scan:cfg.scan'));
 assert(helper.includes('acceptance_order_match_ids'));
 assert(helper.includes('production_ui_modified:false'));
 
+// Phase A seed must be explicit/local, not the currently rendered Match Lab screen.
+assert(helper.includes("SEED_KEY='phase-a-seed-v02'"));
+assert(helper.includes('EXPECTED_SEED_MATCHES=20,EXPECTED_SEED_PLAYERS=160'));
+assert(helper.includes('phaseASeedFromEnvelope'));
+assert(helper.includes('importPhaseAAndRun'));
+assert(helper.includes("seed_source:'imported_phase_a_json'"));
+assert(helper.includes('Seed source: imported Phase A JSON'));
+assert(!helper.includes('aramHistoryState'),'Phase B must not seed from the current renderer history state');
+assert(!helper.includes('current:true'),'Phase B must not silently fall back to current-account history as seed');
+assert(core.includes('phaseASeedFromEnvelope'));
+assert(core.includes("envelope.schema!=='aram-rating-real-sample-v02'"));
+
+// Single-instance guard must stop a second script evaluation before any async work/history call.
+assert(helper.includes("const RUN_LOCK_KEY='__ARAM_RATING_PHASE_B_SINGLE_INSTANCE_V03__'"));
+assert(helper.includes("console.warn('Phase B already running')"));
+let warnings=[];
+const lockedSandbox={console:{warn:(...xs)=>warnings.push(xs.join(' ')),error:()=>{},log:()=>{}},globalThis:null};
+lockedSandbox.globalThis=lockedSandbox;
+lockedSandbox.__ARAM_RATING_PHASE_B_SINGLE_INSTANCE_V03__={active:true,token:'existing'};
+vm.runInNewContext(helper,lockedSandbox,{filename:'phase-b-expansion-devtools-locked.js'});
+assert(warnings.includes('Phase B already running'),'second helper evaluation must report the single-instance guard');
+
 const forbidden=[/op\.gg/i,/match-v5/i,/captcha/i,/anti-bot/i,/rate-limit bypass/i,/private endpoint/i];
 for(const re of forbidden){
   assert(!re.test(helper),`forbidden source/bypass reference in helper: ${re}`);
@@ -40,8 +62,6 @@ for(const p of ['research/aram-rating-v03/data/.gitignore','research/aram-rating
 }
 
 // History path audit: only assert source that is actually tracked in Git.
-// The packaged preload.js and base autosync-core.js are referenced by main.js but are not
-// present in this repository snapshot, so this audit must not pretend to inspect them.
 const main=read('update/v0.15.70/main.js');
 const concurrency=read('update/v0.15.128/autosync-concurrency-v015119.js');
 const latency=read('update/v0.15.128/history-latency-v015128.js');
@@ -66,6 +86,11 @@ const out={
   per_player_history_cap_enforced:true,
   blocked_by_data_source_guard:true,
   checkpoint_resume:true,
+  phase_a_seed_import_required:true,
+  phase_a_expected_seed:{matches:20,players:160},
+  current_screen_seed_fallback:false,
+  single_instance_guard:true,
+  single_instance_message:'Phase B already running',
   tracked_history_path:{
     renderer_default_limit:20,
     renderer_max_limit:30,
