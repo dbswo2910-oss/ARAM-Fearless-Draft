@@ -35,14 +35,17 @@ ok('death return plan preserved',code.includes('ri82ReturnPlan')&&code.includes(
 ok('Korean live tab preserved',code.includes('data-ri-tab="live">실시간</button>'));
 ok('historical v0.15.82 layer adds no scheduler or observer',!read('update/v0.15.82/runtime-source-stability-v01582.js').includes('setInterval(')&&!read('update/v0.15.82/runtime-source-stability-v01582.js').includes('MutationObserver'));
 ok('draft/champion scoring remains untouched',mod.score_logic_changed===false);
-const itemPolicyOk=mod.item_recommendation_logic_changed===false||(atLeast(0,15,87)&&mod.item_recommendation_logic_changed===true&&mod.route_adoption_changed===true);
-ok('item recommendation policy is inherited or explicit successor route-adoption policy',itemPolicyOk,`item=${mod.item_recommendation_logic_changed} route=${mod.route_adoption_changed}`);
-ok('HUD change remains explicit',mod.ingame_hud_changed===true);
+const routePolicy=atLeast(0,15,87)&&mod.item_recommendation_logic_changed===true&&mod.route_adoption_changed===true;
+const statBaselinePolicy=atLeast(0,15,125)&&mod.item_recommendation_logic_changed===true&&mod.aram_build_cache===true&&mod.score_logic_changed===false&&mod.random_scoring_changed===false;
+const itemPolicyOk=mod.item_recommendation_logic_changed===false||routePolicy||statBaselinePolicy;
+ok('item recommendation policy is inherited or an explicit scoped successor policy',itemPolicyOk,`item=${mod.item_recommendation_logic_changed} route=${mod.route_adoption_changed} aramCache=${mod.aram_build_cache}`);
+const hudPolicyOk=mod.ingame_hud_changed===true||statBaselinePolicy;
+ok('HUD ownership is explicit or safely inherited by a non-HUD statistical-baseline successor',hudPolicyOk,`hud=${mod.ingame_hud_changed} aramCache=${mod.aram_build_cache}`);
 if(atLeast(0,15,87)){
   ok('v0.15.87 route-adoption successor keeps v0.15.82 command center semantics',code.includes('사용자 선택 반영')&&code.includes('초기 추천 루트 A')&&code.includes('다음 구매 우선순위 TOP3'));
 }
 
-const report={version:'0.15.82-forward-contract',active_version:manifest.version,generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'verify the v0.15.82 command-center contract remains intact while allowing explicit successor recommendation policies',score_logic_changed:mod.score_logic_changed,item_recommendation_logic_changed:mod.item_recommendation_logic_changed,route_adoption_changed:!!mod.route_adoption_changed,ingame_hud_changed:mod.ingame_hud_changed}};
+const report={version:'0.15.82-forward-contract',active_version:manifest.version,generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'verify the v0.15.82 command-center contract remains intact while allowing explicit scoped successor recommendation policies',score_logic_changed:mod.score_logic_changed,item_recommendation_logic_changed:mod.item_recommendation_logic_changed,route_adoption_changed:!!mod.route_adoption_changed,aram_build_cache:!!mod.aram_build_cache,ingame_hud_changed:mod.ingame_hud_changed}};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output/ingame-command-center-v01582-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status,active:manifest.version}));
