@@ -7,5 +7,10 @@
   "full_regression": "success",
   "active_app_at_baseline": "0.15.128",
   "manifest_changed_by_v01": false,
-  "runtime_integration": false
+  "runtime_integration": false,
+  "v02_validation_at_commit": "a440004e8ede8067a9030da3b84ce78686303ac2",
+  "v02_research_ci_run": 34766475111,
+  "v02_research_ci": "success",
+  "v02_full_regression_run": 34766475088,
+  "v02_full_regression": "success"
 }
