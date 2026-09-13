@@ -182,7 +182,8 @@ async function main(){
       'main-v015117.js':'update/v0.15.117/main-v015117.js'
     };
     for(const [p,s] of Object.entries(preserved))if(map.get(p)!==s)throw new Error(`v0.15.117 state baseline not preserved by successor ${p}: ${map.get(p)||'missing'}`);
-    if(map.get('ui-stability-baseline-v015115.js')!=='update/v0.15.115/ui-stability-baseline-v015115.js')throw new Error('v0.15.115 UI owner unexpectedly replaced by successor');
+    const uiOwnerSource=Number(m[1])>=120?'update/v0.15.120/ui-stability-baseline-v015115.js':'update/v0.15.115/ui-stability-baseline-v015115.js';
+    if(map.get('ui-stability-baseline-v015115.js')!==uiOwnerSource)throw new Error('v0.15.115 DATA owner source was replaced by an unapproved successor path');
     if(!map.get('runtime-loader-v01579.js')||!map.get('package.json'))throw new Error('successor runtime/package route missing');
     ok('successor-preserves-v117-baseline');
   }

@@ -205,3 +205,12 @@ node tools/ai-continuity-audit.js
 ## Long-form historical context
 
 `docs/AI_HANDOFF.md` contains the detailed release history, product decisions, old UI layers, shop/item rules, and prior failure analysis. Use it after the compact cold-start files above; do not rebuild current state by reading the historical document from top to bottom and guessing which old layer is still active.
+
+## v0.15.120 DATA submenu baseline
+
+- DATA presentation is still owned by `ui-stability-v015115`; v0.15.120 is a maintained owner revision, not a competing overlay.
+- Discover the role-tier branch only inside exact `#data`, then resolve its nearest common ancestor with exact `#dataCard`. Never restore document-wide panel-title discovery.
+- `#dataHubTopNavV015115` belongs inside that common host and spans all host columns. In Patch Notes mode, hide the tier branch and let the detail/Patch Notes branch span the workspace.
+- Do not restore `card.closest('.grid2')` as the DATA host shortcut; the Windows screenshot proved it can resolve the right/detail sub-grid and strand the tier browser on the left.
+- Do not reactivate v0.15.103-v0.15.114 UI overlays. RANDOM, Riot-grade, history-sync, AutoSync and scoring are outside v0.15.120 scope.
+- CI proves structure/regression contracts, not final Electron appearance. Require post-update Windows evidence before visual acceptance.

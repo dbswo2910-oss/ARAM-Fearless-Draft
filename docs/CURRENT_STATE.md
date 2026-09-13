@@ -4,17 +4,17 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.119**
-- Manifest message: v0.15.119 · AUTOSYNC CONCURRENCY — single-flight core, stale-response guard, reconnect backoff
+- Active updater: **v0.15.120**
+- Manifest message: v0.15.120 · DATA SUBMENU RESTORE — Patch Notes again owns the full DATA workspace
 - Manifest commit: `ee4fe8d947633c6e002cf75e5f3b63efe8213e65`
-- Package: `update/v0.15.119/package.json` → **v0.15.119**
-- Electron entry: `main-v015119.js` → `update/v0.15.119/main-v015119.js`
-- Current runtime stability source: `update/v0.15.119/runtime-source-stability-v015119.js`
+- Package: `update/v0.15.120/package.json` → **v0.15.120**
+- Electron entry: `main-v015120.js` → `update/v0.15.120/main-v015120.js`
+- Current runtime stability source: `update/v0.15.120/runtime-source-stability-v015120.js`
 
 ## Active ownership — do not create competing owners
 
 - RANDOM PICK DOM/state owner: **runtime-v015100** (v0.15.115 single-owner baseline)
-- DATA view owner: **ui-stability-v015115** → `update/v0.15.115/ui-stability-baseline-v015115.js`
+- DATA view owner: **ui-stability-v015115** → `update/v0.15.120/ui-stability-baseline-v015115.js`
 - Persistent-state owner: **state-integrity-v015117** → `update/v0.15.117/state-integrity-v015117.js`
 - Resource lifecycle owner: **resource-lifecycle-v015118** → `update/v0.15.118/resource-lifecycle-v015118.js`
 - AutoSync main owner: **autosync-concurrency-v015119** → `update/v0.15.119/autosync-concurrency-v015119.js`
@@ -35,6 +35,7 @@
 - **random_pick_after_v015115_single_owner_reset** — `pending`: No post-v0.15.115 real-Windows screenshot/video has yet been recorded as the final visual acceptance baseline.
 - **autosync_v015119_real_league_soak** — `pending`: Code-level async race simulations and CI pass, but a prolonged real League Client/LCU/Live Client session has not been recorded as completed acceptance evidence.
 - **installed_app_snapshot** — `known_stale_baseline`: Latest preserved real installed-app baseline is v0.15.49 while the active updater is newer.
+- **data_patch_notes_subnav_v015120** — `pending`: Repository structural/regression audits can validate ownership and routing, but a post-v0.15.120 real-Windows screenshot is still required for visual acceptance.
 
 ## Next planned work
 

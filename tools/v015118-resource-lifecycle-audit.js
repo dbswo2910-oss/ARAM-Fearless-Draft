@@ -137,9 +137,10 @@ if(active==='0.15.118'){
   ok('active-v118-manifest');
 }else if(active==='0.15.117')ok('preactivation-v117-manifest');
 else if(ge(active,'0.15.119')){
+  const uiOwnerSource=ge(active,'0.15.120')?'update/v0.15.120/ui-stability-baseline-v015115.js':'update/v0.15.115/ui-stability-baseline-v015115.js';
   const preserved={
     'resource-lifecycle-v015118.js':'update/v0.15.118/resource-lifecycle-v015118.js',
-    'ui-stability-baseline-v015115.js':'update/v0.15.115/ui-stability-baseline-v015115.js',
+    'ui-stability-baseline-v015115.js':uiOwnerSource,
     'state-integrity-v015117.js':'update/v0.15.117/state-integrity-v015117.js',
     'state-integrity-renderer-v015117.js':'update/v0.15.117/state-integrity-renderer-v015117.js',
     'preload.js':'update/v0.15.117/preload.js',

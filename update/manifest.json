@@ -1,6 +1,6 @@
 {
-  "version": "0.15.119",
-  "message": "v0.15.119 · AUTOSYNC CONCURRENCY — single-flight core, stale-response guard, reconnect backoff",
+  "version": "0.15.120",
+  "message": "v0.15.120 · DATA SUBMENU RESTORE — Patch Notes again owns the full DATA workspace",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -261,7 +261,7 @@
     },
     {
       "path": "ui-stability-baseline-v015115.js",
-      "source": "update/v0.15.115/ui-stability-baseline-v015115.js"
+      "source": "update/v0.15.120/ui-stability-baseline-v015115.js"
     },
     {
       "path": "state-integrity-v015117.js",
@@ -353,7 +353,7 @@
     },
     {
       "path": "runtime-loader-v01579.js",
-      "source": "update/v0.15.119/runtime-loader-v01579.js"
+      "source": "update/v0.15.120/runtime-loader-v01579.js"
     },
     {
       "path": "runtime-source-stability-v01579.js",
@@ -632,6 +632,10 @@
       "source": "update/v0.15.119/runtime-source-stability-v015119.js"
     },
     {
+      "path": "runtime-source-stability-v015120.js",
+      "source": "update/v0.15.120/runtime-source-stability-v015120.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -696,8 +700,12 @@
       "source": "update/v0.15.119/main-v015119.js"
     },
     {
+      "path": "main-v015120.js",
+      "source": "update/v0.15.120/main-v015120.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.119/package.json"
+      "source": "update/v0.15.120/package.json"
     }
   ],
   "delete": [

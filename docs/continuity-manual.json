@@ -27,6 +27,16 @@
       "must_verify": [
         "If a newer installed-app ZIP is supplied, preserve it as a new baseline instead of replacing the historical v0.15.49 baseline"
       ]
+    },
+    "data_patch_notes_subnav_v015120": {
+      "status": "pending",
+      "evidence": "Repository structural/regression audits can validate ownership and routing, but a post-v0.15.120 real-Windows screenshot is still required for visual acceptance.",
+      "must_verify": [
+        "DATA submenu spans the full tier/detail workspace rather than only the right detail column",
+        "Patch Notes hides the role-tier browser and uses the full DATA workspace",
+        "Champion Tier List restores the normal tier/detail split",
+        "Patch Notes champion cards remain compact and readable"
+      ]
     }
   },
   "next_planned_work": {
@@ -47,5 +57,27 @@
     "priority": "accuracy_over_speed",
     "completion_rule": "Do not call a visual/runtime issue fully fixed from CI alone when real-Windows evidence is still pending.",
     "patch_rule": "Prefer root-cause consolidation and existing-owner edits over new overlay/hotfix stacks."
-  }
+  },
+  "user_reported_backlog_v015120": [
+    {
+      "order": 2,
+      "theme": "RANDOM Practice restore",
+      "status": "not_started"
+    },
+    {
+      "order": 3,
+      "theme": "Match-history / Random result recent-match sync latency",
+      "status": "not_started"
+    },
+    {
+      "order": 4,
+      "theme": "Riot S/A/B grade calibration against actual Riot grade",
+      "status": "not_started"
+    },
+    {
+      "order": 5,
+      "theme": "Startup Patch Notes announcement popup with per-patch do-not-show persistence",
+      "status": "not_started"
+    }
+  ]
 }
