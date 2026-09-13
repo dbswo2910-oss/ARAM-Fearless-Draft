@@ -34,7 +34,6 @@ function patchRandomPractice(src){
     '  let maintenanceTimer=0,analysisTimer=0,detailTimer=0,comboTimer=0,comboGeneration=0;',
     '  let maintenanceTimer=0,analysisTimer=0,detailTimer=0,comboTimer=0,comboGeneration=0,longTaskObserver=null,disposed=false;',
     'random-practice lifecycle state');
-  src=exact(src,'      const po=new PerformanceObserver(','      longTaskObserver=new PerformanceObserver(','random-practice longtask observer owner');
   src=exact(src,
     "      const po=new PerformanceObserver(list=>{for(const e of list.getEntries()){const d=Number(e.duration)||0;counters.longTasks++;counters.maxTaskMs=Math.max(counters.maxTaskMs,d)}});po.observe({entryTypes:['longtask']});",
     "      longTaskObserver=new PerformanceObserver(list=>{for(const e of list.getEntries()){const d=Number(e.duration)||0;counters.longTasks++;counters.maxTaskMs=Math.max(counters.maxTaskMs,d)}});longTaskObserver.observe({entryTypes:['longtask']});",
