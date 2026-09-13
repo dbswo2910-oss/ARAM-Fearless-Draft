@@ -77,7 +77,7 @@ if(String(manifest.version)==='0.15.124'){
   };
   for(const [p,s] of Object.entries(expected))if(map.get(p)!==s)throw new Error(`active v124 manifest mismatch ${p}: ${map.get(p)||'missing'}`);
   ok('active-v124-manifest');
-}else if(['0.15.125','0.15.126','0.15.127'].includes(String(manifest.version))){
+}else if(['0.15.125','0.15.126','0.15.127','0.15.128'].includes(String(manifest.version))){
   const preserved={
     'successor-route-hotfix-v015124.js':'update/v0.15.124/successor-route-hotfix-v015124.js',
     'runtime-source-stability-v015124.js':'update/v0.15.124/runtime-source-stability-v015124.js',
