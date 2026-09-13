@@ -1,0 +1,95 @@
+name: v0.15.119 Activate AutoSync Concurrency Stability
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015119-activate-autosync-concurrency.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.119 AutoSync concurrency stability
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          if(String(m.version)!=='0.15.118')throw new Error(`v0.15.119 activation requires active v0.15.118, got ${m.version}`);
+          const upsert=(path,source,after)=>{
+            m.files=(m.files||[]).filter(x=>x.path!==path);
+            let idx=after?m.files.findIndex(x=>x.path===after):-1;
+            if(idx<0)idx=m.files.length-1;
+            m.files.splice(idx+1,0,{path,source});
+          };
+          const replace=(path,source)=>{
+            const f=(m.files||[]).find(x=>x.path===path);
+            if(!f)throw new Error('manifest anchor missing: '+path);
+            f.source=source;
+          };
+          m.version='0.15.119';
+          m.message='v0.15.119 · AUTOSYNC CONCURRENCY — single-flight core, stale-response guard, reconnect backoff';
+          replace('runtime-loader-v01579.js','update/v0.15.119/runtime-loader-v01579.js');
+          replace('package.json','update/v0.15.119/package.json');
+          upsert('autosync-concurrency-v015119.js','update/v0.15.119/autosync-concurrency-v015119.js','autosync-live-runtime-v01571.js');
+          upsert('runtime-source-stability-v015119.js','update/v0.15.119/runtime-source-stability-v015119.js','runtime-source-stability-v015118.js');
+          upsert('main-v015119.js','update/v0.15.119/main-v015119.js','main-v015118.js');
+          const installed=new Set((m.files||[]).map(x=>x.path));
+          m.delete=(m.delete||[]).filter(x=>!installed.has(x));
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.119**');
+          const note='- **v0.15.119**: AutoSync concurrency stability. Main-process League/LCU/Live Client work is single-flight and endpoint-coalesced, failed reconnect cycles back off, credential rotation invalidates short caches, and renderer completions from an obsolete lifecycle epoch are dropped. UI ownership, persistent-state recovery, resource lifecycle, and scoring remain unchanged.';
+          if(!r.includes('**v0.15.119**'))r+='\n'+note+'\n';fs.writeFileSync(rp,r);
+
+          const hp='docs/AI_HANDOFF.md';let h=fs.readFileSync(hp,'utf8');
+          h=h.replace(/- Active updater version: \*\*v[^*]+\*\*/,'- Active updater version: **v0.15.119**');
+          const hnote=`\n### v0.15.119 — AutoSync concurrency stability\n\nThis release stabilizes asynchronous League/LCU/Live Client work without adding a UI owner. \`autosync-concurrency-v015119.js\` wraps the existing v0.15.71 main-process AutoSync patch before the historical main chain compiles: core ticks are single-flight, the scheduler is one timeout chain with bounded failure backoff, request-equivalent identity/credential/gameflow/Live Client calls are coalesced, and credential rotation advances a connection epoch and invalidates short caches. The renderer keeps the v0.15.118 lifecycle owner and adds a request/lifecycle epoch guard so a completion after disposal or replacement cannot fan out stale state. Scoring and recommendation logic are unchanged.\n`;
+          if(!h.includes('### v0.15.119 — AutoSync concurrency stability'))h+=hnote;fs.writeFileSync(hp,h);
+
+          const ap='AGENTS.md';let a=fs.readFileSync(ap,'utf8');
+          const rule=`\n## v0.15.119 AutoSync concurrency baseline\n\n- Main-process AutoSync ticks are single-flight. Do not restore an unconditional interval that can start a second tick while the previous League/LCU/Live Client request tree is unresolved.\n- Equivalent in-flight identity/party, credential, gameflow, and Live Client GET requests should be coalesced instead of duplicated.\n- Credential rotation is a connection-epoch boundary. Invalidate short connection caches and do not trust an endpoint completion from the previous epoch without retrying it on the current connection.\n- Reconnect/network failures must use bounded backoff; do not create retry storms.\n- Renderer AutoSync keeps the v0.15.118 lifecycle/dispose contract. A poll completion from a disposed/replaced lifecycle epoch must be dropped before downstream Random Practice fan-out.\n- v0.15.119 is infrastructure-only: no RANDOM/DATA DOM ownership and no scoring changes. Changes to these contracts require updating \`tools/v015119-autosync-concurrency-audit.js\`.\n`;
+          if(!a.includes('## v0.15.119 AutoSync concurrency baseline'))a+=rule;fs.writeFileSync(ap,a);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md docs/AI_HANDOFF.md AGENTS.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.119 autosync concurrency stability'
+            git push
+          fi
