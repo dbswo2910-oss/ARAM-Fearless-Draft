@@ -49,6 +49,8 @@ write('AGENTS.md',agents);
 
 const cp='docs/continuity-manual.json';
 const c=JSON.parse(read(cp));
+const plannedBefore=JSON.stringify(c.next_planned_work??null);
+if(c.next_planned_work?.theme!=='SAFE MODE / CRASH-LOOP ISOLATION')throw new Error(`v0.15.120 must not replace existing next_planned_work; got ${c.next_planned_work?.theme||'missing'}`);
 c.real_world_validation=c.real_world_validation||{};
 c.real_world_validation.data_patch_notes_subnav_v015120={
   status:'pending',
@@ -66,19 +68,6 @@ c.user_reported_backlog_v015120=[
   {order:4,theme:'Riot S/A/B grade calibration against actual Riot grade',status:'not_started'},
   {order:5,theme:'Startup Patch Notes announcement popup with per-patch do-not-show persistence',status:'not_started'}
 ];
-c.next_planned_work={
-  version:'0.15.121',
-  theme:'RANDOM PRACTICE RESTORE',
-  status:'planned',
-  intent:'Investigate the screenshot-confirmed Random Practice regression without changing recommendation/scoring unless explicitly required.',
-  guardrails:[
-    'preserve v0.15.115 single-owner UI and v0.15.120 DATA submenu contract',
-    'preserve v0.15.116 transactional rollback',
-    'preserve v0.15.117 state integrity',
-    'preserve v0.15.118 lifecycle disposal',
-    'preserve v0.15.119 AutoSync concurrency guards',
-    'do not change recommendation or Random scoring unless explicitly requested'
-  ]
-};
+if(JSON.stringify(c.next_planned_work??null)!==plannedBefore)throw new Error('v0.15.120 activation unexpectedly changed next_planned_work');
 write(cp,JSON.stringify(c,null,2)+'\n');
 console.log('v0.15.120 DATA SUBNAV ACTIVATION FILES: PREPARED');
