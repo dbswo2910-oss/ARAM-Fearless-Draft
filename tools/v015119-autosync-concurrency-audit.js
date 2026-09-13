@@ -159,6 +159,24 @@ const ok=name=>report.checks.push({name,status:'success'});
   else if(ge(active,'0.15.119'))ok('newer-successor-manifest');
   else throw new Error(`unexpected active manifest version during v0.15.119 rollout: ${active}`);
 
+  if(ge(active,'0.15.128')){
+    const ownerSource=map.get('autosync-concurrency-v015119.js');
+    if(ownerSource!=='update/v0.15.128/autosync-concurrency-v015119.js')throw new Error(`v0.15.128 must revise the existing AutoSync owner in place, got ${ownerSource||'missing'}`);
+    const ownerSrc=read(ownerSource);parse(ownerSrc,'v0.15.128 AutoSync owner revision');
+    for(const [n,l] of [
+      ['const HISTORY_CACHE_MAX_KEYS=12','bounded history cache key count'],
+      ['historyInteractiveInflight','interactive history priority state'],
+      ['waitForInteractiveHistory(this)','background yields to interactive history'],
+      ['cacheOnly===true','session cache read path'],
+      ['historyProbe','latest-match probe marker'],
+      ['historyCoalesces','history request coalescing telemetry'],
+      ['score_logic_changed:false','v128 owner scoring neutrality'],
+      ['random_scoring_changed:false','v128 owner Random neutrality']
+    ])must(ownerSrc,n,l);
+    mustNot(ownerSrc,'setInterval(()=>this.getAramMatchHistory','history request interval');
+    ok('v128-history-extension-preserves-v119-owner');
+  }
+
   fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
   fs.writeFileSync(path.join(ROOT,'audit-output/v015119-autosync-concurrency-report.json'),JSON.stringify({...report,status:'success',activeManifestVersion:active},null,2)+'\n');
   console.log('v0.15.119 AUTOSYNC CONCURRENCY AUDIT: SUCCESS');
