@@ -258,3 +258,14 @@ node tools/ai-continuity-audit.js
 - New main successors must continue the v0.15.124 boot-smoke rule: transform the known-good v0.15.122 entry and execute the exact successor transform in CI.
 
 - Updater delivery for the ARAM cache must use the mirrored `update/data/aram-builds/current.json` source. Do not point an active manifest source directly at `data/`; the v0.15.116 updater allowlist intentionally rejects non-`update/` sources. Keep the canonical `data/` cache and the `update/data/` distribution mirror byte-identical.
+
+## v0.15.128 Match-history latency baseline
+
+- Match-history latency work extends the existing `autosync-concurrency-v015119` owner; do not create a second main-process AutoSync/history request owner.
+- Session-cached history is a display hint, not authority: paint compatible cached rows first, then always perform a fresh bounded interactive lookup.
+- The interactive lookup scans only the recent window first; if it does not fill the requested list, deep historical scanning runs as one coalesced background backfill and yields while an interactive history request is in flight.
+- RANDOM post-game result synchronization should probe only the newest current-account standard-ARAM match first, merge that result into the cached history, and retain the existing full history loader as fallback.
+- Equivalent in-flight history calls must coalesce, stale searched-account completions must not overwrite a newer target, and no new recurring `setInterval` / `MutationObserver` repair loop may be added.
+- Expose timing/counter telemetry for diagnosis, but do not feed it into gameplay scoring.
+- `score_logic_changed:false`, `random_scoring_changed:false`; item recommendation, Riot Grade, RANDOM composition/champion scoring and DATA ownership remain unchanged.
+- CI proves cache/priority/probe/concurrency contracts only. Perceived speed and post-game freshness still require a real League Client session before acceptance.
