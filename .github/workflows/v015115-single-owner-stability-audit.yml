@@ -2,21 +2,10 @@ name: v0.15.115 Single-Owner UI Stability Audit
 
 on:
   pull_request:
-    paths:
-      - 'update/v0.15.115/**'
-      - 'tools/v015115-single-owner-stability-audit.js'
-      - '.github/workflows/v015115-single-owner-stability-audit.yml'
-      - '.github/workflows/v015115-activate-stability-baseline.yml'
-      - '.github/workflows/full-regression-audit.yml'
-      - 'AGENTS.md'
-      - 'docs/AI_HANDOFF.md'
+    branches: [ main ]
   push:
     branches: [ main ]
-    paths:
-      - 'update/v0.15.115/**'
-      - 'tools/v015115-single-owner-stability-audit.js'
-      - '.github/workflows/v015115-single-owner-stability-audit.yml'
-      - '.github/workflows/full-regression-audit.yml'
+  workflow_dispatch:
 
 jobs:
   audit:
