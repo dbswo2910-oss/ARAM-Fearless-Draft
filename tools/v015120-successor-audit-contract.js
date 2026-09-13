@@ -35,5 +35,11 @@ results.push(patchFile('tools/v015117-state-integrity-audit.js',[{
   newText:`    const uiOwnerSource=Number(m[1])>=120?'${ui120}':'${ui115}';\n    if(map.get('ui-stability-baseline-v015115.js')!==uiOwnerSource)throw new Error('v0.15.115 DATA owner source was replaced by an unapproved successor path');`
 }]));
 
+results.push(patchFile('tools/v015116-runtime-update-stability-audit.js',[{
+  label:'v0.15.116 successor UI-owner source contract',
+  oldText:`  if(map.get('ui-stability-baseline-v015115.js')!=='${ui115}')throw new Error('v0.15.115 UI owner unexpectedly replaced by successor');`,
+  newText:`  const uiOwnerSource=cmp(active,'0.15.120')>=0?'${ui120}':'${ui115}';\n  if(map.get('ui-stability-baseline-v015115.js')!==uiOwnerSource)throw new Error('v0.15.115 DATA owner source was replaced by an unapproved successor path');`
+}]));
+
 console.log(`v0.15.120 SUCCESSOR AUDIT CONTRACT: ${checkOnly?'CHECK SUCCESS':'APPLY SUCCESS'}`);
 for(const r of results)console.log(JSON.stringify(r));
