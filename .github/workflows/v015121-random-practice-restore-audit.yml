@@ -1,0 +1,42 @@
+name: v0.15.121 RANDOM Practice Restore Audit
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.121/**'
+      - 'tools/v015121-random-practice-restore-audit.js'
+      - 'tools/v015121-activate-random-practice-restore.js'
+      - '.github/workflows/v015121-random-practice-restore-audit.yml'
+      - '.github/workflows/v015121-activate-random-practice-restore.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.121/**'
+      - 'tools/v015121-random-practice-restore-audit.js'
+      - 'tools/v015121-activate-random-practice-restore.js'
+      - '.github/workflows/v015121-random-practice-restore-audit.yml'
+      - '.github/workflows/v015121-activate-random-practice-restore.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Dedicated Random Practice restore audit
+        run: node tools/v015121-random-practice-restore-audit.js
+      - name: Predecessor DATA audit
+        run: node tools/v015120-data-subnav-audit.js
+      - name: Resource lifecycle audit
+        run: node tools/v015118-resource-lifecycle-audit.js
+      - name: Single-owner UI audit
+        run: node tools/v015115-single-owner-stability-audit.js
+      - name: Full regression
+        run: node tools/full-regression-audit.js
