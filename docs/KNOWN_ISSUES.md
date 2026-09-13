@@ -76,3 +76,7 @@ If `docs/CURRENT_STATE.md` or `update/current-state.json` disagrees with `update
 ## Riot Grade mismatch before v0.15.122
 
 Before v0.15.122 the collector recursively traversed the ChampionMasteryUpdate payload, so nested `memberGrades` could be stored under the local account and the match-detail card could choose a same-game row without requiring the played champion. v0.15.122 changes collection to primary-only and requires exact gameId + championId linkage. Historical rows from v0.15.121 and earlier are intentionally treated as unverified; a new real-game comparison is still required before marking the user-reported mismatch fully accepted.
+
+## Startup Patch Notes notice v0.15.123 real-Windows acceptance
+
+The v0.15.123 startup notice is structurally audited for per-patch persistence and routing through the existing DATA owner, but final Electron acceptance still requires confirming the popup visually and checking that `패치노트 보러가기` lands on DATA > 패치노트 in the installed Windows app.

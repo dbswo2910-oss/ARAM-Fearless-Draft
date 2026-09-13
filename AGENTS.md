@@ -233,3 +233,12 @@ node tools/ai-continuity-audit.js
 - Riot Grade remains an external validation label only. Do not feed it into ROLE, recommendation, champion, item, or RANDOM scoring without a separate explicit request.
 - Preserve v0.15.121 RANDOM restore, v0.15.120 DATA owner, v0.15.119 AutoSync concurrency, v0.15.118 lifecycle, v0.15.117 state integrity, and v0.15.79 permanent safety contracts.
 - CI proves parser/matching contracts. Final real-world acceptance requires one newly completed League game where the Riot client grade and v0.15.122 card are compared directly.
+
+## v0.15.123 Startup Patch Notes notice baseline
+
+- The startup Patch Notes modal is presentation-only and must not become a second DATA layout owner. Route Patch Notes opening through `window.aramUiStabilityV015115.syncData('patch')`.
+- Persist `다시 보지 않기` by exact Patch Notes version, not by app release version. A future Patch Notes version must be eligible to show again automatically.
+- Closing the modal or choosing `패치노트 보러가기` must not silently persist do-not-show state; only the explicit do-not-show action may do that.
+- Keep the startup notice injection before the v0.15.117 state-integrity suffix and do not add MutationObserver/setInterval repair loops.
+- Preserve v0.15.122 Riot Grade accuracy, v0.15.121 RANDOM restore, v0.15.120 DATA owner, v0.15.119 AutoSync concurrency, v0.15.118 lifecycle, v0.15.117 state integrity, and v0.15.79 safety contracts.
+- CI can prove storage/routing/injection contracts, but final popup appearance and DATA navigation require real-Windows confirmation.

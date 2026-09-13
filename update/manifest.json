@@ -1,6 +1,6 @@
 {
-  "version": "0.15.122",
-  "message": "v0.15.122 · RIOT GRADE ACCURACY — primary Riot mastery grade only, exact game+champion matching",
+  "version": "0.15.123",
+  "message": "v0.15.123 · PATCH NOTES STARTUP NOTICE — per-patch popup, DATA Patch Notes deep-link, explicit do-not-show",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -258,6 +258,10 @@
     {
       "path": "input-interaction-stability-v01539.js",
       "source": "update/v0.15.39/input-interaction-stability-v01539.js"
+    },
+    {
+      "path": "patch-notes-startup-notice-v015123.js",
+      "source": "update/v0.15.123/patch-notes-startup-notice-v015123.js"
     },
     {
       "path": "ui-stability-baseline-v015115.js",
@@ -648,6 +652,10 @@
       "source": "update/v0.15.122/runtime-source-stability-v015122.js"
     },
     {
+      "path": "runtime-source-stability-v015123.js",
+      "source": "update/v0.15.123/runtime-source-stability-v015123.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -724,8 +732,12 @@
       "source": "update/v0.15.122/main-v015122.js"
     },
     {
+      "path": "main-v015123.js",
+      "source": "update/v0.15.123/main-v015123.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.122/package.json"
+      "source": "update/v0.15.123/package.json"
     }
   ],
   "delete": [

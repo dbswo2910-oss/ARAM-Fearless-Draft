@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.122",
-    "message": "v0.15.122 · RIOT GRADE ACCURACY — primary Riot mastery grade only, exact game+champion matching",
+    "version": "0.15.123",
+    "message": "v0.15.123 · PATCH NOTES STARTUP NOTICE — per-patch popup, DATA Patch Notes deep-link, explicit do-not-show",
     "min_launcher": "2.0.2",
-    "manifest_commit": "41acd1561a0d0678ea20b4b9505098a049f82ffd"
+    "manifest_commit": "0fb542feafc8d4799509ce93abfc086cbe781c8d"
   },
   "package": {
-    "source": "update/v0.15.122/package.json",
-    "version": "0.15.122",
-    "main": "main-v015122.js",
-    "main_source": "update/v0.15.122/main-v015122.js"
+    "source": "update/v0.15.123/package.json",
+    "version": "0.15.123",
+    "main": "main-v015123.js",
+    "main_source": "update/v0.15.123/main-v015123.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.122/runtime-source-stability-v015122.js"
+      "active_runtime_source": "update/v0.15.123/runtime-source-stability-v015123.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
@@ -152,6 +152,16 @@
         "Open the same game in Match Lab and confirm Riot Grade is identical",
         "Confirm a teammate grade from the same game never appears as the local Riot Grade",
         "If no authoritative primary row was captured, the app shows no Riot Grade rather than a guessed value"
+      ]
+    },
+    "patch_notes_startup_notice_v015123": {
+      "status": "pending",
+      "evidence": "CI validates exact per-patch dismissal semantics, one-shot injection, and routing through the existing DATA owner. Real Windows Electron appearance/navigation still needs confirmation.",
+      "must_verify": [
+        "Launch with the current Patch Notes version not dismissed and confirm the startup modal appears once",
+        "Choose 패치노트 보러가기 and confirm DATA > 패치노트 opens",
+        "Choose 다시 보지 않기, restart, and confirm the same Patch Notes version no longer shows the modal",
+        "After a future Patch Notes version is registered, confirm the modal is eligible to appear again despite the older dismissal value"
       ]
     }
   },

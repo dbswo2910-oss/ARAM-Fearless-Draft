@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.122**
+- Active updater version: **v0.15.123**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -440,3 +440,7 @@ RANDOM Practice keeps the v0.15.100 PICK DOM/selection owner and the v0.15.115 s
 ### v0.15.122 — Riot Grade accuracy
 
 The Riot Grade collector is authoritative only when the LCU value comes from the direct local-player ChampionMasteryUpdate. The collector must not recursively consume `memberGrades`; those are other members' grade rows. Authoritative records use `gradeProvenance: riot-primary-update`. Match-detail and calibration linkage requires exact local account + gameId + championId. Records captured by v0.15.121 and earlier are migrated to `legacy-unverified-v015121` and excluded from authoritative display/calibration until replaced by a new primary record. Never synthesize or infer a Riot S/A/B grade when no authoritative row exists. ROLE/recommendation/Random scoring is unchanged.
+
+### v0.15.123 — Startup Patch Notes notice
+
+Startup Patch Notes announcement is a one-shot presentation feature injected into the existing input-interaction runtime before the v0.15.117 state-integrity suffix. It reads the registered Patch Notes version from `window.aramDataHubV01599.patch.version`, compares it with the exact version stored in `aram.patchNotes.notice.dismissedVersion.v1`, and shows the modal only when they differ. `패치노트 보러가기` routes through the existing `ui-stability-v015115` DATA owner using `syncData('patch')`; it does not create another DATA owner. Only the explicit `다시 보지 않기` action stores dismissal. A future Patch Notes version therefore becomes eligible automatically. No scoring/RANDOM/Riot Grade/AutoSync logic changes.

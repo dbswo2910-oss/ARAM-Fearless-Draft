@@ -49,6 +49,16 @@
         "Confirm a teammate grade from the same game never appears as the local Riot Grade",
         "If no authoritative primary row was captured, the app shows no Riot Grade rather than a guessed value"
       ]
+    },
+    "patch_notes_startup_notice_v015123": {
+      "status": "pending",
+      "evidence": "CI validates exact per-patch dismissal semantics, one-shot injection, and routing through the existing DATA owner. Real Windows Electron appearance/navigation still needs confirmation.",
+      "must_verify": [
+        "Launch with the current Patch Notes version not dismissed and confirm the startup modal appears once",
+        "Choose 패치노트 보러가기 and confirm DATA > 패치노트 opens",
+        "Choose 다시 보지 않기, restart, and confirm the same Patch Notes version no longer shows the modal",
+        "After a future Patch Notes version is registered, confirm the modal is eligible to appear again despite the older dismissal value"
+      ]
     }
   },
   "next_planned_work": {
@@ -89,7 +99,7 @@
     {
       "order": 5,
       "theme": "Startup Patch Notes announcement popup with per-patch do-not-show persistence",
-      "status": "not_started"
+      "status": "code_complete_real_windows_pending"
     }
   ]
 }

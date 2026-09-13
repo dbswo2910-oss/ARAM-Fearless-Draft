@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.122**  
+Current app/update version: **v0.15.123**  
 Current balance/data patch: **26.18**
 
 This repository is the source of truth for incremental in-app updates, regression validation, Windows distribution work, and coding-agent handoff.
@@ -81,3 +81,5 @@ The Windows bootstrap is distributed as `ARAM_Fearless_Draft.exe`. Historical bo
 - **v0.15.121**: RANDOM Practice restore. Entering RANDOM restores the existing input/TOP5/detail view from current state, input/change refreshes are coalesced under one disposable runtime owner, and the cooperative exhaustive TOP5 calculator remains unchanged. No recommendation/Random scoring math changed.
 
 - **v0.15.122**: Riot Grade accuracy. Collect only the local player primary ChampionMasteryUpdate, ignore nested memberGrades, and connect an actual Riot Grade only when gameId + championId + local account match exactly. Legacy v0.15.121-and-earlier grade rows are retained but excluded from authoritative display/calibration. ROLE/Random scoring is unchanged.
+
+- **v0.15.123**: Startup Patch Notes notice. On launch, show the latest registered ARAM Patch Notes unless that exact patch version was explicitly dismissed. `패치노트 보러가기` routes through the existing DATA owner into Patch Notes; `다시 보지 않기` suppresses only the current patch version so the next Patch Notes release can appear again. Scoring and existing feature owners are unchanged.
