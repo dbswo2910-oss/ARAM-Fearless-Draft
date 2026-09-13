@@ -1,0 +1,54 @@
+name: v0.15.122 Riot Grade Accuracy Audit
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.122/**'
+      - 'tools/v015122-riot-grade-accuracy-audit.js'
+      - 'tools/v015122-activate-riot-grade-accuracy.js'
+      - '.github/workflows/v015122-riot-grade-accuracy-audit.yml'
+      - '.github/workflows/v015122-activate-riot-grade-accuracy.yml'
+      - '.github/workflows/full-regression-audit.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.122/**'
+      - 'tools/v015122-riot-grade-accuracy-audit.js'
+      - 'tools/v015122-activate-riot-grade-accuracy.js'
+      - '.github/workflows/v015122-riot-grade-accuracy-audit.yml'
+      - '.github/workflows/v015122-activate-riot-grade-accuracy.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Dedicated Riot Grade accuracy audit
+        run: node tools/v015122-riot-grade-accuracy-audit.js
+      - name: v0.15.121 RANDOM restore regression
+        run: node tools/v015121-random-practice-restore-audit.js
+      - name: v0.15.120 DATA regression
+        run: node tools/v015120-data-subnav-audit.js
+      - name: Persistent-state regression
+        run: node tools/v015117-state-integrity-audit.js
+      - name: Permanent safety regression
+        run: node tools/runtime-stability-v01579-audit.js
+      - name: Full regression
+        run: node tools/full-regression-audit.js
+      - name: Upload v0.15.122 audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v015122-riot-grade-accuracy-report
+          path: audit-output/v015122-riot-grade-accuracy-report.json
+          if-no-files-found: error
