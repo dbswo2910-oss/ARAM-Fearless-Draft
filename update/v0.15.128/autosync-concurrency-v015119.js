@@ -203,7 +203,8 @@ function patchCore(mod){
         const out=await oldHistory.call(this,o),ms=Math.max(0,NOW()-started);
         s.historyLastMs=ms;s.historyMaxMs=Math.max(s.historyMaxMs,ms);s.historyLastKey=targetKey;s.historyLastRows=Array.isArray(out?.matches)?out.matches.length:0;s.historyLastScanned=Number(out?.scanned)||0;
         cacheHistory(this,targetKey,out);
-        return decorateHistoryResult(out,{mode:priority,probe,key:targetKey,ms,scan,limit,cacheHit:false});
+        const returned=probe?(cachedHistory(this,targetKey)?.payload||out):out;
+        return decorateHistoryResult(returned,{mode:priority,probe,key:targetKey,ms,scan,limit,cacheHit:false});
       }finally{if(priority==='interactive')s.historyInteractiveInflight=Math.max(0,s.historyInteractiveInflight-1)}
     });
   };
