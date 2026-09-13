@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -117,6 +119,8 @@ jobs:
         run: node tools/v015118-resource-lifecycle-audit.js
       - name: Run v0.15.119 AutoSync concurrency audit
         run: node tools/v015119-autosync-concurrency-audit.js
+      - name: Run AI continuity audit
+        run: node tools/ai-continuity-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -185,6 +189,7 @@ jobs:
             audit-output/v015117-state-integrity-report.json
             audit-output/v015118-resource-lifecycle-report.json
             audit-output/v015119-autosync-concurrency-report.json
+            audit-output/ai-continuity-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
