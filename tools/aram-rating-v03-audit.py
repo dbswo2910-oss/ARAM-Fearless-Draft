@@ -29,6 +29,7 @@ def main() -> None:
         'schema': 'aram-rating-phase-b-real-sample-v03',
         'metadata': {
             'source': 'synthetic_fixture_only',
+            'fixture_only': True,
             'region': 'KR',
             'queue': 450,
             'phase': 'B1',
@@ -76,7 +77,8 @@ def main() -> None:
         source.write_text(json.dumps(payload, ensure_ascii=False), encoding='utf-8')
         result = run_phase_b(source, out, min_test_matches=100)
         report = result['report']
-        assert report['real_data'] is True
+        assert report['real_data'] is False
+        assert report['fixture_only'] is True
         assert report['snapshot_points'] == [20, 100, 120]
         assert report['player_facing_rating_enabled'] is False
         assert report['privacy']['aggregate_contains_puuid'] is False
