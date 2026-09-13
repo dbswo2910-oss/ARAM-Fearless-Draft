@@ -2,40 +2,85 @@
 
 Read this file before editing the repository.
 
-## Current source of truth
+## Mandatory cold-start / new-chat protocol
 
-1. `update/manifest.json` — active in-app update channel and current distributed runtime files.
-2. `docs/INSTALLED_BASELINE_v0.15.49.md` — verified real Windows installation snapshot captured from `ARAM Fearless Draft AutoUpdate/appfiles`.
-3. `reference/installed-v0.15.49/random-practice-pick-fragment.html` — exact installed DOM fragment for Random Practice pick mode.
-4. `reference/installed-v0.15.49/random-practice-ingame-fragment.html` — exact installed DOM fragment for Random Practice in-game mode.
-5. `docs/AI_HANDOFF.md` — architecture, recent decisions, UI philosophy, and next planned work.
-6. `update/v*/` — versioned patch sources. Older versions are historical; do not treat an old update directory as current just because it exists.
+**Repository state wins over conversational memory.** A prior chat summary, remembered version number, or old screenshot is never authoritative over the current repository.
 
-## Critical rules
+Before changing code in a fresh session, read in this order:
 
-- Never infer installed UI structure from screenshots alone when a baseline/DOM map is available.
-- Prefer exact IDs/classes from the installed baseline. Avoid broad text/regex DOM discovery that can capture parent panels. This caused the v0.15.48 Random Practice layout collapse.
-- Captured baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`.
-- The user's installed `appfiles/manifest.json` may be stale. Verify installed runtime from `main.js` / `package.json`; verify active distribution from repository `update/manifest.json`.
-- Keep app version, manifest, package metadata, README/changelog/audit, workflow, and AI handoff notes synchronized when releasing.
-- Preserve recommendation/balance logic for UI-only requests and explicitly document whether scoring changed.
-- Before reporting a GitHub update complete, wait for Full Regression Audit and verify the relevant new audit plus historical forward-compatible audits are `success`.
+1. `docs/CURRENT_STATE.md` — compact human-readable current state and unresolved acceptance checks.
+2. `update/current-state.json` — machine-readable active owners/version/safety lineage.
+3. `update/manifest.json` — authoritative active in-app distribution.
+4. `docs/KNOWN_ISSUES.md` — active verification work and historical regression signatures.
+5. `docs/AI_HANDOFF.md` — long-form architecture/history/product decisions.
+6. `docs/NEW_CHAT_BOOTSTRAP.md` — reusable fresh-chat prompt and restore procedure.
+7. Latest `main` commit, latest merged PR, and relevant GitHub Actions results.
+
+Before editing, give a short internal/pre-work checkpoint: active version, active subsystem owners, unresolved real-Windows/real-match validation, planned next work, and whether the requested change touches scoring/UI/state/AutoSync.
+
+If the compact state files disagree with `update/manifest.json`, **the manifest wins for active distribution** and the continuity snapshot must be regenerated with:
+
+```bash
+node tools/sync-current-state.js
+```
+
+Do not patch through a state conflict without resolving it first.
+
+## Source-of-truth hierarchy
+
+When sources disagree:
+
+1. A newly supplied real installed-app snapshot from the user for facts about that specific installation.
+2. `update/manifest.json` for the current distributed runtime.
+3. `update/current-state.json` / `docs/CURRENT_STATE.md` for generated cold-start ownership/version state.
+4. Current active source files referenced by the manifest.
+5. `docs/KNOWN_ISSUES.md` for acceptance state and regression warnings.
+6. `docs/AI_HANDOFF.md` for architecture/history/product direction.
+7. Historical `update/v*/`, old changelogs, old screenshots, and conversation memory.
+
+The user's installed `appfiles/manifest.json` may be stale. Verify installed runtime from `main.js` / `package.json`; verify active distribution from repository `update/manifest.json`.
+
+## Critical engineering rules
+
+- **Accuracy over speed.** Inspect the active owner/source and relevant regression history before patching. Do not create a quick overlay just because it is faster.
+- Never infer installed UI structure from screenshots alone when a verified baseline/DOM map is available.
+- Prefer exact IDs/classes from the installed baseline. Avoid broad text/regex DOM discovery that can capture parent panels.
+- Preserve recommendation/balance logic for UI/infrastructure-only requests and explicitly document whether scoring changed.
+- Do not declare a visual/runtime issue fully fixed from CI alone when real-Windows evidence is still pending.
+- Before reporting a GitHub update complete, verify the intended changes are on `main`, the active manifest/package are consistent, the new audit is green, and Full Regression Audit is green.
 - If a newer real installed-app ZIP is supplied, preserve it as a new baseline rather than silently replacing historical baseline documentation.
 
-## Current product/UI direction
+## Current active ownership baseline
 
-The product is being simplified around fast decisions rather than vertically stacking every detail.
+Always verify against `docs/CURRENT_STATE.md` and `update/current-state.json`; the names below describe the current architecture contract.
 
-- Draft: compact two-column workflow; pick judgment uses tabs.
-- Pick judgment: summary / risk detection / composition matchup.
-- Random Practice pick: inputs first, recommendations prioritized, detail behind tabs/collapse.
-- Random Practice in-game: **one-glance coach HUD**; alive state should be readable in roughly 1–2 seconds.
-- Recommendation engines should not repeatedly overreward a small set of champions through duplicated synergy signals.
-- Item-bearing UI should use **current Riot-client item art + short existing text**, never icon-only, and should avoid duplicating artwork already present in the base UI.
+- RANDOM PICK DOM/state owner: `runtime-v015100` lineage under the **v0.15.115 single-owner baseline**.
+- DATA boundary/presentation owner: `ui-stability-v015115`.
+- Persistent-state integrity owner: `state-integrity-v015117`.
+- Renderer resource lifecycle owner: `resource-lifecycle-v015118`.
+- AutoSync main-process concurrency owner: `autosync-concurrency-v015119`.
+- AutoSync renderer owner: `runtime-live-autosync-v01571+v015119` under the v0.15.118 lifecycle contract.
+- Permanent runtime/update safety root: **v0.15.79**.
 
-## Random Practice exact installed IDs — v0.15.49 baseline
+Do not add another module that competes for one of these ownership domains. Extend the owner or intentionally and atomically replace it with matching audits/documentation.
 
-Pick mode:
+## Retired RANDOM/DATA overlay lineage
+
+The v0.15.103–v0.15.114 late UI overlay stack is historical and must not be restored as independent active owners. In particular, do not reintroduce click/change/input handlers plus delayed `setTimeout` / `requestAnimationFrame` DOM repair passes that move the same RANDOM containers after interaction.
+
+The retired installed overlay names are tracked in `docs/KNOWN_ISSUES.md` and `update/current-state.json` and are guarded as deleted by the active manifest.
+
+## Verified installed baseline
+
+Latest preserved real installed-app snapshot supplied by the user: **v0.15.49**.
+
+- `docs/INSTALLED_BASELINE_v0.15.49.md`
+- `reference/installed-v0.15.49/random-practice-pick-fragment.html`
+- `reference/installed-v0.15.49/random-practice-ingame-fragment.html`
+- Baseline `index.html`: 35,359,059 bytes
+- SHA-256: `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
+
+Important Random Practice pick IDs:
 
 - `#random`
 - `#queueSize`
@@ -53,7 +98,7 @@ Pick mode:
 - `#randomEnemySummary`
 - `#randomRoles`
 
-In-game base shell:
+Important Random Practice in-game IDs:
 
 - `#randomIngameShell`
 - `#randomLiveTopbar`
@@ -65,186 +110,98 @@ In-game base shell:
 - `#randomTimingPanel`
 - `#randomPowerCurve`
 
-Read both exact DOM fragments under `reference/installed-v0.15.49/` before changing Random Practice layout.
+Read both exact DOM fragments before changing Random Practice layout.
 
-## Current Random Practice / item UI runtime contract — v0.15.62
+## Product/UI direction
 
-Pick-side layers:
+The product is an operational decision dashboard, not a vertically stacked report.
 
-1. `update/v0.15.49/random-practice-focus-v01549.js`
-2. `update/v0.15.55/random-pick-density-v01555.js`
-3. `update/v0.15.58/random-party-picks-v01558.js`
-4. `update/v0.15.59/random-party-labels-v01559.js`
-5. `update/v0.15.60/ui-refresh-v01560.js` — visible wording + latest item-art refresh
-6. `update/v0.15.61/random-party-label-fix-v01561.js` — historical real-Windows follow-up that directly created the inline party pill
-7. `update/v0.15.62/random-party-pool-labels-v01562.js` — current visual contract: hide the inline pill and show `팀원픽` in the remaining-random pool slot
+- Draft: compact two-column workflow; pick judgment uses tabs.
+- Random Practice PICK: team state + candidate pool + TOP5 first; detail should not compete with primary decisions.
+- Random Practice IN GAME: one-glance coach HUD; alive state should be readable in roughly 1–2 seconds.
+- Secondary information belongs behind tabs/collapse/detail actions.
+- Avoid duplicate information/artwork.
+- Red styling is reserved for genuinely high-priority danger.
+- Item UI uses current Riot-client art plus short text; image failure must not destroy the text fallback.
+- Do not begin another major HUD/layout redesign unless the user explicitly asks.
 
-In-game and item-visual layers:
+## v0.15.79 permanent safety baseline
 
-1. `update/v0.15.50/random-ingame-coach-v01550.js`
-2. `update/v0.15.51/random-ingame-ux-v01551.js`
-3. `update/v0.15.52/random-ingame-ux-v01552.js`
-4. `update/v0.15.53/random-ingame-shop-v01553.js`
-5. `update/v0.15.54/random-ingame-shop-polish-v01554.js`
-6. `update/v0.15.56/random-item-icons-v01556.js`
-7. `update/v0.15.57/item-icons-global-v01557.js`
-8. `update/v0.15.60/ui-refresh-v01560.js` — refreshes existing image elements to latest Riot-client artwork
+- Updates are transactional and snapshot the previous installation before patching.
+- New versions must survive the dual-heartbeat probation window.
+- A safety failure during probation must block commit and preserve next-boot rollback ability.
+- Renderer/runtime patches are injected independently; one optional patch failure must not automatically crash the whole process.
+- Do not remove or bypass the safety root when adding successors.
 
-Installed item-catalog filename remains `item-catalog-v01527.js`; active source is `update/v0.15.60/item-catalog-v01527.js`.
+## v0.15.115 single-owner UI baseline
 
-`v0.15.55` keeps rank 1 large while compacting ranks 2–5. `v0.15.56` adds item icons to the current coach. `v0.15.57` audits and extends the same visual language across verified item-bearing menus. `v0.15.58` adds AutoSync party-current-pick visibility and fixes the cramped composition-status layout. `v0.15.59` made manual-vs-AutoSync state visible. `v0.15.60` simplified the wording. `v0.15.61` directly created an inline party-row pill after a real-Windows miss. `v0.15.62` corrects that interpretation after the user's screenshot clarification: the desired `팀원픽` label belongs in the right-side remaining-random candidate slot, like `외부픽`, not inside the left party input.
-
-v0.15.58–0.15.62 Random Practice pick rules:
-
-- read party-held champions from observable AutoSync champ-select state (`party`, plus local-champion fallback)
-- display current party champions in `#manualPartyInputs` as display-only current picks, but do not write them into `randomState.manual`
-- explicit manual locks remain an internal user choice; current AutoSync picks stay swappable unless manually locked
-- the left `우리 파티 챔피언` area shows the champion itself; the v0.15.61 inline `팀원픽` pill is hidden by v0.15.62
-- the section title remains `우리 파티 챔피언 · 고정할 픽만 선택`
-- in `#poolInputs`, both AutoSync-held party champions and explicit `randomState.manual` locks are visually marked `팀원픽`
-- render that `팀원픽` beneath/beside the candidate slot number, matching the location of the existing `외부픽` badge
-- do not collapse the underlying distinction: manual locks still affect recommendation state, AutoSync current picks alone do not
-- party-marked pool champions remain recommendation candidates
-- an existing `외부픽` remains excluded and takes precedence over `팀원픽`; do not show both badges on one candidate
-- `#externalCheck` remains the full-width host; its child `.randomCheckGrid` owns the actual three-card desktop grid
-- visible status copy is `현재 조합 체크` with `조합 보완 / 실질 딜 밸런스 · AD / AP / 추천 계산`
-- exact selectors only: `#manualPartyInputs`, `#poolInputs`, `#externalCheck`
-- `score_logic_changed:false`
-
-Visible in-game hierarchy:
-
-- 3 tabs: `LIVE / 빌드 / 상세`
-- AUTO:
-  - alive → LIVE combat mode
-  - dead with meaningful respawn time → Build/analysis
-  - respawn <= 7 seconds → LIVE preparation
-- LIVE information budget:
-  - NOW CALL
-  - highest threat
-  - local role/action
-  - next purchase
-  - at most one critical warning
-- Build death view:
-  - respawn countdown + current gold
-  - `지금 구매` recipe/component planner
-  - current-match optimized build primary
-  - statistical base build secondary
-  - next-fight action line
-- Preview uses the same coach renderer and clearly marks synthetic data.
-
-v0.15.53 purchase-planner rules:
-
-- completed-core recommendation and immediate component purchase are separate concepts
-- use current gold plus Data Dragon recipe metadata (`from`, `into`, `gold.base`, `gold.total`)
-- account for already-owned components when they are observable from Live Context
-- if real owned-component state cannot be confirmed, hide exact component-buy advice instead of risking duplicate purchases
-- display immediate buy(s), purchase cost, leftover gold, final core target, and remaining core cost
-- use `ko_KR` item catalog where available
-- v0.15.60 does **not** replace Data Dragon recipe/price/map metadata with CommunityDragon data
-- `score_logic_changed:false`; this layer does not alter recommendation/threat/item scoring
-
-v0.15.56–0.15.57 item-icon rules:
-
-- decorate existing exact item-bearing UI surfaces; keep names/prices visible
-- icons supplement rather than replace text
-- cap recognized icon strips (normally <=6) to avoid clutter
-- no broad page-title/body-text UI discovery
-- image failure must retain existing text
-- Match Lab `.matchItems` actual final-item row already owns its image element and must not receive duplicate artwork
-- `score_logic_changed:false`
-
-v0.15.60 latest-item-art rules:
-
-- recipe/price/ARAM-map metadata stays Data Dragon based
-- current artwork metadata is read from CommunityDragon `latest`, which mirrors Riot client `lol-game-data` item metadata and `iconPath`
-- do not describe CommunityDragon itself as an official Riot service; it is a mirror of Riot-client assets
-- each catalog item exposes `iconUrl`; visual refresh prefers this latest Riot-client artwork
-- versioned Data Dragon artwork remains the fallback if the latest mirror image cannot load
-- refresh only known image surfaces: v0.15.56 item images, v0.15.57 item images, and existing Match Lab `#historyMatchDetail .matchItems img`
-- do not create a second Match Lab final-item image row
-- a failed latest-art request must not enter a retry loop; fall back once and retain text if both images fail
-- `score_logic_changed:false`
-
-**The overall HUD layout is considered largely stabilized. Do not begin another major layout redesign unless the user explicitly asks.**
-
-## Next planned phase
-
-First validate v0.15.62 in a real Windows/League session:
-
-- confirm the left party input has no redundant inline `팀원픽` pill
-- confirm a manually locked or AutoSync-held champion in `남은 랜덤 챔피언` shows `팀원픽` in the same slot area as `외부픽`
-- confirm `외부픽` takes precedence if a candidate is externally fixed
-- confirm internal manual-lock behavior is unchanged
-- confirm latest item art appears on actual item-bearing screens and falls back cleanly if the mirror is unavailable
-- validate purchase math/owned-item extraction in a real Live Client death/shop state before changing shop calculations
-
-After live validation, primary candidate: strengthen the statistical baseline with patch-level cached LOL.PS ARAM data.
-
-Requirements:
-
-- do not scrape LOL.PS repeatedly during a live match
-- refresh/cache external statistics by patch or controlled update job
-- show source and freshness clearly
-- keep `통계 빌드` as reference and `이번 판 최적화` as the actionable recommendation
-- only change purchase math after verifying real live inventory/recipe behavior
-
-See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
-
-## v0.15.107 view-boundary rule
-
-- Data layout discovery must stay inside the view containing exact `#dataCard`; never use document-wide `.panel` + title matching.
-- Random Practice pick layout ownership is exact-ID only: `#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, `#rpPickIntelV01589`.
-- Patch Notes hides only the verified Data tier pane; Data UI must never be allowed to participate in `#random` layout.
-- `score_logic_changed:false`.
-
-## v0.15.112 RANDOM mode/workspace rule
-
-- `data-random-mode="ingame"` must hard-hide every `.randomPickOnly` surface even when later layout patches use `display:* !important`.
-- PICK layout repair must happen from exact IDs before first paint; do not reintroduce delayed post-paint movement between `#randomRecommendAnchor` and `#randomInputAnchor`.
-- Keep `rp107Center` / `rp107Right` compatibility classes when creating newer wrappers so historical forward-compatible repairs become no-ops instead of moving content again.
-- The right decision rail is one column: Combination DNA first, selected-composition detail second.
-- `score_logic_changed:false`.
-
-## v0.15.115 UI single-owner baseline
-
-- RANDOM PICK DOM/layout ownership belongs to the v0.15.90/v0.15.100 transformed `random-practice-focus-v01549.js`.
+- RANDOM PICK layout/selection/DNA ownership is single-owner. Do not layer a second RANDOM DOM repair system on top.
 - DATA boundary/presentation ownership belongs to `ui-stability-baseline-v015115.js`.
-- Do not restore the retired v0.15.103-v0.15.114 late UI overlay stack or add a second module that reparents `#randomInputAnchor`, `#poolInputs`, `#comboResults`, `#comboDetail`, or `#rpPickIntelV01589`.
-- Do not implement UI fixes as generic RANDOM click/change/input handlers followed by delayed `setTimeout` / `requestAnimationFrame` repair passes. State changes may re-render content, but interaction must not move ownership containers.
-- A future architecture change must atomically replace the owner and update `tools/v015115-single-owner-stability-audit.js`; do not layer a competing owner on top.
+- Do not reparent `#randomInputAnchor`, `#poolInputs`, `#comboResults`, `#comboDetail`, or `#rpPickIntelV01589` from a new competing click/timer repair layer.
+- A future architecture change must atomically replace the owner and update `tools/v015115-single-owner-stability-audit.js`.
+- `score_logic_changed:false`, `random_scoring_changed:false` unless the user explicitly requests scoring changes.
 
-## v0.15.116 runtime/update stability baseline
+## v0.15.116 runtime/update integrity baseline
 
-- Preserve the v0.15.115 UI single-owner contract; v0.15.116 is infrastructure-only and must not become a second RANDOM/DATA DOM owner.
-- Critical renderer readiness failures must be persisted through `update-safety-v01579.js` as a safety failure, not only logged to the console.
-- A safety failure written during update probation must block `PROBATION_COMMIT`; the next launch may then use the existing snapshot rollback path.
-- Updater manifests must reject duplicate install paths, install/delete overlap, unsafe/non-`update/` sources, malformed optional SHA-256 values, duplicate deletes, and deletion of critical runtime files before staging.
-- Keep per-script runtime injection isolation. Do not turn one optional renderer patch failure into an immediate process crash; only the critical readiness gate participates in update rollback.
-- Changes to these contracts require updating `tools/v015116-runtime-update-stability-audit.js`.
+- Critical renderer readiness failures must be persisted through the update-safety channel, not only logged.
+- Probation must re-check current-boot safety failure before `PROBATION_COMMIT`.
+- Updater manifests reject duplicate targets, install/delete overlap, unsafe sources, malformed optional SHA-256 values, duplicate deletes, and critical runtime-file deletion.
+- Changes require updating `tools/v015116-runtime-update-stability-audit.js`.
 
-## v0.15.117 persistent state integrity baseline
+## v0.15.117 persistent-state integrity baseline
 
-- Persisted app state must not be replaced with empty/default data merely because a JSON read fails. Recover from a validated last-known-good copy when available and quarantine the corrupt payload.
-- New app-owned renderer persistence should use an `aram_` localStorage key so the v0.15.117 mirror can protect it. Add an explicit validator for important structured keys.
-- Intentional removals must remain tombstoned; recovery must not resurrect state that the user deliberately deleted after v0.15.117.
-- Main-process JSON stores should use `state-integrity-v015117.js` or an equivalent atomic write + validation + LKG pattern instead of bare overwrite writes.
-- State-integrity code is not a UI owner. Do not append/reparent DOM, start polling timers, or alter RANDOM/DATA layout from the state layer.
-- State integrity must remain scoring-neutral. Changes to these contracts require updating `tools/v015117-state-integrity-audit.js`.
+- A malformed JSON read must not silently replace persisted state with empty/default data when a validated last-known-good copy exists.
+- Intentional removals remain tombstoned; recovery must not resurrect deliberately deleted state.
+- Main-process state writes use atomic write + validation + LKG/quarantine behavior.
+- State integrity is not a UI owner and must not reparent DOM or start unrelated polling.
+- Changes require updating `tools/v015117-state-integrity-audit.js`.
 
 ## v0.15.118 resource lifecycle baseline
 
-- Renderer recurring work must have one clear owner and an idempotent cleanup path. Do not add a new interval/observer merely to repair output from an existing owner.
-- One-shot refresh timers must be coalesced when repeated UI events can queue the same work. Preserve the earliest due refresh and merge force-refresh intent instead of stacking callbacks.
-- Background/inactive views must not run a full-speed UI heartbeat. Prefer event-driven refresh plus an adaptive low-frequency safety heartbeat when necessary.
-- Long-lived MutationObserver/PerformanceObserver instances must be disconnectable. Runtime owners should expose `dispose()` when they own recurring resources.
-- `resource-lifecycle-v015118.js` is infrastructure only: no DOM reparenting, no polling timer, no scoring changes.
-- Keep the whole-active-manifest resource inventory in `tools/v015118-resource-lifecycle-audit.js` and update the audit whenever recurring ownership changes.
+- Recurring renderer work has one clear owner and an idempotent cleanup path.
+- Repeated one-shot refreshes are coalesced rather than stacked.
+- Inactive/background views do not run full-speed UI heartbeats.
+- Long-lived MutationObserver/PerformanceObserver instances must be disconnectable.
+- `resource-lifecycle-v015118.js` is infrastructure only: no DOM reparenting, no scoring changes.
+- Changes require updating `tools/v015118-resource-lifecycle-audit.js`.
 
 ## v0.15.119 AutoSync concurrency baseline
 
-- Main-process AutoSync ticks are single-flight. Do not restore an unconditional interval that can start a second tick while the previous League/LCU/Live Client request tree is unresolved.
-- Equivalent in-flight identity/party, credential, gameflow, and Live Client GET requests should be coalesced instead of duplicated.
-- Credential rotation is a connection-epoch boundary. Invalidate short connection caches and do not trust an endpoint completion from the previous epoch without retrying it on the current connection.
-- Reconnect/network failures must use bounded backoff; do not create retry storms.
-- Renderer AutoSync keeps the v0.15.118 lifecycle/dispose contract. A poll completion from a disposed/replaced lifecycle epoch must be dropped before downstream Random Practice fan-out.
-- v0.15.119 is infrastructure-only: no RANDOM/DATA DOM ownership and no scoring changes. Changes to these contracts require updating `tools/v015119-autosync-concurrency-audit.js`.
+- Main-process AutoSync ticks are single-flight.
+- Equivalent in-flight identity/party, credential, gameflow, and Live Client GET requests are coalesced.
+- Credential rotation is a connection-epoch boundary; old-epoch endpoint completion is not trusted as current state without retry.
+- Reconnect/network failures use bounded backoff; no retry storms.
+- Renderer poll completion from a disposed/replaced lifecycle epoch is dropped before downstream Random Practice fan-out.
+- v0.15.119 is infrastructure-only: no RANDOM/DATA DOM ownership and no scoring changes.
+- Changes require updating `tools/v015119-autosync-concurrency-audit.js`.
+
+## Real-world acceptance boundary
+
+Consult `docs/KNOWN_ISSUES.md` before claiming completion.
+
+Current important rule: CI can prove source contracts and simulations, but it cannot prove exact Electron DPI/font/layout behavior or real League Client timing. Screenshot-driven UI changes and real-client timing changes must keep their real-world validation status explicit until the user verifies them.
+
+## Release / activation continuity contract
+
+For every future app release, especially **v0.15.120+**:
+
+1. Patch from the current active owner/lineage rather than an old directory chosen by version number alone.
+2. Add/update the feature/stability audit.
+3. Update Full Regression Audit when a new durable contract is introduced.
+4. In the activation workflow, mutate `update/manifest.json` and package/runtime sources as needed.
+5. **After manifest mutation and before the release metadata commit, run:**
+
+```bash
+node tools/sync-current-state.js
+node tools/ai-continuity-audit.js
+```
+
+6. Commit `docs/CURRENT_STATE.md` and `update/current-state.json` with the release metadata when they changed.
+7. Keep `docs/continuity-manual.json` current when real-world validation status or next planned work changes.
+8. Run the new audit, predecessor audits, and Full Regression Audit before declaring completion.
+
+`tools/ai-continuity-audit.js` enforces that v0.15.120+ activation workflows include the continuity sync call.
+
+## Long-form historical context
+
+`docs/AI_HANDOFF.md` contains the detailed release history, product decisions, old UI layers, shop/item rules, and prior failure analysis. Use it after the compact cold-start files above; do not rebuild current state by reading the historical document from top to bottom and guessing which old layer is still active.
