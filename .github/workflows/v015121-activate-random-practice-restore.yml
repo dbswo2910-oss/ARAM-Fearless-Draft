@@ -36,6 +36,7 @@ jobs:
           node tools/v015117-state-integrity-audit.js
           node tools/v015116-runtime-update-stability-audit.js
           node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
           node tools/ai-continuity-audit.js
           node tools/full-regression-audit.js
       - name: Prepare v0.15.121 activation files
