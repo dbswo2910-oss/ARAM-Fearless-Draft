@@ -96,7 +96,7 @@
     Object.defineProperty(proto,'removeItem',{...Object.getOwnPropertyDescriptor(proto,'removeItem'),value:wrappedRemove});
     Object.defineProperty(proto,'clear',{...Object.getOwnPropertyDescriptor(proto,'clear'),value:wrappedClear});
     recoverInitial();
-    window.aramStateIntegrityV015117={version:V,getStats:()=>({...stats,tracked:Object.keys(entries).length}),flush:()=>{flush();return true},validateValue,score_logic_changed:false,random_scoring_changed:false};
+    window.aramStateIntegrityV015117={version:V,getStats:()=>({...stats,tracked:Object.keys(entries).length}),flush:()=>{flush();return true},validateValue:validValue,score_logic_changed:false,random_scoring_changed:false};
     window.__ARAM_STATE_INTEGRITY_V015117__=true;
     diag('RENDERER_STATE_INTEGRITY_READY',{tracked:Object.keys(entries).length});
   }catch(e){
