@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const SAFETY_BASELINE_LINEAGE_V015114=Object.freeze({via:'main-v015113.js',root:'main-v01579.js',reason:'random-pick-integrity-engine-backed-name-and-dna-repair'});
+void SAFETY_BASELINE_LINEAGE_V015114;
+const basePath=path.join(__dirname,'main-v015113.js');
+let src=fs.readFileSync(basePath,'utf8');
+const marker='0.15.113';
+const hits=src.split(marker).length-1;
+if(hits<3)throw new Error('v0.15.114 successor contract mismatch: v0.15.113 markers='+hits);
+const stabilityAnchor='runtime-source-stability-v015113';
+if(src.split(stabilityAnchor).length-1<1)throw new Error('v0.15.114 source-stability anchor mismatch');
+src=src.replaceAll('0.15.113','0.15.114').replaceAll(stabilityAnchor,'runtime-source-stability-v015114');
+module._compile(src,__filename);

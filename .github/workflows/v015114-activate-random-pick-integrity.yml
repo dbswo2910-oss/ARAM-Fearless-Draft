@@ -1,0 +1,85 @@
+name: v0.15.114 Activate RANDOM Pick Integrity
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015114-activate-random-pick-integrity.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015114-random-pick-integrity-audit.js
+          node tools/v015113-random-readable-audit.js
+          node tools/v015112-random-workspace-stability-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.114 manifest + docs
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          m.version='0.15.114';
+          m.message='v0.15.114 · RANDOM PICK INTEGRITY — fix clipped grades, corrupted candidate names, and candidate-specific DNA updates';
+          const remove=new Set(['random-pick-integrity-v015114.js','runtime-source-stability-v015114.js','main-v015114.js']);
+          m.files=(m.files||[]).filter(x=>!remove.has(x.path));
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(!pkg)throw new Error('manifest package.json missing');
+          pkg.source='update/v0.15.114/package.json';
+          let idx=m.files.findIndex(x=>x.path==='random-workspace-readable-v015113.js');
+          if(idx<0)throw new Error('v0.15.113 RANDOM readable anchor missing');
+          m.files.splice(idx+1,0,{path:'random-pick-integrity-v015114.js',source:'update/v0.15.114/random-pick-integrity-v015114.js'});
+          idx=m.files.findIndex(x=>x.path==='runtime-source-stability-v015113.js');
+          if(idx<0)throw new Error('v0.15.113 runtime anchor missing');
+          m.files.splice(idx+1,0,{path:'runtime-source-stability-v015114.js',source:'update/v0.15.114/runtime-source-stability-v015114.js'});
+          idx=m.files.findIndex(x=>x.path==='main-v015113.js');
+          if(idx<0)throw new Error('v0.15.113 main anchor missing');
+          m.files.splice(idx+1,0,{path:'main-v015114.js',source:'update/v0.15.114/main-v015114.js'});
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';
+          let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.114**');
+          const note='- **v0.15.114**: RANDOM PICK integrity repair. Keeps pool grade labels inside candidate cards, sources TOP5 candidate names from the engine combo selection instead of polluted DOM text, and rebuilds candidate DNA from each engine combo structure/parts so clicking a different recommendation updates the actual metrics. Injected directly into the Random Practice lifecycle owner. Scoring is unchanged.';
+          if(!r.includes('**v0.15.114**'))r+='\n'+note+'\n';
+          fs.writeFileSync(rp,r);
+
+          const hp='docs/AI_HANDOFF.md';
+          let h=fs.readFileSync(hp,'utf8');
+          h=h.replace(/- Active updater version: \*\*v[^*]+\*\*/,'- Active updater version: **v0.15.114**');
+          const hnote='\n### v0.15.114 — RANDOM PICK integrity repair\n\nReal Electron verification of v0.15.113 still showed clipped tier grades, polluted repeated candidate names, and a candidate label that changed while the DNA bars remained static. v0.15.114 moves the repair into the actual Random Practice lifecycle owner (`random-practice-focus-v01549.js`) instead of mounting from unrelated shell scripts. TOP5 labels prefer `randomState.combos[index].sel`, DNA prefers the selected engine combo `structure` / `parts`, and old `.rp107Right/.rp112Right` wrappers are retained only as compatibility containers forced below the main column at readable width. Grade tokens are constrained inside their pool items. Ranking/scoring, items, DATA, and PICK/IN GAME logic are unchanged. `score_logic_changed:false`, `random_scoring_changed:false`.\n';
+          if(!h.includes('### v0.15.114 — RANDOM PICK integrity repair'))h+=hnote;
+          fs.writeFileSync(hp,h);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015114-random-pick-integrity-audit.js
+          node tools/v015113-random-readable-audit.js
+          node tools/v015112-random-workspace-stability-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md docs/AI_HANDOFF.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.114 random pick integrity repair'
+            git push
+          fi
