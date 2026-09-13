@@ -5,6 +5,9 @@ const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const checks=[];
 const ok=(name,pass,detail='')=>checks.push({name,pass:!!pass,detail});
+const atLeast=(a,b)=>{
+  const A=String(a).split('.').map(Number),B=String(b).split('.').map(Number);for(let i=0;i<Math.max(A.length,B.length);i++){const x=A[i]||0,y=B[i]||0;if(x!==y)return x>y}return true;
+};
 
 const runtime=read('update/v0.15.98/runtime-source-stability-v01598.js');
 const main=read('update/v0.15.98/main-v01598.js');
@@ -20,12 +23,12 @@ try{
   ok('patched in-game coach parses',true);
 }catch(e){ok('patched in-game coach parses',false,e.stack||e.message)}
 
-ok('package version',pkg.version==='0.15.98',pkg.version);
-ok('package entry',pkg.main==='main-v01598.js',pkg.main);
-ok('manifest version',manifest.version==='0.15.98',manifest.version);
-ok('manifest package',by.get('package.json')==='update/v0.15.98/package.json',by.get('package.json')||'');
-ok('manifest main',by.get('main-v01598.js')==='update/v0.15.98/main-v01598.js',by.get('main-v01598.js')||'');
-ok('manifest runtime',by.get('runtime-source-stability-v01598.js')==='update/v0.15.98/runtime-source-stability-v01598.js',by.get('runtime-source-stability-v01598.js')||'');
+ok('historical package version',pkg.version==='0.15.98',pkg.version);
+ok('historical package entry',pkg.main==='main-v01598.js',pkg.main);
+ok('active manifest is v0.15.98 or newer',atLeast(manifest.version,'0.15.98'),manifest.version);
+ok('active manifest package follows active version',by.get('package.json')===`update/v${manifest.version}/package.json`,by.get('package.json')||'');
+ok('historical main retained',by.get('main-v01598.js')==='update/v0.15.98/main-v01598.js',by.get('main-v01598.js')||'');
+ok('historical runtime retained',by.get('runtime-source-stability-v01598.js')==='update/v0.15.98/runtime-source-stability-v01598.js',by.get('runtime-source-stability-v01598.js')||'');
 ok('v0.15.97 parser retained',patched.includes('resultObjectsV01597')&&patched.includes('resultParticipantV01597'));
 ok('v0.15.96 result sync retained',patched.includes('syncResultHistoryV01596(m)')&&patched.includes('renderResultSyncV01596()'));
 ok('team KP uses team kills',patched.includes("teamKills=sum('kills')")&&patched.includes('/teamKills*100'));
@@ -47,7 +50,7 @@ ok('item recommendation inheritance preserved',mod&&prior&&mod.item_recommendati
 ok('safety lineage retained',main.includes("root:'main-v01579.js'")&&main.includes("via:'main-v01597.js'"));
 ok('v98 feature flags',mod&&mod.ingame_results_team_kp===true&&mod.ingame_results_item_icons===true&&mod.ingame_results_champion_square_fit===true);
 
-const report={version:'0.15.98',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'Verify IN GAME Results integrity and visual hotfix: real KP percentage, team-relative ranks/share, CC units, item artwork, square champion portraits, upgraded coaching copy, visible version sync, and inherited safety/result-sync behavior.'}};
+const report={version:'0.15.98',generated_at:new Date().toISOString(),pass:checks.filter(x=>x.pass).length,fail:checks.filter(x=>!x.pass).length,status:checks.every(x=>x.pass)?'PASS':'FAIL',checks,info:{purpose:'Historical v0.15.98 IN GAME Results integrity/visual contract, forward-compatible with newer active updater manifests.'}};
 fs.mkdirSync(path.join(root,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(root,'audit-output/ingame-results-integrity-v01598-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify({pass:report.pass,fail:report.fail,status:report.status}));
