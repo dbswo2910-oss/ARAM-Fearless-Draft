@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.126**  
+Current app/update version: **v0.15.127**  
 Current balance/data patch: **26.18**
 
 This repository is the source of truth for incremental in-app updates, regression validation, Windows distribution work, and coding-agent handoff.
@@ -91,3 +91,5 @@ The Windows bootstrap is distributed as `ARAM_Fearless_Draft.exe`. Historical bo
 - **v0.15.125 updater hotfix**: keeps the v0.15.116 updater source allowlist intact and mirrors the ARAM cache under `update/data/aram-builds/current.json`, so installed clients can validate and download the cache without accepting arbitrary repository paths.
 
 - **v0.15.126**: visible `매치 랩` / `매치랩` / `Match Lab` product naming is unified to **`전적검색`** in the top navigation and Match Lab screen titles while preserving internal `match-lab-*` / `history*` identifiers and all history, Riot Grade, AutoSync, RANDOM, DATA, and scoring behavior.
+
+- **v0.15.127**: checks for a newer app version once after desktop startup. If one exists, it reuses the existing `desktop:update-now` transactional updater to download, validate, snapshot, apply and automatically relaunch. Current-version launches stay open; failures do not block boot; manual update checking remains available. No recurring poller and no scoring/AutoSync/RANDOM/DATA ownership change.

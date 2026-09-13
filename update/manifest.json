@@ -1,6 +1,6 @@
 {
-  "version": "0.15.126",
-  "message": "v0.15.126 · MATCH SEARCH LABEL — visible Match Lab naming unified to 전적검색",
+  "version": "0.15.127",
+  "message": "v0.15.127 · STARTUP AUTO UPDATE — checks once on launch and safely applies/restarts automatically when a newer app version exists",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -262,6 +262,10 @@
     {
       "path": "patch-notes-startup-notice-v015123.js",
       "source": "update/v0.15.123/patch-notes-startup-notice-v015123.js"
+    },
+    {
+      "path": "startup-update-notice-v015127.js",
+      "source": "update/v0.15.127/startup-update-notice-v015127.js"
     },
     {
       "path": "match-search-labels-v015126.js",
@@ -680,6 +684,10 @@
       "source": "update/v0.15.126/runtime-source-stability-v015126.js"
     },
     {
+      "path": "runtime-source-stability-v015127.js",
+      "source": "update/v0.15.127/runtime-source-stability-v015127.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -772,6 +780,10 @@
       "source": "update/v0.15.126/main-v015126.js"
     },
     {
+      "path": "main-v015127.js",
+      "source": "update/v0.15.127/main-v015127.js"
+    },
+    {
       "path": "successor-route-hotfix-v015124.js",
       "source": "update/v0.15.124/successor-route-hotfix-v015124.js"
     },
@@ -784,8 +796,12 @@
       "source": "update/v0.15.126/successor-route-v015126.js"
     },
     {
+      "path": "successor-route-v015127.js",
+      "source": "update/v0.15.127/successor-route-v015127.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.126/package.json"
+      "source": "update/v0.15.127/package.json"
     }
   ],
   "delete": [

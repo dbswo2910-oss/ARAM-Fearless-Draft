@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.126**
+- Active updater version: **v0.15.127**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -460,3 +460,7 @@ The first v0.15.125 manifest referenced `data/aram-builds/current.json` directly
 ### v0.15.126 — 전적검색 visible naming
 
 The user-facing feature name formerly shown as `매치 랩` / `매치랩` / `Match Lab` is now `전적검색`. This is presentation-only. Internal `match-lab-*`, `historyMatchDetail`, history state/storage, Riot Grade linkage, AutoSync and result-sync identifiers remain unchanged. The label patch is scoped to the exact `#history` view plus the header history navigation, runs only with a bounded startup settle, and adds no MutationObserver or interval repair owner.
+
+### v0.15.127 — startup automatic update
+
+After desktop startup, the renderer invokes the already-exposed `window.aramDesktop.checkAndApplyUpdate()` exactly once. The existing main-process updater remains the sole update owner: it compares the manifest, validates sources/SHA values, snapshots touched files, applies transactionally, marks the safety handoff and automatically relaunches only when a newer version exists. If the app is already current it stays open. Network/update-check failure does not block boot, and the existing manual update badge remains available for retry. No new preload bridge, IPC owner, interval or MutationObserver is introduced. Scoring, RANDOM, DATA, Riot Grade and AutoSync behavior are unchanged.

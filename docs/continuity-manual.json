@@ -89,6 +89,16 @@
         "Open 전적검색 and confirm any feature title uses 전적검색 while LAB badge styling remains intact if present",
         "Confirm player search, recent matches, match detail, Riot Grade, favorites and result synchronization still work normally"
       ]
+    },
+    "startup_update_notice_v015127": {
+      "status": "pending",
+      "evidence": "CI verifies a one-shot startup call into the existing transactional updater with no new updater/preload owner. Final automatic download/apply/relaunch behavior requires Windows acceptance against a future newer manifest.",
+      "must_verify": [
+        "Launch while already current and confirm the app remains open and the badge settles to latest version",
+        "With a newer manifest available, launch the app without pressing 업데이트 확인 and confirm the update is downloaded/applied automatically",
+        "Confirm the app automatically relaunches into the newer version",
+        "Confirm an update/network failure does not prevent normal app startup and manual update retry remains available"
+      ]
     }
   },
   "next_planned_work": {

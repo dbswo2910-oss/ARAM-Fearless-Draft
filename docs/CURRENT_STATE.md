@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.126**
-- Manifest message: v0.15.126 · MATCH SEARCH LABEL — visible Match Lab naming unified to 전적검색
-- Manifest commit: `47a9230a8a420fb9e7551e367a4d6b408d16edeb`
-- Package: `update/v0.15.126/package.json` → **v0.15.126**
-- Electron entry: `main-v015126.js` → `update/v0.15.126/main-v015126.js`
-- Current runtime stability source: `update/v0.15.126/runtime-source-stability-v015126.js`
+- Active updater: **v0.15.127**
+- Manifest message: v0.15.127 · STARTUP AUTO UPDATE — checks once on launch and safely applies/restarts automatically when a newer app version exists
+- Manifest commit: `009f1a2be921ef34aa4c30e8d9198bfd6cc226e1`
+- Package: `update/v0.15.127/package.json` → **v0.15.127**
+- Electron entry: `main-v015127.js` → `update/v0.15.127/main-v015127.js`
+- Current runtime stability source: `update/v0.15.127/runtime-source-stability-v015127.js`
 
 ## Active ownership — do not create competing owners
 
@@ -41,6 +41,7 @@
 - **startup_recovery_v015124** — `pending`: Repository CI now executes the exact successor route transform against the real v0.15.122 predecessor source. The user supplied a real Windows screenshot proving v0.15.123 crashed before UI creation; v0.15.124 must be relaunched on Windows to confirm recovery.
 - **aram_build_stat_cache_v015125** — `pending`: CI validates the 173-champion standard-ARAM cache and source provenance. A real Windows screenshot then exposed that the first v0.15.125 manifest used disallowed source data/aram-builds/current.json; the updater-safe hotfix preserves the v0.15.116 allowlist and delivers the byte-identical cache from update/data/aram-builds/current.json. Real Windows retry is still required.
 - **match_search_label_v015126** — `pending`: CI can prove the label payload is scoped to #history/header and that internal Match Lab/history identifiers and scoring owners are byte-preserved, but final visible wording requires the installed Windows UI.
+- **startup_update_notice_v015127** — `pending`: CI verifies a one-shot startup call into the existing transactional updater with no new updater/preload owner. Final automatic download/apply/relaunch behavior requires Windows acceptance against a future newer manifest.
 
 ## Next planned work
 
