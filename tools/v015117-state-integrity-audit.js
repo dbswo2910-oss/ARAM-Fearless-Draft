@@ -152,7 +152,8 @@ async function main(){
   ok('main-successor-contract');
 
   const deletes=new Set(manifest.delete||[]);for(const p of map.keys())if(deletes.has(p))throw new Error(`manifest installs and deletes ${p}`);
-  if(String(manifest.version)==='0.15.117'){
+  const active=String(manifest.version||'');
+  if(active==='0.15.117'){
     const expected={
       'state-integrity-v015117.js':'update/v0.15.117/state-integrity-v015117.js',
       'state-integrity-renderer-v015117.js':'update/v0.15.117/state-integrity-renderer-v015117.js',
@@ -167,8 +168,24 @@ async function main(){
     for(const [p,s] of Object.entries(expected))if(map.get(p)!==s)throw new Error(`v0.15.117 active manifest mismatch ${p}: ${map.get(p)||'missing'}`);
     if(map.get('ui-stability-baseline-v015115.js')!=='update/v0.15.115/ui-stability-baseline-v015115.js')throw new Error('v0.15.115 UI owner unexpectedly replaced');
     ok('active-v117-manifest');
-  }else if(String(manifest.version)==='0.15.116')ok('preactivation-v116-manifest');
-  else throw new Error(`unexpected active manifest version during v0.15.117 rollout: ${manifest.version}`);
+  }else if(active==='0.15.116')ok('preactivation-v116-manifest');
+  else{
+    const m=active.match(/^0\.15\.(\d+)$/),successor=m&&Number(m[1])>117;
+    if(!successor)throw new Error(`unexpected active manifest version during v0.15.117 audit: ${active}`);
+    const preserved={
+      'state-integrity-v015117.js':'update/v0.15.117/state-integrity-v015117.js',
+      'state-integrity-renderer-v015117.js':'update/v0.15.117/state-integrity-renderer-v015117.js',
+      'preload.js':'update/v0.15.117/preload.js',
+      'riot-grade-collector-base-v01532.js':'update/v0.15.32/riot-grade-collector-v01532.js',
+      'riot-grade-collector-v01532.js':'update/v0.15.117/riot-grade-collector-v01532.js',
+      'runtime-source-stability-v015117.js':'update/v0.15.117/runtime-source-stability-v015117.js',
+      'main-v015117.js':'update/v0.15.117/main-v015117.js'
+    };
+    for(const [p,s] of Object.entries(preserved))if(map.get(p)!==s)throw new Error(`v0.15.117 state baseline not preserved by successor ${p}: ${map.get(p)||'missing'}`);
+    if(map.get('ui-stability-baseline-v015115.js')!=='update/v0.15.115/ui-stability-baseline-v015115.js')throw new Error('v0.15.115 UI owner unexpectedly replaced by successor');
+    if(!map.get('runtime-loader-v01579.js')||!map.get('package.json'))throw new Error('successor runtime/package route missing');
+    ok('successor-preserves-v117-baseline');
+  }
 
   fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
   fs.writeFileSync(path.join(ROOT,'audit-output/v015117-state-integrity-report.json'),JSON.stringify({...report,status:'success',activeManifestVersion:manifest.version},null,2)+'\n');

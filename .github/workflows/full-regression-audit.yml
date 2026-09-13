@@ -113,6 +113,8 @@ jobs:
         run: node tools/v015116-runtime-update-stability-audit.js
       - name: Run v0.15.117 persistent state integrity audit
         run: node tools/v015117-state-integrity-audit.js
+      - name: Run v0.15.118 resource lifecycle audit
+        run: node tools/v015118-resource-lifecycle-audit.js
       - name: Assemble current updater overlay
         if: always()
         run: |
@@ -179,6 +181,7 @@ jobs:
             audit-output/v015115-single-owner-stability-report.json
             audit-output/v015116-runtime-update-stability-report.json
             audit-output/v015117-state-integrity-report.json
+            audit-output/v015118-resource-lifecycle-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay
         if: always()
