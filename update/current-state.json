@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.128",
-    "message": "v0.15.128 · MATCH HISTORY LATENCY — cached-first match search + quick recent probe + background deep sync",
+    "version": "0.15.129",
+    "message": "v0.15.129 · ARAM RATING RESEARCH UI — local personal Research card in Player Profile",
     "min_launcher": "2.0.2",
-    "manifest_commit": "3a823a4274cbcad84048a36461b460db36ea1a4d"
+    "manifest_commit": "5b5ed4f88016bfad3e5c6b79d7ad990196f054c3"
   },
   "package": {
-    "source": "update/v0.15.128/package.json",
-    "version": "0.15.128",
-    "main": "main-v015128.js",
-    "main_source": "update/v0.15.128/main-v015128.js"
+    "source": "update/v0.15.129/package.json",
+    "version": "0.15.129",
+    "main": "main-v015129.js",
+    "main_source": "update/v0.15.129/main-v015129.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.128/runtime-source-stability-v015128.js"
+      "active_runtime_source": "update/v0.15.129/runtime-source-stability-v015129.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",

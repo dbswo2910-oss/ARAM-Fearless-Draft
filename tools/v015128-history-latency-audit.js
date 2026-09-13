@@ -8,6 +8,7 @@ const ok=(c,m)=>{if(!c)throw new Error(`v0.15.128 HISTORY LATENCY AUDIT: ${m}`)}
 const count=(s,n)=>String(s).split(n).length-1;
 const parse=(s,n)=>{try{new Function(s)}catch(e){throw new Error(`${n} parse failed: ${e.message}`)}};
 const waitTurn=()=>new Promise(r=>setImmediate(r));
+const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 
 (async()=>{
   const dir='update/v0.15.128/';
@@ -81,8 +82,23 @@ const waitTurn=()=>new Promise(r=>setImmediate(r));
     };
     for(const [p,s] of Object.entries(expected))ok(map.get(p)===s,`active manifest mismatch ${p}: ${map.get(p)||'missing'}`);
     for(const row of manifest.files||[])ok(String(row.source||'').startsWith('update/'),`unsafe active source ${row.path} -> ${row.source}`);
+  }else if(ge(manifest.version,'0.15.129')){
+    const preserved={
+      'autosync-concurrency-v015119.js':'update/v0.15.128/autosync-concurrency-v015119.js',
+      'history-latency-v015128.js':'update/v0.15.128/history-latency-v015128.js',
+      'successor-route-v015128.js':'update/v0.15.128/successor-route-v015128.js',
+      'runtime-source-stability-v015128.js':'update/v0.15.128/runtime-source-stability-v015128.js',
+      'main-v015128.js':'update/v0.15.128/main-v015128.js'
+    };
+    for(const [p,s] of Object.entries(preserved))ok(map.get(p)===s,`successor failed to preserve v0.15.128 history dependency ${p}: ${map.get(p)||'missing'}`);
+    const activeRuntimePath=map.get(`runtime-source-stability-v${String(manifest.version).replace(/\./g,'')}.js`);
+    ok(activeRuntimePath&&exists(activeRuntimePath),'successor active runtime source missing');
+    const activeRuntime=require(path.join(ROOT,activeRuntimePath));
+    ok(activeRuntime.history_latency_changed===true&&activeRuntime.history_cache_first===true&&activeRuntime.history_background_deep_scan===true&&activeRuntime.result_latest_probe===true,'successor runtime did not preserve v0.15.128 history flags');
+    const successorQueue=activeRuntime.patchRuntimeSource('match-lab-queue-v01517.js',queueBase);
+    ok(successorQueue.includes('__ARAM_HISTORY_LATENCY_V015128__')&&successorQueue.includes('cacheOnly:true')&&successorQueue.includes("priority:'background'"),'successor runtime did not preserve history renderer payload');
   }else ok(String(manifest.version)==='0.15.127','unexpected preactivation manifest '+manifest.version);
-  const report={version:'0.15.128',generated_at:new Date().toISOString(),status:'PASS',active_manifest_version:String(manifest.version),score_logic_changed:false,random_scoring_changed:false,contracts:{cache_first:true,quick_scan_max:50,background_deep_backfill:true,latest_game_probe_scan:12,request_coalescing:true,telemetry:true,no_new_recurring_poll:true},simulated_history_stats:hs};
+  const report={version:'0.15.128',generated_at:new Date().toISOString(),status:'PASS',active_manifest_version:String(manifest.version),score_logic_changed:false,random_scoring_changed:false,contracts:{cache_first:true,quick_scan_max:50,background_deep_backfill:true,latest_game_probe_scan:12,request_coalescing:true,telemetry:true,no_new_recurring_poll:true,successor_preservation:true},simulated_history_stats:hs};
   fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
   fs.writeFileSync(path.join(ROOT,'audit-output/v015128-history-latency-report.json'),JSON.stringify(report,null,2)+'\n');
   console.log('v0.15.128 HISTORY LATENCY AUDIT: SUCCESS · cache-first search · quick scan · background deep backfill · bounded latest-game probe');

@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.128**
-- Manifest message: v0.15.128 · MATCH HISTORY LATENCY — cached-first match search + quick recent probe + background deep sync
-- Manifest commit: `3a823a4274cbcad84048a36461b460db36ea1a4d`
-- Package: `update/v0.15.128/package.json` → **v0.15.128**
-- Electron entry: `main-v015128.js` → `update/v0.15.128/main-v015128.js`
-- Current runtime stability source: `update/v0.15.128/runtime-source-stability-v015128.js`
+- Active updater: **v0.15.129**
+- Manifest message: v0.15.129 · ARAM RATING RESEARCH UI — local personal Research card in Player Profile
+- Manifest commit: `5b5ed4f88016bfad3e5c6b79d7ad990196f054c3`
+- Package: `update/v0.15.129/package.json` → **v0.15.129**
+- Electron entry: `main-v015129.js` → `update/v0.15.129/main-v015129.js`
+- Current runtime stability source: `update/v0.15.129/runtime-source-stability-v015129.js`
 
 ## Active ownership — do not create competing owners
 
