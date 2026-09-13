@@ -7,7 +7,7 @@ const ver=v=>String(v||'0').split('.').map(x=>parseInt(x,10)||0),gte=(a,b)=>{con
 const pkg=JSON.parse(src('package.json')||'{}'),entryTarget=String(pkg.main||''),entry=src(entryTarget),v79Entry=src('main-v01579.js'),preload=src('preload.js');
 function collectMainChain(startTarget){
   const out=[],seen=new Set();let target=startTarget;
-  while(target&&by.get(target)&&!seen.has(target)&&out.length<40){
+  while(target&&by.get(target)&&!seen.has(target)&&out.length<128){
     seen.add(target);const source=by.get(target);if(!source||!exists(source))break;const text=read(source);out.push({target,source,text});
     const refs=[...text.matchAll(/['"](main-v\d+\.js)['"]/g)].map(x=>x[1]);
     target=refs.find(x=>by.has(x)&&!seen.has(x))||'';

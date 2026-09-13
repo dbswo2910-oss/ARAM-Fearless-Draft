@@ -9,7 +9,7 @@ const iconPath=byPath.get('random-item-icons-v01556.js'),pkgPath=byPath.get('pac
 const icon=iconPath&&exists(iconPath)?read(iconPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},entryTarget=String(pkg.main||'main.js'),entryPath=byPath.get(entryTarget),entry=entryPath&&exists(entryPath)?read(entryPath):'',v79Entry=v79Path&&exists(v79Path)?read(v79Path):'';
 function collectMainChain(startTarget){
   const out=[],seen=new Set();let target=startTarget;
-  while(target&&byPath.get(target)&&!seen.has(target)&&out.length<40){
+  while(target&&byPath.get(target)&&!seen.has(target)&&out.length<128){
     seen.add(target);const source=byPath.get(target);if(!source||!exists(source))break;const text=read(source);out.push({target,source,text});
     const refs=[...text.matchAll(/['"](main-v\d+\.js)['"]/g)].map(x=>x[1]);
     target=refs.find(x=>byPath.has(x)&&!seen.has(x))||'';

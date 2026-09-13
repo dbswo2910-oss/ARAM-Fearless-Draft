@@ -1,0 +1,9 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const {patchSuccessorSource}=require('./successor-route-hotfix-v015124');
+const SAFETY_BASELINE_LINEAGE_V015124=Object.freeze({via:'main-v015123.js',recoveryBase:'main-v015122.js',root:'main-v01579.js',reason:'startup-successor-route-hotfix'});
+void SAFETY_BASELINE_LINEAGE_V015124;
+const basePath=path.join(__dirname,'main-v015122.js');
+const src=patchSuccessorSource(fs.readFileSync(basePath,'utf8'));
+module._compile(src,__filename);
