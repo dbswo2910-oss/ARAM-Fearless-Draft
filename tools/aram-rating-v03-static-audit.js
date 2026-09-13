@@ -23,6 +23,7 @@ assert(helper.includes('target_hits===0'));
 assert(helper.includes('empty_target_history'));
 assert(helper.includes("queueMode:'standard'"));
 assert(helper.includes('limit:cfg.maxMatchesPerPlayer'));
+assert(helper.includes('slice(0,cfg.maxMatchesPerPlayer)'),'collector must enforce the per-player accepted-history cap even if the source ignores limit');
 assert(helper.includes('scan:cfg.scan'));
 assert(helper.includes('acceptance_order_match_ids'));
 assert(helper.includes('production_ui_modified:false'));
@@ -62,6 +63,7 @@ const out={
   fixture_only:true,
   production_manifest_untouched:true,
   bounded_collector:true,
+  per_player_history_cap_enforced:true,
   blocked_by_data_source_guard:true,
   checkpoint_resume:true,
   tracked_history_path:{
