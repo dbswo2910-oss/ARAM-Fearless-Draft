@@ -38,14 +38,18 @@ jobs:
         run: node tools/v015123-patch-notes-startup-notice-audit.js
       - name: Re-run v0.15.122 Riot Grade audit
         run: node tools/v015122-riot-grade-accuracy-audit.js
-      - name: Re-run predecessor ownership audits
-        run: |
-          node tools/v015121-random-practice-restore-audit.js
-          node tools/v015120-data-subnav-audit.js
-          node tools/v015119-autosync-concurrency-audit.js
-          node tools/v015118-resource-lifecycle-audit.js
-          node tools/v015117-state-integrity-audit.js
-          node tools/runtime-stability-v01579-audit.js
+      - name: Re-run v0.15.121 RANDOM restore audit
+        run: node tools/v015121-random-practice-restore-audit.js
+      - name: Re-run v0.15.120 DATA submenu audit
+        run: node tools/v015120-data-subnav-audit.js
+      - name: Re-run v0.15.119 AutoSync audit
+        run: node tools/v015119-autosync-concurrency-audit.js
+      - name: Re-run v0.15.118 lifecycle audit
+        run: node tools/v015118-resource-lifecycle-audit.js
+      - name: Re-run v0.15.117 state integrity audit
+        run: node tools/v015117-state-integrity-audit.js
+      - name: Re-run v0.15.79 permanent safety audit
+        run: node tools/runtime-stability-v01579-audit.js
       - name: Full regression on unchanged v0.15.122 manifest
         run: node tools/full-regression-audit.js
 
