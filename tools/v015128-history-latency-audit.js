@@ -82,5 +82,8 @@ const waitTurn=()=>new Promise(r=>setImmediate(r));
     for(const [p,s] of Object.entries(expected))ok(map.get(p)===s,`active manifest mismatch ${p}: ${map.get(p)||'missing'}`);
     for(const row of manifest.files||[])ok(String(row.source||'').startsWith('update/'),`unsafe active source ${row.path} -> ${row.source}`);
   }else ok(String(manifest.version)==='0.15.127','unexpected preactivation manifest '+manifest.version);
+  const report={version:'0.15.128',generated_at:new Date().toISOString(),status:'PASS',active_manifest_version:String(manifest.version),score_logic_changed:false,random_scoring_changed:false,contracts:{cache_first:true,quick_scan_max:50,background_deep_backfill:true,latest_game_probe_scan:12,request_coalescing:true,telemetry:true,no_new_recurring_poll:true},simulated_history_stats:hs};
+  fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
+  fs.writeFileSync(path.join(ROOT,'audit-output/v015128-history-latency-report.json'),JSON.stringify(report,null,2)+'\n');
   console.log('v0.15.128 HISTORY LATENCY AUDIT: SUCCESS · cache-first search · quick scan · background deep backfill · bounded latest-game probe');
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
