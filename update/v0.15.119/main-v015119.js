@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const SAFETY_BASELINE_LINEAGE_V015119=Object.freeze({via:'main-v015118.js',root:'main-v01579.js',reason:'autosync-concurrency-stability'});
+void SAFETY_BASELINE_LINEAGE_V015119;
+const livePatch=require('./autosync-live-runtime-v01571');
+require('./autosync-concurrency-v015119').install(livePatch);
+const basePath=path.join(__dirname,'main-v015118.js');
+let src=fs.readFileSync(basePath,'utf8');
+const oldRoute=`src=src.replace(oldRoute,"src=src.replaceAll('0.15.113','0.15.118').replaceAll(stabilityAnchor,'runtime-source-stability-v015118');");`;
+const newRoute=`src=src.replace(oldRoute,"src=src.replaceAll('0.15.113','0.15.119').replaceAll(stabilityAnchor,'runtime-source-stability-v015119');");`;
+if(!src.includes(oldRoute))throw new Error('v0.15.119 main successor contract mismatch: v0.15.118 route missing');
+src=src.replace(oldRoute,newRoute);
+module._compile(src,__filename);

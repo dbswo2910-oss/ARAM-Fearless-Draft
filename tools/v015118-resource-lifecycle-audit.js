@@ -9,6 +9,7 @@ const count=(src,re)=>{const m=String(src).match(re);return m?m.length:0};
 const must=(src,n,label)=>{if(!String(src).includes(n))throw new Error(`v0.15.118 audit missing ${label}: ${n}`)};
 const mustNot=(src,n,label)=>{if(String(src).includes(n))throw new Error(`v0.15.118 audit forbidden ${label}: ${n}`)};
 const parse=(src,label)=>{try{new Function(src)}catch(e){throw new Error(`v0.15.118 ${label} parse failed: ${e.message}`)}};
+const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const report={version:'0.15.118',score_logic_changed:false,random_scoring_changed:false,checks:[],inventory:[]};
 const ok=name=>report.checks.push({name,status:'success'});
 
@@ -135,7 +136,18 @@ if(active==='0.15.118'){
   }))if(map.get(p)!==s)throw new Error(`v0.15.118 successor failed to preserve ${p}`);
   ok('active-v118-manifest');
 }else if(active==='0.15.117')ok('preactivation-v117-manifest');
-else throw new Error(`unexpected active manifest version during v0.15.118 rollout: ${active}`);
+else if(ge(active,'0.15.119')){
+  const preserved={
+    'resource-lifecycle-v015118.js':'update/v0.15.118/resource-lifecycle-v015118.js',
+    'ui-stability-baseline-v015115.js':'update/v0.15.115/ui-stability-baseline-v015115.js',
+    'state-integrity-v015117.js':'update/v0.15.117/state-integrity-v015117.js',
+    'state-integrity-renderer-v015117.js':'update/v0.15.117/state-integrity-renderer-v015117.js',
+    'preload.js':'update/v0.15.117/preload.js',
+    'riot-grade-collector-v01532.js':'update/v0.15.117/riot-grade-collector-v01532.js'
+  };
+  for(const [p,s] of Object.entries(preserved))if(map.get(p)!==s)throw new Error(`newer successor failed to preserve v0.15.118 baseline dependency ${p}`);
+  ok('successor-preserves-v118-baseline');
+}else throw new Error(`unexpected active manifest version during v0.15.118 rollout: ${active}`);
 
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output/v015118-resource-lifecycle-report.json'),JSON.stringify({...report,status:'success',activeManifestVersion:active,inventory:report.inventory.slice(0,40)},null,2)+'\n');
