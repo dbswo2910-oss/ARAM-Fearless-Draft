@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.118**
+- Active updater version: **v0.15.119**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -424,3 +424,7 @@ This release is infrastructure-only. `state-integrity-v015117.js` provides bound
 ### v0.15.118 — Resource lifecycle stability
 
 This release is infrastructure-only. Runtime source transformation adds explicit lifecycle disposal to Random Practice, Random IN GAME, and renderer AutoSync without adding another UI owner. Random IN GAME one-shot ticks are coalesced and its permanent 1-second interval is replaced by an adaptive timeout heartbeat that backs off while inactive/hidden. Random Practice owns and disconnects its long-task observer; AutoSync follow-up polls are coalesced. `resource-lifecycle-v015118.js` provides a no-polling aggregate snapshot/dispose surface, and runtime readiness requires the lifecycle owner/disposers. v0.15.115 UI ownership, v0.15.117 state integrity, and scoring remain unchanged.
+
+### v0.15.119 — AutoSync concurrency stability
+
+This release stabilizes asynchronous League/LCU/Live Client work without adding a UI owner. `autosync-concurrency-v015119.js` wraps the existing v0.15.71 main-process AutoSync patch before the historical main chain compiles: core ticks are single-flight, the scheduler is one timeout chain with bounded failure backoff, request-equivalent identity/credential/gameflow/Live Client calls are coalesced, and credential rotation advances a connection epoch and invalidates short caches. The renderer keeps the v0.15.118 lifecycle owner and adds a request/lifecycle epoch guard so a completion after disposal or replacement cannot fan out stale state. Scoring and recommendation logic are unchanged.

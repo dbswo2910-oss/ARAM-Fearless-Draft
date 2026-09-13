@@ -239,3 +239,12 @@ See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
 - Long-lived MutationObserver/PerformanceObserver instances must be disconnectable. Runtime owners should expose `dispose()` when they own recurring resources.
 - `resource-lifecycle-v015118.js` is infrastructure only: no DOM reparenting, no polling timer, no scoring changes.
 - Keep the whole-active-manifest resource inventory in `tools/v015118-resource-lifecycle-audit.js` and update the audit whenever recurring ownership changes.
+
+## v0.15.119 AutoSync concurrency baseline
+
+- Main-process AutoSync ticks are single-flight. Do not restore an unconditional interval that can start a second tick while the previous League/LCU/Live Client request tree is unresolved.
+- Equivalent in-flight identity/party, credential, gameflow, and Live Client GET requests should be coalesced instead of duplicated.
+- Credential rotation is a connection-epoch boundary. Invalidate short connection caches and do not trust an endpoint completion from the previous epoch without retrying it on the current connection.
+- Reconnect/network failures must use bounded backoff; do not create retry storms.
+- Renderer AutoSync keeps the v0.15.118 lifecycle/dispose contract. A poll completion from a disposed/replaced lifecycle epoch must be dropped before downstream Random Practice fan-out.
+- v0.15.119 is infrastructure-only: no RANDOM/DATA DOM ownership and no scoring changes. Changes to these contracts require updating `tools/v015119-autosync-concurrency-audit.js`.

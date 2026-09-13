@@ -1,6 +1,6 @@
 {
-  "version": "0.15.118",
-  "message": "v0.15.118 · RESOURCE LIFECYCLE — coalesced ticks, adaptive heartbeat, bounded observers",
+  "version": "0.15.119",
+  "message": "v0.15.119 · AUTOSYNC CONCURRENCY — single-flight core, stale-response guard, reconnect backoff",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -292,6 +292,10 @@
       "source": "update/v0.15.71/autosync-live-runtime-v01571.js"
     },
     {
+      "path": "autosync-concurrency-v015119.js",
+      "source": "update/v0.15.119/autosync-concurrency-v015119.js"
+    },
+    {
       "path": "community-calibration-v01534.js",
       "source": "update/v0.15.34/community-calibration-v01534.js"
     },
@@ -349,7 +353,7 @@
     },
     {
       "path": "runtime-loader-v01579.js",
-      "source": "update/v0.15.118/runtime-loader-v01579.js"
+      "source": "update/v0.15.119/runtime-loader-v01579.js"
     },
     {
       "path": "runtime-source-stability-v01579.js",
@@ -624,6 +628,10 @@
       "source": "update/v0.15.118/runtime-source-stability-v015118.js"
     },
     {
+      "path": "runtime-source-stability-v015119.js",
+      "source": "update/v0.15.119/runtime-source-stability-v015119.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -684,8 +692,12 @@
       "source": "update/v0.15.118/main-v015118.js"
     },
     {
+      "path": "main-v015119.js",
+      "source": "update/v0.15.119/main-v015119.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.118/package.json"
+      "source": "update/v0.15.119/package.json"
     }
   ],
   "delete": [
