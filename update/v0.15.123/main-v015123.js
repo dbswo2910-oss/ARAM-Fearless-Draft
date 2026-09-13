@@ -5,8 +5,9 @@ const SAFETY_BASELINE_LINEAGE_V015123=Object.freeze({via:'main-v015122.js',root:
 void SAFETY_BASELINE_LINEAGE_V015123;
 const basePath=path.join(__dirname,'main-v015122.js');
 let src=fs.readFileSync(basePath,'utf8');
-const oldRoute="src=src.replace(oldRoute,\"src=src.replaceAll('0.15.113','0.15.122').replaceAll(stabilityAnchor,'runtime-source-stability-v015122');\");";
-const newRoute="src=src.replace(oldRoute,\"src=src.replaceAll('0.15.113','0.15.123').replaceAll(stabilityAnchor,'runtime-source-stability-v015123');\");";
-if(!src.includes(oldRoute))throw new Error('v0.15.123 main successor contract mismatch: v0.15.122 route missing');
-src=src.replace(oldRoute,newRoute);
+const OLD_ROUTE_FRAGMENT="'0.15.122').replaceAll(stabilityAnchor,'runtime-source-stability-v015122')";
+const NEW_ROUTE_FRAGMENT="'0.15.123').replaceAll(stabilityAnchor,'runtime-source-stability-v015123')";
+const routeHits=src.split(OLD_ROUTE_FRAGMENT).length-1;
+if(routeHits!==1)throw new Error(`v0.15.123 main successor contract mismatch: expected one v0.15.122 route, got ${routeHits}`);
+src=src.replace(OLD_ROUTE_FRAGMENT,NEW_ROUTE_FRAGMENT);
 module._compile(src,__filename);
