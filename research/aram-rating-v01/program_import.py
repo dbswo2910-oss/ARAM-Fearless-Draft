@@ -22,10 +22,28 @@ def _game_list(payload):
     return [payload] if ('gameId' in payload or 'matchId' in payload) else []
 
 
+def _current_program_participants(game: dict) -> list[dict]:
+    """Return participant rows from either raw LCU or the current Match Lab shape.
+
+    The current desktop Match Lab emits five `team` rows plus five `enemy` rows,
+    each with a nested `player` identity object. Older/raw LCU rows expose
+    `participants` plus optional `participantIdentities`. This adapter accepts
+    both without inventing missing identity data.
+    """
+    ps=game.get('participants')
+    if isinstance(ps,list) and ps:
+        return ps
+    team=game.get('team') if isinstance(game.get('team'),list) else []
+    enemy=game.get('enemy') if isinstance(game.get('enemy'),list) else []
+    if team or enemy:
+        return [*team,*enemy]
+    return []
+
+
 def normalize_current_program_game(game: dict) -> dict:
     """Translate Match Lab/LCU shapes already handled by the app.
 
-    A stable PUUID is mandatory. If an old LCU row lacks PUUID identity for any
+    A stable PUUID is mandatory. If a row lacks PUUID identity for any
     participant, the match is rejected rather than inventing an identity.
     """
     identities={}
@@ -34,28 +52,30 @@ def normalize_current_program_game(game: dict) -> dict:
         player=x.get('player') or {}
         identities[pid]=player
     out=[]
-    for p in game.get('participants') or []:
+    for p in _current_program_participants(game):
         st=p.get('stats') if isinstance(p.get('stats'),dict) else {}
         pid=int(p.get('participantId') or 0)
+        nested=p.get('player') if isinstance(p.get('player'),dict) else {}
         ident=identities.get(pid,{})
-        puuid=str(_pick(p.get('puuid'),ident.get('puuid'),ident.get('PUUID')) or '').strip()
+        puuid=str(_pick(p.get('puuid'),nested.get('puuid'),ident.get('puuid'),ident.get('PUUID')) or '').strip()
         if not puuid:
             raise ValueError(f"{game.get('gameId')}: participant {pid or '?'} has no stable PUUID")
-        riot_id=_pick(p.get('riotId'),ident.get('riotId'))
-        game_name=_pick(p.get('gameName'),ident.get('gameName'))
-        tag=_pick(p.get('tagLine'),ident.get('tagLine'))
+        riot_id=_pick(p.get('riotId'),nested.get('riotId'),ident.get('riotId'))
+        game_name=_pick(p.get('gameName'),nested.get('gameName'),nested.get('displayName'),ident.get('gameName'))
+        tag=_pick(p.get('tagLine'),nested.get('tagLine'),ident.get('tagLine'))
         if not riot_id and game_name:
             riot_id=game_name
+        champion=p.get('champion') if isinstance(p.get('champion'),dict) else {}
         out.append({
             'puuid':puuid,'riot_id':riot_id,'tag':tag,
             'team_id':int(_pick(p.get('teamId'),st.get('teamId'),0) or 0),
-            'champion_id':_pick(p.get('championId'),st.get('championId')),
-            'champion_name':_pick(p.get('championName'),st.get('championName')),
+            'champion_id':_pick(p.get('championId'),champion.get('id'),st.get('championId')),
+            'champion_name':_pick(p.get('championName'),champion.get('name'),st.get('championName')),
             'win':bool(_pick(p.get('win'),st.get('win'),False)),
             'kills':_pick(p.get('kills'),st.get('kills')),
             'deaths':_pick(p.get('deaths'),st.get('deaths')),
             'assists':_pick(p.get('assists'),st.get('assists')),
-            'damage':_pick(p.get('totalDamageDealtToChampions'),st.get('totalDamageDealtToChampions')),
+            'damage':_pick(p.get('totalDamageDealtToChampions'),p.get('damageToChampions'),st.get('totalDamageDealtToChampions')),
             'damage_taken':_pick(p.get('totalDamageTaken'),st.get('totalDamageTaken')),
             'healing':_pick(p.get('totalHealsOnTeammates'),st.get('totalHealsOnTeammates'),p.get('totalHeal'),st.get('totalHeal')),
             'shielding':_pick(p.get('totalDamageShieldedOnTeammates'),st.get('totalDamageShieldedOnTeammates')),
