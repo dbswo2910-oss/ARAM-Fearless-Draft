@@ -17,10 +17,17 @@ function stateWrite(namespace,payload){
   try{return stateIntegrity.writeNamespace(namespace,payload,{maxBytes:4*1024*1024})}
   catch(e){stateIntegrity.appendDiagnostic({},'RENDERER_MIRROR_WRITE_ERROR',{namespace:String(namespace||'').slice(0,96),message:e?.message||String(e)});return{ok:false,error:e?.message||String(e)}}
 }
+function boundedDetail(detail){
+  if(!detail||typeof detail!=='object')return{};
+  try{
+    const text=JSON.stringify(detail);
+    if(text.length<=32000)return JSON.parse(text);
+    return{truncated:true,preview:text.slice(0,30000),originalChars:text.length};
+  }catch(e){return{serializationError:e?.message||String(e)}}
+}
 function stateDiagnostic(event,detail){
   const name=String(event||'RENDERER_STATE').replace(/[^A-Za-z0-9._-]/g,'_').slice(0,80)||'RENDERER_STATE';
-  const safe=detail&&typeof detail==='object'?JSON.parse(JSON.stringify(detail).slice(0,32000)):{};
-  stateIntegrity.appendDiagnostic({},name,safe);return true;
+  stateIntegrity.appendDiagnostic({},name,boundedDetail(detail));return true;
 }
 contextBridge.exposeInMainWorld('aramDesktop', {
   isElectron: true,
