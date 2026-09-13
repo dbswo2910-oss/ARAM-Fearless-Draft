@@ -1,0 +1,110 @@
+name: v0.15.123 Activate Patch Notes Startup Notice
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.123/**'
+      - 'tools/v015123-patch-notes-startup-notice-audit.js'
+      - 'tools/v015123-activate-patch-notes-startup-notice.js'
+      - '.github/workflows/v015123-activate-patch-notes-startup-notice.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.123/**'
+      - 'tools/v015123-patch-notes-startup-notice-audit.js'
+      - 'tools/v015123-activate-patch-notes-startup-notice.js'
+      - '.github/workflows/v015123-activate-patch-notes-startup-notice.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  contract-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate v0.15.123 startup notice contracts
+        run: node tools/v015123-patch-notes-startup-notice-audit.js
+      - name: Re-run v0.15.122 Riot Grade audit
+        run: node tools/v015122-riot-grade-accuracy-audit.js
+      - name: Re-run predecessor ownership audits
+        run: |
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/runtime-stability-v01579-audit.js
+      - name: Full regression on unchanged v0.15.122 manifest
+        run: node tools/full-regression-audit.js
+
+  activate:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify activation preconditions
+        run: |
+          node tools/v015123-patch-notes-startup-notice-audit.js
+          node tools/v015122-riot-grade-accuracy-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
+          node tools/ai-continuity-audit.js
+          node tools/full-regression-audit.js
+      - name: Prepare v0.15.123 activation files
+        run: node tools/v015123-activate-patch-notes-startup-notice.js
+      - name: Sync repository continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Post-activation feature and predecessor audits
+        run: |
+          node tools/v015123-patch-notes-startup-notice-audit.js
+          node tools/v015122-riot-grade-accuracy-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
+          node tools/ai-continuity-audit.js
+      - name: Full regression after active-manifest mutation
+        run: node tools/full-regression-audit.js
+      - name: Commit verified activation atomically
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md AGENTS.md docs/AI_HANDOFF.md docs/KNOWN_ISSUES.md docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.123 patch notes startup notice'
+            git push
+          fi
