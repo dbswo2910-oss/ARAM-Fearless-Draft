@@ -1,4 +1,4 @@
-name: v0.15.125 ARAM Build Source Probe
+name: v0.15.125 ARAM Build Cache Generate
 
 on:
   push:
@@ -9,18 +9,43 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  probe:
+  generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Probe OP.GG ARAM structured data and Data Dragon
+          node-version: '24'
+      - name: Generate current standard-ARAM cache
         env:
           ARAM_CANONICAL_PATCH: '26.18'
-        run: node tools/aram-build-stats-refresh.js --probe
+        run: node tools/aram-build-stats-refresh.js
+      - name: Validate generated cache contract
+        run: |
+          node - <<'NODE'
+          const x=require('./data/aram-builds/current.json');
+          const rows=Object.values(x.champions||{});
+          if(x.mode!=='ARAM'||!x.excludes?.includes('ARAM_MAYHEM'))throw new Error('mode contract failed');
+          if(x.canonicalPatch!=='26.18')throw new Error('patch contract failed '+x.canonicalPatch);
+          if(rows.length!==173||x.rosterCount!==173)throw new Error('roster contract failed '+rows.length+'/'+x.rosterCount);
+          for(const r of rows){
+            if(!r.championId||!r.name||!Array.isArray(r.coreNames)||r.coreNames.length<2||!r.tree)throw new Error('invalid row '+JSON.stringify(r));
+          }
+          const ahri=rows.find(r=>r.championId===103);
+          console.log('validated',rows.length,'champions; Ahri=',ahri?.tree,'provider',x.providerPatch,'matches',x.providerMatchCount);
+          NODE
+      - name: Commit generated cache to feature branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add data/aram-builds/current.json
+          if git diff --cached --quiet; then
+            echo 'Cache unchanged'
+          else
+            git commit -m 'data: refresh 26.18 ARAM build cache'
+            git push
+          fi
