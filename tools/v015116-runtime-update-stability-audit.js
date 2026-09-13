@@ -9,6 +9,8 @@ const parse=(src,label)=>{try{new Function(src)}catch(e){throw new Error(`v0.15.
 const throws=(fn,label)=>{let yes=false;try{fn()}catch{yes=true}if(!yes)throw new Error(`v0.15.116 expected rejection: ${label}`)};
 const report={version:'0.15.116',score_logic_changed:false,random_scoring_changed:false,checks:[]};
 const ok=name=>report.checks.push({name,status:'success'});
+const ver=v=>String(v||'0').split('.').map(x=>Number.parseInt(x,10)||0);
+const cmp=(a,b)=>{const A=ver(a),B=ver(b),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)?1:-1}return 0};
 
 const dir='update/v0.15.116/';
 const safety=read(dir+'update-safety-v01579.js');
@@ -57,7 +59,7 @@ ok('probation-failure-gate-simulation');
   ['runtime-readiness-v015116.json','readiness diagnostic file'],
   ['aramSafetyNetV01579?.finalize','v0.15.79 safety finalizer preserved'],
   ['CRITICAL_SCRIPT_FILES','critical injection isolation'],
-  ['score_logic_changed:false','loader scoring neutrality']
+  ['score_logic_changed:false','scoring neutrality']
 ].forEach(([n,l])=>must(loader,n,l));
 ok('critical-runtime-readiness-contract');
 
@@ -97,7 +99,8 @@ const map=new Map((manifest.files||[]).map(x=>[x.path,x.source]));
 if(map.size!==(manifest.files||[]).length)throw new Error('active manifest has duplicate output paths');
 for(const f of manifest.files||[])if(!exists(f.source))throw new Error(`manifest source missing: ${f.path} -> ${f.source}`);
 const deletes=new Set(manifest.delete||[]);for(const p of map.keys())if(deletes.has(p))throw new Error(`manifest installs and deletes ${p}`);
-if(String(manifest.version)==='0.15.116'){
+const active=String(manifest.version||'');
+if(active==='0.15.116'){
   const expected={
     'update-safety-v01579.js':'update/v0.15.116/update-safety-v01579.js',
     'runtime-loader-v01579.js':'update/v0.15.116/runtime-loader-v01579.js',
@@ -109,8 +112,19 @@ if(String(manifest.version)==='0.15.116'){
   for(const [p,s] of Object.entries(expected))if(map.get(p)!==s)throw new Error(`v0.15.116 active manifest mismatch ${p}: ${map.get(p)||'missing'}`);
   if(map.get('ui-stability-baseline-v015115.js')!=='update/v0.15.115/ui-stability-baseline-v015115.js')throw new Error('v0.15.115 UI owner unexpectedly replaced');
   ok('active-v116-manifest');
-}else if(String(manifest.version)==='0.15.115')ok('preactivation-v115-manifest');
-else throw new Error(`unexpected active manifest version during v0.15.116 rollout: ${manifest.version}`);
+}else if(cmp(active,'0.15.117')>=0){
+  const preserved={
+    'update-safety-v01579.js':'update/v0.15.116/update-safety-v01579.js',
+    'updater-safety-patch-v01579.js':'update/v0.15.116/updater-safety-patch-v01579.js',
+    'runtime-source-stability-v015116.js':'update/v0.15.116/runtime-source-stability-v015116.js',
+    'main-v015116.js':'update/v0.15.116/main-v015116.js'
+  };
+  for(const [p,s] of Object.entries(preserved))if(map.get(p)!==s)throw new Error(`v0.15.116 safety lineage not preserved by successor ${p}: ${map.get(p)||'missing'}`);
+  if(map.get('ui-stability-baseline-v015115.js')!=='update/v0.15.115/ui-stability-baseline-v015115.js')throw new Error('v0.15.115 UI owner unexpectedly replaced by successor');
+  if(!map.get('runtime-loader-v01579.js'))throw new Error('successor runtime loader missing');
+  ok('successor-preserves-v116-baseline');
+}else if(active==='0.15.115')ok('preactivation-v115-manifest');
+else throw new Error(`unexpected active manifest version during v0.15.116 audit: ${manifest.version}`);
 
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output/v015116-runtime-update-stability-report.json'),JSON.stringify({...report,status:'success',activeManifestVersion:manifest.version},null,2)+'\n');
