@@ -1,0 +1,96 @@
+name: v0.15.120 Activate DATA Submenu Restore Retry
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'tools/v015120-successor-audit-contract.js'
+      - 'tools/v015120-activate-data-subnav.js'
+      - '.github/workflows/v015120-activate-data-subnav-retry.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015120-activate-data-subnav-retry.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  contract-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate successor-audit migration anchors
+        run: node tools/v015120-successor-audit-contract.js --check
+      - name: Re-run v0.15.120 preactivation audit
+        run: node tools/v015120-data-subnav-audit.js
+      - name: Re-run full regression on unchanged v0.15.119 manifest
+        run: node tools/full-regression-audit.js
+
+  activate:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify retry preconditions
+        run: |
+          node tools/v015120-successor-audit-contract.js --check
+          node tools/v015120-data-subnav-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/ai-continuity-audit.js
+          node tools/full-regression-audit.js
+      - name: Upgrade historical successor audit contracts
+        run: node tools/v015120-successor-audit-contract.js --apply
+      - name: Prepare v0.15.120 activation files
+        run: node tools/v015120-activate-data-subnav.js
+      - name: Sync repository continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Post-activation dedicated and historical audits
+        run: |
+          node tools/v015120-data-subnav-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
+          node tools/ai-continuity-audit.js
+      - name: Full regression after active-manifest mutation
+        run: node tools/full-regression-audit.js
+      - name: Commit verified activation atomically
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add \
+            tools/v015118-resource-lifecycle-audit.js \
+            tools/v015117-state-integrity-audit.js \
+            update/manifest.json README.md AGENTS.md docs/AI_HANDOFF.md \
+            docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.120 data submenu restore'
+            git push
+          fi
