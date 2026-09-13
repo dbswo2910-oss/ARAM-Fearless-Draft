@@ -18,6 +18,7 @@ function writeDiagnostic(payload){try{const dir=diagnosticDir();fs.mkdirSync(dir
 function markFailure(detail,blackbox){try{require('./update-safety-v01579').markSafetyFailure({code:'SAFE-RT121',detail})}catch(e){try{require('../v0.15.116/update-safety-v01579').markSafetyFailure({code:'SAFE-RT121',detail})}catch{}blackbox?.record?.('RTI-E121','random-practice-restore-readiness-mark-failed',{message:e?.message||String(e)})}}
 async function injectRuntimeStack(opts={}){
   const result=await prior.injectRuntimeStack(opts);const wc=opts.mainWindow?.webContents,blackbox=opts.blackbox;
+  if(wc)try{await wc.executeJavaScript('window.aramSafetyNetV01579?.finalize?.(); true',false);blackbox?.record?.('SAFE-FIN','safety-finalize-end',{wrapped:true,policy:'0.15.121'})}catch(e){blackbox?.record?.('SAFE-FIN','safety-finalize-error',{message:e?.message||String(e),policy:'0.15.121'})}
   let readiness={ok:false,missing:['renderer-unavailable'],required:{},random:null,lifecycle:null};
   if(wc)try{readiness=await wc.executeJavaScript(READINESS_EXPR,false)}catch(e){readiness={ok:false,missing:['readiness-eval-error'],required:{},random:null,lifecycle:null,error:e?.message||String(e)}}
   const payload={at:new Date().toISOString(),version:'0.15.121',ok:!!readiness?.ok,missing:Array.isArray(readiness?.missing)?readiness.missing:[],required:readiness?.required||{},random:readiness?.random||null,lifecycle:readiness?.lifecycle||null,error:readiness?.error||''};
