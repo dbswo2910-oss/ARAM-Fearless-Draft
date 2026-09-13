@@ -212,3 +212,12 @@ See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
 - Do not restore the retired v0.15.103-v0.15.114 late UI overlay stack or add a second module that reparents `#randomInputAnchor`, `#poolInputs`, `#comboResults`, `#comboDetail`, or `#rpPickIntelV01589`.
 - Do not implement UI fixes as generic RANDOM click/change/input handlers followed by delayed `setTimeout` / `requestAnimationFrame` repair passes. State changes may re-render content, but interaction must not move ownership containers.
 - A future architecture change must atomically replace the owner and update `tools/v015115-single-owner-stability-audit.js`; do not layer a competing owner on top.
+
+## v0.15.116 runtime/update stability baseline
+
+- Preserve the v0.15.115 UI single-owner contract; v0.15.116 is infrastructure-only and must not become a second RANDOM/DATA DOM owner.
+- Critical renderer readiness failures must be persisted through `update-safety-v01579.js` as a safety failure, not only logged to the console.
+- A safety failure written during update probation must block `PROBATION_COMMIT`; the next launch may then use the existing snapshot rollback path.
+- Updater manifests must reject duplicate install paths, install/delete overlap, unsafe/non-`update/` sources, malformed optional SHA-256 values, duplicate deletes, and deletion of critical runtime files before staging.
+- Keep per-script runtime injection isolation. Do not turn one optional renderer patch failure into an immediate process crash; only the critical readiness gate participates in update rollback.
+- Changes to these contracts require updating `tools/v015116-runtime-update-stability-audit.js`.

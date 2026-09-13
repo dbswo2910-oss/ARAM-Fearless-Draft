@@ -1,6 +1,6 @@
 {
-  "version": "0.15.115",
-  "message": "v0.15.115 · STABILITY BASELINE — single-owner RANDOM/DATA UI, remove competing late repair stack",
+  "version": "0.15.116",
+  "message": "v0.15.116 · RUNTIME/UPDATE STABILITY — critical readiness rollback guard + manifest integrity",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -321,11 +321,11 @@
     },
     {
       "path": "update-safety-v01579.js",
-      "source": "update/v0.15.79/update-safety-v01579.js"
+      "source": "update/v0.15.116/update-safety-v01579.js"
     },
     {
       "path": "updater-safety-patch-v01579.js",
-      "source": "update/v0.15.79/updater-safety-patch-v01579.js"
+      "source": "update/v0.15.116/updater-safety-patch-v01579.js"
     },
     {
       "path": "runtime-safety-net-v01579.js",
@@ -333,7 +333,7 @@
     },
     {
       "path": "runtime-loader-v01579.js",
-      "source": "update/v0.15.79/runtime-loader-v01579.js"
+      "source": "update/v0.15.116/runtime-loader-v01579.js"
     },
     {
       "path": "runtime-source-stability-v01579.js",
@@ -596,6 +596,10 @@
       "source": "update/v0.15.115/runtime-source-stability-v015115.js"
     },
     {
+      "path": "runtime-source-stability-v015116.js",
+      "source": "update/v0.15.116/runtime-source-stability-v015116.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -644,8 +648,12 @@
       "source": "update/v0.15.115/main-v015115.js"
     },
     {
+      "path": "main-v015116.js",
+      "source": "update/v0.15.116/main-v015116.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.115/package.json"
+      "source": "update/v0.15.116/package.json"
     }
   ],
   "delete": [
