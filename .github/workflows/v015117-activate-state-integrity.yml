@@ -1,0 +1,95 @@
+name: v0.15.117 Activate Persistent State Integrity
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015117-activate-state-integrity.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.117 persistent state integrity
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          if(String(m.version)!=='0.15.116')throw new Error(`v0.15.117 activation requires active v0.15.116, got ${m.version}`);
+          const upsert=(path,source,after)=>{
+            m.files=(m.files||[]).filter(x=>x.path!==path);
+            let idx=after?m.files.findIndex(x=>x.path===after):-1;
+            if(idx<0)idx=m.files.length-1;
+            m.files.splice(idx+1,0,{path,source});
+          };
+          const replace=(path,source)=>{
+            const f=(m.files||[]).find(x=>x.path===path);
+            if(!f)throw new Error('manifest anchor missing: '+path);
+            f.source=source;
+          };
+          m.version='0.15.117';
+          m.message='v0.15.117 · STATE INTEGRITY — atomic mirrors, localStorage recovery, Riot Grade LKG';
+          replace('preload.js','update/v0.15.117/preload.js');
+          replace('riot-grade-collector-v01532.js','update/v0.15.117/riot-grade-collector-v01532.js');
+          replace('runtime-loader-v01579.js','update/v0.15.117/runtime-loader-v01579.js');
+          replace('package.json','update/v0.15.117/package.json');
+          upsert('state-integrity-v015117.js','update/v0.15.117/state-integrity-v015117.js','ui-stability-baseline-v015115.js');
+          upsert('state-integrity-renderer-v015117.js','update/v0.15.117/state-integrity-renderer-v015117.js','state-integrity-v015117.js');
+          upsert('riot-grade-collector-base-v01532.js','update/v0.15.32/riot-grade-collector-v01532.js','riot-grade-collector-v01532.js');
+          upsert('runtime-source-stability-v015117.js','update/v0.15.117/runtime-source-stability-v015117.js','runtime-source-stability-v015116.js');
+          upsert('main-v015117.js','update/v0.15.117/main-v015117.js','main-v015116.js');
+          const installed=new Set((m.files||[]).map(x=>x.path));
+          m.delete=(m.delete||[]).filter(x=>!installed.has(x));
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.117**');
+          const note='- **v0.15.117**: Persistent state integrity baseline. App-owned localStorage state is mirrored outside Chromium storage with schema checks, malformed writes can roll back to known-good values, Riot Grade history receives an independent last-known-good copy, and incomplete state-integrity startup participates in the existing update rollback gate. UI ownership and scoring are unchanged.';
+          if(!r.includes('**v0.15.117**'))r+='\n'+note+'\n';fs.writeFileSync(rp,r);
+
+          const hp='docs/AI_HANDOFF.md';let h=fs.readFileSync(hp,'utf8');
+          h=h.replace(/- Active updater version: \*\*v[^*]+\*\*/,'- Active updater version: **v0.15.117**');
+          const hnote=`\n### v0.15.117 — Persistent state integrity\n\nThis release is infrastructure-only. \`state-integrity-v015117.js\` provides bounded atomic JSON writes, validated backup recovery, quarantine, and last-known-good protection. \`state-integrity-renderer-v015117.js\` mirrors app-owned \`aram_\` localStorage keys to the preload-backed state store, validates known schemas, tombstones intentional deletes, and restores malformed/missing state when a valid mirror exists. Riot Grade history is guarded through a wrapper around the unchanged v0.15.32 collector. The v0.15.115 RANDOM/DATA UI owner and v0.15.116 updater/rollback baseline remain intact. \`score_logic_changed:false\`, \`random_scoring_changed:false\`.\n`;
+          if(!h.includes('### v0.15.117 — Persistent state integrity'))h+=hnote;fs.writeFileSync(hp,h);
+
+          const ap='AGENTS.md';let a=fs.readFileSync(ap,'utf8');
+          const rule=`\n## v0.15.117 persistent state integrity baseline\n\n- Persisted app state must not be replaced with empty/default data merely because a JSON read fails. Recover from a validated last-known-good copy when available and quarantine the corrupt payload.\n- New app-owned renderer persistence should use an \`aram_\` localStorage key so the v0.15.117 mirror can protect it. Add an explicit validator for important structured keys.\n- Intentional removals must remain tombstoned; recovery must not resurrect state that the user deliberately deleted after v0.15.117.\n- Main-process JSON stores should use \`state-integrity-v015117.js\` or an equivalent atomic write + validation + LKG pattern instead of bare overwrite writes.\n- State-integrity code is not a UI owner. Do not append/reparent DOM, start polling timers, or alter RANDOM/DATA layout from the state layer.\n- State integrity must remain scoring-neutral. Changes to these contracts require updating \`tools/v015117-state-integrity-audit.js\`.\n`;
+          if(!a.includes('## v0.15.117 persistent state integrity baseline'))a+=rule;fs.writeFileSync(ap,a);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md docs/AI_HANDOFF.md AGENTS.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.117 persistent state integrity'
+            git push
+          fi
