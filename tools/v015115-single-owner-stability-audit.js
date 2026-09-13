@@ -102,14 +102,15 @@ const inputSource=map.get('input-interaction-stability-v01539.js');
 if(!inputSource||!exists(inputSource))throw new Error('input-interaction stability source missing');
 const inputOut=runtime.patchRuntimeSource('input-interaction-stability-v01539.js',read(inputSource));
 parse(inputOut,'final input interaction payload');
-if(count(inputOut,'__ARAM_UI_STABILITY_BASELINE_V015115__')!==1)throw new Error('v0.15.115 UI owner must be injected exactly once');
+if(count(inputOut,'/* ARAM_UI_STABILITY_OWNER_PAYLOAD_V015115 */')!==1)throw new Error('v0.15.115 UI owner payload must be injected exactly once');
+must(inputOut,'__ARAM_UI_STABILITY_BASELINE_V015115__','v0.15.115 UI readiness marker');
 for(const m of oldMarkers)mustNot(inputOut,m,'legacy late overlay in final global target');
 ok('single-global-injection');
 
 const brandSource=map.get('brand-header-v01538.js');
 if(!brandSource||!exists(brandSource))throw new Error('brand header source missing');
 const brandOut=runtime.patchRuntimeSource('brand-header-v01538.js',read(brandSource));
-mustNot(brandOut,'__ARAM_UI_STABILITY_BASELINE_V015115__','duplicate v0.15.115 owner injection');
+mustNot(brandOut,'/* ARAM_UI_STABILITY_OWNER_PAYLOAD_V015115 */','duplicate v0.15.115 owner injection');
 ok('no-redundant-injection');
 
 const itemSource=map.get('item-icons-global-v01557.js');
