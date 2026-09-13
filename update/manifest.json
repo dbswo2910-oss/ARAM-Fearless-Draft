@@ -441,7 +441,7 @@
     },
     {
       "path": "aram-build-stats-current.json",
-      "source": "data/aram-builds/current.json"
+      "source": "update/data/aram-builds/current.json"
     },
     {
       "path": "aram-build-stat-runtime-v015125.js",

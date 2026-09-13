@@ -88,3 +88,9 @@ Observed on real Windows after v0.15.123 activation: `main-v015123.js` threw `v0
 ## Historical RANDOM statistical baseline drift (v0.15.124 and earlier)
 
 `통계 사이트 기본 빌드` previously read `item[기본 트리]` from the embedded champion database. Those rows were not automatically refreshed per live ARAM patch and could diverge substantially from current Howling Abyss builds. v0.15.125 changes the primary source to a validated 173-champion standard-ARAM cache generated from OP.GG structured ARAM data, with source/patch/date provenance and a bundled fallback. Real-Windows visual acceptance is still required for the Build tab and representative champions.
+
+## v0.15.125 updater rejected the first cache source
+
+**Status:** `VERIFY_REAL_WINDOWS`
+
+The first activated v0.15.125 manifest mapped installed `aram-build-stats-current.json` directly from repository `data/aram-builds/current.json`. A real Windows screenshot showed `허용되지 않은 update source: data/aram-builds/current.json`. This was the v0.15.116 safety gate working as designed: active update sources must live under `update/`. The hotfix preserves the safety gate, mirrors the canonical cache to `update/data/aram-builds/current.json`, and maps the manifest to that updater-safe source. Re-run update check on Windows before closing this issue.

@@ -71,8 +71,10 @@
     },
     "aram_build_stat_cache_v015125": {
       "status": "pending",
-      "evidence": "CI validates 173 standard-ARAM rows, current patch/source provenance, Ahri current-core sanity, one-shot remote refresh, embedded fallback, v0.15.81 gate preservation, and byte-neutral outputs for RANDOM scoring/DATA/AutoSync/Riot Grade targets.",
+      "evidence": "CI validates the 173-champion standard-ARAM cache and source provenance. A real Windows screenshot then exposed that the first v0.15.125 manifest used disallowed source data/aram-builds/current.json; the updater-safe hotfix preserves the v0.15.116 allowlist and delivers the byte-identical cache from update/data/aram-builds/current.json. Real Windows retry is still required.",
       "must_verify": [
+        "Click 업데이트 확인 again and confirm 허용되지 않은 update source no longer appears",
+        "Confirm v0.15.125 downloads/applies and relaunches normally",
         "Update/relaunch on Windows and confirm v0.15.125 reaches the normal UI",
         "Open RANDOM > in-game Build and confirm 통계 사이트 기본 빌드 shows OP.GG ARAM, public patch, and refresh date",
         "Spot-check Ahri plus several tank/marksman/support champions against current standard ARAM statistics",

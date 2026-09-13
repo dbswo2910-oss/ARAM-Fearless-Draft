@@ -256,3 +256,5 @@ node tools/ai-continuity-audit.js
 - Do not fetch OP.GG or another statistics provider in the live render loop. Use bundled cache synchronously; an external freshness check may run once per app session and must fail closed to the bundled/embedded fallback.
 - Provider patch labels may use Riot static-data numbering (for example OP.GG/Data Dragon 16.18) while the public client patch is 26.18. Treat the +10 major alias as equivalent only when the minor version matches.
 - New main successors must continue the v0.15.124 boot-smoke rule: transform the known-good v0.15.122 entry and execute the exact successor transform in CI.
+
+- Updater delivery for the ARAM cache must use the mirrored `update/data/aram-builds/current.json` source. Do not point an active manifest source directly at `data/`; the v0.15.116 updater allowlist intentionally rejects non-`update/` sources. Keep the canonical `data/` cache and the `update/data/` distribution mirror byte-identical.

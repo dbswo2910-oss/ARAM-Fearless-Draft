@@ -39,7 +39,7 @@
 - **riot_grade_accuracy_v015122** — `pending`: Synthetic LCU parser and exact-link CI prove that memberGrades are excluded and only primary gameId+championId records are authoritative. One newly completed real League game still needs direct client-grade comparison.
 - **patch_notes_startup_notice_v015123** — `pending`: CI validates exact per-patch dismissal semantics, one-shot injection, and routing through the existing DATA owner. Real Windows Electron appearance/navigation still needs confirmation.
 - **startup_recovery_v015124** — `pending`: Repository CI now executes the exact successor route transform against the real v0.15.122 predecessor source. The user supplied a real Windows screenshot proving v0.15.123 crashed before UI creation; v0.15.124 must be relaunched on Windows to confirm recovery.
-- **aram_build_stat_cache_v015125** — `pending`: CI validates 173 standard-ARAM rows, current patch/source provenance, Ahri current-core sanity, one-shot remote refresh, embedded fallback, v0.15.81 gate preservation, and byte-neutral outputs for RANDOM scoring/DATA/AutoSync/Riot Grade targets.
+- **aram_build_stat_cache_v015125** — `pending`: CI validates the 173-champion standard-ARAM cache and source provenance. A real Windows screenshot then exposed that the first v0.15.125 manifest used disallowed source data/aram-builds/current.json; the updater-safe hotfix preserves the v0.15.116 allowlist and delivers the byte-identical cache from update/data/aram-builds/current.json. Real Windows retry is still required.
 
 ## Next planned work
 

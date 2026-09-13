@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "policy": "v0.15.125-safe-cache-source",
+  "target": "aram-build-stats-current.json",
+  "source": "update/data/aram-builds/current.json",
+  "updaterSafetyGate": "v0.15.116 update/ allowlist preserved"
+}
