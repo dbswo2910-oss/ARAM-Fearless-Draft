@@ -204,3 +204,11 @@ See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
 - Keep `rp107Center` / `rp107Right` compatibility classes when creating newer wrappers so historical forward-compatible repairs become no-ops instead of moving content again.
 - The right decision rail is one column: Combination DNA first, selected-composition detail second.
 - `score_logic_changed:false`.
+
+## v0.15.115 UI single-owner baseline
+
+- RANDOM PICK DOM/layout ownership belongs to the v0.15.90/v0.15.100 transformed `random-practice-focus-v01549.js`.
+- DATA boundary/presentation ownership belongs to `ui-stability-baseline-v015115.js`.
+- Do not restore the retired v0.15.103-v0.15.114 late UI overlay stack or add a second module that reparents `#randomInputAnchor`, `#poolInputs`, `#comboResults`, `#comboDetail`, or `#rpPickIntelV01589`.
+- Do not implement UI fixes as generic RANDOM click/change/input handlers followed by delayed `setTimeout` / `requestAnimationFrame` repair passes. State changes may re-render content, but interaction must not move ownership containers.
+- A future architecture change must atomically replace the owner and update `tools/v015115-single-owner-stability-audit.js`; do not layer a competing owner on top.
