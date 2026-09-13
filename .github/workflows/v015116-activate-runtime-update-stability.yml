@@ -1,0 +1,86 @@
+name: v0.15.116 Activate Runtime Update Stability
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015116-activate-runtime-update-stability.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.116 runtime/update stability
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          const upsert=(path,source,after)=>{
+            m.files=(m.files||[]).filter(x=>x.path!==path);
+            let idx=after?m.files.findIndex(x=>x.path===after):-1;
+            if(idx<0)idx=m.files.length-1;
+            m.files.splice(idx+1,0,{path,source});
+          };
+          m.version='0.15.116';
+          m.message='v0.15.116 · RUNTIME/UPDATE STABILITY — critical readiness rollback guard + manifest integrity';
+          for(const [p,s] of [
+            ['update-safety-v01579.js','update/v0.15.116/update-safety-v01579.js'],
+            ['runtime-loader-v01579.js','update/v0.15.116/runtime-loader-v01579.js'],
+            ['updater-safety-patch-v01579.js','update/v0.15.116/updater-safety-patch-v01579.js']
+          ]){
+            const f=(m.files||[]).find(x=>x.path===p);if(!f)throw new Error('manifest safety anchor missing: '+p);f.source=s;
+          }
+          upsert('runtime-source-stability-v015116.js','update/v0.15.116/runtime-source-stability-v015116.js','runtime-source-stability-v015115.js');
+          upsert('main-v015116.js','update/v0.15.116/main-v015116.js','main-v015115.js');
+          const pkg=(m.files||[]).find(x=>x.path==='package.json');if(!pkg)throw new Error('manifest package.json missing');pkg.source='update/v0.15.116/package.json';
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.116**');
+          const note='- **v0.15.116**: Runtime/update integrity stabilization. Critical renderer readiness failures are persisted into the existing update-safety rollback channel, current-boot failures can no longer be accidentally committed as healthy during probation, and malformed updater manifests are rejected before staging. The v0.15.115 single-owner RANDOM/DATA UI remains unchanged; scoring is unchanged.';
+          if(!r.includes('**v0.15.116**'))r+='\n'+note+'\n';fs.writeFileSync(rp,r);
+
+          const hp='docs/AI_HANDOFF.md';let h=fs.readFileSync(hp,'utf8');
+          h=h.replace(/- Active updater version: \*\*v[^*]+\*\*/,'- Active updater version: **v0.15.116**');
+          const hnote=`\n### v0.15.116 — Runtime / update integrity stability\n\nThis release hardens the infrastructure below the UI without adding another renderer owner. The v0.15.79 update transaction/rollback baseline remains the root, but probation now re-checks current-boot safety failures before committing. \`runtime-loader-v01579.js\` preserves per-script isolation and adds a final critical readiness gate; missing core runtime owners are persisted as \`SAFE-RT116\` and written to \`diagnostics/runtime-readiness-v015116.json\`. The updater transform now validates manifest uniqueness, install/delete conflicts, safe sources, optional SHA-256 format, and critical-file deletion before staging. The v0.15.115 RANDOM/DATA single-owner architecture is preserved exactly. \`score_logic_changed:false\`, \`random_scoring_changed:false\`.\n`;
+          if(!h.includes('### v0.15.116 — Runtime / update integrity stability'))h+=hnote;fs.writeFileSync(hp,h);
+
+          const ap='AGENTS.md';let a=fs.readFileSync(ap,'utf8');
+          const rule=`\n## v0.15.116 runtime/update stability baseline\n\n- Preserve the v0.15.115 UI single-owner contract; v0.15.116 is infrastructure-only and must not become a second RANDOM/DATA DOM owner.\n- Critical renderer readiness failures must be persisted through \`update-safety-v01579.js\` as a safety failure, not only logged to the console.\n- A safety failure written during update probation must block \`PROBATION_COMMIT\`; the next launch may then use the existing snapshot rollback path.\n- Updater manifests must reject duplicate install paths, install/delete overlap, unsafe/non-\`update/\` sources, malformed optional SHA-256 values, duplicate deletes, and deletion of critical runtime files before staging.\n- Keep per-script runtime injection isolation. Do not turn one optional renderer patch failure into an immediate process crash; only the critical readiness gate participates in update rollback.\n- Changes to these contracts require updating \`tools/v015116-runtime-update-stability-audit.js\`.\n`;
+          if(!a.includes('## v0.15.116 runtime/update stability baseline'))a+=rule;fs.writeFileSync(ap,a);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md docs/AI_HANDOFF.md AGENTS.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.116 runtime update stability'
+            git push
+          fi

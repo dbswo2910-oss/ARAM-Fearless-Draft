@@ -1,0 +1,11 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const SAFETY_BASELINE_LINEAGE_V015116=Object.freeze({via:'main-v015115.js',root:'main-v01579.js',reason:'runtime-update-integrity-hardening'});
+void SAFETY_BASELINE_LINEAGE_V015116;
+const basePath=path.join(__dirname,'main-v015115.js');
+let src=fs.readFileSync(basePath,'utf8');
+const oldRoute="src=src.replaceAll('0.15.113','0.15.115').replaceAll(stabilityAnchor,'runtime-source-stability-v015115');";
+if(!src.includes(oldRoute))throw new Error('v0.15.116 main successor contract mismatch: v0.15.115 route missing');
+src=src.replace(oldRoute,"src=src.replaceAll('0.15.113','0.15.116').replaceAll(stabilityAnchor,'runtime-source-stability-v015116');");
+module._compile(src,__filename);
