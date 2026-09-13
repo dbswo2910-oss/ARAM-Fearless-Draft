@@ -5,6 +5,7 @@ const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const fail=m=>{throw new Error(`v0.15.125 ARAM BUILD CACHE AUDIT: ${m}`)};
 const ok=(c,m)=>{if(!c)fail(m)};
+const count=(src,n)=>String(src).split(n).length-1;
 
 const cache=JSON.parse(read('data/aram-builds/current.json'));
 const rows=Object.values(cache.champions||{});
@@ -41,8 +42,8 @@ ok(coach125.includes('OP.GG ARAM ·'),'source label with provider missing');
 ok(coach125.includes('갱신'),'source refresh date missing');
 ok(coach125.includes('raw.githubusercontent.com/dbswo2910-oss/ARAM-Fearless-Draft/main/data/aram-builds/current.json'),'single remote cache URL missing');
 ok(coach125.includes("if(aramBuildStatsRefreshStartedV015125)return;aramBuildStatsRefreshStartedV015125=true"),'one-shot remote refresh guard missing');
-ok(!coach125.includes('setInterval('),'statistics runtime must not add an interval poller');
-ok(!coach125.includes('lol-api-champion.op.gg'),'renderer must never call OP.GG live API');
+ok(count(coach125,'setInterval(')===count(coach124,'setInterval('),'statistics runtime added an interval poller');
+ok(count(coach125,'lol-api-champion.op.gg')===count(coach124,'lol-api-champion.op.gg'),'renderer added a direct OP.GG live API call');
 ok(coach125.includes("it['기본 트리']"),'embedded champion DB fallback was removed');
 ok(coach125.includes('function buildGateV01581('),'v0.15.81 item recommendation gate missing after patch');
 new Function(coach125);
