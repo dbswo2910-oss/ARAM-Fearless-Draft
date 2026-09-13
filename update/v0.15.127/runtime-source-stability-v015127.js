@@ -35,7 +35,7 @@ module.exports={
   random_scoring_changed:false,
   item_recommendation_logic_changed:prior.item_recommendation_logic_changed===true,
   startup_update_check:true,
-  startup_update_policy:'check-once-then-prompt-apply-restart',
+  startup_update_policy:'check-once-auto-apply-restart',
   activation_targets:[...new Set([...(prior.activation_targets||[]),'input-interaction-stability-v01539.js'])],
   policy_version:'0.15.127'
 };
