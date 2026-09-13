@@ -1,0 +1,41 @@
+{
+  "title": "ARAM Rating Research v0.2",
+  "status": "insufficient_real_data",
+  "actual_data": {
+    "matches": 0,
+    "players": 0,
+    "participants": 0,
+    "date_range": null,
+    "patch_range": []
+  },
+  "data_quality": {
+    "accepted": 0,
+    "rejected": 0,
+    "duplicates": 0,
+    "invalid_queue": 0,
+    "missing_puuid": 0,
+    "note": "No live desktop export is present in the repository or CI environment. Fixture data is excluded from real results."
+  },
+  "network_quality": {
+    "largest_component": 0,
+    "single_match_players": 0,
+    "ten_plus_match_players": 0,
+    "cold_start_rate": null
+  },
+  "models": {
+    "elo": null,
+    "glicko": null,
+    "trueskill_family": null,
+    "baseline": null
+  },
+  "frozen_test": null,
+  "walk_forward": null,
+  "bootstrap": null,
+  "rating_difference": null,
+  "calibration": null,
+  "conclusion": "insufficient_real_data",
+  "blocking_reason": "The allowed first source is the running program's already-fetched KR ARAM history. GitHub Actions cannot access the user's League Client/Electron process, and no PUUID-bearing real export is committed by design.",
+  "next_required_data_path": "Run research/aram-rating-v02/export-current-history-devtools.js in the desktop app, save the JSON locally, then run research/aram-rating-v02/run.py run-all.",
+  "player_facing_ui_enabled": false,
+  "synthetic_or_fixture_substituted_for_real_result": false
+}
