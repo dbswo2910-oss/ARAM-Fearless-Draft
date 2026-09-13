@@ -1,13 +1,9 @@
 'use strict';
 const fs=require('fs');
 const path=require('path');
+const {patchSuccessorSource}=require('./successor-route-hotfix-v015124');
 const SAFETY_BASELINE_LINEAGE_V015124=Object.freeze({via:'main-v015123.js',recoveryBase:'main-v015122.js',root:'main-v01579.js',reason:'startup-successor-route-hotfix'});
 void SAFETY_BASELINE_LINEAGE_V015124;
 const basePath=path.join(__dirname,'main-v015122.js');
-let src=fs.readFileSync(basePath,'utf8');
-const OLD_ROUTE_FRAGMENT="'0.15.122').replaceAll(stabilityAnchor,'runtime-source-stability-v015122')";
-const NEW_ROUTE_FRAGMENT="'0.15.124').replaceAll(stabilityAnchor,'runtime-source-stability-v015124')";
-const routeHits=src.split(OLD_ROUTE_FRAGMENT).length-1;
-if(routeHits!==1)throw new Error(`v0.15.124 main recovery contract mismatch: expected one v0.15.122 route, got ${routeHits}`);
-src=src.replace(OLD_ROUTE_FRAGMENT,NEW_ROUTE_FRAGMENT);
+const src=patchSuccessorSource(fs.readFileSync(basePath,'utf8'));
 module._compile(src,__filename);
