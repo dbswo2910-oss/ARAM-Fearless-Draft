@@ -50,7 +50,7 @@ const ok=name=>report.checks.push({name,status:'success'});
     captureIdentityAndParty(){return Promise.resolve({party:[1]})}
     refreshCreds(...a){return this._refreshImpl(...a)}
     gameflowInfo(){return Promise.resolve({phase:'InProgress',queueId:450,gameId:1})}
-    liveGet(pathname,...a){liveCalls++;return this._liveImpl(pathname,...a)}
+    liveGet(pathname,...a){return this._liveImpl(pathname,...a)}
     stop(){if(this.timer){clearInterval(this.timer);this.timer=null}}
   }
   const livePatch={patch:baseline.patch};
