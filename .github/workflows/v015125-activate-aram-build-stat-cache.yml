@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'data/aram-builds/current.json'
+      - 'update/data/aram-builds/current.json'
+      - 'update/manifest.json'
       - 'update/v0.15.125/**'
       - 'tools/aram-build-stats-refresh.js'
       - 'tools/v015125-aram-build-stat-cache-audit.js'
@@ -19,6 +21,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'update/manifest.json'
       - 'update/v0.15.125/**'
       - 'tools/aram-build-stats-refresh.js'
       - 'tools/v015125-aram-build-stat-cache-audit.js'
@@ -35,6 +38,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: v015125-aram-build-stat-cache-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   contract-check:
     if: github.event_name == 'pull_request'
@@ -47,7 +54,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate v0.15.125 ARAM build cache
+      - name: Prepare updater-safe v0.15.125 candidate in PR workspace
+        run: node tools/v015125-activate-aram-build-stat-cache.js
+      - name: Sync candidate continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Validate v0.15.125 ARAM build cache and updater source contract
         run: node tools/v015125-aram-build-stat-cache-audit.js
       - name: Re-run startup and core predecessor audits
         run: |
@@ -66,7 +79,7 @@ jobs:
           node tools/runtime-stability-v01575-audit.js
           node tools/runtime-stability-v01578-audit.js
           node tools/runtime-stability-v01579-audit.js
-      - name: Full regression on unchanged v0.15.124 manifest
+      - name: Full regression on repaired candidate
         run: node tools/full-regression-audit.js
 
   activate:
@@ -80,33 +93,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify activation preconditions
-        run: |
-          node tools/v015125-aram-build-stat-cache-audit.js
-          node tools/v015124-startup-successor-route-audit.js
-          node tools/v015123-patch-notes-startup-notice-audit.js
-          node tools/v015122-riot-grade-accuracy-audit.js
-          node tools/v015121-random-practice-restore-audit.js
-          node tools/v015120-data-subnav-audit.js
-          node tools/v015119-autosync-concurrency-audit.js
-          node tools/v015118-resource-lifecycle-audit.js
-          node tools/v015117-state-integrity-audit.js
-          node tools/v015116-runtime-update-stability-audit.js
-          node tools/v015115-single-owner-stability-audit.js
-          node tools/runtime-stability-v01571-audit.js
-          node tools/runtime-stability-v01573-audit.js
-          node tools/runtime-stability-v01575-audit.js
-          node tools/runtime-stability-v01578-audit.js
-          node tools/runtime-stability-v01579-audit.js
-          node tools/ai-continuity-audit.js
-          node tools/full-regression-audit.js
-      - name: Prepare v0.15.125 activation files
+      - name: Prepare or repair v0.15.125 activation files
         run: node tools/v015125-activate-aram-build-stat-cache.js
       - name: Sync repository continuity snapshot
         run: |
           node tools/sync-current-state.js
           node tools/ai-continuity-audit.js
-      - name: Post-activation feature and predecessor audits
+      - name: Post-repair feature and predecessor audits
         run: |
           node tools/v015125-aram-build-stat-cache-audit.js
           node tools/v015124-startup-successor-route-audit.js
@@ -125,16 +118,16 @@ jobs:
           node tools/runtime-stability-v01578-audit.js
           node tools/runtime-stability-v01579-audit.js
           node tools/ai-continuity-audit.js
-      - name: Full regression after active-manifest mutation
+      - name: Full regression after updater-safe manifest repair
         run: node tools/full-regression-audit.js
-      - name: Commit verified activation atomically
+      - name: Commit verified v0.15.125 repair atomically
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '418982+github-actions[bot]@users.noreply.github.com'
-          git add update/manifest.json README.md AGENTS.md docs/AI_HANDOFF.md docs/KNOWN_ISSUES.md docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
+          git add update/manifest.json update/data/aram-builds/current.json update/meta/v015125-safe-cache-source.json README.md AGENTS.md docs/AI_HANDOFF.md docs/KNOWN_ISSUES.md docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
           if git diff --cached --quiet; then
             echo 'Nothing to commit'
           else
-            git commit -m 'release v0.15.125 ARAM build stat cache'
+            git commit -m 'hotfix v0.15.125 updater-safe ARAM cache source'
             git push
           fi
