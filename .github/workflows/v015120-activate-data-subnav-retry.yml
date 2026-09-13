@@ -10,6 +10,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'tools/v015120-activate-data-subnav.js'
       - '.github/workflows/v015120-activate-data-subnav-retry.yml'
   workflow_dispatch:
 
@@ -30,6 +31,19 @@ jobs:
           node-version: '20'
       - name: Validate successor-audit migration anchors
         run: node tools/v015120-successor-audit-contract.js --check
+      - name: Validate activation continuity scope
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const src=fs.readFileSync('tools/v015120-activate-data-subnav.js','utf8');
+          if(src.includes('c.next_planned_work={'))throw new Error('v0.15.120 activation must not replace next_planned_work');
+          for(const needle of [
+            "const plannedBefore=JSON.stringify(c.next_planned_work??null)",
+            "c.next_planned_work?.theme!=='SAFE MODE / CRASH-LOOP ISOLATION'",
+            "JSON.stringify(c.next_planned_work??null)!==plannedBefore"
+          ])if(!src.includes(needle))throw new Error('missing continuity-preservation contract: '+needle);
+          console.log('v0.15.120 ACTIVATION CONTINUITY SCOPE: SUCCESS');
+          NODE
       - name: Re-run v0.15.120 preactivation audit
         run: node tools/v015120-data-subnav-audit.js
       - name: Re-run full regression on unchanged v0.15.119 manifest
@@ -59,6 +73,19 @@ jobs:
           node tools/v015115-single-owner-stability-audit.js
           node tools/ai-continuity-audit.js
           node tools/full-regression-audit.js
+      - name: Verify activation continuity scope
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const src=fs.readFileSync('tools/v015120-activate-data-subnav.js','utf8');
+          if(src.includes('c.next_planned_work={'))throw new Error('v0.15.120 activation must not replace next_planned_work');
+          for(const needle of [
+            "const plannedBefore=JSON.stringify(c.next_planned_work??null)",
+            "c.next_planned_work?.theme!=='SAFE MODE / CRASH-LOOP ISOLATION'",
+            "JSON.stringify(c.next_planned_work??null)!==plannedBefore"
+          ])if(!src.includes(needle))throw new Error('missing continuity-preservation contract: '+needle);
+          console.log('v0.15.120 ACTIVATION CONTINUITY SCOPE: SUCCESS');
+          NODE
       - name: Upgrade historical successor audit contracts
         run: node tools/v015120-successor-audit-contract.js --apply
       - name: Prepare v0.15.120 activation files
