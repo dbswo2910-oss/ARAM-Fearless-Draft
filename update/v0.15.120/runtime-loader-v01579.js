@@ -2,7 +2,7 @@
 const fs=require('fs');
 const path=require('path');
 let prior;
-try{prior=require('../v0.15.119/runtime-loader-v01579')}catch{prior=require('./runtime-loader-v01579')}
+try{prior=require('../v0.15.77/runtime-loader-v01577')}catch{prior=require('./runtime-loader-v01577')}
 const CRITICAL_SCRIPT_FILES=new Set([
   'runtime-safety-net-v01579.js',
   'runtime-performance-v01568.js',
@@ -30,7 +30,7 @@ const READINESS_EXPR=`(()=>{const required={
 };const missing=Object.entries(required).filter(([,v])=>!v).map(([k])=>k);let lifecycle=null,autosync=null,dataOwner=null;try{lifecycle=window.aramResourceLifecycleV015118?.snapshot?.()||null}catch(e){lifecycle={error:e?.message||String(e)}}try{autosync=window.aramLiveAutosyncRuntimeV01571?.getStats?.()||null}catch(e){autosync={error:e?.message||String(e)}}try{dataOwner=window.aramUiStabilityV015115?.audit?.()||null}catch(e){dataOwner={error:e?.message||String(e)}}return{ok:missing.length===0,missing,required,lifecycle,autosync,dataOwner};})()`;
 function diagnosticDir(){try{const {app}=require('electron');return path.join(app.getPath('userData'),'diagnostics')}catch{return path.join(process.cwd(),'diagnostics')}}
 function writeDiagnostic(payload){try{const dir=diagnosticDir();fs.mkdirSync(dir,{recursive:true});const dst=path.join(dir,'runtime-readiness-v015120.json'),tmp=dst+'.tmp-'+process.pid;fs.writeFileSync(tmp,JSON.stringify(payload,null,2),'utf8');try{fs.renameSync(tmp,dst)}catch{try{fs.rmSync(dst,{force:true})}catch{}fs.renameSync(tmp,dst)}}catch{}}
-function markFailure(detail,blackbox){try{require('../v0.15.116/update-safety-v01579').markSafetyFailure({code:'SAFE-RT120',detail})}catch{try{require('./update-safety-v01579').markSafetyFailure({code:'SAFE-RT120',detail})}catch(e){blackbox?.record?.('RTI-E120','data-subnav-readiness-mark-failed',{message:e?.message||String(e)})}}}
+function markFailure(detail,blackbox){try{require('./update-safety-v01579').markSafetyFailure({code:'SAFE-RT120',detail})}catch(e){blackbox?.record?.('RTI-E120','data-subnav-readiness-mark-failed',{message:e?.message||String(e)})}}
 async function injectRuntimeStack(opts={}){
   const result=await prior.injectRuntimeStack(opts);const wc=opts.mainWindow?.webContents,blackbox=opts.blackbox;
   if(wc)try{await wc.executeJavaScript('window.aramSafetyNetV01579?.finalize?.(); true',false);blackbox?.record?.('SAFE-FIN','safety-finalize-end',{wrapped:true,policy:'0.15.120'})}catch(e){blackbox?.record?.('SAFE-FIN','safety-finalize-error',{message:e?.message||String(e)})}
