@@ -3,20 +3,25 @@ const fs=require('fs');
 const path=require('path');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
+const exists=p=>fs.existsSync(path.join(ROOT,p));
 const fail=m=>{throw new Error(`v0.15.125 ARAM BUILD CACHE AUDIT: ${m}`)};
 const ok=(c,m)=>{if(!c)fail(m)};
 const count=(src,n)=>String(src).split(n).length-1;
+const patchParts=v=>String(v||'').match(/^(\d+)\.(\d+)$/)?.slice(1).map(Number)||[];
+const compatiblePatch=(provider,canonical)=>{const [pm,pn]=patchParts(provider),[cm,cn]=patchParts(canonical);return Number.isFinite(pm)&&Number.isFinite(cm)&&pn===cn&&(pm===cm||pm+10===cm)};
 
-const cache=JSON.parse(read('data/aram-builds/current.json'));
+const canonicalPath='data/aram-builds/current.json';
+const mirrorPath='update/data/aram-builds/current.json';
+const cache=JSON.parse(read(canonicalPath));
 const rows=Object.values(cache.champions||{});
 ok(cache.schemaVersion>=2,'schemaVersion < 2');
 ok(cache.mode==='ARAM','mode is not standard ARAM');
 ok(Array.isArray(cache.excludes)&&cache.excludes.includes('ARAM_MAYHEM'),'ARAM_MAYHEM exclusion missing');
-ok(cache.canonicalPatch==='26.18','initial release cache is not canonical patch 26.18');
+ok(/^\d+\.\d+$/.test(String(cache.canonicalPatch||'')),'canonical patch format invalid');
 ok(cache.provider==='OP.GG','provider is not OP.GG');
-ok(cache.providerPatch==='16.18','provider patch alias is not 16.18');
+ok(compatiblePatch(cache.providerPatch,cache.canonicalPatch),`provider/public patch alias mismatch ${cache.providerPatch}/${cache.canonicalPatch}`);
 ok(Number(cache.providerMatchCount)>100000,'provider match sample unexpectedly small');
-ok(rows.length===173&&cache.rosterCount===173,`roster must be 173, got ${rows.length}/${cache.rosterCount}`);
+ok(rows.length>=170&&cache.rosterCount===rows.length,`roster contract failed ${rows.length}/${cache.rosterCount}`);
 for(const r of rows){
   ok(Number(r.championId)>0,`invalid champion id ${r.championId}`);
   ok(String(r.name||'').trim(),`missing name ${r.championId}`);
@@ -29,7 +34,13 @@ for(const r of rows){
 }
 const ahri=cache.champions['103'];
 ok(ahri?.name==='아리','Ahri row missing');
-ok(ahri.tree==='루덴의 메아리 → 폭풍 쇄도 → 그림자불꽃',`Ahri sanity baseline changed unexpectedly: ${ahri?.tree}`);
+ok(Array.isArray(ahri.coreNames)&&ahri.coreNames.length>=2,'Ahri current core baseline missing');
+if(cache.canonicalPatch==='26.18')ok(ahri.tree==='루덴의 메아리 → 폭풍 쇄도 → 그림자불꽃',`26.18 Ahri sanity baseline changed unexpectedly: ${ahri?.tree}`);
+
+ok(exists(mirrorPath),'updater-safe ARAM cache mirror missing');
+ok(read(mirrorPath)===read(canonicalPath),'canonical ARAM cache and updater-safe mirror are not byte-identical');
+const marker=JSON.parse(read('update/meta/v015125-safe-cache-source.json'));
+ok(marker?.source===mirrorPath&&marker?.target==='aram-build-stats-current.json','safe-cache-source marker mismatch');
 
 const current=require('../update/v0.15.125/runtime-source-stability-v015125');
 const prior=require('../update/v0.15.124/runtime-source-stability-v015124');
@@ -81,6 +92,14 @@ if(String(manifest.version)==='0.15.125'){
   ok(map.get('main-v015125.js')==='update/v0.15.125/main-v015125.js','active main mapping wrong');
   ok(map.get('runtime-source-stability-v015125.js')==='update/v0.15.125/runtime-source-stability-v015125.js','active runtime mapping wrong');
   ok(map.get('aram-build-stat-runtime-v015125.js')==='update/v0.15.125/aram-build-stat-runtime-v015125.js','active stats runtime mapping wrong');
-  ok(map.get('aram-build-stats-current.json')==='data/aram-builds/current.json','active cache mapping wrong');
+  ok(map.get('aram-build-stats-current.json')===mirrorPath,'active cache mapping is not updater-safe');
+  for(const row of manifest.files||[])ok(String(row.source||'').startsWith('update/'),`active manifest contains disallowed source ${row.path} -> ${row.source}`);
 }
-console.log(`v0.15.125 ARAM BUILD CACHE AUDIT: SUCCESS · ${rows.length} champions · ${cache.canonicalPatch} · ${cache.providerMatchCount.toLocaleString('en-US')} matches`);
+const updaterSafety=read('update/v0.15.116/updater-safety-patch-v01579.js');
+ok(updaterSafety.includes("if(!s.startsWith('update/'))throw new Error('허용되지 않은 update source: '+s);"),'v0.15.116 updater source allowlist was weakened');
+const activation=read('tools/v015125-activate-aram-build-stat-cache.js');
+ok(activation.includes("const safeCacheSource='update/data/aram-builds/current.json';"),'activation does not use updater-safe cache source');
+const refreshWorkflow=read('.github/workflows/aram-build-stats-refresh.yml');
+ok(refreshWorkflow.includes('update/data/aram-builds/current.json'),'scheduled refresh does not maintain updater-safe cache mirror');
+ok(refreshWorkflow.includes('git add data/aram-builds/current.json update/data/aram-builds/current.json'),'scheduled refresh does not stage canonical+mirror together');
+console.log(`v0.15.125 ARAM BUILD CACHE AUDIT: SUCCESS · ${rows.length} champions · ${cache.canonicalPatch} · ${Number(cache.providerMatchCount||0).toLocaleString('en-US')} matches · updater-safe mirror`);
