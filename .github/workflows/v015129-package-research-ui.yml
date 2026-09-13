@@ -1,0 +1,44 @@
+name: Package v0.15.129 Research UI
+
+on:
+  push:
+    branches: [ feat/v015129-aram-rating-research-ui ]
+    paths:
+      - '.github/workflows/v015129-package-research-ui.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch audited Research UI source
+        run: |
+          git fetch origin research/aram-rating-ui-v01
+          test "$(git rev-parse origin/research/aram-rating-ui-v01)" = "9369453eccb2121fdd426417428f3c6a6b0f243c"
+          git show origin/research/aram-rating-ui-v01:research/aram-rating-ui-v01/rating-engine-v01.js > update/v0.15.129/rating-engine-v01.js
+          git show origin/research/aram-rating-ui-v01:research/aram-rating-ui-v01/research-ui-core.js > update/v0.15.129/research-ui-core.js
+          git show origin/research/aram-rating-ui-v01:research/aram-rating-ui-v01/research-ui-devtools.js > update/v0.15.129/research-ui-devtools.js
+      - name: Package local-only runtime and activate manifest
+        run: |
+          node tools/package-v015129-research-ui.js
+          node -c update/v0.15.129/rating-engine-v01.js
+          node -c update/v0.15.129/research-ui-core.js
+          node -c update/v0.15.129/research-ui-devtools.js
+          node -c update/v0.15.129/runtime-source-stability-v015129.js
+          node -c update/v0.15.129/main-v015129.js
+      - name: Commit generated package
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update/manifest.json update/v0.15.129/rating-engine-v01.js update/v0.15.129/research-ui-core.js update/v0.15.129/research-ui-devtools.js
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "release: package v0.15.129 local Rating Research UI"
+          git push origin HEAD:feat/v015129-aram-rating-research-ui
