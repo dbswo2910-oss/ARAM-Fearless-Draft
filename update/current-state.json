@@ -6,8 +6,7 @@
     "version": "0.15.119",
     "message": "v0.15.119 · AUTOSYNC CONCURRENCY — single-flight core, stale-response guard, reconnect backoff",
     "min_launcher": "2.0.2",
-    "manifest_commit": "ee4fe8d947633c6e002cf75e5f3b63efe8213e65",
-    "manifest_commit_date": "2026-09-13T06:02:16+00:00"
+    "manifest_commit": "ee4fe8d947633c6e002cf75e5f3b63efe8213e65"
   },
   "package": {
     "source": "update/v0.15.119/package.json",
@@ -49,17 +48,61 @@
     "runtime_loader_source": "update/v0.15.119/runtime-loader-v01579.js"
   },
   "retired_ui_overlays": [
-    {"path":"ui-layout-restore-v015103.js","active":false,"scheduled_delete":true},
-    {"path":"random-data-ui-hotfix-v015105.js","active":false,"scheduled_delete":true},
-    {"path":"random-data-ui-hotfix-v015106.js","active":false,"scheduled_delete":true},
-    {"path":"view-boundary-repair-v015107.js","active":false,"scheduled_delete":true},
-    {"path":"data-random-hardfix-v015108.js","active":false,"scheduled_delete":true},
-    {"path":"ui-screenshot-polish-v015109.js","active":false,"scheduled_delete":true},
-    {"path":"patch-notes-density-v015110.js","active":false,"scheduled_delete":true},
-    {"path":"random-dna-rail-v015111.js","active":false,"scheduled_delete":true},
-    {"path":"random-workspace-stability-v015112.js","active":false,"scheduled_delete":true},
-    {"path":"random-workspace-readable-v015113.js","active":false,"scheduled_delete":true},
-    {"path":"random-pick-integrity-v015114.js","active":false,"scheduled_delete":true}
+    {
+      "path": "ui-layout-restore-v015103.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "random-data-ui-hotfix-v015105.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "random-data-ui-hotfix-v015106.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "view-boundary-repair-v015107.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "data-random-hardfix-v015108.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "ui-screenshot-polish-v015109.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "patch-notes-density-v015110.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "random-dna-rail-v015111.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "random-workspace-stability-v015112.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "random-workspace-readable-v015113.js",
+      "active": false,
+      "scheduled_delete": true
+    },
+    {
+      "path": "random-pick-integrity-v015114.js",
+      "active": false,
+      "scheduled_delete": true
+    }
   ],
   "real_world_validation": {
     "random_pick_after_v015115_single_owner_reset": {
