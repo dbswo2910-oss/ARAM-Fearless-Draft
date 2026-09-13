@@ -1,0 +1,48 @@
+name: v0.15.115 Single-Owner UI Stability Audit
+
+on:
+  pull_request:
+    paths:
+      - 'update/v0.15.115/**'
+      - 'tools/v015115-single-owner-stability-audit.js'
+      - '.github/workflows/v015115-single-owner-stability-audit.yml'
+      - '.github/workflows/v015115-activate-stability-baseline.yml'
+      - '.github/workflows/full-regression-audit.yml'
+      - 'AGENTS.md'
+      - 'docs/AI_HANDOFF.md'
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.115/**'
+      - 'tools/v015115-single-owner-stability-audit.js'
+      - '.github/workflows/v015115-single-owner-stability-audit.yml'
+      - '.github/workflows/full-regression-audit.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run v0.15.115 single-owner stability audit
+        run: node tools/v015115-single-owner-stability-audit.js
+      - name: Run v0.15.100 candidate-preview audit
+        run: node tools/v015100-random-pick-preview-lock-audit.js
+      - name: Run v0.15.99 Data Hub audit
+        run: node tools/v01599-data-hub-audit.js
+      - name: Run v0.15.79 permanent safety audit
+        run: node tools/runtime-stability-v01579-audit.js
+      - name: Run full regression audit
+        run: node tools/full-regression-audit.js
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v015115-single-owner-stability-audit
+          path: audit-output/v015115-single-owner-stability-report.json
+          if-no-files-found: ignore
