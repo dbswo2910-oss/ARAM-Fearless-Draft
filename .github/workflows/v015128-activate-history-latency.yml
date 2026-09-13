@@ -1,0 +1,124 @@
+name: v0.15.128 Activate Match History Latency
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.128/**'
+      - 'tools/v015128-history-latency-audit.js'
+      - 'tools/v015128-activate-history-latency.js'
+      - 'tools/v015124-startup-successor-route-audit.js'
+      - '.github/workflows/v015128-activate-history-latency.yml'
+      - 'AGENTS.md'
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.128/**'
+      - 'tools/v015128-history-latency-audit.js'
+      - 'tools/v015128-activate-history-latency.js'
+      - 'tools/v015124-startup-successor-route-audit.js'
+      - '.github/workflows/v015128-activate-history-latency.yml'
+      - 'AGENTS.md'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v015128-history-latency
+  cancel-in-progress: false
+
+jobs:
+  contract-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare v0.15.128 candidate
+        run: node tools/v015128-activate-history-latency.js
+      - name: Sync candidate continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Validate v0.15.128 history latency contract
+        run: node tools/v015128-history-latency-audit.js
+      - name: Re-run affected history and AutoSync audits
+        run: |
+          node tools/ingame-results-v01595-audit.js
+          node tools/ingame-results-sync-v01596-audit.js
+          node tools/ingame-results-parser-v01597-audit.js
+          node tools/ingame-results-integrity-v01598-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+      - name: Re-run successor and safety audits
+        run: |
+          node tools/v015127-startup-update-notice-audit.js
+          node tools/v015126-match-search-labels-audit.js
+          node tools/v015125-aram-build-stat-cache-audit.js
+          node tools/v015124-startup-successor-route-audit.js
+          node tools/v015123-patch-notes-startup-notice-audit.js
+          node tools/v015122-riot-grade-accuracy-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
+      - name: Full Regression
+        run: node tools/full-regression-audit.js
+
+  activate:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare v0.15.128 activation files
+        run: node tools/v015128-activate-history-latency.js
+      - name: Sync repository continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Post-activation feature and affected audits
+        run: |
+          node tools/v015128-history-latency-audit.js
+          node tools/ingame-results-sync-v01596-audit.js
+          node tools/ingame-results-parser-v01597-audit.js
+          node tools/ingame-results-integrity-v01598-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015127-startup-update-notice-audit.js
+          node tools/v015126-match-search-labels-audit.js
+          node tools/v015125-aram-build-stat-cache-audit.js
+          node tools/v015124-startup-successor-route-audit.js
+          node tools/v015123-patch-notes-startup-notice-audit.js
+          node tools/v015122-riot-grade-accuracy-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01579-audit.js
+      - name: Full Regression after manifest activation
+        run: node tools/full-regression-audit.js
+      - name: Commit verified v0.15.128 activation atomically
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md docs/AI_HANDOFF.md docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
+          if git diff --cached --quiet; then
+            echo 'v0.15.128 activation already present'
+          else
+            git commit -m 'release v0.15.128 match history latency'
+            git push
+          fi
