@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.107**
+- Active updater version: **v0.15.108**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -380,3 +380,7 @@ Do not restart established design decisions from scratch unless the user asks to
 ### v0.15.107 — DATA/RANDOM view boundary repair
 
 The v0.15.103 Data layout helper used a document-wide `.panel` + Korean-title search. v0.15.107 supersedes that ownership with view-scoped discovery rooted at exact `#dataCard`, removes legacy cross-view layout classes, makes Patch Notes own the Data workspace, and rebuilds Random Practice pick layout only from exact installed IDs (`#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, `#rpPickIntelV01589`). Do not reintroduce document-wide panel discovery. Scoring remains unchanged.
+
+### v0.15.108 — DATA Patch Mode hardfix
+
+The screenshot-confirmed v0.15.107 failure was caused by relying on a direct-child layout assumption and a single patch-mode signal. v0.15.108 detects Patch Notes from visible and hidden tabs, the v0.15.99 card class, and actual patch-note visibility, then marks and hides the real tier branch using descendant-safe selectors. Random Practice also hides foreign Data nodes and their empty branches. `score_logic_changed:false`.
