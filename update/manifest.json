@@ -1,6 +1,6 @@
 {
-  "version": "0.15.110",
-  "message": "v0.15.110 · PATCH NOTES DENSITY — compact champion portraits and card grid",
+  "version": "0.15.111",
+  "message": "v0.15.111 · RANDOM DNA RAIL — readable selected-composition detail + DNA layout",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -572,6 +572,10 @@
       "source": "update/v0.15.110/patch-notes-density-v015110.js"
     },
     {
+      "path": "random-dna-rail-v015111.js",
+      "source": "update/v0.15.111/random-dna-rail-v015111.js"
+    },
+    {
       "path": "runtime-source-stability-v015104.js",
       "source": "update/v0.15.104/runtime-source-stability-v015104.js"
     },
@@ -598,6 +602,10 @@
     {
       "path": "runtime-source-stability-v015110.js",
       "source": "update/v0.15.110/runtime-source-stability-v015110.js"
+    },
+    {
+      "path": "runtime-source-stability-v015111.js",
+      "source": "update/v0.15.111/runtime-source-stability-v015111.js"
     },
     {
       "path": "main-v015104.js",
@@ -628,8 +636,12 @@
       "source": "update/v0.15.110/main-v015110.js"
     },
     {
+      "path": "main-v015111.js",
+      "source": "update/v0.15.111/main-v015111.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.110/package.json"
+      "source": "update/v0.15.111/package.json"
     }
   ],
   "delete": [

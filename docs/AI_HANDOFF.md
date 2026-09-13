@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.110**
+- Active updater version: **v0.15.111**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -392,3 +392,7 @@ The v0.15.108 screenshots confirm that DATA/RANDOM view ownership is fixed. v0.1
 ### v0.15.110 — Patch Notes champion density
 
 Screenshot-confirmed hotfix for oversized Patch Notes champion portraits. The repair is strictly scoped to `#dataPatchNotesV01599 #dh99ChampionGrid`, force-locks portraits to 46×46 px, uses a denser responsive grid, and preserves DATA tier cards, RANDOM Practice, recommendation/scoring/item logic, v0.15.109 polish, and the v0.15.79 safety lineage. `score_logic_changed:false`.
+
+### v0.15.111 — RANDOM DNA right-rail repair
+
+Screenshot-confirmed fix for the selected-composition detail + Combination DNA rail being squeezed into tiny side-by-side columns. The rail now uses width-aware `auto-fit/minmax(260px, 1fr)` so a narrow third column stacks vertically while a genuinely wide row can use two columns. Korean detail text wrapping is restored. Recommendation/scoring/item logic is unchanged and v0.15.79 safety lineage is preserved. `score_logic_changed:false`.
