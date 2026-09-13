@@ -37,6 +37,21 @@ def _cold_start_rate(ev: dict) -> float | None:
     return ((total - no_cold) / total) if total else None
 
 
+def _phase_a_selection_guard(ev: dict, real_matches: int) -> None:
+    if real_matches <= 0:
+        return
+    if real_matches < 500:
+        ev['selection'] = {
+            **(ev.get('selection') or {}),
+            'status': 'insufficient_for_model_selection',
+            'reason': 'Phase A real sample is for importer/schema/network/model execution validation only; at least 500 matches are required before model selection.',
+            'matches': real_matches,
+            'candidate_winner_forbidden': True,
+            'kr_percentile_forbidden': True,
+            'skill_tier_forbidden': True,
+        }
+
+
 def run_phase_a(input_path: str | Path, output_dir: str | Path | None = None,
                 min_duration: int = 180, min_test_matches: int = 100) -> dict:
     input_path = Path(input_path)
@@ -64,6 +79,7 @@ def run_phase_a(input_path: str | Path, output_dir: str | Path | None = None,
     network = analyze_network(db)
     matches = load_matches(db)
     ev = evaluate_v02(matches, real_data=True, min_test_matches=min_test_matches)
+    _phase_a_selection_guard(ev, stats.get('matches', 0))
     cold = _cold_start_rate(ev)
     strategy = recommend_phase_b(network, cold_start_rate=cold)
 
