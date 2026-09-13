@@ -1,0 +1,155 @@
+name: v0.15.131 Activate Startup Cold Boot Fix
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'launcher/stable-v203/**'
+      - 'update/v0.15.131/**'
+      - 'tools/v015131-startup-cold-boot-audit.js'
+      - 'tools/v015131-activate-startup-cold-boot.js'
+      - 'docs/STARTUP_COLD_BOOT_ROOT_CAUSE_v0.15.131.md'
+      - '.github/workflows/v015131-activate-startup-cold-boot.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'launcher/stable-v203/**'
+      - 'update/v0.15.131/**'
+      - 'tools/v015131-startup-cold-boot-audit.js'
+      - 'tools/v015131-activate-startup-cold-boot.js'
+      - 'docs/STARTUP_COLD_BOOT_ROOT_CAUSE_v0.15.131.md'
+      - '.github/workflows/v015131-activate-startup-cold-boot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v015131-startup-cold-boot-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contract-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22.x' }
+      - name: Compile sources
+        run: |
+          node -c update/v0.15.131/main-v015131.js
+          node -c update/v0.15.131/runtime-source-stability-v015131.js
+          node -c update/v0.15.131/successor-route-v015131.js
+          node -c update/v0.15.131/update-boot-diagnostic-v015131.js
+          node -c tools/v015131-startup-cold-boot-audit.js
+          node -c tools/v015131-activate-startup-cold-boot.js
+      - name: Launcher fixture tests A B D + semver
+        working-directory: launcher/stable-v203
+        run: go test ./...
+      - name: Cross-build Windows repair launcher
+        working-directory: launcher/stable-v203
+        env: { GOOS: windows, GOARCH: amd64, CGO_ENABLED: '0' }
+        run: |
+          mkdir -p ../../audit-output
+          go build -ldflags '-s -w -H=windowsgui' -o ../../audit-output/ARAM_Fearless_Draft_ColdBootFix_v2.0.3.exe .
+      - name: Verify PE binary
+        run: file audit-output/ARAM_Fearless_Draft_ColdBootFix_v2.0.3.exe | grep -E 'PE32\+.*x86-64'
+      - name: Prepare v0.15.131 candidate
+        run: node tools/v015131-activate-startup-cold-boot.js
+      - name: Sync candidate continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Run cold-boot lifecycle audit including Cases C/E
+        run: node tools/v015131-startup-cold-boot-audit.js
+      - name: Re-run update/runtime owners
+        run: |
+          node tools/v015127-startup-update-notice-audit.js
+          node tools/v015128-history-latency-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+      - name: Re-run unaffected product regressions
+        run: |
+          node tools/profile-ux-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/item-recommendation-v01581-audit.js
+      - name: Full Regression
+        run: node tools/full-regression-audit.js
+      - name: Upload diagnostics and repair launcher
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v015131-startup-cold-boot
+          path: |
+            audit-output/ARAM_Fearless_Draft_ColdBootFix_v2.0.3.exe
+            audit-output/v015131-startup-cold-boot-report.json
+            audit-output/full-regression-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: warn
+
+  activate:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22.x' }
+      - name: Build and test launcher
+        run: |
+          cd launcher/stable-v203
+          go test ./...
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '-s -w -H=windowsgui' -o ../../ARAM_Fearless_Draft_ColdBootFix_v2.0.3.exe .
+          cd ../..
+          file ARAM_Fearless_Draft_ColdBootFix_v2.0.3.exe | grep -E 'PE32\+.*x86-64'
+      - name: Prepare v0.15.131 activation
+        run: node tools/v015131-activate-startup-cold-boot.js
+      - name: Sync repository continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Validate lifecycle and predecessor contracts
+        run: |
+          node tools/v015131-startup-cold-boot-audit.js
+          node tools/v015127-startup-update-notice-audit.js
+          node tools/v015128-history-latency-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/profile-ux-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/item-recommendation-v01581-audit.js
+      - name: Full Regression after activation
+        run: node tools/full-regression-audit.js
+      - name: Upload Windows Launcher 2.0.3
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARAM-Fearless-Draft-Launcher-v2.0.3
+          path: ARAM_Fearless_Draft_ColdBootFix_v2.0.3.exe
+          if-no-files-found: error
+      - name: Commit verified activation atomically
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md AGENTS.md docs/AI_HANDOFF.md docs/KNOWN_ISSUES.md docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
+          if git diff --cached --quiet; then
+            echo 'v0.15.131 activation already present'
+          else
+            git commit -m 'release v0.15.131 cold boot update authority'
+            git push
+          fi
