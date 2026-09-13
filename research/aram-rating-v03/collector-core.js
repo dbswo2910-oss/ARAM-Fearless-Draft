@@ -10,9 +10,10 @@
   const matchTime=g=>{const v=pick(g,['gameEndTimestamp','gameEnd','timestamp','ts','createdAt','gameCreation','gameCreationDate','gameStartTimestamp','game_datetime']);const n=Number(v);return Number.isFinite(n)?n:0};
   function queueId(g){const direct=pick(g,['queueId','queue_id']);if(direct!==null){const n=Number(direct);return Number.isFinite(n)?n:null}for(const r of roots(g)){const n=Number(r?.gameQueueConfig?.id);if(Number.isFinite(n)&&n>0)return n}return null}
   function participants(g){for(const r of roots(g)){if(Array.isArray(r?.participants)&&r.participants.length)return r.participants;const a=Array.isArray(r?.team)?r.team:[],b=Array.isArray(r?.enemy)?r.enemy:[];if(a.length||b.length)return [...a,...b]}return []}
-  function participantPuuids(g){const ps=participants(g);let xs=ps.map(p=>String(p?.puuid||p?.player?.puuid||'').trim()).filter(Boolean);if(xs.length)return xs;for(const r of roots(g)){if(Array.isArray(r?.participantIdentities)){xs=r.participantIdentities.map(x=>String(x?.player?.puuid||x?.puuid||'').trim()).filter(Boolean);if(xs.length)return xs}}return []}
+  function participantPuuids(g){const ps=participants(g);let xs=ps.map(p=>String(p?.puuid||p?.player?.puuid||'').trim()).filter(Boolean);if(xs.length)return xs;for(const r of roots(g))if(Array.isArray(r?.participantIdentities)){xs=r.participantIdentities.map(x=>String(x?.player?.puuid||x?.puuid||'').trim()).filter(Boolean);if(xs.length)return xs}return []}
   function standardMatches(rows){return (Array.isArray(rows)?rows:[]).filter(g=>queueId(g)===450&&participantPuuids(g).length===10&&matchId(g));}
   function dedupeMatches(rows){const out=[],seen=new Set();for(const g of rows||[]){const id=matchId(g);if(!id||seen.has(id))continue;seen.add(id);out.push(g)}return out.sort((a,b)=>matchTime(b)-matchTime(a));}
+  function seedFingerprint(rows){return dedupeMatches(standardMatches(rows)).map(matchId).sort().join('|')}
   function median(xs){const a=xs.slice().sort((a,b)=>a-b);if(!a.length)return 0;const n=a.length;return n%2?a[n>>1]:(a[n/2-1]+a[n/2])/2}
   function networkState(rows){
     const matches=dedupeMatches(standardMatches(rows)),counts=new Map(),adj=new Map();
@@ -29,6 +30,20 @@
     const {matches,counts,adj}=networkState(rows),vals=[...counts.values()],players=vals.length;const singles=vals.filter(x=>x===1).length,two=vals.filter(x=>x>=2).length,five=vals.filter(x=>x>=5).length,ten=vals.filter(x=>x>=10).length;
     const seen=new Set();let giant=0,components=0;for(const p of adj.keys()){if(seen.has(p))continue;components++;let n=0,stack=[p];seen.add(p);while(stack.length){const u=stack.pop();n++;for(const v of adj.get(u)||[])if(!seen.has(v)){seen.add(v);stack.push(v)}}giant=Math.max(giant,n)}
     return {matches:matches.length,players,avg_matches_per_player:players?vals.reduce((a,b)=>a+b,0)/players:0,median_matches_per_player:median(vals),single_match_players:singles,single_match_fraction:players?singles/players:0,players_2_plus:two,players_5_plus:five,players_10_plus:ten,component_count:components,largest_component_players:giant,largest_component_fraction:players?giant/players:0};
+  }
+  function phaseASeedFromEnvelope(envelope,opts={}){
+    if(!envelope||typeof envelope!=='object')throw new Error('phase_a_seed_invalid_json');
+    if(envelope.schema!=='aram-rating-real-sample-v02')throw new Error('phase_a_seed_wrong_schema');
+    const raw=Array.isArray(envelope.matches)?envelope.matches:[];
+    if(!raw.length)throw new Error('phase_a_seed_empty');
+    const matches=dedupeMatches(standardMatches(raw));
+    if(matches.length!==raw.length)throw new Error('phase_a_seed_contains_invalid_or_duplicate_matches');
+    const stats=kpis(matches),declared=Number(envelope?.metadata?.match_count);
+    if(Number.isFinite(declared)&&declared>0&&declared!==stats.matches)throw new Error('phase_a_seed_metadata_match_count_mismatch');
+    const expectedMatches=opts.expectedMatches===undefined?20:Number(opts.expectedMatches),expectedPlayers=opts.expectedPlayers===undefined?160:Number(opts.expectedPlayers);
+    if(Number.isFinite(expectedMatches)&&expectedMatches>0&&stats.matches!==expectedMatches)throw new Error(`phase_a_seed_expected_${expectedMatches}_matches_got_${stats.matches}`);
+    if(Number.isFinite(expectedPlayers)&&expectedPlayers>0&&stats.players!==expectedPlayers)throw new Error(`phase_a_seed_expected_${expectedPlayers}_players_got_${stats.players}`);
+    return {schema:'aram-rating-phase-a-import-v03',source_schema:envelope.schema,source_exported_at:envelope?.metadata?.exported_at||null,matches,kpis:stats,fingerprint:seedFingerprint(matches)};
   }
   function scoreCandidates(seedRows,historyStats={}){
     const {counts,adj}=networkState(seedRows),arts=articulationPoints(adj),maxDeg=Math.max(1,...[...adj.values()].map(s=>s.size));const rows=[];const cohort=historyStats.__cohort||{},cohortDup=Math.max(0,Math.min(1,Number(cohort.duplicate_rate)||0)),cohortRetry=Math.max(0,Math.min(1,Number(cohort.retry_rate)||0));
@@ -53,5 +68,5 @@
     const information_gain=knownAppearances+3*crossed2+4*crossed5+5*crossed10-0.5*duplicates.length-0.1*newPlayers;
     return {valid,target_hits:targetHits,duplicates,new_matches:fresh,after_rows:afterRows,new_players:newPlayers,already_known_player_appearances:knownAppearances,threshold_crossings:{two_plus:crossed2,five_plus:crossed5,ten_plus:crossed10},information_gain};
   }
-  return {matchId,matchTime,queueId,participants,participantPuuids,standardMatches,dedupeMatches,networkState,articulationPoints,kpis,scoreCandidates,mergeExpansion};
+  return {matchId,matchTime,queueId,participants,participantPuuids,standardMatches,dedupeMatches,seedFingerprint,networkState,articulationPoints,kpis,phaseASeedFromEnvelope,scoreCandidates,mergeExpansion};
 });
