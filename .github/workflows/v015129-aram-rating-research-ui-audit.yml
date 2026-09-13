@@ -7,6 +7,7 @@ on:
       - 'update/v0.15.129/**'
       - 'update/manifest.json'
       - 'tools/v015129-aram-rating-research-ui-audit.js'
+      - 'tools/v015129-history-preservation-audit.js'
       - '.github/workflows/v015129-aram-rating-research-ui-audit.yml'
   pull_request:
     branches: [ main ]
@@ -14,6 +15,7 @@ on:
       - 'update/v0.15.129/**'
       - 'update/manifest.json'
       - 'tools/v015129-aram-rating-research-ui-audit.js'
+      - 'tools/v015129-history-preservation-audit.js'
       - '.github/workflows/v015129-aram-rating-research-ui-audit.yml'
   workflow_dispatch:
 
@@ -42,6 +44,7 @@ jobs:
           node -c update/v0.15.129/main-v015129.js
           node -c update/v0.15.129/successor-route-v015129.js
           node -c tools/v015129-aram-rating-research-ui-audit.js
+          node -c tools/v015129-history-preservation-audit.js
       - name: Run v0.15.129 Research UI fixtures and integration audit
         run: node tools/v015129-aram-rating-research-ui-audit.js
       - name: Run Full Regression
@@ -49,7 +52,7 @@ jobs:
       - name: Run Player Profile regression
         run: node tools/profile-ux-audit.js
       - name: Run Match History regression
-        run: node tools/v015128-history-latency-audit.js
+        run: node tools/v015129-history-preservation-audit.js
       - name: Run AutoSync regression
         run: node tools/v015119-autosync-concurrency-audit.js
       - name: Run RANDOM regression
@@ -75,7 +78,6 @@ jobs:
             audit-output/v015129-aram-rating-research-ui-report.json
             audit-output/full-regression-report.json
             audit-output/profile-ux-report.json
-            audit-output/v015128-history-latency-report.json
             audit-output/v015119-autosync-concurrency-report.json
             audit-output/v015121-random-practice-restore-report.json
             audit-output/v015120-data-subnav-report.json
