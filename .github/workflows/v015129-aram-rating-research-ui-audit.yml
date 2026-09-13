@@ -6,6 +6,8 @@ on:
     paths:
       - 'update/v0.15.129/**'
       - 'update/manifest.json'
+      - 'update/current-state.json'
+      - 'docs/CURRENT_STATE.md'
       - 'tools/v015129-aram-rating-research-ui-audit.js'
       - 'tools/v015129-history-preservation-audit.js'
       - '.github/workflows/v015129-aram-rating-research-ui-audit.yml'
@@ -14,6 +16,8 @@ on:
     paths:
       - 'update/v0.15.129/**'
       - 'update/manifest.json'
+      - 'update/current-state.json'
+      - 'docs/CURRENT_STATE.md'
       - 'tools/v015129-aram-rating-research-ui-audit.js'
       - 'tools/v015129-history-preservation-audit.js'
       - '.github/workflows/v015129-aram-rating-research-ui-audit.yml'
@@ -67,6 +71,8 @@ jobs:
           node tools/v015116-runtime-update-stability-audit.js
           node tools/v015117-state-integrity-audit.js
           node tools/v015118-resource-lifecycle-audit.js
+      - name: Verify AI continuity snapshot
+        run: node tools/sync-current-state.js --check
       - name: Run AI continuity
         run: node tools/ai-continuity-audit.js
       - name: Upload v0.15.129 audit report
