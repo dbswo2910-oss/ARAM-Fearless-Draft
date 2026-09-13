@@ -10,6 +10,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'tools/v015120-successor-audit-contract.js'
       - 'tools/v015120-activate-data-subnav.js'
       - '.github/workflows/v015120-activate-data-subnav-retry.yml'
   workflow_dispatch:
@@ -113,6 +114,7 @@ jobs:
           git add \
             tools/v015118-resource-lifecycle-audit.js \
             tools/v015117-state-integrity-audit.js \
+            tools/v015116-runtime-update-stability-audit.js \
             update/manifest.json README.md AGENTS.md docs/AI_HANDOFF.md \
             docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
           if git diff --cached --quiet; then
