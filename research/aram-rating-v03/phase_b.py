@@ -167,11 +167,18 @@ def _evaluation_summary(report: dict) -> dict:
     }
 
 
+def _is_fixture(metadata: dict) -> bool:
+    source = str(metadata.get('source') or '').lower()
+    return bool(metadata.get('fixture_only') is True or 'synthetic' in source or 'fixture' in source)
+
+
 def _write_snapshot_input(rows: list[dict], path: Path, source_metadata: dict) -> None:
+    fixture_only = _is_fixture(source_metadata)
     envelope = {
         'schema': 'aram-rating-phase-b-snapshot-input-v03',
         'metadata': {
-            'source': 'phase_b_local_collector_snapshot',
+            'source': 'synthetic_fixture_only' if fixture_only else 'phase_b_local_collector_snapshot',
+            'fixture_only': fixture_only,
             'region': 'KR',
             'queue': 450,
             'match_count': len(rows),
@@ -197,6 +204,7 @@ def run_phase_b(input_path: str | Path, output_dir: str | Path | None = None,
         raise ValueError('no matches available for Phase B evaluation')
 
     metadata = payload.get('metadata') or {}
+    fixture_only = _is_fixture(metadata)
     seed_matches = int(metadata.get('seed_matches') or ((payload.get('kpis') or {}).get('before') or {}).get('matches') or 20)
     out = Path(output_dir) if output_dir else _default_output_dir()
     out.mkdir(parents=True, exist_ok=True)
@@ -237,7 +245,8 @@ def run_phase_b(input_path: str | Path, output_dir: str | Path | None = None,
         'schema': 'aram-rating-phase-b-evaluation-v03',
         'source_file': input_path.name,
         'collector_status': metadata.get('status'),
-        'real_data': True,
+        'real_data': not fixture_only,
+        'fixture_only': fixture_only,
         'input': input_stats,
         'snapshot_points': points,
         'timeline': timeline,
@@ -257,6 +266,8 @@ def run_phase_b(input_path: str | Path, output_dir: str | Path | None = None,
     aggregate_path.write_text(json.dumps(aggregate, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(json.dumps({
         'collector_status': metadata.get('status'),
+        'real_data': not fixture_only,
+        'fixture_only': fixture_only,
         'accepted_for_evaluation': input_stats['accepted_for_evaluation'],
         'snapshots': points,
         'repeat_observation_direction': direction,
