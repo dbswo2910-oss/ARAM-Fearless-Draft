@@ -44,10 +44,16 @@ function chooseBaseline(info,itemMap){
   for(const row of sortRows(info.core_items).slice(1))for(const id of flattenIds(row))add(id);
   return {starterItemIds:starters.slice(0,4),bootsId:boots[0]||null,coreItemIds:unique([...topCore,...completion]).slice(0,5)};
 }
+function ddragonPatchCandidates(target){
+  const [major,minor]=patchParts(target);const out=[target];
+  if(Number.isFinite(major)&&major>=20)out.push(`${major-10}.${minor}`);
+  return out;
+}
 async function loadItemMap(){
   const versions=await fetchJson(`${DD}/api/versions.json`);
-  const ddVersion=versions.find(v=>String(v).startsWith(`${TARGET_PATCH}.`));
-  if(!ddVersion)throw new Error(`Data Dragon version for ${TARGET_PATCH} not found; latest=${versions[0]}`);
+  const candidates=ddragonPatchCandidates(TARGET_PATCH);
+  const ddVersion=versions.find(v=>candidates.some(p=>String(v).startsWith(`${p}.`)));
+  if(!ddVersion)throw new Error(`Data Dragon version for ${TARGET_PATCH} aliases=${candidates.join(',')} not found; latest=${versions[0]}`);
   const payload=await fetchJson(`${DD}/cdn/${ddVersion}/data/ko_KR/item.json`);
   return {ddVersion,itemMap:payload.data||{}};
 }
