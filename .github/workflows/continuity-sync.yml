@@ -1,0 +1,42 @@
+name: Continuity Snapshot Sync
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/manifest.json'
+      - 'docs/continuity-manual.json'
+      - 'tools/sync-current-state.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Regenerate current-state handoff
+        run: node tools/sync-current-state.js
+      - name: Validate continuity contracts
+        run: node tools/ai-continuity-audit.js
+      - name: Commit generated handoff if needed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add docs/CURRENT_STATE.md update/current-state.json
+          if git diff --cached --quiet; then
+            echo 'Continuity snapshot already current'
+          else
+            git commit -m 'sync AI continuity snapshot'
+            git push
+          fi

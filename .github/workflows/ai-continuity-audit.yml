@@ -1,0 +1,36 @@
+name: AI Continuity Audit
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check generated continuity snapshot
+        run: node tools/sync-current-state.js --check
+      - name: Run AI continuity audit
+        run: node tools/ai-continuity-audit.js
+      - name: Upload continuity report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-continuity-report
+          path: audit-output/ai-continuity-report.json
+          if-no-files-found: ignore
