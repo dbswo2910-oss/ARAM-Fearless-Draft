@@ -49,5 +49,13 @@ results.push(patchFile('tools/v015118-resource-lifecycle-audit.js',[
   }
 ]));
 
+results.push(patchFile('tools/runtime-stability-v01579-audit.js',[
+  {
+    label:'permanent safety baseline successor chain limit',
+    oldText:'while(target&&by.get(target)&&!seen.has(target)&&out.length<40){',
+    newText:'while(target&&by.get(target)&&!seen.has(target)&&out.length<128){'
+  }
+]));
+
 console.log(`v0.15.122 SUCCESSOR GRADE AUDIT CONTRACT: ${checkOnly?'CHECK SUCCESS':'APPLY SUCCESS'}`);
 for(const r of results)console.log(JSON.stringify(r));
