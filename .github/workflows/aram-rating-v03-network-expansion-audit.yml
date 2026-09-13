@@ -1,0 +1,87 @@
+name: ARAM Rating v0.3 Network Expansion Research Audit
+
+on:
+  push:
+    branches: [ research/aram-rating-v03-network-expansion ]
+    paths:
+      - 'research/aram-rating-v01/**'
+      - 'research/aram-rating-v02/**'
+      - 'research/aram-rating-v03/**'
+      - 'tools/aram-rating-v01-audit.py'
+      - 'tools/aram-rating-v02-audit.py'
+      - 'tools/aram-rating-phase-a-audit.py'
+      - 'tools/aram-rating-export-v02-audit.js'
+      - 'tools/aram-rating-v03-audit.py'
+      - 'tools/aram-rating-v03-static-audit.js'
+      - '.github/workflows/aram-rating-v03-network-expansion-audit.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'research/aram-rating-v01/**'
+      - 'research/aram-rating-v02/**'
+      - 'research/aram-rating-v03/**'
+      - 'tools/aram-rating-v01-audit.py'
+      - 'tools/aram-rating-v02-audit.py'
+      - 'tools/aram-rating-phase-a-audit.py'
+      - 'tools/aram-rating-export-v02-audit.js'
+      - 'tools/aram-rating-v03-audit.py'
+      - 'tools/aram-rating-v03-static-audit.js'
+      - '.github/workflows/aram-rating-v03-network-expansion-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Compile v0.1-v0.3 research modules
+        run: python -m py_compile research/aram-rating-v01/*.py research/aram-rating-v02/*.py research/aram-rating-v03/*.py tools/aram-rating-v01-audit.py tools/aram-rating-v02-audit.py tools/aram-rating-phase-a-audit.py tools/aram-rating-v03-audit.py
+      - name: Re-run v0.2 research audit
+        run: |
+          python tools/aram-rating-v02-audit.py
+          node tools/aram-rating-export-v02-audit.js
+          python tools/aram-rating-phase-a-audit.py
+      - name: Run v0.3 collector core fixture
+        run: node research/aram-rating-v03/collector-core.test.js
+      - name: Run v0.3 static safety and history-path audit
+        run: node tools/aram-rating-v03-static-audit.js
+      - name: Run v0.3 end-to-end snapshot fixture
+        run: python tools/aram-rating-v03-audit.py
+      - name: Assert fixture is not presented as real performance
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open('audit-output/aram-rating-v03-report.json',encoding='utf-8'))
+          s=json.load(open('audit-output/aram-rating-v03-static-report.json',encoding='utf-8'))
+          assert r['fixture_only'] is True and r['real_performance_claimed'] is False
+          assert r['hard_cap']==500
+          assert r['snapshot_points_verified']==[20,100,250,500]
+          assert s['production_manifest_untouched'] is True
+          assert s['blocked_by_data_source_guard'] is True
+          print('v0.3 fixture / safety guards: PASS')
+          PY
+      - name: Upload research audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aram-rating-v03-research-audit
+          path: |
+            audit-output/aram-rating-v02-report.json
+            audit-output/aram-rating-export-v02-report.json
+            audit-output/aram-rating-phase-a-report.json
+            audit-output/aram-rating-v03-report.json
+            audit-output/aram-rating-v03-static-report.json
+          if-no-files-found: error
