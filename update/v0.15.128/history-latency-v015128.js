@@ -24,7 +24,8 @@
   function applyResult(r,key,{merge=false,preserveSelection=true}={}){
     const s=state();if(!s||!r||r.connected===false)return false;
     const incoming=Array.isArray(r.matches)?r.matches:[];
-    const rows=merge?mergeRows(incoming,s.matches,Math.max(40,Number(s.limit)||20)):incoming;
+    const canMerge=merge&&s.__latencyKeyV015128===key;
+    const rows=canMerge?mergeRows(incoming,s.matches,Math.max(40,Number(s.limit)||20)):incoming;
     const selected=preserveSelection?String(s.selectedGameId||''):'';
     s.matches=rows;s.account=r.account||s.account||null;s.localAccount=r.localAccount||s.localAccount||currentLocalAccount();s.targetMode=r.targetMode==='searched'?'searched':(s.targetMode==='searched'?'searched':'current');s.source=r.sourceEndpoint||s.source||'LCU Match History';s.scanned=Math.max(Number(s.scanned)||0,Number(r.scanned)||0);s.fullTeamCount=Math.max(Number(s.fullTeamCount)||0,Number(r.fullTeamCount)||0);s.errors=Array.isArray(r.errors)?r.errors:[];s.loadedAt=Date.now();s.queueMode=r.queueMode==='mayhem'?'mayhem':queueModeOf(s);s.__latencyKeyV015128=key;lastAppliedKey=key;
     const ids=new Set(rows.map(gameKey).filter(Boolean));s.selectedGameId=selected&&ids.has(selected)?selected:String(rows[0]?.gameId||rows[0]?.id||gameKey(rows[0])||'');if(!s.detailTab)s.detailTab='summary';
@@ -54,7 +55,7 @@
   }
 
   async function load(force=true){
-    const s=state();if(!s)return baseLoad?baseLoad(force):undefined;if(s.loading)return;
+    const s=state();if(!s)return baseLoad?baseLoad(force):undefined;
     if(!window.aramDesktop?.getAramMatchHistory)return baseLoad?baseLoad(force):undefined;
     counters.loads++;const token=++generation;
     s.limit=Math.max(1,Math.min(30,Number(document.getElementById('historyLimit')?.value)||s.limit||20));
@@ -72,7 +73,7 @@
       const r=await desktopHistory({limit,scan:quickScan,target,queueMode,priority:'interactive'});const ms=Math.max(0,now()-a);counters.lastQuickMs=ms;counters.maxQuickMs=Math.max(counters.maxQuickMs,ms);
       if(!isCurrentGeneration(token,key)){counters.staleDrops++;return r}
       if(!r?.connected)throw new Error(r?.message||'League Client에 연결되지 않았습니다.');
-      applyResult(r,key,{merge:false,preserveSelection:true});s.loading=false;s.error='';
+      applyResult(r,key,{merge:true,preserveSelection:true});s.loading=false;s.error='';
       if(!s.matches.length)s.error=`${accountLabel(s.account)}의 최근 조회 범위에서 ${queueMode==='mayhem'?'아수라장':'일반 칼바람'} 전적을 아직 찾지 못했습니다.`;
       render();
       if((Array.isArray(r.matches)?r.matches.length:0)<limit)scheduleDeep(token,key,{...s,target,queueMode,limit});
@@ -90,7 +91,7 @@
     try{
       const r=await desktopHistory({limit:1,scan:12,target,queueMode,priority:'interactive',historyProbe:true});const ms=Math.max(0,now()-a);counters.lastProbeMs=ms;counters.maxProbeMs=Math.max(counters.maxProbeMs,ms);
       if(!r?.connected)return r;const incoming=Array.isArray(r.matches)?r.matches:[];if(incoming.length)counters.probeHits++;
-      s.queueMode='standard';s.targetMode='current';s.target=null;applyResult(r,key,{merge:true,preserveSelection:true});s.loading=false;s.error='';render();return r;
+      s.queueMode='standard';s.targetMode='current';s.target=null;applyResult(r,key,{merge:false,preserveSelection:true});s.loading=false;s.error='';render();return r;
     }catch(e){counters.errors++;throw e}
   }
 
