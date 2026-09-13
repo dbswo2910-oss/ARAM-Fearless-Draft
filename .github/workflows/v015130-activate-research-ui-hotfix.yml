@@ -1,0 +1,123 @@
+name: v0.15.130 Activate Research UI Boot Hotfix
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.130/**'
+      - 'tools/v015130-activate-research-ui-hotfix.js'
+      - 'tools/v015130-research-ui-boot-audit.js'
+      - '.github/workflows/v015130-activate-research-ui-hotfix.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.130/**'
+      - 'tools/v015130-activate-research-ui-hotfix.js'
+      - 'tools/v015130-research-ui-boot-audit.js'
+      - '.github/workflows/v015130-activate-research-ui-hotfix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v015130-research-ui-boot-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contract-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Compile v0.15.130 hotfix sources
+        run: |
+          node -c update/v0.15.130/main-v015130.js
+          node -c update/v0.15.130/successor-route-v015130.js
+          node -c tools/v015130-activate-research-ui-hotfix.js
+          node -c tools/v015130-research-ui-boot-audit.js
+      - name: Prepare v0.15.130 candidate in PR workspace
+        run: node tools/v015130-activate-research-ui-hotfix.js
+      - name: Sync candidate continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Validate boot-safe Research UI architecture
+        run: node tools/v015130-research-ui-boot-audit.js
+      - name: Re-run affected regressions
+        run: |
+          node tools/profile-ux-audit.js
+          node tools/v015128-history-latency-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/item-recommendation-v01581-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+      - name: Full Regression on v0.15.130 candidate
+        run: node tools/full-regression-audit.js
+      - name: Upload hotfix audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v015130-research-ui-boot-pr
+          path: |
+            audit-output/v015130-research-ui-boot-report.json
+            audit-output/full-regression-report.json
+            audit-output/profile-ux-report.json
+            audit-output/v015128-history-latency-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: warn
+
+  activate:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare v0.15.130 activation files
+        run: node tools/v015130-activate-research-ui-hotfix.js
+      - name: Sync repository continuity snapshot
+        run: |
+          node tools/sync-current-state.js
+          node tools/ai-continuity-audit.js
+      - name: Validate activated v0.15.130
+        run: |
+          node tools/v015130-research-ui-boot-audit.js
+          node tools/profile-ux-audit.js
+          node tools/v015128-history-latency-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/item-recommendation-v01581-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/ai-continuity-audit.js
+      - name: Full Regression after v0.15.130 activation
+        run: node tools/full-regression-audit.js
+      - name: Commit verified v0.15.130 activation atomically
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json update/v0.15.130/player-profile-v01519.js README.md docs/AI_HANDOFF.md docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
+          if git diff --cached --quiet; then
+            echo 'v0.15.130 activation already present'
+          else
+            git commit -m 'release v0.15.130 Research UI boot hotfix'
+            git push
+          fi
