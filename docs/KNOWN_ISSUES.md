@@ -84,3 +84,7 @@ The v0.15.123 startup notice is structurally audited for per-patch persistence a
 ## v0.15.123 main-process successor-route crash
 
 Observed on real Windows after v0.15.123 activation: `main-v015123.js` threw `v0.15.123 main successor contract mismatch: v0.15.122 route missing` before UI creation. Root cause was brittle exact matching of an escaped nested route string; CI had only parsed the wrapper. v0.15.124 replaces that boot path with a tested predecessor-route transform. Real-Windows relaunch is still required to close acceptance.
+
+## Historical RANDOM statistical baseline drift (v0.15.124 and earlier)
+
+`통계 사이트 기본 빌드` previously read `item[기본 트리]` from the embedded champion database. Those rows were not automatically refreshed per live ARAM patch and could diverge substantially from current Howling Abyss builds. v0.15.125 changes the primary source to a validated 173-champion standard-ARAM cache generated from OP.GG structured ARAM data, with source/patch/date provenance and a bundled fallback. Real-Windows visual acceptance is still required for the Build tab and representative champions.

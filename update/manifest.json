@@ -1,6 +1,6 @@
 {
-  "version": "0.15.124",
-  "message": "v0.15.124 · STARTUP RECOVERY HOTFIX — repair v0.15.123 main successor route and add boot smoke coverage",
+  "version": "0.15.125",
+  "message": "v0.15.125 · ARAM BUILD STAT CACHE — 173-champion current standard-ARAM statistical baselines with automatic patch refresh",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -440,6 +440,14 @@
       "source": "update/v0.15.86/build-analysis-logic-v01586.js"
     },
     {
+      "path": "aram-build-stats-current.json",
+      "source": "data/aram-builds/current.json"
+    },
+    {
+      "path": "aram-build-stat-runtime-v015125.js",
+      "source": "update/v0.15.125/aram-build-stat-runtime-v015125.js"
+    },
+    {
       "path": "main-v01587.js",
       "source": "update/v0.15.87/main-v01587.js"
     },
@@ -660,6 +668,10 @@
       "source": "update/v0.15.124/runtime-source-stability-v015124.js"
     },
     {
+      "path": "runtime-source-stability-v015125.js",
+      "source": "update/v0.15.125/runtime-source-stability-v015125.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -744,12 +756,20 @@
       "source": "update/v0.15.124/main-v015124.js"
     },
     {
+      "path": "main-v015125.js",
+      "source": "update/v0.15.125/main-v015125.js"
+    },
+    {
       "path": "successor-route-hotfix-v015124.js",
       "source": "update/v0.15.124/successor-route-hotfix-v015124.js"
     },
     {
+      "path": "successor-route-v015125.js",
+      "source": "update/v0.15.125/successor-route-v015125.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.124/package.json"
+      "source": "update/v0.15.125/package.json"
     }
   ],
   "delete": [

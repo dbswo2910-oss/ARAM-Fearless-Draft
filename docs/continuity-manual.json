@@ -68,6 +68,16 @@
         "Confirm the application reaches its normal UI",
         "Confirm the Patch Notes startup notice can appear and 패치노트 보러가기 still opens DATA > 패치노트"
       ]
+    },
+    "aram_build_stat_cache_v015125": {
+      "status": "pending",
+      "evidence": "CI validates 173 standard-ARAM rows, current patch/source provenance, Ahri current-core sanity, one-shot remote refresh, embedded fallback, v0.15.81 gate preservation, and byte-neutral outputs for RANDOM scoring/DATA/AutoSync/Riot Grade targets.",
+      "must_verify": [
+        "Update/relaunch on Windows and confirm v0.15.125 reaches the normal UI",
+        "Open RANDOM > in-game Build and confirm 통계 사이트 기본 빌드 shows OP.GG ARAM, public patch, and refresh date",
+        "Spot-check Ahri plus several tank/marksman/support champions against current standard ARAM statistics",
+        "Confirm current-match optimized build still changes with enemy threat while the statistical baseline remains the reference path"
+      ]
     }
   },
   "next_planned_work": {

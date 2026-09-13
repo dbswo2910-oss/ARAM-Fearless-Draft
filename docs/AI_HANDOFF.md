@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.124**
+- Active updater version: **v0.15.125**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -448,3 +448,7 @@ Startup Patch Notes announcement is a one-shot presentation feature injected int
 ### v0.15.124 — Startup successor-route recovery hotfix
 
 v0.15.123 could crash before Electron UI creation because its main successor wrapper exact-matched an escaped nested route string that did not exist in the installed predecessor source. v0.15.124 boots from the known-good `main-v015122.js`, applies a tested unique route-fragment transform to v0.15.124, and keeps the v0.15.123 Patch Notes behavior through `runtime-source-stability-v015124 -> v015123`. The audit executes the exact transform against the real v0.15.122 predecessor source; syntax-only checking is no longer considered sufficient for successor main wrappers.
+
+### v0.15.125 — ARAM statistical build cache
+
+RANDOM in-game `통계 사이트 기본 빌드` no longer trusts the old embedded champion `item[기본 트리]` as its primary source. `tools/aram-build-stats-refresh.js` collects all standard-ARAM champions from the OP.GG structured ARAM endpoint, resolves current item IDs through Riot Data Dragon, and writes `data/aram-builds/current.json`. The initial 26.18 cache contains 173 champions and excludes ARAM Mayhem. At runtime, `random-ingame-coach-v01550.js` is patched only at `statBuildFor`: it uses the bundled cache synchronously and performs at most one non-blocking fetch of the repository cache per app session, then falls back to the historical embedded DB if validation fails. The v0.15.81 current-match item engine still consumes the statistical tree as a baseline, so item recommendations benefit from corrected current ARAM cores without changing RANDOM champion/composition score.

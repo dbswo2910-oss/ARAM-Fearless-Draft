@@ -248,3 +248,11 @@ node tools/ai-continuity-audit.js
 - Never accept a new `main-v*` successor wrapper from `new Function`/syntax checks alone. Execute the exact successor transform against the real predecessor source and require exactly one route match.
 - For recovery from the v0.15.123 crash, `main-v015124.js` intentionally uses `main-v015122.js` as its runtime recovery base while preserving v0.15.123 presentation behavior through the runtime-source-stability chain.
 - Do not reintroduce nested escaped-string exact matching for successor routes. Match a small unique semantic route fragment and assert cardinality equals one.
+
+## v0.15.125 ARAM statistical baseline ownership
+
+- `runtime-source-stability-v015125.js` owns only the RANDOM in-game statistical baseline source used by `statBuildFor` in `random-ingame-coach-v01550.js`. Do not move RANDOM composition/champion scoring, ROLE scoring, DATA view ownership, AutoSync ownership, or Riot Grade logic into this layer.
+- The primary data artifact is `data/aram-builds/current.json`: standard ARAM only; `ARAM_MAYHEM` must remain explicitly excluded; a publishable cache must cover the full current roster (170+ and 173 at the initial 26.18 release).
+- Do not fetch OP.GG or another statistics provider in the live render loop. Use bundled cache synchronously; an external freshness check may run once per app session and must fail closed to the bundled/embedded fallback.
+- Provider patch labels may use Riot static-data numbering (for example OP.GG/Data Dragon 16.18) while the public client patch is 26.18. Treat the +10 major alias as equivalent only when the minor version matches.
+- New main successors must continue the v0.15.124 boot-smoke rule: transform the known-good v0.15.122 entry and execute the exact successor transform in CI.

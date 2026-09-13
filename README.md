@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.124**  
+Current app/update version: **v0.15.125**  
 Current balance/data patch: **26.18**
 
 This repository is the source of truth for incremental in-app updates, regression validation, Windows distribution work, and coding-agent handoff.
@@ -85,3 +85,5 @@ The Windows bootstrap is distributed as `ARAM_Fearless_Draft.exe`. Historical bo
 - **v0.15.123**: Startup Patch Notes notice. On launch, show the latest registered ARAM Patch Notes unless that exact patch version was explicitly dismissed. `패치노트 보러가기` routes through the existing DATA owner into Patch Notes; `다시 보지 않기` suppresses only the current patch version so the next Patch Notes release can appear again. Scoring and existing feature owners are unchanged.
 
 - **v0.15.124**: Startup recovery hotfix. Repairs the v0.15.123 main-process successor-route crash by routing boot from the known-good v0.15.122 entry through a tested route transformer while preserving the v0.15.123 Patch Notes runtime. Adds an actual predecessor-route smoke audit so this class of main-process boot failure is not accepted by syntax-only CI again.
+
+- **v0.15.125**: ARAM Build Stat Cache. Replaces stale embedded RANDOM in-game statistical baseline item trees with a complete 173-champion standard-ARAM cache generated from current OP.GG ARAM structured statistics, with explicit source/patch/refresh-date display, bundled offline fallback, and one-shot non-blocking repository refresh for future patches. ARAM Mayhem is excluded. RANDOM composition scoring, ROLE scoring, AutoSync, DATA ownership, and Riot Grade logic are unchanged.

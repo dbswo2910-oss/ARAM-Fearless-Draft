@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.124",
-    "message": "v0.15.124 · STARTUP RECOVERY HOTFIX — repair v0.15.123 main successor route and add boot smoke coverage",
+    "version": "0.15.125",
+    "message": "v0.15.125 · ARAM BUILD STAT CACHE — 173-champion current standard-ARAM statistical baselines with automatic patch refresh",
     "min_launcher": "2.0.2",
-    "manifest_commit": "25db9f30719655d5993c05abd109b2e7332da254"
+    "manifest_commit": "5e528e5cc5b6a12a18a996403c1a5eefcddf5216"
   },
   "package": {
-    "source": "update/v0.15.124/package.json",
-    "version": "0.15.124",
-    "main": "main-v015124.js",
-    "main_source": "update/v0.15.124/main-v015124.js"
+    "source": "update/v0.15.125/package.json",
+    "version": "0.15.125",
+    "main": "main-v015125.js",
+    "main_source": "update/v0.15.125/main-v015125.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.124/runtime-source-stability-v015124.js"
+      "active_runtime_source": "update/v0.15.125/runtime-source-stability-v015125.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
@@ -171,6 +171,16 @@
         "Launch/update to v0.15.124 and confirm the JavaScript main-process error no longer appears",
         "Confirm the application reaches its normal UI",
         "Confirm the Patch Notes startup notice can appear and 패치노트 보러가기 still opens DATA > 패치노트"
+      ]
+    },
+    "aram_build_stat_cache_v015125": {
+      "status": "pending",
+      "evidence": "CI validates 173 standard-ARAM rows, current patch/source provenance, Ahri current-core sanity, one-shot remote refresh, embedded fallback, v0.15.81 gate preservation, and byte-neutral outputs for RANDOM scoring/DATA/AutoSync/Riot Grade targets.",
+      "must_verify": [
+        "Update/relaunch on Windows and confirm v0.15.125 reaches the normal UI",
+        "Open RANDOM > in-game Build and confirm 통계 사이트 기본 빌드 shows OP.GG ARAM, public patch, and refresh date",
+        "Spot-check Ahri plus several tank/marksman/support champions against current standard ARAM statistics",
+        "Confirm current-match optimized build still changes with enemy threat while the statistical baseline remains the reference path"
       ]
     }
   },
