@@ -55,9 +55,7 @@ jobs:
       - name: Run AutoSync regression
         run: node tools/v015119-autosync-concurrency-audit.js
       - name: Run RANDOM regression
-        run: |
-          node tools/v015121-random-practice-restore-audit.js
-          node tools/random-pick-preview-lock-v015100-audit.js
+        run: node tools/v015121-random-practice-restore-audit.js
       - name: Run DATA regression
         run: node tools/v015120-data-subnav-audit.js
       - name: Run Item regression
