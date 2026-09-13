@@ -1,6 +1,6 @@
 {
-  "version": "0.15.120",
-  "message": "v0.15.120 · DATA SUBMENU RESTORE — Patch Notes again owns the full DATA workspace",
+  "version": "0.15.121",
+  "message": "v0.15.121 · RANDOM PRACTICE RESTORE — deterministic entry/render/input/results with one disposable refresh owner",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -353,6 +353,10 @@
     },
     {
       "path": "runtime-loader-v01579.js",
+      "source": "update/v0.15.121/runtime-loader-v01579.js"
+    },
+    {
+      "path": "runtime-loader-v015120.js",
       "source": "update/v0.15.120/runtime-loader-v01579.js"
     },
     {
@@ -636,6 +640,10 @@
       "source": "update/v0.15.120/runtime-source-stability-v015120.js"
     },
     {
+      "path": "runtime-source-stability-v015121.js",
+      "source": "update/v0.15.121/runtime-source-stability-v015121.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -704,8 +712,12 @@
       "source": "update/v0.15.120/main-v015120.js"
     },
     {
+      "path": "main-v015121.js",
+      "source": "update/v0.15.121/main-v015121.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.120/package.json"
+      "source": "update/v0.15.121/package.json"
     }
   ],
   "delete": [

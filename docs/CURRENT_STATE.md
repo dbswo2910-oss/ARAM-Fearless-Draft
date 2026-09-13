@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.120**
-- Manifest message: v0.15.120 · DATA SUBMENU RESTORE — Patch Notes again owns the full DATA workspace
-- Manifest commit: `ee4fe8d947633c6e002cf75e5f3b63efe8213e65`
-- Package: `update/v0.15.120/package.json` → **v0.15.120**
-- Electron entry: `main-v015120.js` → `update/v0.15.120/main-v015120.js`
-- Current runtime stability source: `update/v0.15.120/runtime-source-stability-v015120.js`
+- Active updater: **v0.15.121**
+- Manifest message: v0.15.121 · RANDOM PRACTICE RESTORE — deterministic entry/render/input/results with one disposable refresh owner
+- Manifest commit: `a4ec866548cd66323389b222ad65f68affdb3bb6`
+- Package: `update/v0.15.121/package.json` → **v0.15.121**
+- Electron entry: `main-v015121.js` → `update/v0.15.121/main-v015121.js`
+- Current runtime stability source: `update/v0.15.121/runtime-source-stability-v015121.js`
 
 ## Active ownership — do not create competing owners
 
@@ -32,7 +32,7 @@
 
 ## Real-world validation still open
 
-- **random_pick_after_v015115_single_owner_reset** — `pending`: No post-v0.15.115 real-Windows screenshot/video has yet been recorded as the final visual acceptance baseline.
+- **random_pick_after_v015115_single_owner_reset** — `pending`: v0.15.121 restores RANDOM entry/render/input/TOP5-result coordination with one disposable event owner. CI is green only after activation; a post-v0.15.121 real-Windows screenshot/video is still required for final acceptance.
 - **autosync_v015119_real_league_soak** — `pending`: Code-level async race simulations and CI pass, but a prolonged real League Client/LCU/Live Client session has not been recorded as completed acceptance evidence.
 - **installed_app_snapshot** — `known_stale_baseline`: Latest preserved real installed-app baseline is v0.15.49 while the active updater is newer.
 - **data_patch_notes_subnav_v015120** — `pending`: Repository structural/regression audits can validate ownership and routing, but a post-v0.15.120 real-Windows screenshot is still required for visual acceptance.

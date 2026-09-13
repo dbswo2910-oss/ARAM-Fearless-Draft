@@ -2,7 +2,7 @@
 
 League of Legends ARAM draft / practice / Match Lab / live in-game analysis / player coaching desktop app.
 
-Current app/update version: **v0.15.120**  
+Current app/update version: **v0.15.121**  
 Current balance/data patch: **26.18**
 
 This repository is the source of truth for incremental in-app updates, regression validation, Windows distribution work, and coding-agent handoff.
@@ -77,3 +77,5 @@ The Windows bootstrap is distributed as `ARAM_Fearless_Draft.exe`. Historical bo
 - **v0.15.100 RANDOM Pick Preview Lock:** RANDOM > 픽창에서 TOP5/남은 챔피언을 직접 클릭했을 때 오른쪽 조합 DNA·AD/AP·현재 결론·점수·추천 방향이 잠깐 바뀐 뒤 TOP1으로 되돌아가던 상태 덮어쓰기 오류를 수정했습니다. 수동 선택 후보는 실제 TOP5에서 사라질 때까지 자동 refresh보다 우선하며, 추천/점수 산식은 변경하지 않았습니다.
 
 - **v0.15.120**: DATA Patch Notes submenu restore. `챔피언 티어리스트 | 패치노트` is again a DATA-wide second navigation. Patch Notes hides the tier browser and spans the workspace. RANDOM, Riot grades, history sync, AutoSync and scoring are unchanged.
+
+- **v0.15.121**: RANDOM Practice restore. Entering RANDOM restores the existing input/TOP5/detail view from current state, input/change refreshes are coalesced under one disposable runtime owner, and the cooperative exhaustive TOP5 calculator remains unchanged. No recommendation/Random scoring math changed.

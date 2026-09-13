@@ -214,3 +214,13 @@ node tools/ai-continuity-audit.js
 - Do not restore `card.closest('.grid2')` as the DATA host shortcut; the Windows screenshot proved it can resolve the right/detail sub-grid and strand the tier browser on the left.
 - Do not reactivate v0.15.103-v0.15.114 UI overlays. RANDOM, Riot-grade, history-sync, AutoSync and scoring are outside v0.15.120 scope.
 - CI proves structure/regression contracts, not final Electron appearance. Require post-update Windows evidence before visual acceptance.
+
+## v0.15.121 RANDOM Practice restore baseline
+
+- RANDOM PICK DOM/selection ownership remains `runtime-v015100` under the v0.15.115 single-owner boundary.
+- Runtime interaction/refresh coordination remains the v0.15.72 coordinator, revised by v0.15.121; do not add a second Random refresh owner.
+- Entering RANDOM may restore current inputs/TOP5/detail once, then ordinary interaction uses one coalesced maintenance timer.
+- Random click/change/input/focus/visibility listeners must be explicitly disposable through the v0.15.118 lifecycle owner.
+- Do not restore subtree MutationObserver repair loops, setInterval refresh loops, or the retired v0.15.103-v0.15.114 DOM reparent overlays.
+- The cooperative exhaustive TOP5 calculation and recommendation/Random scoring math are unchanged.
+- CI validates source/lifecycle contracts only; final PICK interaction/visual acceptance still requires real-Windows evidence.

@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.120**
+- Active updater version: **v0.15.121**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -432,3 +432,7 @@ This release stabilizes asynchronous League/LCU/Live Client work without adding 
 ### v0.15.120 — DATA Patch Notes submenu restore
 
 The existing `ui-stability-v015115` DATA owner remains authoritative. v0.15.120 is a maintained owner revision, not a new overlay. DATA host discovery resolves the role-tier panel and exact `#dataCard` from their nearest shared ancestor inside exact `#data`; `#dataHubTopNavV015115` lives inside that common host and spans the workspace. Patch Notes hides the tier branch while the detail branch spans the workspace. v0.15.117 state-integrity and v0.15.118 lifecycle payloads are preserved. RANDOM, Riot grades, history sync, AutoSync and scoring are unchanged. Final visual acceptance requires a post-v0.15.120 Windows screenshot.
+
+### v0.15.121 — RANDOM Practice restore
+
+RANDOM Practice keeps the v0.15.100 PICK DOM/selection owner and the v0.15.115 single-owner UI boundary. The v0.15.72 Random Practice coordinator is revised in-place by the v0.15.121 runtime transform: view entry restores the existing input/TOP5/detail output from current state, click/change/input refresh work is coalesced through the existing maintenance timer, event listeners have one explicit owner and are removed by the v0.15.118 disposer, and the cooperative exhaustive TOP5 path remains the only combo calculator. No MutationObserver, interval repair loop, late DOM reparent owner, or scoring change is introduced. Real-Windows acceptance remains required for final visual/interaction sign-off.

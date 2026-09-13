@@ -16,7 +16,7 @@ Status vocabulary:
 
 The v0.15.111–v0.15.114 sequence repeatedly changed RANDOM PICK layout/selection behavior and produced screenshot-confirmed failures: microscopic right rail, clipped grades, repeated champion names, DNA values that did not follow the clicked candidate, and content jumping/reparenting after click.
 
-v0.15.115 intentionally retired that late overlay stack and restored a single-owner architecture. The code ownership problem is guarded by CI, but there is not yet a recorded final real-Windows acceptance screenshot/video after the reset.
+v0.15.115 intentionally retired that late overlay stack and restored a single-owner architecture. v0.15.121 then restores RANDOM entry/render/input/TOP5-result coordination inside the existing owners and makes the interaction listener set explicitly disposable. The code ownership and refresh-loop contracts are guarded by CI, but there is not yet a recorded final real-Windows acceptance screenshot/video after v0.15.121.
 
 Do not claim this visual acceptance is complete until the user verifies:
 

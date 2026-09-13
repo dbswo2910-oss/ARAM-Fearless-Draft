@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.120",
-    "message": "v0.15.120 · DATA SUBMENU RESTORE — Patch Notes again owns the full DATA workspace",
+    "version": "0.15.121",
+    "message": "v0.15.121 · RANDOM PRACTICE RESTORE — deterministic entry/render/input/results with one disposable refresh owner",
     "min_launcher": "2.0.2",
-    "manifest_commit": "ee4fe8d947633c6e002cf75e5f3b63efe8213e65"
+    "manifest_commit": "a4ec866548cd66323389b222ad65f68affdb3bb6"
   },
   "package": {
-    "source": "update/v0.15.120/package.json",
-    "version": "0.15.120",
-    "main": "main-v015120.js",
-    "main_source": "update/v0.15.120/main-v015120.js"
+    "source": "update/v0.15.121/package.json",
+    "version": "0.15.121",
+    "main": "main-v015121.js",
+    "main_source": "update/v0.15.121/main-v015121.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.120/runtime-source-stability-v015120.js"
+      "active_runtime_source": "update/v0.15.121/runtime-source-stability-v015121.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
@@ -45,7 +45,7 @@
     "permanent_root": "v0.15.79",
     "update_transaction_source": "update/v0.15.116/update-safety-v01579.js",
     "updater_guard_source": "update/v0.15.116/updater-safety-patch-v01579.js",
-    "runtime_loader_source": "update/v0.15.120/runtime-loader-v01579.js"
+    "runtime_loader_source": "update/v0.15.121/runtime-loader-v01579.js"
   },
   "retired_ui_overlays": [
     {
@@ -107,13 +107,15 @@
   "real_world_validation": {
     "random_pick_after_v015115_single_owner_reset": {
       "status": "pending",
-      "evidence": "No post-v0.15.115 real-Windows screenshot/video has yet been recorded as the final visual acceptance baseline.",
+      "evidence": "v0.15.121 restores RANDOM entry/render/input/TOP5-result coordination with one disposable event owner. CI is green only after activation; a post-v0.15.121 real-Windows screenshot/video is still required for final acceptance.",
       "must_verify": [
+        "RANDOM opens without a blank/stale PICK workspace and existing input state renders immediately",
         "PICK and IN GAME do not leak into each other",
-        "pool grade labels are not clipped",
-        "champion names do not duplicate or concatenate",
-        "TOP5 selection changes both selected name and DNA/AD-AP values",
-        "DNA/detail containers do not jump, disappear, or reparent after click"
+        "typing/committing external, party and pool inputs stays responsive without repeated refresh jumps",
+        "TOP5 calculation completes and results/detail remain visible",
+        "clicking different TOP5 candidates changes the selected name and DNA/AD-AP values",
+        "DNA/detail containers do not jump, disappear, or reparent after repeated clicks",
+        "repeated RANDOM entry/exit does not create duplicate refresh behavior or progressive slowdown"
       ]
     },
     "autosync_v015119_real_league_soak": {

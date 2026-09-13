@@ -3,13 +3,15 @@
   "real_world_validation": {
     "random_pick_after_v015115_single_owner_reset": {
       "status": "pending",
-      "evidence": "No post-v0.15.115 real-Windows screenshot/video has yet been recorded as the final visual acceptance baseline.",
+      "evidence": "v0.15.121 restores RANDOM entry/render/input/TOP5-result coordination with one disposable event owner. CI is green only after activation; a post-v0.15.121 real-Windows screenshot/video is still required for final acceptance.",
       "must_verify": [
+        "RANDOM opens without a blank/stale PICK workspace and existing input state renders immediately",
         "PICK and IN GAME do not leak into each other",
-        "pool grade labels are not clipped",
-        "champion names do not duplicate or concatenate",
-        "TOP5 selection changes both selected name and DNA/AD-AP values",
-        "DNA/detail containers do not jump, disappear, or reparent after click"
+        "typing/committing external, party and pool inputs stays responsive without repeated refresh jumps",
+        "TOP5 calculation completes and results/detail remain visible",
+        "clicking different TOP5 candidates changes the selected name and DNA/AD-AP values",
+        "DNA/detail containers do not jump, disappear, or reparent after repeated clicks",
+        "repeated RANDOM entry/exit does not create duplicate refresh behavior or progressive slowdown"
       ]
     },
     "autosync_v015119_real_league_soak": {
@@ -62,7 +64,7 @@
     {
       "order": 2,
       "theme": "RANDOM Practice restore",
-      "status": "not_started"
+      "status": "code_complete_real_windows_pending"
     },
     {
       "order": 3,
