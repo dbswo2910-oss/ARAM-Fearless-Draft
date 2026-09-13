@@ -2,7 +2,7 @@
 const fs=require('fs');
 const path=require('path');
 let prior;
-try{prior=require('../v0.15.120/runtime-loader-v01579')}catch{prior=require('./runtime-loader-v01579-v015120')}
+try{prior=require('../v0.15.120/runtime-loader-v01579')}catch{prior=require('./runtime-loader-v015120')}
 
 const READINESS_EXPR=`(()=>{const required={
   randomPracticeRuntime:Boolean(window.__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__),
