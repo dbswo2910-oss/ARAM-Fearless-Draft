@@ -9,6 +9,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'tools/v015122-successor-grade-audit-contract.js'
       - '.github/workflows/v015122-activate-riot-grade-accuracy-retry.yml'
   workflow_dispatch:
 
