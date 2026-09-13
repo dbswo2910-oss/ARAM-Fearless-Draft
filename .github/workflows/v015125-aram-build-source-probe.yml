@@ -1,0 +1,26 @@
+name: v0.15.125 ARAM Build Source Probe
+
+on:
+  push:
+    branches: [ feat/v015125-aram-build-stat-cache ]
+    paths:
+      - 'tools/aram-build-stats-refresh.js'
+      - '.github/workflows/v015125-aram-build-source-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Probe OP.GG ARAM structured data and Data Dragon
+        env:
+          ARAM_CANONICAL_PATCH: '26.18'
+        run: node tools/aram-build-stats-refresh.js --probe
