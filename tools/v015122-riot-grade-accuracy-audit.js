@@ -53,9 +53,8 @@ for(const [n,l] of [
   ["random_scoring_changed:false",'Random score neutrality']
 ])must(collectorSrc,n,l);
 mustNot(collectorSrc,'for(const v of Object.values(x))walk(v,next)','old recursive grade walk');
-mustNot(collectorSrc,'memberGrades', 'memberGrades traversal');
-// The word memberGrades is allowed in comments explaining the bug, but not as an envelope/traversal expression.
 if(/(?:visit|walk)\s*\(\s*x\.memberGrades/.test(collectorSrc))throw new Error('collector traverses memberGrades');
+if(/envelopes\s*=\s*\[[^\]]*memberGrades/.test(collectorSrc))throw new Error('memberGrades added to traversal allowlist');
 ok('collector-source-contract');
 
 const manifest=JSON.parse(read('update/manifest.json'));
