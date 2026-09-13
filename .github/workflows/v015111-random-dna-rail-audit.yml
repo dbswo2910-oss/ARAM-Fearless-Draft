@@ -1,0 +1,40 @@
+name: v0.15.111 RANDOM DNA Rail Audit
+
+on:
+  pull_request:
+    paths:
+      - 'update/v0.15.111/**'
+      - 'tools/v015111-random-dna-rail-audit.js'
+      - '.github/workflows/v015111-random-dna-rail-audit.yml'
+      - '.github/workflows/v015111-activate-random-dna-rail.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.111/**'
+      - 'tools/v015111-random-dna-rail-audit.js'
+      - '.github/workflows/v015111-random-dna-rail-audit.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run v0.15.111 RANDOM DNA rail audit
+        run: node tools/v015111-random-dna-rail-audit.js
+      - name: Run v0.15.110 Patch Notes density audit
+        run: node tools/v015110-patch-notes-density-audit.js
+      - name: Run full regression audit
+        run: node tools/full-regression-audit.js
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v015111-random-dna-rail-audit
+          path: audit-output/v015111-random-dna-rail-report.json
+          if-no-files-found: ignore
