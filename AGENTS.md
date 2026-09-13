@@ -221,3 +221,12 @@ See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
 - Updater manifests must reject duplicate install paths, install/delete overlap, unsafe/non-`update/` sources, malformed optional SHA-256 values, duplicate deletes, and deletion of critical runtime files before staging.
 - Keep per-script runtime injection isolation. Do not turn one optional renderer patch failure into an immediate process crash; only the critical readiness gate participates in update rollback.
 - Changes to these contracts require updating `tools/v015116-runtime-update-stability-audit.js`.
+
+## v0.15.117 persistent state integrity baseline
+
+- Persisted app state must not be replaced with empty/default data merely because a JSON read fails. Recover from a validated last-known-good copy when available and quarantine the corrupt payload.
+- New app-owned renderer persistence should use an `aram_` localStorage key so the v0.15.117 mirror can protect it. Add an explicit validator for important structured keys.
+- Intentional removals must remain tombstoned; recovery must not resurrect state that the user deliberately deleted after v0.15.117.
+- Main-process JSON stores should use `state-integrity-v015117.js` or an equivalent atomic write + validation + LKG pattern instead of bare overwrite writes.
+- State-integrity code is not a UI owner. Do not append/reparent DOM, start polling timers, or alter RANDOM/DATA layout from the state layer.
+- State integrity must remain scoring-neutral. Changes to these contracts require updating `tools/v015117-state-integrity-audit.js`.

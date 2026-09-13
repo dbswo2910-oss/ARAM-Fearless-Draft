@@ -1,6 +1,6 @@
 {
-  "version": "0.15.116",
-  "message": "v0.15.116 · RUNTIME/UPDATE STABILITY — critical readiness rollback guard + manifest integrity",
+  "version": "0.15.117",
+  "message": "v0.15.117 · STATE INTEGRITY — atomic mirrors, localStorage recovery, Riot Grade LKG",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -237,6 +237,10 @@
     },
     {
       "path": "riot-grade-collector-v01532.js",
+      "source": "update/v0.15.117/riot-grade-collector-v01532.js"
+    },
+    {
+      "path": "riot-grade-collector-base-v01532.js",
       "source": "update/v0.15.32/riot-grade-collector-v01532.js"
     },
     {
@@ -249,7 +253,7 @@
     },
     {
       "path": "preload.js",
-      "source": "update/v0.15.79/preload.js"
+      "source": "update/v0.15.117/preload.js"
     },
     {
       "path": "input-interaction-stability-v01539.js",
@@ -258,6 +262,14 @@
     {
       "path": "ui-stability-baseline-v015115.js",
       "source": "update/v0.15.115/ui-stability-baseline-v015115.js"
+    },
+    {
+      "path": "state-integrity-v015117.js",
+      "source": "update/v0.15.117/state-integrity-v015117.js"
+    },
+    {
+      "path": "state-integrity-renderer-v015117.js",
+      "source": "update/v0.15.117/state-integrity-renderer-v015117.js"
     },
     {
       "path": "main.js",
@@ -333,7 +345,7 @@
     },
     {
       "path": "runtime-loader-v01579.js",
-      "source": "update/v0.15.116/runtime-loader-v01579.js"
+      "source": "update/v0.15.117/runtime-loader-v01579.js"
     },
     {
       "path": "runtime-source-stability-v01579.js",
@@ -600,6 +612,10 @@
       "source": "update/v0.15.116/runtime-source-stability-v015116.js"
     },
     {
+      "path": "runtime-source-stability-v015117.js",
+      "source": "update/v0.15.117/runtime-source-stability-v015117.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -652,8 +668,12 @@
       "source": "update/v0.15.116/main-v015116.js"
     },
     {
+      "path": "main-v015117.js",
+      "source": "update/v0.15.117/main-v015117.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.116/package.json"
+      "source": "update/v0.15.117/package.json"
     }
   ],
   "delete": [

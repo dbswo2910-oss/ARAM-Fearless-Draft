@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.116**
+- Active updater version: **v0.15.117**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -416,3 +416,7 @@ This release intentionally resets the late UI overlay lineage. Renderer source p
 ### v0.15.116 — Runtime / update integrity stability
 
 This release hardens the infrastructure below the UI without adding another renderer owner. The v0.15.79 update transaction/rollback baseline remains the root, but probation now re-checks current-boot safety failures before committing. `runtime-loader-v01579.js` preserves per-script isolation and adds a final critical readiness gate; missing core runtime owners are persisted as `SAFE-RT116` and written to `diagnostics/runtime-readiness-v015116.json`. The updater transform now validates manifest uniqueness, install/delete conflicts, safe sources, optional SHA-256 format, and critical-file deletion before staging. The v0.15.115 RANDOM/DATA single-owner architecture is preserved exactly. `score_logic_changed:false`, `random_scoring_changed:false`.
+
+### v0.15.117 — Persistent state integrity
+
+This release is infrastructure-only. `state-integrity-v015117.js` provides bounded atomic JSON writes, validated backup recovery, quarantine, and last-known-good protection. `state-integrity-renderer-v015117.js` mirrors app-owned `aram_` localStorage keys to the preload-backed state store, validates known schemas, tombstones intentional deletes, and restores malformed/missing state when a valid mirror exists. Riot Grade history is guarded through a wrapper around the unchanged v0.15.32 collector. The v0.15.115 RANDOM/DATA UI owner and v0.15.116 updater/rollback baseline remain intact. `score_logic_changed:false`, `random_scoring_changed:false`.
