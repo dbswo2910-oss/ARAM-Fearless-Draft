@@ -1,6 +1,6 @@
 {
-  "version": "0.15.111",
-  "message": "v0.15.111 · RANDOM DNA RAIL — readable selected-composition detail + DNA layout",
+  "version": "0.15.112",
+  "message": "v0.15.112 · RANDOM WORKSPACE STABILITY — mode isolation, real pick redesign, no first-paint rail jump",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -576,6 +576,10 @@
       "source": "update/v0.15.111/random-dna-rail-v015111.js"
     },
     {
+      "path": "random-workspace-stability-v015112.js",
+      "source": "update/v0.15.112/random-workspace-stability-v015112.js"
+    },
+    {
       "path": "runtime-source-stability-v015104.js",
       "source": "update/v0.15.104/runtime-source-stability-v015104.js"
     },
@@ -606,6 +610,10 @@
     {
       "path": "runtime-source-stability-v015111.js",
       "source": "update/v0.15.111/runtime-source-stability-v015111.js"
+    },
+    {
+      "path": "runtime-source-stability-v015112.js",
+      "source": "update/v0.15.112/runtime-source-stability-v015112.js"
     },
     {
       "path": "main-v015104.js",
@@ -640,8 +648,12 @@
       "source": "update/v0.15.111/main-v015111.js"
     },
     {
+      "path": "main-v015112.js",
+      "source": "update/v0.15.112/main-v015112.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.111/package.json"
+      "source": "update/v0.15.112/package.json"
     }
   ],
   "delete": [

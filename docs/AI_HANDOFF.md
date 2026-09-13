@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.111**
+- Active updater version: **v0.15.112**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -396,3 +396,7 @@ Screenshot-confirmed hotfix for oversized Patch Notes champion portraits. The re
 ### v0.15.111 — RANDOM DNA right-rail repair
 
 Screenshot-confirmed fix for the selected-composition detail + Combination DNA rail being squeezed into tiny side-by-side columns. The rail now uses width-aware `auto-fit/minmax(260px, 1fr)` so a narrow third column stacks vertically while a genuinely wide row can use two columns. Korean detail text wrapping is restored. Recommendation/scoring/item logic is unchanged and v0.15.79 safety lineage is preserved. `score_logic_changed:false`.
+
+### v0.15.112 — RANDOM workspace stability
+
+Screenshot + video confirmed three related defects: PICK surfaces could remain visible in IN GAME because later `display:grid!important` layout rules outranked the base mode hide; v0.15.107/v0.15.111 repaired the PICK DOM after first paint, causing a visible two-column-to-stacked jump; and the intended PICK redesign was not materially visible. v0.15.112 fixes all three using only verified exact IDs. It hard-isolates `.randomPickOnly` from `data-random-mode="ingame"`, pre-assembles `#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, and `#rpPickIntelV01589` into stable legacy-compatible wrappers before paint, and locks the decision rail to one readable column. Recommendation/scoring/item logic and DATA are unchanged. `score_logic_changed:false`.

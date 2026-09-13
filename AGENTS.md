@@ -196,3 +196,11 @@ See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
 - Random Practice pick layout ownership is exact-ID only: `#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, `#rpPickIntelV01589`.
 - Patch Notes hides only the verified Data tier pane; Data UI must never be allowed to participate in `#random` layout.
 - `score_logic_changed:false`.
+
+## v0.15.112 RANDOM mode/workspace rule
+
+- `data-random-mode="ingame"` must hard-hide every `.randomPickOnly` surface even when later layout patches use `display:* !important`.
+- PICK layout repair must happen from exact IDs before first paint; do not reintroduce delayed post-paint movement between `#randomRecommendAnchor` and `#randomInputAnchor`.
+- Keep `rp107Center` / `rp107Right` compatibility classes when creating newer wrappers so historical forward-compatible repairs become no-ops instead of moving content again.
+- The right decision rail is one column: Combination DNA first, selected-composition detail second.
+- `score_logic_changed:false`.
