@@ -36,7 +36,11 @@ function buildSnapshot(){
   const runtimeSource=byPath.get(runtimePath)||[...files].reverse().find(x=>/^runtime-source-stability-v\d+\.js$/.test(x.path))?.source||'';
   const runtimeText=runtimeSource&&fs.existsSync(path.join(ROOT,runtimeSource))?read(runtimeSource):'';
   const deletes=new Set(Array.isArray(manifest.delete)?manifest.delete:[]);
-  const manifestCommit=safeGit(['log','-1','--format=%H','--','update/manifest.json']);
+  let priorSnapshot=null;try{priorSnapshot=readJson('update/current-state.json')}catch{}
+  const sameActiveVersion=String(priorSnapshot?.active?.version||'')===String(manifest.version||'');
+  const manifestCommit=sameActiveVersion&&priorSnapshot?.active?.manifest_commit
+    ?String(priorSnapshot.active.manifest_commit)
+    :safeGit(['log','-1','--format=%H','--','update/manifest.json']);
   const mainSource=byPath.get(pkg.main)||'';
   const owners={
     random_pick:{owner:matchExport(runtimeText,'random_pick_owner','runtime-v015100'),contract:'v0.15.115 single-owner baseline',active_runtime_source:runtimeSource},
