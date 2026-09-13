@@ -32,9 +32,9 @@ jobs:
       - name: Run v0.15.115 single-owner stability audit
         run: node tools/v015115-single-owner-stability-audit.js
       - name: Run v0.15.100 candidate-preview audit
-        run: node tools/v015100-random-pick-preview-lock-audit.js
+        run: node tools/random-pick-preview-lock-v015100-audit.js
       - name: Run v0.15.99 Data Hub audit
-        run: node tools/v01599-data-hub-audit.js
+        run: node tools/data-patch-notes-v01599-audit.js
       - name: Run v0.15.79 permanent safety audit
         run: node tools/runtime-stability-v01579-audit.js
       - name: Run full regression audit
