@@ -64,6 +64,7 @@ ok('random-owner-byte-preserved');
 
 must(rt,"require('../v0.15.119/runtime-source-stability-v015119')",'v119 predecessor');
 must(rt,'replaceUiOwnerPayload(src)','existing-owner payload replacement');
+must(rt,'STATE_SENTINEL','state-integrity suffix boundary');
 must(rt,"file==='input-interaction-stability-v01539.js'",'single owner injection target');
 must(rt,"data_view_owner:'ui-stability-v015115'",'DATA owner identity preserved');
 must(rt,"data_presentation_revision:'0.15.120'",'v120 presentation revision');
@@ -86,8 +87,12 @@ const oldInput=base119.patchRuntimeSource('input-interaction-stability-v01539.js
 const newInput=next120.patchRuntimeSource('input-interaction-stability-v01539.js',read(inputSource));
 parse(newInput,'transformed input interaction');
 if(count(newInput,'/* ARAM_UI_STABILITY_OWNER_PAYLOAD_V015115 */')!==1)throw new Error('v120 must retain exactly one DATA/UI owner payload');
-if(count(newInput,'__ARAM_UI_STABILITY_BASELINE_V015115__')!==1)throw new Error('v115 owner marker must occur exactly once in transformed target');
+const oldOwnerMarkerCount=count(oldInput,'__ARAM_UI_STABILITY_BASELINE_V015115__');
+if(oldOwnerMarkerCount<1||count(newInput,'__ARAM_UI_STABILITY_BASELINE_V015115__')!==oldOwnerMarkerCount)throw new Error('v115 owner marker cardinality changed in transformed target');
 if(count(newInput,'__ARAM_DATA_SUBNAV_RESTORE_V015120__')<1)throw new Error('v120 submenu marker missing from transformed target');
+for(const marker of ['/* ARAM_STATE_INTEGRITY_PAYLOAD_V015117 */','/* ARAM_RESOURCE_LIFECYCLE_OWNER_V015118 */']){
+  if(count(newInput,marker)!==count(oldInput,marker)||count(newInput,marker)!==1)throw new Error(`v120 failed to preserve downstream payload: ${marker}`);
+}
 if(oldInput===newInput)throw new Error('v120 did not replace the DATA owner presentation payload');
 ok('single-owner-transformed-payload');
 
@@ -106,6 +111,7 @@ if(oldAuto!==newAuto)throw new Error('v0.15.120 unexpectedly changed AutoSync re
 ok('autosync-transform-unchanged');
 
 for(const [n,l] of [
+  ["require('../v0.15.77/runtime-loader-v01577')",'installed loader ancestry'],
   ['dataSubnav:Boolean(window.__ARAM_DATA_SUBNAV_RESTORE_V015120__)','v120 submenu readiness'],
   ["code:'SAFE-RT120'",'v120 safety failure code'],
   ['runtime-readiness-v015120.json','v120 readiness diagnostic'],
@@ -113,6 +119,7 @@ for(const [n,l] of [
   ['resourceLifecycle:Boolean(window.__ARAM_RESOURCE_LIFECYCLE_V015118__)','v118 lifecycle preservation'],
   ['score_logic_changed:false','loader scoring neutrality']
 ])must(loader,n,l);
+mustNot(loader,"require('./runtime-loader-v01579')",'self-requiring installed loader');
 ok('runtime-readiness-gate');
 
 must(main,"path.join(__dirname,'main-v015119.js')",'v119 main predecessor');
