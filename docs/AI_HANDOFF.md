@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.117**
+- Active updater version: **v0.15.118**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -420,3 +420,7 @@ This release hardens the infrastructure below the UI without adding another rend
 ### v0.15.117 — Persistent state integrity
 
 This release is infrastructure-only. `state-integrity-v015117.js` provides bounded atomic JSON writes, validated backup recovery, quarantine, and last-known-good protection. `state-integrity-renderer-v015117.js` mirrors app-owned `aram_` localStorage keys to the preload-backed state store, validates known schemas, tombstones intentional deletes, and restores malformed/missing state when a valid mirror exists. Riot Grade history is guarded through a wrapper around the unchanged v0.15.32 collector. The v0.15.115 RANDOM/DATA UI owner and v0.15.116 updater/rollback baseline remain intact. `score_logic_changed:false`, `random_scoring_changed:false`.
+
+### v0.15.118 — Resource lifecycle stability
+
+This release is infrastructure-only. Runtime source transformation adds explicit lifecycle disposal to Random Practice, Random IN GAME, and renderer AutoSync without adding another UI owner. Random IN GAME one-shot ticks are coalesced and its permanent 1-second interval is replaced by an adaptive timeout heartbeat that backs off while inactive/hidden. Random Practice owns and disconnects its long-task observer; AutoSync follow-up polls are coalesced. `resource-lifecycle-v015118.js` provides a no-polling aggregate snapshot/dispose surface, and runtime readiness requires the lifecycle owner/disposers. v0.15.115 UI ownership, v0.15.117 state integrity, and scoring remain unchanged.

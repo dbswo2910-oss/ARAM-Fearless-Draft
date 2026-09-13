@@ -230,3 +230,12 @@ See `docs/AI_HANDOFF.md` and the latest changelogs before starting this phase.
 - Main-process JSON stores should use `state-integrity-v015117.js` or an equivalent atomic write + validation + LKG pattern instead of bare overwrite writes.
 - State-integrity code is not a UI owner. Do not append/reparent DOM, start polling timers, or alter RANDOM/DATA layout from the state layer.
 - State integrity must remain scoring-neutral. Changes to these contracts require updating `tools/v015117-state-integrity-audit.js`.
+
+## v0.15.118 resource lifecycle baseline
+
+- Renderer recurring work must have one clear owner and an idempotent cleanup path. Do not add a new interval/observer merely to repair output from an existing owner.
+- One-shot refresh timers must be coalesced when repeated UI events can queue the same work. Preserve the earliest due refresh and merge force-refresh intent instead of stacking callbacks.
+- Background/inactive views must not run a full-speed UI heartbeat. Prefer event-driven refresh plus an adaptive low-frequency safety heartbeat when necessary.
+- Long-lived MutationObserver/PerformanceObserver instances must be disconnectable. Runtime owners should expose `dispose()` when they own recurring resources.
+- `resource-lifecycle-v015118.js` is infrastructure only: no DOM reparenting, no polling timer, no scoring changes.
+- Keep the whole-active-manifest resource inventory in `tools/v015118-resource-lifecycle-audit.js` and update the audit whenever recurring ownership changes.

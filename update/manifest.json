@@ -1,6 +1,6 @@
 {
-  "version": "0.15.117",
-  "message": "v0.15.117 · STATE INTEGRITY — atomic mirrors, localStorage recovery, Riot Grade LKG",
+  "version": "0.15.118",
+  "message": "v0.15.118 · RESOURCE LIFECYCLE — coalesced ticks, adaptive heartbeat, bounded observers",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -272,6 +272,10 @@
       "source": "update/v0.15.117/state-integrity-renderer-v015117.js"
     },
     {
+      "path": "resource-lifecycle-v015118.js",
+      "source": "update/v0.15.118/resource-lifecycle-v015118.js"
+    },
+    {
       "path": "main.js",
       "source": "update/v0.15.70/main.js"
     },
@@ -345,7 +349,7 @@
     },
     {
       "path": "runtime-loader-v01579.js",
-      "source": "update/v0.15.117/runtime-loader-v01579.js"
+      "source": "update/v0.15.118/runtime-loader-v01579.js"
     },
     {
       "path": "runtime-source-stability-v01579.js",
@@ -616,6 +620,10 @@
       "source": "update/v0.15.117/runtime-source-stability-v015117.js"
     },
     {
+      "path": "runtime-source-stability-v015118.js",
+      "source": "update/v0.15.118/runtime-source-stability-v015118.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -672,8 +680,12 @@
       "source": "update/v0.15.117/main-v015117.js"
     },
     {
+      "path": "main-v015118.js",
+      "source": "update/v0.15.118/main-v015118.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.117/package.json"
+      "source": "update/v0.15.118/package.json"
     }
   ],
   "delete": [
