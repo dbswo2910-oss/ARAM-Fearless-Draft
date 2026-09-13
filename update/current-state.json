@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.125",
-    "message": "v0.15.125 · ARAM BUILD STAT CACHE — 173-champion current standard-ARAM statistical baselines with automatic patch refresh",
+    "version": "0.15.126",
+    "message": "v0.15.126 · MATCH SEARCH LABEL — visible Match Lab naming unified to 전적검색",
     "min_launcher": "2.0.2",
-    "manifest_commit": "5e528e5cc5b6a12a18a996403c1a5eefcddf5216"
+    "manifest_commit": "47a9230a8a420fb9e7551e367a4d6b408d16edeb"
   },
   "package": {
-    "source": "update/v0.15.125/package.json",
-    "version": "0.15.125",
-    "main": "main-v015125.js",
-    "main_source": "update/v0.15.125/main-v015125.js"
+    "source": "update/v0.15.126/package.json",
+    "version": "0.15.126",
+    "main": "main-v015126.js",
+    "main_source": "update/v0.15.126/main-v015126.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.125/runtime-source-stability-v015125.js"
+      "active_runtime_source": "update/v0.15.126/runtime-source-stability-v015126.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
@@ -183,6 +183,15 @@
         "Open RANDOM > in-game Build and confirm 통계 사이트 기본 빌드 shows OP.GG ARAM, public patch, and refresh date",
         "Spot-check Ahri plus several tank/marksman/support champions against current standard ARAM statistics",
         "Confirm current-match optimized build still changes with enemy threat while the statistical baseline remains the reference path"
+      ]
+    },
+    "match_search_label_v015126": {
+      "status": "pending",
+      "evidence": "CI can prove the label payload is scoped to #history/header and that internal Match Lab/history identifiers and scoring owners are byte-preserved, but final visible wording requires the installed Windows UI.",
+      "must_verify": [
+        "After updating to v0.15.126, confirm the top navigation says 전적검색 instead of 매치 랩/매치랩/Match Lab",
+        "Open 전적검색 and confirm any feature title uses 전적검색 while LAB badge styling remains intact if present",
+        "Confirm player search, recent matches, match detail, Riot Grade, favorites and result synchronization still work normally"
       ]
     }
   },

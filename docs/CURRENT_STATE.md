@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.125**
-- Manifest message: v0.15.125 · ARAM BUILD STAT CACHE — 173-champion current standard-ARAM statistical baselines with automatic patch refresh
-- Manifest commit: `5e528e5cc5b6a12a18a996403c1a5eefcddf5216`
-- Package: `update/v0.15.125/package.json` → **v0.15.125**
-- Electron entry: `main-v015125.js` → `update/v0.15.125/main-v015125.js`
-- Current runtime stability source: `update/v0.15.125/runtime-source-stability-v015125.js`
+- Active updater: **v0.15.126**
+- Manifest message: v0.15.126 · MATCH SEARCH LABEL — visible Match Lab naming unified to 전적검색
+- Manifest commit: `47a9230a8a420fb9e7551e367a4d6b408d16edeb`
+- Package: `update/v0.15.126/package.json` → **v0.15.126**
+- Electron entry: `main-v015126.js` → `update/v0.15.126/main-v015126.js`
+- Current runtime stability source: `update/v0.15.126/runtime-source-stability-v015126.js`
 
 ## Active ownership — do not create competing owners
 
@@ -40,6 +40,7 @@
 - **patch_notes_startup_notice_v015123** — `pending`: CI validates exact per-patch dismissal semantics, one-shot injection, and routing through the existing DATA owner. Real Windows Electron appearance/navigation still needs confirmation.
 - **startup_recovery_v015124** — `pending`: Repository CI now executes the exact successor route transform against the real v0.15.122 predecessor source. The user supplied a real Windows screenshot proving v0.15.123 crashed before UI creation; v0.15.124 must be relaunched on Windows to confirm recovery.
 - **aram_build_stat_cache_v015125** — `pending`: CI validates the 173-champion standard-ARAM cache and source provenance. A real Windows screenshot then exposed that the first v0.15.125 manifest used disallowed source data/aram-builds/current.json; the updater-safe hotfix preserves the v0.15.116 allowlist and delivers the byte-identical cache from update/data/aram-builds/current.json. Real Windows retry is still required.
+- **match_search_label_v015126** — `pending`: CI can prove the label payload is scoped to #history/header and that internal Match Lab/history identifiers and scoring owners are byte-preserved, but final visible wording requires the installed Windows UI.
 
 ## Next planned work
 

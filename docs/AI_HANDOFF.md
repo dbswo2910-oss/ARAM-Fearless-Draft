@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.125**
+- Active updater version: **v0.15.126**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -456,3 +456,7 @@ RANDOM in-game `통계 사이트 기본 빌드` no longer trusts the old embedde
 #### v0.15.125 updater-safe cache source hotfix
 
 The first v0.15.125 manifest referenced `data/aram-builds/current.json` directly. Real Windows updater validation correctly rejected that path because the v0.15.116 safety contract only accepts manifest sources under `update/`. The fix does **not** weaken that allowlist: the canonical cache remains under `data/`, an identical distribution mirror lives at `update/data/aram-builds/current.json`, and the manifest installs that mirror as `aram-build-stats-current.json`. The scheduled refresh workflow updates both copies atomically.
+
+### v0.15.126 — 전적검색 visible naming
+
+The user-facing feature name formerly shown as `매치 랩` / `매치랩` / `Match Lab` is now `전적검색`. This is presentation-only. Internal `match-lab-*`, `historyMatchDetail`, history state/storage, Riot Grade linkage, AutoSync and result-sync identifiers remain unchanged. The label patch is scoped to the exact `#history` view plus the header history navigation, runs only with a bounded startup settle, and adds no MutationObserver or interval repair owner.

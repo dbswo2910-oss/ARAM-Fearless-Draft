@@ -1,6 +1,6 @@
 {
-  "version": "0.15.125",
-  "message": "v0.15.125 · ARAM BUILD STAT CACHE — 173-champion current standard-ARAM statistical baselines with automatic patch refresh",
+  "version": "0.15.126",
+  "message": "v0.15.126 · MATCH SEARCH LABEL — visible Match Lab naming unified to 전적검색",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -262,6 +262,10 @@
     {
       "path": "patch-notes-startup-notice-v015123.js",
       "source": "update/v0.15.123/patch-notes-startup-notice-v015123.js"
+    },
+    {
+      "path": "match-search-labels-v015126.js",
+      "source": "update/v0.15.126/match-search-labels-v015126.js"
     },
     {
       "path": "ui-stability-baseline-v015115.js",
@@ -672,6 +676,10 @@
       "source": "update/v0.15.125/runtime-source-stability-v015125.js"
     },
     {
+      "path": "runtime-source-stability-v015126.js",
+      "source": "update/v0.15.126/runtime-source-stability-v015126.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -760,6 +768,10 @@
       "source": "update/v0.15.125/main-v015125.js"
     },
     {
+      "path": "main-v015126.js",
+      "source": "update/v0.15.126/main-v015126.js"
+    },
+    {
       "path": "successor-route-hotfix-v015124.js",
       "source": "update/v0.15.124/successor-route-hotfix-v015124.js"
     },
@@ -768,8 +780,12 @@
       "source": "update/v0.15.125/successor-route-v015125.js"
     },
     {
+      "path": "successor-route-v015126.js",
+      "source": "update/v0.15.126/successor-route-v015126.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.125/package.json"
+      "source": "update/v0.15.126/package.json"
     }
   ],
   "delete": [

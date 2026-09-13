@@ -80,6 +80,15 @@
         "Spot-check Ahri plus several tank/marksman/support champions against current standard ARAM statistics",
         "Confirm current-match optimized build still changes with enemy threat while the statistical baseline remains the reference path"
       ]
+    },
+    "match_search_label_v015126": {
+      "status": "pending",
+      "evidence": "CI can prove the label payload is scoped to #history/header and that internal Match Lab/history identifiers and scoring owners are byte-preserved, but final visible wording requires the installed Windows UI.",
+      "must_verify": [
+        "After updating to v0.15.126, confirm the top navigation says 전적검색 instead of 매치 랩/매치랩/Match Lab",
+        "Open 전적검색 and confirm any feature title uses 전적검색 while LAB badge styling remains intact if present",
+        "Confirm player search, recent matches, match detail, Riot Grade, favorites and result synchronization still work normally"
+      ]
     }
   },
   "next_planned_work": {
