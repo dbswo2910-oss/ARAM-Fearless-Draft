@@ -1,6 +1,7 @@
 'use strict';
 const path=require('path');
-const base=require('./riot-grade-collector-base-v01532');
+let base;
+try{base=require('../v0.15.32/riot-grade-collector-v01532')}catch{base=require('./riot-grade-collector-base-v01532')}
 const integrity=require('./state-integrity-v015117');
 
 const MAX_RECORDS_SAFE=1000;
