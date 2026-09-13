@@ -36,8 +36,20 @@ function parseJsonText(text,{validator,maxBytes=DEFAULT_MAX_BYTES}={}){
   if(!validBy(value,validator))throw new Error('state schema validation failed');
   return value;
 }
+function recoverOrphanSwap(file){
+  try{
+    if(fs.existsSync(file))return false;
+    const dir=path.dirname(file),prefix=path.basename(file)+'.swap-';
+    const candidates=fs.readdirSync(dir).filter(x=>x.startsWith(prefix)).map(name=>{const full=path.join(dir,name);let mtime=0;try{mtime=fs.statSync(full).mtimeMs}catch{}return{full,mtime}}).sort((a,b)=>b.mtime-a.mtime);
+    if(!candidates.length)return false;
+    fs.renameSync(candidates[0].full,file);
+    for(const x of candidates.slice(1))try{fs.rmSync(x.full,{force:true})}catch{}
+    return true;
+  }catch{return false}
+}
 function readJsonFile(file,opts={}){
   try{
+    recoverOrphanSwap(file);
     const st=fs.statSync(file);
     if(!st.isFile())return{ok:false,reason:'not-file'};
     if(st.size>Number(opts.maxBytes||DEFAULT_MAX_BYTES))return{ok:false,reason:'too-large',size:st.size};
@@ -51,7 +63,7 @@ function fsyncDir(dir){
   try{fd=fs.openSync(dir,'r');fs.fsyncSync(fd)}catch{}finally{try{if(fd!==undefined)fs.closeSync(fd)}catch{}}
 }
 function writeTextAtomic(file,text,{maxBytes=DEFAULT_MAX_BYTES}={}){
-  text=String(text);validateSize(text,maxBytes);ensure(path.dirname(file));
+  text=String(text);validateSize(text,maxBytes);ensure(path.dirname(file));recoverOrphanSwap(file);
   const token=`${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
   const tmp=`${file}.tmp-${token}`;
   let fd;
@@ -158,5 +170,6 @@ function watchExternalJson(file,opts={}){
 module.exports={
   VERSION,DEFAULT_MAX_BYTES,rootOf,safeName,parseJsonText,readJsonFile,writeTextAtomic,
   writeNamespace,readNamespace,guardExternalJson,watchExternalJson,appendDiagnostic,
-  score_logic_changed:false,random_scoring_changed:false,policy_version:VERSION
+  score_logic_changed:false,random_scoring_changed:false,policy_version:VERSION,
+  _test:{recoverOrphanSwap}
 };
