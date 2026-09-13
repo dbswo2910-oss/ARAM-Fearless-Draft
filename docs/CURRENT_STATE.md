@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.127**
-- Manifest message: v0.15.127 · STARTUP AUTO UPDATE — checks once on launch and safely applies/restarts automatically when a newer app version exists
-- Manifest commit: `009f1a2be921ef34aa4c30e8d9198bfd6cc226e1`
-- Package: `update/v0.15.127/package.json` → **v0.15.127**
-- Electron entry: `main-v015127.js` → `update/v0.15.127/main-v015127.js`
-- Current runtime stability source: `update/v0.15.127/runtime-source-stability-v015127.js`
+- Active updater: **v0.15.128**
+- Manifest message: v0.15.128 · MATCH HISTORY LATENCY — cached-first match search + quick recent probe + background deep sync
+- Manifest commit: `3a823a4274cbcad84048a36461b460db36ea1a4d`
+- Package: `update/v0.15.128/package.json` → **v0.15.128**
+- Electron entry: `main-v015128.js` → `update/v0.15.128/main-v015128.js`
+- Current runtime stability source: `update/v0.15.128/runtime-source-stability-v015128.js`
 
 ## Active ownership — do not create competing owners
 
@@ -17,7 +17,7 @@
 - DATA view owner: **ui-stability-v015115** → `update/v0.15.120/ui-stability-baseline-v015115.js`
 - Persistent-state owner: **state-integrity-v015117** → `update/v0.15.117/state-integrity-v015117.js`
 - Resource lifecycle owner: **resource-lifecycle-v015118** → `update/v0.15.118/resource-lifecycle-v015118.js`
-- AutoSync main owner: **autosync-concurrency-v015119** → `update/v0.15.119/autosync-concurrency-v015119.js`
+- AutoSync main owner: **autosync-concurrency-v015119** → `update/v0.15.128/autosync-concurrency-v015119.js`
 - AutoSync renderer owner: **runtime-live-autosync-v01571+v015119** → `update/v0.15.72/runtime-live-autosync-v01571.js`
 - Permanent update/runtime safety root: **v0.15.79**
 
@@ -42,6 +42,7 @@
 - **aram_build_stat_cache_v015125** — `pending`: CI validates the 173-champion standard-ARAM cache and source provenance. A real Windows screenshot then exposed that the first v0.15.125 manifest used disallowed source data/aram-builds/current.json; the updater-safe hotfix preserves the v0.15.116 allowlist and delivers the byte-identical cache from update/data/aram-builds/current.json. Real Windows retry is still required.
 - **match_search_label_v015126** — `pending`: CI can prove the label payload is scoped to #history/header and that internal Match Lab/history identifiers and scoring owners are byte-preserved, but final visible wording requires the installed Windows UI.
 - **startup_update_notice_v015127** — `pending`: CI verifies a one-shot startup call into the existing transactional updater with no new updater/preload owner. Final automatic download/apply/relaunch behavior requires Windows acceptance against a future newer manifest.
+- **match_history_latency_v015128** — `pending`: CI simulates cache-first/coalesced history requests, quick/deep separation and latest-game probes. Real League Client timing is still required to accept perceived latency and post-game freshness.
 
 ## Next planned work
 

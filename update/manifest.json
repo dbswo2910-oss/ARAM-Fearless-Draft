@@ -1,6 +1,6 @@
 {
-  "version": "0.15.127",
-  "message": "v0.15.127 · STARTUP AUTO UPDATE — checks once on launch and safely applies/restarts automatically when a newer app version exists",
+  "version": "0.15.128",
+  "message": "v0.15.128 · MATCH HISTORY LATENCY — cached-first match search + quick recent probe + background deep sync",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -42,6 +42,10 @@
     {
       "path": "match-lab-queue-v01517.js",
       "source": "update/v0.15.17/match-lab-queue-v01517.js"
+    },
+    {
+      "path": "history-latency-v015128.js",
+      "source": "update/v0.15.128/history-latency-v015128.js"
     },
     {
       "path": "draft-pick-balance-v01517.js",
@@ -305,7 +309,7 @@
     },
     {
       "path": "autosync-concurrency-v015119.js",
-      "source": "update/v0.15.119/autosync-concurrency-v015119.js"
+      "source": "update/v0.15.128/autosync-concurrency-v015119.js"
     },
     {
       "path": "community-calibration-v01534.js",
@@ -688,6 +692,10 @@
       "source": "update/v0.15.127/runtime-source-stability-v015127.js"
     },
     {
+      "path": "runtime-source-stability-v015128.js",
+      "source": "update/v0.15.128/runtime-source-stability-v015128.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -784,6 +792,10 @@
       "source": "update/v0.15.127/main-v015127.js"
     },
     {
+      "path": "main-v015128.js",
+      "source": "update/v0.15.128/main-v015128.js"
+    },
+    {
       "path": "successor-route-hotfix-v015124.js",
       "source": "update/v0.15.124/successor-route-hotfix-v015124.js"
     },
@@ -800,8 +812,12 @@
       "source": "update/v0.15.127/successor-route-v015127.js"
     },
     {
+      "path": "successor-route-v015128.js",
+      "source": "update/v0.15.128/successor-route-v015128.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.127/package.json"
+      "source": "update/v0.15.128/package.json"
     }
   ],
   "delete": [

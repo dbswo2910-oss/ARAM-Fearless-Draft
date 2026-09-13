@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.127**
+- Active updater version: **v0.15.128**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -464,3 +464,7 @@ The user-facing feature name formerly shown as `매치 랩` / `매치랩` / `Mat
 ### v0.15.127 — startup automatic update
 
 After desktop startup, the renderer invokes the already-exposed `window.aramDesktop.checkAndApplyUpdate()` exactly once. The existing main-process updater remains the sole update owner: it compares the manifest, validates sources/SHA values, snapshots touched files, applies transactionally, marks the safety handoff and automatically relaunches only when a newer version exists. If the app is already current it stays open. Network/update-check failure does not block boot, and the existing manual update badge remains available for retry. No new preload bridge, IPC owner, interval or MutationObserver is introduced. Scoring, RANDOM, DATA, Riot Grade and AutoSync behavior are unchanged.
+
+### v0.15.128 — match-history latency
+
+Match history loading now uses the existing AutoSync concurrency owner for a session-scoped cache and request priority. 전적검색 paints compatible cached rows first, performs a smaller interactive recent scan, and only launches the historical deep scan as background backfill when the visible list is still short. Background history work yields while an interactive history request is in flight. RANDOM result synchronization no longer repeats the full history scan on every retry; it uses a bounded current-account standard-ARAM latest-match probe first, then retains the old full loader as fallback. Both main-process and renderer timing counters are exposed for diagnosis. No new recurring poller/MutationObserver or competing AutoSync owner is introduced, and scoring/item/Riot Grade logic is unchanged.

@@ -99,6 +99,17 @@
         "Confirm the app automatically relaunches into the newer version",
         "Confirm an update/network failure does not prevent normal app startup and manual update retry remains available"
       ]
+    },
+    "match_history_latency_v015128": {
+      "status": "pending",
+      "evidence": "CI simulates cache-first/coalesced history requests, quick/deep separation and latest-game probes. Real League Client timing is still required to accept perceived latency and post-game freshness.",
+      "must_verify": [
+        "Launch from v0.15.127 and confirm the new startup auto-updater applies/restarts into v0.15.128 without pressing 업데이트 확인",
+        "Open 전적검색 and confirm existing/cached rows appear quickly while fresh rows update without blocking the screen on a 100-match scan",
+        "Search another player and confirm a partial quick result may appear first, then the requested list backfills without jumping back to the previous account",
+        "Finish a new standard ARAM and confirm RANDOM 결과 picks up the just-finished game promptly without repeatedly waiting on full history scans",
+        "Repeat League Client reconnect/game-end transitions and confirm no request storm, duplicate loads, or progressive slowdown"
+      ]
     }
   },
   "next_planned_work": {

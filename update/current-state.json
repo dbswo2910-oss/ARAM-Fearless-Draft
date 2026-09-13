@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.127",
-    "message": "v0.15.127 · STARTUP AUTO UPDATE — checks once on launch and safely applies/restarts automatically when a newer app version exists",
+    "version": "0.15.128",
+    "message": "v0.15.128 · MATCH HISTORY LATENCY — cached-first match search + quick recent probe + background deep sync",
     "min_launcher": "2.0.2",
-    "manifest_commit": "009f1a2be921ef34aa4c30e8d9198bfd6cc226e1"
+    "manifest_commit": "3a823a4274cbcad84048a36461b460db36ea1a4d"
   },
   "package": {
-    "source": "update/v0.15.127/package.json",
-    "version": "0.15.127",
-    "main": "main-v015127.js",
-    "main_source": "update/v0.15.127/main-v015127.js"
+    "source": "update/v0.15.128/package.json",
+    "version": "0.15.128",
+    "main": "main-v015128.js",
+    "main_source": "update/v0.15.128/main-v015128.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.127/runtime-source-stability-v015127.js"
+      "active_runtime_source": "update/v0.15.128/runtime-source-stability-v015128.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
@@ -34,7 +34,7 @@
     },
     "autosync_main": {
       "owner": "autosync-concurrency-v015119",
-      "active_source": "update/v0.15.119/autosync-concurrency-v015119.js"
+      "active_source": "update/v0.15.128/autosync-concurrency-v015119.js"
     },
     "autosync_renderer": {
       "owner": "runtime-live-autosync-v01571+v015119",
@@ -202,6 +202,17 @@
         "With a newer manifest available, launch the app without pressing 업데이트 확인 and confirm the update is downloaded/applied automatically",
         "Confirm the app automatically relaunches into the newer version",
         "Confirm an update/network failure does not prevent normal app startup and manual update retry remains available"
+      ]
+    },
+    "match_history_latency_v015128": {
+      "status": "pending",
+      "evidence": "CI simulates cache-first/coalesced history requests, quick/deep separation and latest-game probes. Real League Client timing is still required to accept perceived latency and post-game freshness.",
+      "must_verify": [
+        "Launch from v0.15.127 and confirm the new startup auto-updater applies/restarts into v0.15.128 without pressing 업데이트 확인",
+        "Open 전적검색 and confirm existing/cached rows appear quickly while fresh rows update without blocking the screen on a 100-match scan",
+        "Search another player and confirm a partial quick result may appear first, then the requested list backfills without jumping back to the previous account",
+        "Finish a new standard ARAM and confirm RANDOM 결과 picks up the just-finished game promptly without repeatedly waiting on full history scans",
+        "Repeat League Client reconnect/game-end transitions and confirm no request storm, duplicate loads, or progressive slowdown"
       ]
     }
   },
