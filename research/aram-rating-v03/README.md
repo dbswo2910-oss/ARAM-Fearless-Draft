@@ -6,6 +6,23 @@ Phase B is research-only. It starts from the real Phase A connected component an
 
 Phase A: 20 accepted KR standard-ARAM matches, 160 players, 93.75% single-match players, 100% giant component, 80% Frozen cold-start. Strategy: `CASE_B_REPEAT_EXISTING_PLAYERS`.
 
+## Seed contract
+
+Phase B **does not use the currently rendered Match Lab rows as its seed**. The real Phase A export (`schema: aram-rating-real-sample-v02`) must be imported once into local research IndexedDB. For the current experiment the importer validates the expected shape exactly: **20 matches / 160 players**. A one-match/current-screen seed is rejected.
+
+Local-only storage:
+
+- Phase A imported seed: `IndexedDB aram-rating-research-v03 / phase-a-seed-v02`
+- Phase B checkpoint: `IndexedDB aram-rating-research-v03 / checkpoint-v03`
+
+If a newly imported Phase A seed has a different fingerprint, the stale checkpoint is cleared. If the fingerprint matches, checkpoint/resume is preserved.
+
+The helper also uses a global single-instance lock. A second invocation while Phase B is active exits immediately with:
+
+```text
+Phase B already running
+```
+
 ## History-path audit
 
 Tracked path: `LeagueAutoSyncCore.getAramMatchHistory` → Electron `match-history:load` → preload bridge → renderer.
@@ -18,7 +35,7 @@ Code-proven facts:
 - Phase A requested `limit=100, scan=200`, but the real Windows runtime returned 20 standard ARAM matches.
 - The final base `autosync-core.js` implementation required by `main.js` is not tracked in this Git tree, so a hidden backend hard-cap line cannot honestly be named from repository source alone.
 
-v0.3 therefore adds a read-only capability probe (`limit=30, scan=150`) against the same existing bridge. If another participant's history cannot be returned normally, collection stops as `blocked_by_data_source`; there is no scraper, private endpoint guess, CAPTCHA/rate-limit bypass or fallback crawler.
+v0.3 therefore adds a read-only capability probe (`limit=30, scan=150`) against the same existing bridge. If another participant's history cannot be returned normally, collection stops as `blocked_by_data_source`; there is no external scraper or fallback crawler.
 
 ## Bounded collector
 
@@ -38,12 +55,26 @@ Repeated observations, graph degree/bridge value and uncertainty-reduction proxy
 
 ## Privacy
 
-Raw collector JSON, local SQLite, PUUID mappings and identity-bearing checkpoints stay local and ignored. GitHub receives code, aggregate metrics and synthetic fixtures only.
+Raw collector JSON, local SQLite, PUUID mappings, imported Phase A seed and identity-bearing checkpoints stay local. GitHub receives code, aggregate metrics and synthetic fixtures only.
 
-## DevTools one-line run
+## DevTools run
+
+Load the helper:
 
 ```js
 fetch('https://raw.githubusercontent.com/dbswo2910-oss/ARAM-Fearless-Draft/research/aram-rating-v03-network-expansion/research/aram-rating-v03/phase-b-expansion-devtools.js?ts='+Date.now()).then(r=>r.text()).then(code=>(0,eval)(code))
 ```
 
-Rerun the same line to resume the checkpoint.
+On the first run only, import the real Phase A JSON and start Phase B:
+
+```js
+await aramRatingPhaseB.importPhaseAAndRun()
+```
+
+Select `aram-rating-real-sample-20260914-0104.json`. The importer must report `Seed matches: 20 / Seed players: 160` before expansion begins.
+
+After that, rerun only the helper load line. It automatically uses the stored Phase A seed and resumes the matching checkpoint. To abort safely:
+
+```js
+aramRatingPhaseB.abort()
+```
