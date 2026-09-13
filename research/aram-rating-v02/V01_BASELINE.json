@@ -1,0 +1,11 @@
+{
+  "version": "ARAM Rating v0.1 research foundation",
+  "commit": "fb4c23da9f5584fcfc82bc3982c47854a3c27f4b",
+  "research_audit_run": 34766068249,
+  "full_regression_run": 34766087689,
+  "research_audit": "success",
+  "full_regression": "success",
+  "active_app_at_baseline": "0.15.128",
+  "manifest_changed_by_v01": false,
+  "runtime_integration": false
+}
