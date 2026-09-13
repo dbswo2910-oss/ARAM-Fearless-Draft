@@ -1,0 +1,91 @@
+name: v0.15.112 Activate RANDOM Workspace Stability
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015112-activate-random-workspace-stability.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015112-random-workspace-stability-audit.js
+          node tools/v015111-random-dna-rail-audit.js
+          node tools/v015110-patch-notes-density-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.112 manifest + docs
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          m.version='0.15.112';
+          m.message='v0.15.112 · RANDOM WORKSPACE STABILITY — mode isolation, real pick redesign, no first-paint rail jump';
+          const remove=new Set(['random-workspace-stability-v015112.js','runtime-source-stability-v015112.js','main-v015112.js']);
+          m.files=(m.files||[]).filter(x=>!remove.has(x.path));
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(!pkg)throw new Error('manifest package.json missing');
+          pkg.source='update/v0.15.112/package.json';
+          let idx=m.files.findIndex(x=>x.path==='random-dna-rail-v015111.js');
+          if(idx<0)throw new Error('v0.15.111 UI anchor missing');
+          m.files.splice(idx+1,0,{path:'random-workspace-stability-v015112.js',source:'update/v0.15.112/random-workspace-stability-v015112.js'});
+          idx=m.files.findIndex(x=>x.path==='runtime-source-stability-v015111.js');
+          if(idx<0)throw new Error('v0.15.111 runtime anchor missing');
+          m.files.splice(idx+1,0,{path:'runtime-source-stability-v015112.js',source:'update/v0.15.112/runtime-source-stability-v015112.js'});
+          idx=m.files.findIndex(x=>x.path==='main-v015111.js');
+          if(idx<0)throw new Error('v0.15.111 main anchor missing');
+          m.files.splice(idx+1,0,{path:'main-v015112.js',source:'update/v0.15.112/main-v015112.js'});
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';
+          let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.112**');
+          const note='- **v0.15.112**: RANDOM workspace stability. IN GAME now hard-isolates all PICK-only UI; the PICK workspace is rebuilt from exact installed IDs into team input / candidate+TOP5 / one-column decision rail, and the first-paint DNA/detail reflow is removed. Scoring remains unchanged.';
+          if(!r.includes('**v0.15.112**'))r+='\n'+note+'\n';
+          fs.writeFileSync(rp,r);
+
+          const hp='docs/AI_HANDOFF.md';
+          let h=fs.readFileSync(hp,'utf8');
+          h=h.replace(/- Active updater version: \*\*v[^*]+\*\*/,'- Active updater version: **v0.15.112**');
+          const hnote='\n### v0.15.112 — RANDOM workspace stability\n\nScreenshot + video confirmed three related defects: PICK surfaces could remain visible in IN GAME because later `display:grid!important` layout rules outranked the base mode hide; v0.15.107/v0.15.111 repaired the PICK DOM after first paint, causing a visible two-column-to-stacked jump; and the intended PICK redesign was not materially visible. v0.15.112 fixes all three using only verified exact IDs. It hard-isolates `.randomPickOnly` from `data-random-mode="ingame"`, pre-assembles `#externalInputs`, `#poolInputs`, `#comboResults`, `#comboDetail`, and `#rpPickIntelV01589` into stable legacy-compatible wrappers before paint, and locks the decision rail to one readable column. Recommendation/scoring/item logic and DATA are unchanged. `score_logic_changed:false`.\n';
+          if(!h.includes('### v0.15.112 — RANDOM workspace stability'))h+=hnote;
+          fs.writeFileSync(hp,h);
+
+          const ap='AGENTS.md';
+          let a=fs.readFileSync(ap,'utf8');
+          const anote='\n## v0.15.112 RANDOM mode/workspace rule\n\n- `data-random-mode="ingame"` must hard-hide every `.randomPickOnly` surface even when later layout patches use `display:* !important`.\n- PICK layout repair must happen from exact IDs before first paint; do not reintroduce delayed post-paint movement between `#randomRecommendAnchor` and `#randomInputAnchor`.\n- Keep `rp107Center` / `rp107Right` compatibility classes when creating newer wrappers so historical forward-compatible repairs become no-ops instead of moving content again.\n- The right decision rail is one column: Combination DNA first, selected-composition detail second.\n- `score_logic_changed:false`.\n';
+          if(!a.includes('## v0.15.112 RANDOM mode/workspace rule'))a+=anote;
+          fs.writeFileSync(ap,a);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015112-random-workspace-stability-audit.js
+          node tools/v015111-random-dna-rail-audit.js
+          node tools/v015110-patch-notes-density-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md docs/AI_HANDOFF.md AGENTS.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.112 random workspace stability'
+            git push
+          fi
