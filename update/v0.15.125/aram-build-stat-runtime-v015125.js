@@ -2,13 +2,14 @@
 const fs=require('fs');
 const path=require('path');
 
-const CACHE_PATH=path.join(__dirname,'aram-build-stats-current.json');
+const CACHE_PATHS=[path.join(__dirname,'aram-build-stats-current.json'),path.resolve(__dirname,'..','..','data','aram-builds','current.json')];
 const REMOTE_URL='https://raw.githubusercontent.com/dbswo2910-oss/ARAM-Fearless-Draft/main/data/aram-builds/current.json';
 const FALLBACK_STAT_FN="  function statBuildFor(name){try{const c=typeof byName!=='undefined'?byName?.[name]:null,it=c?.item||{};return{tree:norm(it['기본 트리']||''),source:norm(it['통계 기준']||it['기준']||'앱 기본 DB'),verified:norm(it['통계 검증등급']||'')}}catch{return{tree:'',source:'앱 기본 DB',verified:''}}}";
 
 function countOf(src,needle){return String(src).split(needle).length-1}
 function readCache(){
-  const x=JSON.parse(fs.readFileSync(CACHE_PATH,'utf8'));
+  const p=CACHE_PATHS.find(x=>fs.existsSync(x));if(!p)throw new Error('v0.15.125 bundled ARAM cache missing');
+  const x=JSON.parse(fs.readFileSync(p,'utf8'));
   const rows=Object.values(x?.champions||{});
   if(x?.mode!=='ARAM'||!Array.isArray(x?.excludes)||!x.excludes.includes('ARAM_MAYHEM')||rows.length<170)throw new Error('v0.15.125 bundled ARAM cache contract invalid');
   return x;
