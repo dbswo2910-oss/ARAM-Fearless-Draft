@@ -5,6 +5,7 @@ let base;
 try{base=require('../v0.15.119/runtime-source-stability-v015119')}catch{base=require('./runtime-source-stability-v015119')}
 
 const OWNER_SENTINEL='/* ARAM_UI_STABILITY_OWNER_PAYLOAD_V015115 */';
+const STATE_SENTINEL='/* ARAM_STATE_INTEGRITY_PAYLOAD_V015117 */';
 let cachedUi='';
 function uiSourceV015120(){
   if(cachedUi)return cachedUi;
@@ -17,10 +18,15 @@ function uiSourceV015120(){
   return cachedUi;
 }
 function replaceUiOwnerPayload(src){
-  const i=String(src).indexOf(OWNER_SENTINEL);
+  src=String(src);
+  const i=src.indexOf(OWNER_SENTINEL);
   if(i<0)throw new Error('v0.15.120 existing v0.15.115 UI owner payload missing');
-  if(String(src).indexOf(OWNER_SENTINEL,i+OWNER_SENTINEL.length)>=0)throw new Error('v0.15.120 duplicate UI owner payload');
-  return String(src).slice(0,i+OWNER_SENTINEL.length)+'\n'+uiSourceV015120()+'\n';
+  if(src.indexOf(OWNER_SENTINEL,i+OWNER_SENTINEL.length)>=0)throw new Error('v0.15.120 duplicate UI owner payload');
+  const stateAt=src.indexOf(STATE_SENTINEL,i+OWNER_SENTINEL.length);
+  if(stateAt<0)throw new Error('v0.15.120 v0.15.117 state-integrity suffix missing');
+  const prefix=src.slice(0,i+OWNER_SENTINEL.length);
+  const suffix=src.slice(stateAt);
+  return prefix+'\n'+uiSourceV015120()+'\n;\n'+suffix;
 }
 function patchRuntimeSource(file,input){
   let src=base.patchRuntimeSource(file,input);
