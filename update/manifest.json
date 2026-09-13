@@ -1,6 +1,6 @@
 {
-  "version": "0.15.112",
-  "message": "v0.15.112 · RANDOM WORKSPACE STABILITY — mode isolation, real pick redesign, no first-paint rail jump",
+  "version": "0.15.113",
+  "message": "v0.15.113 · RANDOM READABILITY HOTFIX — remove narrow right rail; decision area gets full usable width",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -580,6 +580,10 @@
       "source": "update/v0.15.112/random-workspace-stability-v015112.js"
     },
     {
+      "path": "random-workspace-readable-v015113.js",
+      "source": "update/v0.15.113/random-workspace-readable-v015113.js"
+    },
+    {
       "path": "runtime-source-stability-v015104.js",
       "source": "update/v0.15.104/runtime-source-stability-v015104.js"
     },
@@ -614,6 +618,10 @@
     {
       "path": "runtime-source-stability-v015112.js",
       "source": "update/v0.15.112/runtime-source-stability-v015112.js"
+    },
+    {
+      "path": "runtime-source-stability-v015113.js",
+      "source": "update/v0.15.113/runtime-source-stability-v015113.js"
     },
     {
       "path": "main-v015104.js",
@@ -652,8 +660,12 @@
       "source": "update/v0.15.112/main-v015112.js"
     },
     {
+      "path": "main-v015113.js",
+      "source": "update/v0.15.113/main-v015113.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.112/package.json"
+      "source": "update/v0.15.113/package.json"
     }
   ],
   "delete": [
