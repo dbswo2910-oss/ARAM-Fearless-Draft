@@ -1,6 +1,6 @@
 {
-  "version": "0.15.113",
-  "message": "v0.15.113 · RANDOM READABILITY HOTFIX — remove narrow right rail; decision area gets full usable width",
+  "version": "0.15.114",
+  "message": "v0.15.114 · RANDOM PICK INTEGRITY — fix clipped grades, corrupted candidate names, and candidate-specific DNA updates",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -584,6 +584,10 @@
       "source": "update/v0.15.113/random-workspace-readable-v015113.js"
     },
     {
+      "path": "random-pick-integrity-v015114.js",
+      "source": "update/v0.15.114/random-pick-integrity-v015114.js"
+    },
+    {
       "path": "runtime-source-stability-v015104.js",
       "source": "update/v0.15.104/runtime-source-stability-v015104.js"
     },
@@ -622,6 +626,10 @@
     {
       "path": "runtime-source-stability-v015113.js",
       "source": "update/v0.15.113/runtime-source-stability-v015113.js"
+    },
+    {
+      "path": "runtime-source-stability-v015114.js",
+      "source": "update/v0.15.114/runtime-source-stability-v015114.js"
     },
     {
       "path": "main-v015104.js",
@@ -664,8 +672,12 @@
       "source": "update/v0.15.113/main-v015113.js"
     },
     {
+      "path": "main-v015114.js",
+      "source": "update/v0.15.114/main-v015114.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.113/package.json"
+      "source": "update/v0.15.114/package.json"
     }
   ],
   "delete": [

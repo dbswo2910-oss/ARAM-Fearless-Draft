@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.113**
+- Active updater version: **v0.15.114**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -404,3 +404,7 @@ Screenshot + video confirmed three related defects: PICK surfaces could remain v
 ### v0.15.113 — RANDOM readability hotfix
 
 Screenshot after v0.15.112 proved that the three-column PICK layout still allowed the decision rail to become microscopic in the real Electron viewport. v0.15.113 removes that failure mode instead of trying another narrow-rail tweak: the outer PICK workbench is always two columns on desktop (team input + main work area), and Combination DNA / selected-composition detail live below the main column with full usable width. The v0.15.111 rail CSS is explicitly neutralized while its compatibility classes are retained. PICK/IN GAME isolation and v0.15.79 safety lineage remain intact. Recommendation/scoring logic is unchanged. `score_logic_changed:false`.
+
+### v0.15.114 — RANDOM PICK integrity repair
+
+Real Electron verification of v0.15.113 still showed clipped tier grades, polluted repeated candidate names, and a candidate label that changed while the DNA bars remained static. v0.15.114 moves the repair into the actual Random Practice lifecycle owner (`random-practice-focus-v01549.js`) instead of mounting from unrelated shell scripts. TOP5 labels prefer `randomState.combos[index].sel`, DNA prefers the selected engine combo `structure` / `parts`, and old `.rp107Right/.rp112Right` wrappers are retained only as compatibility containers forced below the main column at readable width. Grade tokens are constrained inside their pool items. Ranking/scoring, items, DATA, and PICK/IN GAME logic are unchanged. `score_logic_changed:false`, `random_scoring_changed:false`.
