@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.109**
+- Active updater version: **v0.15.110**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -388,3 +388,7 @@ The screenshot-confirmed v0.15.107 failure was caused by relying on a direct-chi
 ### v0.15.109 — Screenshot UI polish
 
 The v0.15.108 screenshots confirm that DATA/RANDOM view ownership is fixed. v0.15.109 only cleans remaining visual artifacts: the Patch Notes outer header no longer says `챔피언 상세`, the visible Patch Companion label no longer exposes the old v0.15.99 module version, and RANDOM candidate DNA bars / AD-AP split / compact intel typography are restored with exact scoped selectors. `score_logic_changed:false`.
+
+### v0.15.110 — Patch Notes champion density
+
+Screenshot-confirmed hotfix for oversized Patch Notes champion portraits. The repair is strictly scoped to `#dataPatchNotesV01599 #dh99ChampionGrid`, force-locks portraits to 46×46 px, uses a denser responsive grid, and preserves DATA tier cards, RANDOM Practice, recommendation/scoring/item logic, v0.15.109 polish, and the v0.15.79 safety lineage. `score_logic_changed:false`.

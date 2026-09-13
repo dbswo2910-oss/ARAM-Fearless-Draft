@@ -1,6 +1,6 @@
 {
-  "version": "0.15.109",
-  "message": "v0.15.109 · SCREENSHOT UI POLISH — correct Patch Notes labeling and restore readable RANDOM DNA visuals",
+  "version": "0.15.110",
+  "message": "v0.15.110 · PATCH NOTES DENSITY — compact champion portraits and card grid",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -568,6 +568,10 @@
       "source": "update/v0.15.109/ui-screenshot-polish-v015109.js"
     },
     {
+      "path": "patch-notes-density-v015110.js",
+      "source": "update/v0.15.110/patch-notes-density-v015110.js"
+    },
+    {
       "path": "runtime-source-stability-v015104.js",
       "source": "update/v0.15.104/runtime-source-stability-v015104.js"
     },
@@ -590,6 +594,10 @@
     {
       "path": "runtime-source-stability-v015109.js",
       "source": "update/v0.15.109/runtime-source-stability-v015109.js"
+    },
+    {
+      "path": "runtime-source-stability-v015110.js",
+      "source": "update/v0.15.110/runtime-source-stability-v015110.js"
     },
     {
       "path": "main-v015104.js",
@@ -616,8 +624,12 @@
       "source": "update/v0.15.109/main-v015109.js"
     },
     {
+      "path": "main-v015110.js",
+      "source": "update/v0.15.110/main-v015110.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.109/package.json"
+      "source": "update/v0.15.110/package.json"
     }
   ],
   "delete": [
