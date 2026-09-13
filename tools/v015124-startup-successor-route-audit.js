@@ -77,16 +77,19 @@ if(String(manifest.version)==='0.15.124'){
   };
   for(const [p,s] of Object.entries(expected))if(map.get(p)!==s)throw new Error(`active v124 manifest mismatch ${p}: ${map.get(p)||'missing'}`);
   ok('active-v124-manifest');
-}else if(String(manifest.version)==='0.15.125'){
+}else if(['0.15.125','0.15.126'].includes(String(manifest.version))){
   const preserved={
     'successor-route-hotfix-v015124.js':'update/v0.15.124/successor-route-hotfix-v015124.js',
     'runtime-source-stability-v015124.js':'update/v0.15.124/runtime-source-stability-v015124.js',
     'main-v015124.js':'update/v0.15.124/main-v015124.js'
   };
-  for(const [p,s] of Object.entries(preserved))if(map.get(p)!==s)throw new Error(`v125 successor dropped v124 safety artifact ${p}: ${map.get(p)||'missing'}`);
-  if(map.get('package.json')!=='update/v0.15.125/package.json')throw new Error(`v125 successor package mismatch: ${map.get('package.json')||'missing'}`);
-  if(map.get('main-v015125.js')!=='update/v0.15.125/main-v015125.js')throw new Error(`v125 successor main missing: ${map.get('main-v015125.js')||'missing'}`);
-  ok('verified-v125-successor-manifest');
+  for(const [p,s] of Object.entries(preserved))if(map.get(p)!==s)throw new Error(`successor dropped v124 safety artifact ${p}: ${map.get(p)||'missing'}`);
+  const v=String(manifest.version),compact=v.replaceAll('.','');
+  const pkgExpected=`update/v${v}/package.json`;
+  const mainTarget=`main-v${compact}.js`,mainExpected=`update/v${v}/${mainTarget}`;
+  if(map.get('package.json')!==pkgExpected)throw new Error(`${v} successor package mismatch: ${map.get('package.json')||'missing'}`);
+  if(map.get(mainTarget)!==mainExpected)throw new Error(`${v} successor main missing: ${map.get(mainTarget)||'missing'}`);
+  ok(`verified-${v}-successor-manifest`);
 }else if(String(manifest.version)==='0.15.123')ok('preactivation-v123-manifest');
 else throw new Error(`unexpected manifest version for v0.15.124 rollout: ${manifest.version}`);
 
