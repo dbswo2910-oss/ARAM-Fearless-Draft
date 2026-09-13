@@ -1,6 +1,6 @@
 {
-  "version": "0.15.128",
-  "message": "v0.15.128 · MATCH HISTORY LATENCY — cached-first match search + quick recent probe + background deep sync",
+  "version": "0.15.129",
+  "message": "v0.15.129 · ARAM RATING RESEARCH UI — local personal Research card in Player Profile",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -817,7 +817,31 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.128/package.json"
+      "source": "update/v0.15.129/package.json"
+    },
+    {
+      "path": "rating-engine-v01.js",
+      "source": "update/v0.15.129/rating-engine-v01.js"
+    },
+    {
+      "path": "research-ui-core.js",
+      "source": "update/v0.15.129/research-ui-core.js"
+    },
+    {
+      "path": "research-ui-devtools.js",
+      "source": "update/v0.15.129/research-ui-devtools.js"
+    },
+    {
+      "path": "runtime-source-stability-v015129.js",
+      "source": "update/v0.15.129/runtime-source-stability-v015129.js"
+    },
+    {
+      "path": "main-v015129.js",
+      "source": "update/v0.15.129/main-v015129.js"
+    },
+    {
+      "path": "successor-route-v015129.js",
+      "source": "update/v0.15.129/successor-route-v015129.js"
     }
   ],
   "delete": [
