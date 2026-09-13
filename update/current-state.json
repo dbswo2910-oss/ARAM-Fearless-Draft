@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.121",
-    "message": "v0.15.121 · RANDOM PRACTICE RESTORE — deterministic entry/render/input/results with one disposable refresh owner",
+    "version": "0.15.122",
+    "message": "v0.15.122 · RIOT GRADE ACCURACY — primary Riot mastery grade only, exact game+champion matching",
     "min_launcher": "2.0.2",
-    "manifest_commit": "a4ec866548cd66323389b222ad65f68affdb3bb6"
+    "manifest_commit": "41acd1561a0d0678ea20b4b9505098a049f82ffd"
   },
   "package": {
-    "source": "update/v0.15.121/package.json",
-    "version": "0.15.121",
-    "main": "main-v015121.js",
-    "main_source": "update/v0.15.121/main-v015121.js"
+    "source": "update/v0.15.122/package.json",
+    "version": "0.15.122",
+    "main": "main-v015122.js",
+    "main_source": "update/v0.15.122/main-v015122.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.121/runtime-source-stability-v015121.js"
+      "active_runtime_source": "update/v0.15.122/runtime-source-stability-v015122.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
@@ -142,6 +142,16 @@
         "Patch Notes hides the role-tier browser and uses the full DATA workspace",
         "Champion Tier List restores the normal tier/detail split",
         "Patch Notes champion cards remain compact and readable"
+      ]
+    },
+    "riot_grade_accuracy_v015122": {
+      "status": "pending",
+      "evidence": "Synthetic LCU parser and exact-link CI prove that memberGrades are excluded and only primary gameId+championId records are authoritative. One newly completed real League game still needs direct client-grade comparison.",
+      "must_verify": [
+        "Finish a new ARAM while v0.15.122 is running and note the Riot client S/A/B grade",
+        "Open the same game in Match Lab and confirm Riot Grade is identical",
+        "Confirm a teammate grade from the same game never appears as the local Riot Grade",
+        "If no authoritative primary row was captured, the app shows no Riot Grade rather than a guessed value"
       ]
     }
   },

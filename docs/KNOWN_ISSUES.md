@@ -72,3 +72,7 @@ For screenshot-driven UI defects, report CI success separately from real-Windows
 Do not use prior conversation memory as the source of truth after a chat reset. Cold-start from `AGENTS.md` → `docs/CURRENT_STATE.md` → `update/current-state.json` → `update/manifest.json` → this file → `docs/AI_HANDOFF.md`, then inspect latest main/PR/CI.
 
 If `docs/CURRENT_STATE.md` or `update/current-state.json` disagrees with `update/manifest.json`, the manifest wins for active distribution and the continuity snapshot must be regenerated with `node tools/sync-current-state.js` before development continues.
+
+## Riot Grade mismatch before v0.15.122
+
+Before v0.15.122 the collector recursively traversed the ChampionMasteryUpdate payload, so nested `memberGrades` could be stored under the local account and the match-detail card could choose a same-game row without requiring the played champion. v0.15.122 changes collection to primary-only and requires exact gameId + championId linkage. Historical rows from v0.15.121 and earlier are intentionally treated as unverified; a new real-game comparison is still required before marking the user-reported mismatch fully accepted.

@@ -172,12 +172,13 @@ async function main(){
   else{
     const m=active.match(/^0\.15\.(\d+)$/),successor=m&&Number(m[1])>117;
     if(!successor)throw new Error(`unexpected active manifest version during v0.15.117 audit: ${active}`);
+    const gradeCollectorSource=Number(m[1])>=122?'update/v0.15.122/riot-grade-collector-v01532.js':'update/v0.15.117/riot-grade-collector-v01532.js';
     const preserved={
       'state-integrity-v015117.js':'update/v0.15.117/state-integrity-v015117.js',
       'state-integrity-renderer-v015117.js':'update/v0.15.117/state-integrity-renderer-v015117.js',
       'preload.js':'update/v0.15.117/preload.js',
       'riot-grade-collector-base-v01532.js':'update/v0.15.32/riot-grade-collector-v01532.js',
-      'riot-grade-collector-v01532.js':'update/v0.15.117/riot-grade-collector-v01532.js',
+      'riot-grade-collector-v01532.js':gradeCollectorSource,
       'runtime-source-stability-v015117.js':'update/v0.15.117/runtime-source-stability-v015117.js',
       'main-v015117.js':'update/v0.15.117/main-v015117.js'
     };

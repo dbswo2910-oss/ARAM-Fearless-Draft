@@ -224,3 +224,12 @@ node tools/ai-continuity-audit.js
 - Do not restore subtree MutationObserver repair loops, setInterval refresh loops, or the retired v0.15.103-v0.15.114 DOM reparent overlays.
 - The cooperative exhaustive TOP5 calculation and recommendation/Random scoring math are unchanged.
 - CI validates source/lifecycle contracts only; final PICK interaction/visual acceptance still requires real-Windows evidence.
+
+## v0.15.122 Riot Grade accuracy baseline
+
+- Treat only the direct LCU ChampionMasteryUpdate grade as the user's actual Riot Grade. `memberGrades` are not local-player truth and must never be recursively collected.
+- Authoritative grade rows use `gradeProvenance: riot-primary-update`. v0.15.121-and-earlier rows without that provenance are legacy/unverified and may be retained for diagnostics but must not drive displayed Riot Grade or calibration.
+- Link Riot Grade to a match only with local account + canonical gameId + exact championId. If championId is unavailable or no exact authoritative record exists, display no Riot Grade rather than guessing.
+- Riot Grade remains an external validation label only. Do not feed it into ROLE, recommendation, champion, item, or RANDOM scoring without a separate explicit request.
+- Preserve v0.15.121 RANDOM restore, v0.15.120 DATA owner, v0.15.119 AutoSync concurrency, v0.15.118 lifecycle, v0.15.117 state integrity, and v0.15.79 permanent safety contracts.
+- CI proves parser/matching contracts. Final real-world acceptance requires one newly completed League game where the Riot client grade and v0.15.122 card are compared directly.

@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.121**
+- Active updater version: **v0.15.122**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -436,3 +436,7 @@ The existing `ui-stability-v015115` DATA owner remains authoritative. v0.15.120 
 ### v0.15.121 — RANDOM Practice restore
 
 RANDOM Practice keeps the v0.15.100 PICK DOM/selection owner and the v0.15.115 single-owner UI boundary. The v0.15.72 Random Practice coordinator is revised in-place by the v0.15.121 runtime transform: view entry restores the existing input/TOP5/detail output from current state, click/change/input refresh work is coalesced through the existing maintenance timer, event listeners have one explicit owner and are removed by the v0.15.118 disposer, and the cooperative exhaustive TOP5 path remains the only combo calculator. No MutationObserver, interval repair loop, late DOM reparent owner, or scoring change is introduced. Real-Windows acceptance remains required for final visual/interaction sign-off.
+
+### v0.15.122 — Riot Grade accuracy
+
+The Riot Grade collector is authoritative only when the LCU value comes from the direct local-player ChampionMasteryUpdate. The collector must not recursively consume `memberGrades`; those are other members' grade rows. Authoritative records use `gradeProvenance: riot-primary-update`. Match-detail and calibration linkage requires exact local account + gameId + championId. Records captured by v0.15.121 and earlier are migrated to `legacy-unverified-v015121` and excluded from authoritative display/calibration until replaced by a new primary record. Never synthesize or infer a Riot S/A/B grade when no authoritative row exists. ROLE/recommendation/Random scoring is unchanged.

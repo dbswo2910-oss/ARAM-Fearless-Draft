@@ -39,6 +39,16 @@
         "Champion Tier List restores the normal tier/detail split",
         "Patch Notes champion cards remain compact and readable"
       ]
+    },
+    "riot_grade_accuracy_v015122": {
+      "status": "pending",
+      "evidence": "Synthetic LCU parser and exact-link CI prove that memberGrades are excluded and only primary gameId+championId records are authoritative. One newly completed real League game still needs direct client-grade comparison.",
+      "must_verify": [
+        "Finish a new ARAM while v0.15.122 is running and note the Riot client S/A/B grade",
+        "Open the same game in Match Lab and confirm Riot Grade is identical",
+        "Confirm a teammate grade from the same game never appears as the local Riot Grade",
+        "If no authoritative primary row was captured, the app shows no Riot Grade rather than a guessed value"
+      ]
     }
   },
   "next_planned_work": {
@@ -74,7 +84,7 @@
     {
       "order": 4,
       "theme": "Riot S/A/B grade calibration against actual Riot grade",
-      "status": "not_started"
+      "status": "code_complete_real_windows_pending"
     },
     {
       "order": 5,

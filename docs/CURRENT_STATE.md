@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.121**
-- Manifest message: v0.15.121 · RANDOM PRACTICE RESTORE — deterministic entry/render/input/results with one disposable refresh owner
-- Manifest commit: `a4ec866548cd66323389b222ad65f68affdb3bb6`
-- Package: `update/v0.15.121/package.json` → **v0.15.121**
-- Electron entry: `main-v015121.js` → `update/v0.15.121/main-v015121.js`
-- Current runtime stability source: `update/v0.15.121/runtime-source-stability-v015121.js`
+- Active updater: **v0.15.122**
+- Manifest message: v0.15.122 · RIOT GRADE ACCURACY — primary Riot mastery grade only, exact game+champion matching
+- Manifest commit: `41acd1561a0d0678ea20b4b9505098a049f82ffd`
+- Package: `update/v0.15.122/package.json` → **v0.15.122**
+- Electron entry: `main-v015122.js` → `update/v0.15.122/main-v015122.js`
+- Current runtime stability source: `update/v0.15.122/runtime-source-stability-v015122.js`
 
 ## Active ownership — do not create competing owners
 
@@ -36,6 +36,7 @@
 - **autosync_v015119_real_league_soak** — `pending`: Code-level async race simulations and CI pass, but a prolonged real League Client/LCU/Live Client session has not been recorded as completed acceptance evidence.
 - **installed_app_snapshot** — `known_stale_baseline`: Latest preserved real installed-app baseline is v0.15.49 while the active updater is newer.
 - **data_patch_notes_subnav_v015120** — `pending`: Repository structural/regression audits can validate ownership and routing, but a post-v0.15.120 real-Windows screenshot is still required for visual acceptance.
+- **riot_grade_accuracy_v015122** — `pending`: Synthetic LCU parser and exact-link CI prove that memberGrades are excluded and only primary gameId+championId records are authoritative. One newly completed real League game still needs direct client-grade comparison.
 
 ## Next planned work
 

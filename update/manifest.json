@@ -1,6 +1,6 @@
 {
-  "version": "0.15.121",
-  "message": "v0.15.121 · RANDOM PRACTICE RESTORE — deterministic entry/render/input/results with one disposable refresh owner",
+  "version": "0.15.122",
+  "message": "v0.15.122 · RIOT GRADE ACCURACY — primary Riot mastery grade only, exact game+champion matching",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -237,7 +237,7 @@
     },
     {
       "path": "riot-grade-collector-v01532.js",
-      "source": "update/v0.15.117/riot-grade-collector-v01532.js"
+      "source": "update/v0.15.122/riot-grade-collector-v01532.js"
     },
     {
       "path": "riot-grade-collector-base-v01532.js",
@@ -644,6 +644,10 @@
       "source": "update/v0.15.121/runtime-source-stability-v015121.js"
     },
     {
+      "path": "runtime-source-stability-v015122.js",
+      "source": "update/v0.15.122/runtime-source-stability-v015122.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -716,8 +720,12 @@
       "source": "update/v0.15.121/main-v015121.js"
     },
     {
+      "path": "main-v015122.js",
+      "source": "update/v0.15.122/main-v015122.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.121/package.json"
+      "source": "update/v0.15.122/package.json"
     }
   ],
   "delete": [
