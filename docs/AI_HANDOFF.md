@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.108**
+- Active updater version: **v0.15.109**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -384,3 +384,7 @@ The v0.15.103 Data layout helper used a document-wide `.panel` + Korean-title se
 ### v0.15.108 — DATA Patch Mode hardfix
 
 The screenshot-confirmed v0.15.107 failure was caused by relying on a direct-child layout assumption and a single patch-mode signal. v0.15.108 detects Patch Notes from visible and hidden tabs, the v0.15.99 card class, and actual patch-note visibility, then marks and hides the real tier branch using descendant-safe selectors. Random Practice also hides foreign Data nodes and their empty branches. `score_logic_changed:false`.
+
+### v0.15.109 — Screenshot UI polish
+
+The v0.15.108 screenshots confirm that DATA/RANDOM view ownership is fixed. v0.15.109 only cleans remaining visual artifacts: the Patch Notes outer header no longer says `챔피언 상세`, the visible Patch Companion label no longer exposes the old v0.15.99 module version, and RANDOM candidate DNA bars / AD-AP split / compact intel typography are restored with exact scoped selectors. `score_logic_changed:false`.

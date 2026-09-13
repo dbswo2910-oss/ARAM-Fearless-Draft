@@ -1,6 +1,6 @@
 {
-  "version": "0.15.108",
-  "message": "v0.15.108 · DATA PATCH MODE HARD FIX — hides the tier browser whenever Patch Notes is active and strengthens Random Practice foreign-DATA quarantine",
+  "version": "0.15.109",
+  "message": "v0.15.109 · SCREENSHOT UI POLISH — correct Patch Notes labeling and restore readable RANDOM DNA visuals",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -564,6 +564,10 @@
       "source": "update/v0.15.108/data-random-hardfix-v015108.js"
     },
     {
+      "path": "ui-screenshot-polish-v015109.js",
+      "source": "update/v0.15.109/ui-screenshot-polish-v015109.js"
+    },
+    {
       "path": "runtime-source-stability-v015104.js",
       "source": "update/v0.15.104/runtime-source-stability-v015104.js"
     },
@@ -582,6 +586,10 @@
     {
       "path": "runtime-source-stability-v015108.js",
       "source": "update/v0.15.108/runtime-source-stability-v015108.js"
+    },
+    {
+      "path": "runtime-source-stability-v015109.js",
+      "source": "update/v0.15.109/runtime-source-stability-v015109.js"
     },
     {
       "path": "main-v015104.js",
@@ -604,8 +612,12 @@
       "source": "update/v0.15.108/main-v015108.js"
     },
     {
+      "path": "main-v015109.js",
+      "source": "update/v0.15.109/main-v015109.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.108/package.json"
+      "source": "update/v0.15.109/package.json"
     }
   ],
   "delete": [
