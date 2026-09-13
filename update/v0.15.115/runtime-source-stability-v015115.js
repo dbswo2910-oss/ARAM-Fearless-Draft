@@ -18,6 +18,7 @@ const path=require('path');
 let base;
 try{base=require('../v0.15.100/runtime-source-stability-v015100')}catch{base=require('./runtime-source-stability-v015100')}
 
+const OWNER_SENTINEL='/* ARAM_UI_STABILITY_OWNER_PAYLOAD_V015115 */';
 let cachedUi='';
 function uiSourceV015115(){
   if(cachedUi)return cachedUi;
@@ -29,8 +30,8 @@ function uiSourceV015115(){
   return cachedUi;
 }
 function appendUiV015115(src){
-  if(src.includes('__ARAM_UI_STABILITY_BASELINE_V015115__'))return src;
-  return src+'\n;\n'+uiSourceV015115()+'\n';
+  if(src.includes(OWNER_SENTINEL))return src;
+  return src+'\n;\n'+OWNER_SENTINEL+'\n'+uiSourceV015115()+'\n';
 }
 function patchRuntimeSource(file,input){
   let src=base.patchRuntimeSource(file,input);
