@@ -74,6 +74,12 @@ function itemNames(ids,itemMap){return (ids||[]).map(id=>itemMap[String(id)]?.na
 async function fetchChampion(id){return fetchJson(`${OPGG}/api/global/champions/aram/${id}/none?hl=ko_KR`)}
 function slugName(s){return String(s||'').toLowerCase().replace(/&/g,'and').replace(/[.'’\s-]/g,'').replace(/[^a-z0-9]/g,'')}
 function winRate(row){const p=Number(row?.play)||0,w=Number(row?.win)||0;return p?Number((w/p*100).toFixed(2)):0}
+function materialSnapshot(doc){
+  return {
+    schemaVersion:doc?.schemaVersion,mode:doc?.mode,excludes:doc?.excludes,canonicalPatch:doc?.canonicalPatch,provider:doc?.provider,providerPatch:doc?.providerPatch,ddragonVersion:doc?.ddragonVersion,rosterCount:doc?.rosterCount,
+    champions:Object.fromEntries(Object.entries(doc?.champions||{}).map(([id,r])=>[id,{championId:r?.championId,name:r?.name,nameEn:r?.nameEn,starterItemIds:r?.starterItemIds,bootsId:r?.bootsId,coreItemIds:r?.coreItemIds,popularItemIds:r?.popularItemIds,coreAlternatives:(r?.coreAlternatives||[]).map(x=>x?.ids)}]))
+  };
+}
 async function probe(){
   const index=await loadIndex(),{ddVersion,itemMap}=await loadItemMap(index.providerPatch,index.canonicalPatch);
   const id=103,payload=await fetchChampion(id),info=payload?.data||{},picked=chooseBaseline(info,itemMap),top=picked.coreAlternatives[0]||{};
@@ -94,6 +100,9 @@ async function generate(){
   const champions=Object.fromEntries(rows.filter(Boolean).sort((a,b)=>a.championId-b.championId).map(r=>[String(r.championId),r])),count=Object.keys(champions).length;
   if(failures.length||count!==index.ids.length)throw new Error(`incomplete ARAM cache: ${count}/${index.ids.length}; failures=${JSON.stringify(failures.slice(0,10))}`);
   const doc={schemaVersion:2,mode:'ARAM',excludes:['ARAM_MAYHEM'],canonicalPatch:index.canonicalPatch,provider:'OP.GG',providerPatch:index.providerPatch,ddragonVersion:ddVersion,generatedAt:new Date().toISOString(),providerAnalyzedAt:index.listMeta?.analyzed_at||null,providerMatchCount:Number(index.listMeta?.match_count)||null,rosterCount:index.ids.length,champions};
+  if(fs.existsSync(OUT)){
+    try{const old=JSON.parse(fs.readFileSync(OUT,'utf8'));if(JSON.stringify(materialSnapshot(old))===JSON.stringify(materialSnapshot(doc))){console.log(`ARAM build cache material paths unchanged: retaining existing ${old.canonicalPatch} cache`);return}}catch{}
+  }
   fs.mkdirSync(path.dirname(OUT),{recursive:true});fs.writeFileSync(OUT,JSON.stringify(doc,null,2)+'\n','utf8');
   console.log(`ARAM build cache written: ${count} champions patch=${index.canonicalPatch} provider=${index.providerPatch} matches=${doc.providerMatchCount} -> ${path.relative(ROOT,OUT)}`);
 }
