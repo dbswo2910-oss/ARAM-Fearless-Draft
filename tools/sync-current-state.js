@@ -5,7 +5,6 @@ const cp=require('child_process');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const readJson=p=>JSON.parse(read(p));
-const write=p=>{const f=path.join(ROOT,p);fs.mkdirSync(path.dirname(f),{recursive:true});fs.writeFileSync(f,arguments[1],'utf8')};
 const safeGit=args=>{try{return cp.execFileSync('git',args,{cwd:ROOT,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim()}catch{return''}};
 const RETIRED_UI=[
   'ui-layout-restore-v015103.js',
@@ -39,7 +38,6 @@ function buildSnapshot(){
   const deletes=new Set(Array.isArray(manifest.delete)?manifest.delete:[]);
   const manifestCommit=safeGit(['log','-1','--format=%H','--','update/manifest.json']);
   const manifestCommitDate=safeGit(['log','-1','--format=%cI','--','update/manifest.json']);
-  const branchHead=safeGit(['rev-parse','HEAD']);
   const mainSource=byPath.get(pkg.main)||'';
   const owners={
     random_pick:{owner:matchExport(runtimeText,'random_pick_owner','runtime-v015100'),contract:'v0.15.115 single-owner baseline',active_runtime_source:runtimeSource},
@@ -58,8 +56,7 @@ function buildSnapshot(){
       message:String(manifest.message||''),
       min_launcher:String(manifest.min_launcher||''),
       manifest_commit:manifestCommit,
-      manifest_commit_date:manifestCommitDate,
-      generated_from_head:branchHead
+      manifest_commit_date:manifestCommitDate
     },
     package:{source:pkgSource,version:String(pkg.version||''),main:String(pkg.main||''),main_source:mainSource},
     owners,
@@ -77,7 +74,7 @@ function buildSnapshot(){
       scoring_changed_by_continuity_system:false,
       random_scoring_changed_by_continuity_system:false,
       visual_success_requires_real_windows_evidence:true,
-      future_activation_workflows_from_v015120_must_run:'node tools/sync-current-state.js before committing manifest/docs activation'
+      future_activation_workflows_from_v015120_must_run:'node tools/sync-current-state.js after manifest mutation and before release metadata commit'
     },
     cold_start_order:[
       'AGENTS.md',
@@ -102,7 +99,7 @@ function sync({check=false}={}){
     'update/current-state.json':serializeJson(snapshot),
     'docs/CURRENT_STATE.md':renderMarkdown(snapshot)
   };
-  let stale=[];
+  const stale=[];
   for(const [p,content] of Object.entries(outputs)){
     const full=path.join(ROOT,p),old=fs.existsSync(full)?fs.readFileSync(full,'utf8'):'';
     if(old!==content){
