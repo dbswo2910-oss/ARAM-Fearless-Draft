@@ -59,6 +59,15 @@
         "Choose 다시 보지 않기, restart, and confirm the same Patch Notes version no longer shows the modal",
         "After a future Patch Notes version is registered, confirm the modal is eligible to appear again despite the older dismissal value"
       ]
+    },
+    "startup_recovery_v015124": {
+      "status": "pending",
+      "evidence": "Repository CI now executes the exact successor route transform against the real v0.15.122 predecessor source. The user supplied a real Windows screenshot proving v0.15.123 crashed before UI creation; v0.15.124 must be relaunched on Windows to confirm recovery.",
+      "must_verify": [
+        "Launch/update to v0.15.124 and confirm the JavaScript main-process error no longer appears",
+        "Confirm the application reaches its normal UI",
+        "Confirm the Patch Notes startup notice can appear and 패치노트 보러가기 still opens DATA > 패치노트"
+      ]
     }
   },
   "next_planned_work": {

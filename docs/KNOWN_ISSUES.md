@@ -80,3 +80,7 @@ Before v0.15.122 the collector recursively traversed the ChampionMasteryUpdate p
 ## Startup Patch Notes notice v0.15.123 real-Windows acceptance
 
 The v0.15.123 startup notice is structurally audited for per-patch persistence and routing through the existing DATA owner, but final Electron acceptance still requires confirming the popup visually and checking that `패치노트 보러가기` lands on DATA > 패치노트 in the installed Windows app.
+
+## v0.15.123 main-process successor-route crash
+
+Observed on real Windows after v0.15.123 activation: `main-v015123.js` threw `v0.15.123 main successor contract mismatch: v0.15.122 route missing` before UI creation. Root cause was brittle exact matching of an escaped nested route string; CI had only parsed the wrapper. v0.15.124 replaces that boot path with a tested predecessor-route transform. Real-Windows relaunch is still required to close acceptance.

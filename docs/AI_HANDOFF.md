@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.123**
+- Active updater version: **v0.15.124**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -444,3 +444,7 @@ The Riot Grade collector is authoritative only when the LCU value comes from the
 ### v0.15.123 — Startup Patch Notes notice
 
 Startup Patch Notes announcement is a one-shot presentation feature injected into the existing input-interaction runtime before the v0.15.117 state-integrity suffix. It reads the registered Patch Notes version from `window.aramDataHubV01599.patch.version`, compares it with the exact version stored in `aram.patchNotes.notice.dismissedVersion.v1`, and shows the modal only when they differ. `패치노트 보러가기` routes through the existing `ui-stability-v015115` DATA owner using `syncData('patch')`; it does not create another DATA owner. Only the explicit `다시 보지 않기` action stores dismissal. A future Patch Notes version therefore becomes eligible automatically. No scoring/RANDOM/Riot Grade/AutoSync logic changes.
+
+### v0.15.124 — Startup successor-route recovery hotfix
+
+v0.15.123 could crash before Electron UI creation because its main successor wrapper exact-matched an escaped nested route string that did not exist in the installed predecessor source. v0.15.124 boots from the known-good `main-v015122.js`, applies a tested unique route-fragment transform to v0.15.124, and keeps the v0.15.123 Patch Notes behavior through `runtime-source-stability-v015124 -> v015123`. The audit executes the exact transform against the real v0.15.122 predecessor source; syntax-only checking is no longer considered sufficient for successor main wrappers.

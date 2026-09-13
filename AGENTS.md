@@ -242,3 +242,9 @@ node tools/ai-continuity-audit.js
 - Keep the startup notice injection before the v0.15.117 state-integrity suffix and do not add MutationObserver/setInterval repair loops.
 - Preserve v0.15.122 Riot Grade accuracy, v0.15.121 RANDOM restore, v0.15.120 DATA owner, v0.15.119 AutoSync concurrency, v0.15.118 lifecycle, v0.15.117 state integrity, and v0.15.79 safety contracts.
 - CI can prove storage/routing/injection contracts, but final popup appearance and DATA navigation require real-Windows confirmation.
+
+## v0.15.124 Main successor boot-smoke rule
+
+- Never accept a new `main-v*` successor wrapper from `new Function`/syntax checks alone. Execute the exact successor transform against the real predecessor source and require exactly one route match.
+- For recovery from the v0.15.123 crash, `main-v015124.js` intentionally uses `main-v015122.js` as its runtime recovery base while preserving v0.15.123 presentation behavior through the runtime-source-stability chain.
+- Do not reintroduce nested escaped-string exact matching for successor routes. Match a small unique semantic route fragment and assert cardinality equals one.

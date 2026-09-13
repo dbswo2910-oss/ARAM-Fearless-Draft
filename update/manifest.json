@@ -1,6 +1,6 @@
 {
-  "version": "0.15.123",
-  "message": "v0.15.123 · PATCH NOTES STARTUP NOTICE — per-patch popup, DATA Patch Notes deep-link, explicit do-not-show",
+  "version": "0.15.124",
+  "message": "v0.15.124 · STARTUP RECOVERY HOTFIX — repair v0.15.123 main successor route and add boot smoke coverage",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -656,6 +656,10 @@
       "source": "update/v0.15.123/runtime-source-stability-v015123.js"
     },
     {
+      "path": "runtime-source-stability-v015124.js",
+      "source": "update/v0.15.124/runtime-source-stability-v015124.js"
+    },
+    {
       "path": "main-v015104.js",
       "source": "update/v0.15.104/main-v015104.js"
     },
@@ -736,8 +740,16 @@
       "source": "update/v0.15.123/main-v015123.js"
     },
     {
+      "path": "main-v015124.js",
+      "source": "update/v0.15.124/main-v015124.js"
+    },
+    {
+      "path": "successor-route-hotfix-v015124.js",
+      "source": "update/v0.15.124/successor-route-hotfix-v015124.js"
+    },
+    {
       "path": "package.json",
-      "source": "update/v0.15.123/package.json"
+      "source": "update/v0.15.124/package.json"
     }
   ],
   "delete": [

@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.123**
-- Manifest message: v0.15.123 · PATCH NOTES STARTUP NOTICE — per-patch popup, DATA Patch Notes deep-link, explicit do-not-show
-- Manifest commit: `0fb542feafc8d4799509ce93abfc086cbe781c8d`
-- Package: `update/v0.15.123/package.json` → **v0.15.123**
-- Electron entry: `main-v015123.js` → `update/v0.15.123/main-v015123.js`
-- Current runtime stability source: `update/v0.15.123/runtime-source-stability-v015123.js`
+- Active updater: **v0.15.124**
+- Manifest message: v0.15.124 · STARTUP RECOVERY HOTFIX — repair v0.15.123 main successor route and add boot smoke coverage
+- Manifest commit: `25db9f30719655d5993c05abd109b2e7332da254`
+- Package: `update/v0.15.124/package.json` → **v0.15.124**
+- Electron entry: `main-v015124.js` → `update/v0.15.124/main-v015124.js`
+- Current runtime stability source: `update/v0.15.124/runtime-source-stability-v015124.js`
 
 ## Active ownership — do not create competing owners
 
@@ -38,6 +38,7 @@
 - **data_patch_notes_subnav_v015120** — `pending`: Repository structural/regression audits can validate ownership and routing, but a post-v0.15.120 real-Windows screenshot is still required for visual acceptance.
 - **riot_grade_accuracy_v015122** — `pending`: Synthetic LCU parser and exact-link CI prove that memberGrades are excluded and only primary gameId+championId records are authoritative. One newly completed real League game still needs direct client-grade comparison.
 - **patch_notes_startup_notice_v015123** — `pending`: CI validates exact per-patch dismissal semantics, one-shot injection, and routing through the existing DATA owner. Real Windows Electron appearance/navigation still needs confirmation.
+- **startup_recovery_v015124** — `pending`: Repository CI now executes the exact successor route transform against the real v0.15.122 predecessor source. The user supplied a real Windows screenshot proving v0.15.123 crashed before UI creation; v0.15.124 must be relaunched on Windows to confirm recovery.
 
 ## Next planned work
 
