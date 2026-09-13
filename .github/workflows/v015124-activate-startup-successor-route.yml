@@ -8,6 +8,10 @@ on:
       - 'update/v0.15.124/**'
       - 'tools/v015124-startup-successor-route-audit.js'
       - 'tools/v015124-activate-startup-successor-route.js'
+      - 'tools/runtime-stability-v01571-audit.js'
+      - 'tools/runtime-stability-v01573-audit.js'
+      - 'tools/runtime-stability-v01575-audit.js'
+      - 'tools/runtime-stability-v01578-audit.js'
       - '.github/workflows/v015124-activate-startup-successor-route.yml'
   push:
     branches: [ main ]
@@ -16,6 +20,10 @@ on:
       - 'update/v0.15.124/**'
       - 'tools/v015124-startup-successor-route-audit.js'
       - 'tools/v015124-activate-startup-successor-route.js'
+      - 'tools/runtime-stability-v01571-audit.js'
+      - 'tools/runtime-stability-v01573-audit.js'
+      - 'tools/runtime-stability-v01575-audit.js'
+      - 'tools/runtime-stability-v01578-audit.js'
       - '.github/workflows/v015124-activate-startup-successor-route.yml'
   workflow_dispatch:
 
@@ -48,6 +56,10 @@ jobs:
           node tools/v015119-autosync-concurrency-audit.js
           node tools/v015118-resource-lifecycle-audit.js
           node tools/v015117-state-integrity-audit.js
+          node tools/runtime-stability-v01571-audit.js
+          node tools/runtime-stability-v01573-audit.js
+          node tools/runtime-stability-v01575-audit.js
+          node tools/runtime-stability-v01578-audit.js
           node tools/runtime-stability-v01579-audit.js
       - name: Full regression on unchanged v0.15.123 manifest
         run: node tools/full-regression-audit.js
@@ -77,6 +89,10 @@ jobs:
           node tools/v015117-state-integrity-audit.js
           node tools/v015116-runtime-update-stability-audit.js
           node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01571-audit.js
+          node tools/runtime-stability-v01573-audit.js
+          node tools/runtime-stability-v01575-audit.js
+          node tools/runtime-stability-v01578-audit.js
           node tools/runtime-stability-v01579-audit.js
           node tools/ai-continuity-audit.js
           node tools/full-regression-audit.js
@@ -98,6 +114,10 @@ jobs:
           node tools/v015117-state-integrity-audit.js
           node tools/v015116-runtime-update-stability-audit.js
           node tools/v015115-single-owner-stability-audit.js
+          node tools/runtime-stability-v01571-audit.js
+          node tools/runtime-stability-v01573-audit.js
+          node tools/runtime-stability-v01575-audit.js
+          node tools/runtime-stability-v01578-audit.js
           node tools/runtime-stability-v01579-audit.js
           node tools/ai-continuity-audit.js
       - name: Full regression after active-manifest mutation
