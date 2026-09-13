@@ -25,15 +25,20 @@ function collectMainChain(startTarget){
 }
 const entryChain=collectMainChain(entryTarget),entryChainTargets=entryChain.map(x=>x.target),entryChainText=entryChain.map(x=>x.text).join('\n');
 const versionEdges=[];
-for(const row of entryChain){
-  for(const x of row.text.matchAll(/replaceAll\('([0-9.]+)','([0-9.]+)'\)/g))versionEdges.push([x[1],x[2]]);
-  // v0.15.123+ successor wrappers use a small semantic route fragment instead of
-  // brittle nested escaped-source exact matching. Treat the declared old/new
-  // route fragment versions as an explicit successor edge for forward-compatible
-  // lineage validation.
-  const oldFrag=row.text.match(/OLD_ROUTE_FRAGMENT\s*=\s*["']'([0-9.]+)'\)\.replaceAll/);
-  const newFrag=row.text.match(/NEW_ROUTE_FRAGMENT\s*=\s*["']'([0-9.]+)'\)\.replaceAll/);
+function collectSemanticVersionEdges(text){
+  text=String(text||'');
+  for(const x of text.matchAll(/replaceAll\('([0-9.]+)','([0-9.]+)'\)/g))versionEdges.push([x[1],x[2]]);
+  // Newer recovery successors can keep their semantic route transform in a helper
+  // module instead of embedding escaped source strings in main-v*. Treat the
+  // declared OLD/NEW route fragment versions as an explicit runtime promotion.
+  const oldFrag=text.match(/OLD_ROUTE_FRAGMENT\s*=\s*["']'([0-9.]+)'\)\.replaceAll/);
+  const newFrag=text.match(/NEW_ROUTE_FRAGMENT\s*=\s*["']'([0-9.]+)'\)\.replaceAll/);
   if(oldFrag&&newFrag)versionEdges.push([oldFrag[1],newFrag[1]]);
+}
+for(const row of entryChain)collectSemanticVersionEdges(row.text);
+for(const [target,source] of byPath){
+  if(!/^successor-route.*\.js$/.test(target)||!source||!exists(source))continue;
+  collectSemanticVersionEdges(read(source));
 }
 function versionReachable(from,to){const q=[String(from)],seen=new Set(q);while(q.length){const a=q.shift();if(a===String(to))return true;for(const [x,y] of versionEdges)if(x===a&&!seen.has(y)){seen.add(y);q.push(y)}}return false}
 report.entry_chain=entryChainTargets;report.version_edges=versionEdges;
