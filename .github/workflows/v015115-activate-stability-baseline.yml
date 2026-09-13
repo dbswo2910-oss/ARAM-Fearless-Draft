@@ -1,0 +1,102 @@
+name: v0.15.115 Activate Single-Owner Stability Baseline
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/v015115-activate-stability-baseline.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Pre-activation audits
+        run: |
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/full-regression-audit.js
+      - name: Activate v0.15.115 manifest + architecture docs
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const mp='update/manifest.json';
+          const m=JSON.parse(fs.readFileSync(mp,'utf8'));
+          const retired=[
+            'ui-layout-restore-v015103.js',
+            'random-data-ui-hotfix-v015105.js',
+            'random-data-ui-hotfix-v015106.js',
+            'view-boundary-repair-v015107.js',
+            'data-random-hardfix-v015108.js',
+            'ui-screenshot-polish-v015109.js',
+            'patch-notes-density-v015110.js',
+            'random-dna-rail-v015111.js',
+            'random-workspace-stability-v015112.js',
+            'random-workspace-readable-v015113.js',
+            'random-pick-integrity-v015114.js'
+          ];
+          const newFiles=new Set(['ui-stability-baseline-v015115.js','runtime-source-stability-v015115.js','main-v015115.js']);
+          m.version='0.15.115';
+          m.message='v0.15.115 · STABILITY BASELINE — single-owner RANDOM/DATA UI, remove competing late repair stack';
+          m.files=(m.files||[]).filter(x=>!retired.includes(x.path)&&!newFiles.has(x.path));
+          const pkg=m.files.find(x=>x.path==='package.json');
+          if(!pkg)throw new Error('manifest package.json missing');
+          pkg.source='update/v0.15.115/package.json';
+
+          let idx=m.files.findIndex(x=>x.path==='input-interaction-stability-v01539.js');
+          if(idx<0)throw new Error('input interaction runtime anchor missing');
+          m.files.splice(idx+1,0,{path:'ui-stability-baseline-v015115.js',source:'update/v0.15.115/ui-stability-baseline-v015115.js'});
+          idx=m.files.findIndex(x=>x.path==='runtime-source-stability-v015114.js');
+          if(idx<0)throw new Error('v0.15.114 runtime predecessor missing');
+          m.files.splice(idx+1,0,{path:'runtime-source-stability-v015115.js',source:'update/v0.15.115/runtime-source-stability-v015115.js'});
+          idx=m.files.findIndex(x=>x.path==='main-v015114.js');
+          if(idx<0)throw new Error('v0.15.114 main predecessor missing');
+          m.files.splice(idx+1,0,{path:'main-v015115.js',source:'update/v0.15.115/main-v015115.js'});
+          m.delete=[...new Set([...(m.delete||[]),...retired])];
+          fs.writeFileSync(mp,JSON.stringify(m,null,2)+'\n');
+
+          const rp='README.md';
+          let r=fs.readFileSync(rp,'utf8');
+          r=r.replace(/Current app\/update version: \*\*v[^*]+\*\*/,'Current app/update version: **v0.15.115**');
+          const note='- **v0.15.115**: Single-owner UI stability baseline. RANDOM PICK now branches from the proven v0.15.100 candidate-preview/reference-layout runtime instead of stacking v0.15.103-v0.15.114 late DOM repair layers. DATA patch-note boundary/density and ownership diagnostics are consolidated into one non-reparenting v0.15.115 layer. Scoring is unchanged.';
+          if(!r.includes('**v0.15.115**'))r+='\n'+note+'\n';
+          fs.writeFileSync(rp,r);
+
+          const hp='docs/AI_HANDOFF.md';
+          let h=fs.readFileSync(hp,'utf8');
+          h=h.replace(/- Active updater version: \*\*v[^*]+\*\*/,'- Active updater version: **v0.15.115**');
+          const hnote=`\n### v0.15.115 — Single-owner UI stability baseline\n\nThis release intentionally resets the late UI overlay lineage. Renderer source patching for RANDOM/DATA-sensitive targets branches from \`runtime-source-stability-v015100\` rather than chaining through v0.15.103-v0.15.114. RANDOM PICK layout + selection/DNA therefore remain owned by the proven v0.15.90/v0.15.100 transformed \`random-practice-focus-v01549.js\`. The only new global UI layer is \`ui-stability-baseline-v015115.js\`, injected once through \`input-interaction-stability-v01539.js\`; it does not reparent RANDOM nodes. DATA boundary, top nav, patch-note density and diagnostics are consolidated there. Retired late repair scripts are removed from the active manifest and deleted on update. Future UI work must extend or atomically replace the active owner; do not add click/change/input delayed reparent loops. \`score_logic_changed:false\`, \`random_scoring_changed:false\`.\n`;
+          if(!h.includes('### v0.15.115 — Single-owner UI stability baseline'))h+=hnote;
+          fs.writeFileSync(hp,h);
+
+          const ap='AGENTS.md';
+          let a=fs.readFileSync(ap,'utf8');
+          const rule=`\n## v0.15.115 UI single-owner baseline\n\n- RANDOM PICK DOM/layout ownership belongs to the v0.15.90/v0.15.100 transformed \`random-practice-focus-v01549.js\`.\n- DATA boundary/presentation ownership belongs to \`ui-stability-baseline-v015115.js\`.\n- Do not restore the retired v0.15.103-v0.15.114 late UI overlay stack or add a second module that reparents \`#randomInputAnchor\`, \`#poolInputs\`, \`#comboResults\`, \`#comboDetail\`, or \`#rpPickIntelV01589\`.\n- Do not implement UI fixes as generic RANDOM click/change/input handlers followed by delayed \`setTimeout\` / \`requestAnimationFrame\` repair passes. State changes may re-render content, but interaction must not move ownership containers.\n- A future architecture change must atomically replace the owner and update \`tools/v015115-single-owner-stability-audit.js\`; do not layer a competing owner on top.\n`;
+          if(!a.includes('## v0.15.115 UI single-owner baseline'))a+=rule;
+          fs.writeFileSync(ap,a);
+          NODE
+      - name: Post-activation audits
+        run: |
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/full-regression-audit.js
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json README.md docs/AI_HANDOFF.md AGENTS.md
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit'
+          else
+            git commit -m 'release v0.15.115 single-owner stability baseline'
+            git push
+          fi
