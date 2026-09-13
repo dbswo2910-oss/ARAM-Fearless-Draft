@@ -5,9 +5,9 @@ function match(id,ps,t){return{gameId:id,queueId:450,gameCreation:t,participants
 const seedPlayers=Array.from({length:160},(_,i)=>`s${i+1}`),seed=[];let next=0;
 // Synthetic 20-match / 160-player seed with ten repeat hubs.
 for(let i=0;i<20;i++){const ps=[`s${(i%10)+1}`,`s${((i+1)%10)+1}`];if(i<10)ps.push(`s${((i+2)%10)+1}`);while(ps.length<10)ps.push(seedPlayers[10+(next++%150)]);seed.push(match(`seed-${i}`,ps,1000+i))}
-// 139 more accepted matches create a 159-match checkpoint and repeated Phase-B players.
+// 139 more valid 5v5 matches create a 159-match checkpoint. b1..b40 recur, filler identities are singletons.
 const current=seed.slice();
-for(let i=0;i<139;i++){const target=i<20?'s1':i<33?'s2':i<36?'s11':`b${(i%40)+1}`;const ps=[target];while(ps.length<10)ps.push(`b${((i*9+ps.length)%120)+1}`);current.push(match(`b-${i}`,ps,2000+i))}
+for(let i=0;i<139;i++){const target=i<20?'s1':i<33?'s2':i<36?'s11':`b${(i%40)+1}`;const ps=[target];while(ps.length<10)ps.push(`x${i}-${ps.length}`);current.push(match(`b-${i}`,ps,2000+i))}
 const cp={seed_matches:seed,matches:current,completed_puuids:[],completed_puuids_v031:[]};
 assert.equal(C.kpis(cp.matches).matches,159,'checkpoint fixture must resume at 159 accepted matches');
 const saturated=C.scoreFeature({source_pool:'phase_a_seed',current_observation_count:20,already_observed_recent_matches:20,repeat_neighbor_ratio:.5,degree_norm:.5},{historyLimit:20,skipHeadroomLTE:2,skipDuplicateRatioGTE:.8});
@@ -15,8 +15,7 @@ assert.equal(saturated.expected_new_headroom,0);assert.equal(saturated.skip,true
 const shallow=C.scoreFeature({source_pool:'phase_a_seed',current_observation_count:1,already_observed_recent_matches:1,repeat_neighbor_ratio:.5,degree_norm:.5},{historyLimit:20,skipHeadroomLTE:2,skipDuplicateRatioGTE:.8});
 assert.equal(shallow.expected_new_headroom,19);assert(shallow.priority>saturated.priority,'shallow seed should outrank saturated seed');
 const pool=C.buildCandidatePool(cp,{historyLimit:20,skipHeadroomLTE:2,skipDuplicateRatioGTE:.8});
-assert(pool.length>0);assert(pool.every(x=>!(x.source_pool==='phase_b_repeat'&&x.current_observation_count<2)),'new Phase-B singletons must not enter candidate pool');
-assert(pool.every(x=>x.expected_new_headroom>2&&x.expected_duplicate_ratio<.8));
+assert(pool.length>0);assert(pool.some(x=>x.source_pool==='phase_b_repeat'&&x.current_observation_count>=2),'Pool 2 repeated Phase-B player fixture missing');assert(pool.every(x=>!(x.source_pool==='phase_b_repeat'&&x.current_observation_count<2)),'new Phase-B singletons must not enter candidate pool');assert(pool.every(x=>x.expected_new_headroom>2&&x.expected_duplicate_ratio<.8));
 // B1-pattern counterfactual: saturated old top candidate must collapse while shallow candidates rise.
 const fixture=[
  {priority:7.409,priority_components:{uncertainty_reduction_value:.559016994,component_density_value:2.75},duplicates:20,new_unique_matches:0,information_gain:-10,retries:0},
