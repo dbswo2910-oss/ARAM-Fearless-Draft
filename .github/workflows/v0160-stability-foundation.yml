@@ -71,6 +71,8 @@ jobs:
         run: node tools/stability/item-canonical-differential-audit.js
       - name: Canonical Item art resolver and catalog bridge differential
         run: node tools/stability/item-art-catalog-canonical-differential-audit.js
+      - name: Canonical Item art runtime lifecycle audit
+        run: node tools/stability/item-art-runtime-canonical-audit.js
       - name: Canonical Profile Results parser differential
         run: node tools/stability/profile-results-canonical-differential-audit.js
       - name: Canonical Research storage differential
