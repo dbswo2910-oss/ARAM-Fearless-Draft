@@ -1,10 +1,11 @@
 'use strict';
 const selection=require('./selection-state');
 const dna=require('./dna');
+const top5=require('./top5');
 const preview=require('./candidate-preview');
 const render=require('./render-core');
 const IMPLEMENTATION_VERSION='0.16-shadow';
-function createPickOwner({document,state,pickReferenceModel=(()=>({})),candidateMeta=(()=>null),normalizeName=(v=>String(v||'').trim()),canonicalName=((v)=>String(v||'').trim()),text=(el=>String(el?.textContent||'').replace(/\s+/g,' ').trim()),dnaTarget=null,quickTarget=null,onPreviewChange=(()=>{}),...renderDeps}={}){
+function createPickOwner({document,state,teamScore=null,pickReferenceModel=(()=>({})),candidateMeta=(()=>null),normalizeName=(v=>String(v||'').trim()),canonicalName=((v)=>String(v||'').trim()),text=(el=>String(el?.textContent||'').replace(/\s+/g,' ').trim()),dnaTarget=null,quickTarget=null,onPreviewChange=(()=>{}),...renderDeps}={}){
   if(!document||!state)throw new Error('document and state required');
   const selectionState=selection.createSelectionState({normalizeName,canonicalName,text});
   const dnaEngine=dna.createDnaEngine({normalizeName,candidateMeta,pickReferenceModel});
@@ -13,7 +14,8 @@ function createPickOwner({document,state,pickReferenceModel=(()=>({})),candidate
   const renderer=render.createRenderCore({document,state,candidateProfile,candidatePreview:previewController,...renderDeps});
   function ensureShadowSurfaces(){const root=document.getElementById?.('random')||document.querySelector?.('#random');if(!root||!document.createElement)return false;let dnaHost=document.querySelector?.('[data-canonical-random-dna-host]');if(!dnaHost){dnaHost=document.createElement('section');dnaHost.setAttribute('data-canonical-random-dna-host','1');dnaHost.setAttribute('data-ui-role','random-candidate-dna-host');dnaHost.hidden=true;root.appendChild?.(dnaHost)}let quickHost=document.querySelector?.('[data-canonical-random-quick-host]');if(!quickHost){quickHost=document.createElement('section');quickHost.setAttribute('data-canonical-random-quick-host','1');quickHost.setAttribute('data-ui-role','random-quick-judgment-host');quickHost.hidden=true;root.appendChild?.(quickHost)}return true}
   function renderAll(){ensureShadowSurfaces();return renderer.render()}
+  function recompute(plan,{score=teamScore,modes=state.ourModes||{}}={}){if(typeof score!=='function')throw new Error('teamScore function required for recompute');const result=top5.enumerateTop5(plan,{teamScore:score,modes});state.combos=result.top||[];state.selectedCombo=Math.max(0,Math.min(Number(state.selectedCombo)||0,Math.max(0,state.combos.length-1)));renderAll();return result}
   function dispose(){renderer.dispose()}
-  return{render:renderAll,dispose,renderer,preview:previewController,selection:selectionState,dna:dnaEngine,ensureShadowSurfaces};
+  return{render:renderAll,recompute,dispose,renderer,preview:previewController,selection:selectionState,dna:dnaEngine,ensureShadowSurfaces};
 }
 module.exports={IMPLEMENTATION_VERSION,createPickOwner,production_active:false,score_logic_changed:false,random_scoring_changed:false,owner_status:'shadow'};
