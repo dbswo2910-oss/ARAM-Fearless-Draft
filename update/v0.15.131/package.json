@@ -1,0 +1,6 @@
+{
+  "name": "aram-fearless-draft-update",
+  "version": "0.15.131",
+  "description": "Upgrade package v0.15.131 - Research IndexedDB recovery + always-visible Patch Notes detail",
+  "main": "main-v015131.js"
+}

@@ -1,6 +1,6 @@
 {
-  "version": "0.15.130",
-  "message": "v0.15.130 · SEARCHED PLAYER RATING + COLD START PROMOTION — resolved PUUID production UI",
+  "version": "0.15.131",
+  "message": "v0.15.131 · RESEARCH STORAGE RECOVERY + PATCH NOTES DETAIL FIX",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -277,7 +277,8 @@
     },
     {
       "path": "ui-stability-baseline-v015115.js",
-      "source": "update/v0.15.120/ui-stability-baseline-v015115.js"
+      "source": "update/v0.15.131/ui-stability-baseline-v015115.js",
+      "sha256": "0194f4ce7f693b61e2e30117606b8e15b73d0fe792920aa017fddd25a8c15e8e"
     },
     {
       "path": "state-integrity-v015117.js",
@@ -817,23 +818,23 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.130/package.json",
-      "sha256": "29267c9e404b551cdcdc19da6fb1b169879961d0e10857a2a24f8f2c57c1cc6b"
+      "source": "update/v0.15.131/package.json",
+      "sha256": "e2031876ccce55d2b06307f4d295fb2c31383ba48194aa75fcdfecbf185e1894"
     },
     {
       "path": "rating-engine-v01.js",
-      "source": "update/v0.15.130/rating-engine-v01.js",
+      "source": "update/v0.15.131/rating-engine-v01.js",
       "sha256": "76ad43a6e2072376997292fa44a3ec594b01eb28f4c473637391819937b64aa4"
     },
     {
       "path": "research-ui-core.js",
-      "source": "update/v0.15.130/research-ui-core.js",
+      "source": "update/v0.15.131/research-ui-core.js",
       "sha256": "6b21d85be46327823d9a4ce866a3d84d53084ea5be933052609150a2a614d954"
     },
     {
       "path": "research-ui-devtools.js",
-      "source": "update/v0.15.130/research-ui-devtools.js",
-      "sha256": "dee95b6d29c25632b0369cd99d5eedfea2b33dc58a4a822471298a3b0c104979"
+      "source": "update/v0.15.131/research-ui-devtools.js",
+      "sha256": "7306cec01249edf4babc6e2b6d421053661cf852474cdb1eef71fee54e988b54"
     },
     {
       "path": "runtime-source-stability-v015129.js",
@@ -869,8 +870,33 @@
     },
     {
       "path": "ARAM_Fearless_Draft_Launcher_windows_x64.exe",
-      "source": "update/v0.15.130/ARAM_Fearless_Draft_Launcher_windows_x64.exe",
+      "source": "update/v0.15.131/ARAM_Fearless_Draft_Launcher_windows_x64.exe",
       "sha256": "3ac0c067800cc827c59b8c7842e911e412666f93128791650b3d574bcea69b80"
+    },
+    {
+      "path": "research-storage-v015131.js",
+      "source": "update/v0.15.131/research-storage-v015131.js",
+      "sha256": "788b53d209ffacf777e1a116cfddb8cc13e0e3c7a21acb204010bfad6db637aa"
+    },
+    {
+      "path": "runtime-source-stability-v015131.js",
+      "source": "update/v0.15.131/runtime-source-stability-v015131.js",
+      "sha256": "57ba37ca16368483a8aac0162d06308f8edd7c09776ee62843dab53a0a03362c"
+    },
+    {
+      "path": "main-v015131.js",
+      "source": "update/v0.15.131/main-v015131.js",
+      "sha256": "1e783db2736796f0db81e9c363389bb5c96ba24d023193b0b7287e0b3c08b306"
+    },
+    {
+      "path": "successor-route-v015131.js",
+      "source": "update/v0.15.131/successor-route-v015131.js",
+      "sha256": "1cf08b060b1126483bc1cca8403c7dc2c9f401ce33c08e9cc99c9f62f7127552"
+    },
+    {
+      "path": "cold-start-promotion-v015131.js",
+      "source": "update/v0.15.131/cold-start-promotion-v015131.js",
+      "sha256": "5fa1da6222dc0c1a8ba55b61521e5cb60c576261a6820bc2be0ac065d526f806"
     }
   ],
   "delete": [

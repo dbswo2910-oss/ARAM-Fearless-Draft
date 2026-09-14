@@ -1,0 +1,16 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const {patchSuccessorSource}=require('./successor-route-v015131');
+const VERSION='0.15.131';
+const SAFETY_BASELINE_LINEAGE_V015131=Object.freeze({
+  via:'main-v015129.js',
+  recoveryBase:'main-v015122.js',
+  root:'main-v01579.js',
+  reason:'production-rating-ui-target-puuid-and-cold-start-promotion'
+});
+void SAFETY_BASELINE_LINEAGE_V015131;
+try{require('./cold-start-promotion-v015131').install({appDir:__dirname,version:VERSION})}catch(e){try{console.warn('[v0.15.131 cold-start promotion] install failed:',e?.message||String(e))}catch{}}
+const basePath=path.join(__dirname,'main-v015122.js');
+const src=patchSuccessorSource(fs.readFileSync(basePath,'utf8'));
+module._compile(src,__filename);

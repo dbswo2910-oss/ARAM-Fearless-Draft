@@ -3,26 +3,26 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.130",
-    "message": "v0.15.130 · SEARCHED PLAYER RATING + COLD START PROMOTION — resolved PUUID production UI",
+    "version": "0.15.131",
+    "message": "v0.15.131 · RESEARCH STORAGE RECOVERY + PATCH NOTES DETAIL FIX",
     "min_launcher": "2.0.2",
-    "manifest_commit": "5b5ed4f88016bfad3e5c6b79d7ad990196f054c3"
+    "manifest_commit": "b53f7ae1b342a5948961f8d1fceb922394abb6c9"
   },
   "package": {
-    "source": "update/v0.15.130/package.json",
-    "version": "0.15.130",
-    "main": "main-v015130.js",
-    "main_source": "update/v0.15.130/main-v015130.js"
+    "source": "update/v0.15.131/package.json",
+    "version": "0.15.131",
+    "main": "main-v015131.js",
+    "main_source": "update/v0.15.131/main-v015131.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.130/runtime-source-stability-v015130.js"
+      "active_runtime_source": "update/v0.15.131/runtime-source-stability-v015131.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
-      "active_source": "update/v0.15.120/ui-stability-baseline-v015115.js"
+      "active_source": "update/v0.15.131/ui-stability-baseline-v015115.js"
     },
     "state_integrity": {
       "owner": "state-integrity-v015117",
