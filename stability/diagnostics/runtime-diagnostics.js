@@ -55,13 +55,17 @@
       setTimeout(()=>done({database_name:RESEARCH_DB,checkpoint_key:CHECKPOINT_KEY,checkpoint_readable:false,status:'timeout'}),1500);
     });
   }
+  function visibleElement(el){if(!el||el.hidden)return false;try{const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'}catch{return true}}
   function currentView(doc=document){
-    const visible=[...doc.querySelectorAll('[data-view],#random,#data,#history')].find(el=>!el.hidden&&getComputedStyle(el).display!=='none');
+    const visible=[...doc.querySelectorAll('[data-view],#random,#data,#history')].find(visibleElement);
     const role=visible?.getAttribute?.('data-ui-role')||visible?.getAttribute?.('data-view')||visible?.id||'unknown';
     let mode='unknown';
-    if(doc.querySelector('#data.data115PatchMode,[data-mode="patch"]'))mode='patch';
-    else if(doc.querySelector('#randomIngameShell:not([hidden]),[data-mode="ingame"]'))mode='ingame';
-    else if(role.includes('random'))mode='pick';
+    if(visible){
+      if((visible.matches?.('#data.data115PatchMode,[data-mode="patch"]')||visible.querySelector?.('[data-mode="patch"]'))&&/data/i.test(role))mode='patch';
+      else if((visible.querySelector?.('#randomIngameShell:not([hidden]),[data-mode="ingame"]'))&&/random/i.test(role))mode='ingame';
+      else if(/random/i.test(role))mode='pick';
+      else if(/data/i.test(role))mode=visible.getAttribute?.('data-mode')||'tier';
+    }
     return{current_view:role,current_mode:mode};
   }
   function owners(){return sanitize(window.__ARAM_ACTIVE_OWNERS__||window.__aramOwners||{},'owners')}
