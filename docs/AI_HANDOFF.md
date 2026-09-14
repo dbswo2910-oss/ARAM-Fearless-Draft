@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.134**
+- Active updater version: **v0.15.135**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -486,4 +486,13 @@ Match history loading now uses the existing AutoSync concurrency owner for a ses
 - The v0.15.133 ancestor-chain helper was structurally incomplete: the live generic title can be a separate panel under the resolved detail branch rather than an ancestor of `#dataCard`.
 - v0.15.134 keeps the existing DATA single owner and runtime target. It patches the exact `title` variable already resolved by `syncData()`, adding inline `display:none!important` in Patch Notes mode and restoring the original title in tier mode.
 - The v0.15.134 audit runs the real source through `patchRuntimeSource('input-interaction-stability-v01539.js', source)` and asserts the direct resolved-title transform, so an isolated helper cannot mask a production-path miss.
+- Scoring, RANDOM scoring, Rating calculations, AutoSync, item recommendation logic, Research storage, and persistent-state ownership are unchanged.
+
+
+## v0.15.135 Patch Notes semantic shell correction
+
+- Real Windows v0.15.134 evidence still shows the outer `챔피언 상세 / 닫기` row, so the v0.15.134 resolved-title assumption is rejected by device evidence.
+- Without a live DOM dump, do not claim one exact structural root cause: the visible row may be a different title node or may be recreated after `syncData()`.
+- v0.15.135 stays inside the existing `ui-stability-v015115` DATA owner and combined `input-interaction-stability-v01539.js` runtime path. It performs a narrow semantic sweep only under `#data` for a compact row containing `챔피언 상세` plus a `닫기` button, excludes the Patch Notes body/nav, and tags/hides only the matched row.
+- A child-list observer re-applies that same narrow rule if the base renderer replaces nodes later. Tier mode restores only rows tagged by v0.15.135.
 - Scoring, RANDOM scoring, Rating calculations, AutoSync, item recommendation logic, Research storage, and persistent-state ownership are unchanged.

@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.134",
-    "message": "v0.15.134 · PATCH NOTES RESOLVED TITLE FIX",
+    "version": "0.15.135",
+    "message": "v0.15.135 · PATCH NOTES SEMANTIC SHELL SWEEP",
     "min_launcher": "2.0.2",
     "manifest_commit": "05c4281e107dda566572faaaf223f817bac55c22"
   },
   "package": {
-    "source": "update/v0.15.134/package.json",
-    "version": "0.15.134",
-    "main": "main-v015134.js",
-    "main_source": "update/v0.15.134/main-v015134.js"
+    "source": "update/v0.15.135/package.json",
+    "version": "0.15.135",
+    "main": "main-v015135.js",
+    "main_source": "update/v0.15.135/main-v015135.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.134/runtime-source-stability-v015134.js"
+      "active_runtime_source": "update/v0.15.135/runtime-source-stability-v015135.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
@@ -226,22 +226,27 @@
       "must_verify": []
     },
     "patch_notes_shell_header_v015134": {
+      "status": "failed_real_windows",
+      "evidence": "User supplied a real Windows v0.15.134 screenshot. The application is on v0.15.134 and Patch Notes content renders, but the outer generic 챔피언 상세 / 닫기 row still remains. This proves the single title node resolved by syncData() was not sufficient to control the live visible shell, or that the base renderer replaces it after syncData().",
+      "must_verify": []
+    },
+    "patch_notes_shell_header_v015135": {
       "status": "pending",
-      "evidence": "v0.15.134 patches the exact title variable already resolved by the existing ui-stability-v015115 syncData() owner and forces inline display:none!important in Patch Notes mode. Final acceptance requires one real Windows screenshot.",
+      "evidence": "v0.15.135 stays inside ui-stability-v015115 ownership but no longer assumes one title topology. It scans only #data for a compact generic shell row containing 챔피언 상세 plus a 닫기 button, excludes Patch Notes body/nav, tags and hides only matches, restores only its tags in tier mode, and re-applies after child-list replacement.",
       "must_verify": [
-        "Update/relaunch to v0.15.134 and open DATA > 패치노트",
+        "Update/relaunch to v0.15.135 and open DATA > 패치노트",
         "Confirm the outer 챔피언 상세 / 닫기 row is absent while Patch Notes hero/champion/item/TOP6/list/quick-nav remain visible",
-        "Switch back to 챔피언 티어리스트 and confirm the normal detail header returns"
+        "Switch back to 챔피언 티어리스트 and confirm the normal detail header/close behavior returns"
       ]
     }
   },
   "next_planned_work": {
-    "version": "0.15.135",
+    "version": "0.15.136",
     "theme": "ARAM RATING v0.3.1 MAINLINE REBASE",
     "status": "planned",
-    "intent": "Rebase the useful research-only ARAM Rating v0.3.1 sampling/B2 work onto the post-v0.15.134 mainline without reviving obsolete v0.15.129 UI/storage code or changing production scoring owners.",
+    "intent": "Rebase the useful research-only ARAM Rating v0.3.1 sampling/B2 work onto the post-v0.15.135 mainline without reviving obsolete v0.15.129 UI/storage code or changing production scoring owners.",
     "guardrails": [
-      "start from the current mainline after v0.15.134 rather than continuing the diverged PR #74 head directly",
+      "start from the current mainline after v0.15.135 rather than continuing the diverged PR #74 head directly",
       "preserve the stable aram-fearless-draft userData/checkpoint recovery",
       "reuse current Research UI/storage production files instead of old v0.15.129 copies",
       "keep B2 manual-only until explicit user action",
