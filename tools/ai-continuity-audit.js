@@ -70,9 +70,10 @@ for(const [needle,label] of [
   ['Repository state wins over conversational memory','memory authority rule'],
   ['v0.15.103–v0.15.114','retired overlay warning'],
   ['CI success proves code/regression contracts','CI visual boundary'],
-  ['New-chat restore sequence','cold-start sequence'],
-  ['SAFE MODE / CRASH-LOOP ISOLATION','next planned work']
+  ['New-chat restore sequence','cold-start sequence']
 ])must(currentMd,needle,label);
+if(manual.next_planned_work?.theme)must(currentMd,manual.next_planned_work.theme,'next planned work');
+if(manual.next_planned_work?.version)must(currentMd,`**${manual.next_planned_work.version}**`,'next planned work version');
 ok('human-current-state-contract');
 
 const issues=read('docs/KNOWN_ISSUES.md');
