@@ -1,189 +1,224 @@
 # v0.16.0 CLEAN BASELINE — DURABLE PROGRESS / NEW-CHAT HANDOFF
 
-> This file exists so a fresh ChatGPT/Codex session can continue the v0.16.0 stabilization program without relying on chat memory. Repository evidence wins over this file if anything conflicts.
+> Fresh sessions must restore state from the repository, not chat memory. If this file conflicts with current HEAD, manifests, owners, or CI, repository evidence wins.
 
-## Read first in a fresh session
+## Restore order in a new chat
 
 1. `AGENTS.md`
 2. `docs/CURRENT_STATE.md`
 3. `update/current-state.json`
 4. `update/manifest.json`
 5. `docs/KNOWN_ISSUES.md`
-6. **this file**
-7. Issue **#83** and Draft PR **#84**
-8. latest PR head + `v0.16.0 Stability Foundation`, `Full Regression Audit`, `AI Continuity Audit`
+6. `docs/V0160_CLEAN_BASELINE_PROGRESS.md`
+7. Issue #83
+8. Draft PR #84
+9. latest PR HEAD + Stability Foundation / Full Regression / AI Continuity runs
 
-## Safety boundary
+## Non-negotiable safety boundary
 
-- Production `main` remains the real-Windows-verified **v0.15.135 Golden Baseline**.
+- Production `main` remains **v0.15.135 Golden Baseline**.
 - Golden commit: `2048d56ceec2317b4cef225f284443521005994d`.
-- Stabilization branch: `stability/v0160-clean-baseline-phaseb`.
-- Tracking issue: `#83`.
-- Draft consolidation PR: `#84`.
-- Do **not** merge/cut over canonical owners merely because synthetic CI is green.
-- Preserve `aram-fearless-draft` userData identity, `aram-rating-research-v03`, `checkpoint-v03`, v0.15.79 updater safety, v0.15.117 state semantics, v0.15.118 lifecycle semantics, and v0.15.119 AutoSync concurrency semantics.
-- No intended Draft/RANDOM/ROLE/item scoring changes during stabilization.
+- Migration branch: `stability/v0160-clean-baseline-phaseb`.
+- Tracking issue: #83.
+- Draft consolidation PR: #84.
+- Do not promote canonical owners from synthetic CI alone.
+- Preserve userData identity `aram-fearless-draft`.
+- Preserve Research DB/checkpoint `aram-rating-research-v03` / `checkpoint-v03`.
+- Preserve v0.15.79 updater safety, v0.15.117 state semantics, v0.15.118 lifecycle semantics, v0.15.119 AutoSync concurrency semantics.
+- No intended Draft/RANDOM/ROLE/item scoring change during stabilization.
+- B2 Research collection remains manual-only; no automatic network collection.
 
-## Last fully verified checkpoint
+## Last fully verified code checkpoint
 
-PR #84 head **`f9e9fd2d6e12bf2bfcc9b97bdb30f7bf952e33ff`** was fully green for:
+Code checkpoint **`5e69d769c762d7bfbc1beb82ae85f8458669d69b`** is fully green:
 
-- `v0.16.0 Stability Foundation` **run #304** — SUCCESS, including Windows Electron synthetic E2E
-- `Full Regression Audit` **run #879** — SUCCESS
-- `AI Continuity Audit` **run #294** — SUCCESS
+- `v0.16.0 Stability Foundation` **#392 — SUCCESS**
+  - Linux foundation job: SUCCESS
+  - Windows Electron synthetic job: SUCCESS
+- `Full Regression Audit` **#923 — SUCCESS**
+- `AI Continuity Audit` **#338 — SUCCESS**
 
-The immediately preceding code checkpoint `a9a58619e7ec0208295824a428e73a3009519876` introduced the latest Item catalog-service gate; `f9e9fd2...` only updates durable project handoff documentation and confirms the complete suite remains green.
+The Foundation run at this checkpoint includes successful gates through:
 
-The verified suite includes:
+- Golden baseline / inventory / UI contract / owner registry
+- state / lifecycle / updater / boot guard
+- AutoSync / Riot / Draft
+- RANDOM PICK DNA / selection / TOP5 / teamScore boundary / installed-source extractor
+- RANDOM IN GAME semantic / volatile HUD / coordinator / shop / coach render / scheduler
+- DATA Patch Notes / workspace / mode-navigation
+- Item identity / recommendation / art / lifecycle / catalog service
+- Profile results parser / metrics / history service / Riot Grade exact-link
+- Research storage / v0.3.1 sampling policy
+- final assembled runtime / runtime fingerprints / behavioral differential
+- state + Research compatibility / diagnostics / Full Regression / AI continuity
 
-- Item identity/recommendation parity
-- Item art resolver/catalog bridge parity
-- lifecycle-safe canonical Item DOM art runtime
-- active v0.15.64 Item catalog service parity, including single `desktop:get-item-catalog` IPC registration and main-process eager-prefetch intent
-- Profile/Results parser parity
-- read-only Research storage parity
-- final assembled runtime, Golden fingerprints, behavioral differential fixtures, state/Research compatibility, diagnostics contracts
+Important: the code checkpoint above is synthetic/CI verified. It is **not** equivalent to installed-app real-Windows or real-League acceptance.
 
-If the branch HEAD is newer than this SHA, read the latest Actions results before calling the newer HEAD verified.
+## What changed in the latest migration slice
 
-## Current canonical work state
+### RANDOM IN GAME
 
-### Item subsystem
+Canonical shadow coverage is now broad enough to classify the subsystem as a complete shadow owner candidate:
 
-Canonical shadow components now exist for:
+- semantic signature
+- volatile HUD clock/respawn/gold
+- tick coordinator
+- shop/build pipeline
+- coach render
+- lifecycle-safe single scheduler
 
-- `src/items/identity.js`
-- `src/items/recommendation.js`
-- `src/items/art-resolver.js`
-- `src/items/art-runtime.js`
-- `src/items/catalog-contract.js`
-- `src/items/catalog-service.js`
+`src/random/ingame/contract.js` is `status:'shadow'`. Production remains inactive. Real installed/League acceptance is still required before cutover.
 
-Important preserved behavior:
+### Item
 
-- v0.15.80 standard-live item ID preference when localized names collide
-- v0.15.81 owned-item/recommendation gate semantics
-- v0.15.66 image ID resolution and primary/fallback art behavior
-- one lifecycle-safe MutationObserver owner, no interval polling, idempotent start/stop
-- active manifest Item catalog source is `update/v0.15.64/item-catalog-v01527.js`; canonical service differentially preserves its Data Dragon/CommunityDragon compacting, art fields, host policy, single IPC registration, and eager-prefetch intent
-- all canonical Item code remains `production_active:false`; production main integration has **not** been cut over
+Canonical shadow coverage is complete enough to classify Item as a complete shadow owner candidate:
 
-### Diagnostics subsystem
+- canonical item identity/name-collision handling
+- recommendation gate / owned-item semantics
+- art resolver
+- lifecycle-safe DOM art runtime
+- catalog IPC contract
+- active v0.15.64 catalog service behavior / single IPC owner semantics
 
-Canonical shadow diagnostics now include:
+`src/items/contract.js` is `status:'shadow'`. Production integration is still disabled.
 
-- existing privacy-safe/read-only collector `stability/diagnostics/runtime-diagnostics.js`
-- `src/diagnostics/panel.js` with stable `data-ui-role` identifiers
-- refresh / close / privacy-safe `진단 JSON 복사` UX
-- app/view/DOM/Research/AutoSync summary
-- no recurring polling or MutationObserver repair loop
+### Profile / Results
 
-The final production menu/navigation entry remains planned. v0.15.135 UI is untouched.
+Canonical shadow pieces now include:
+
+- v0.15.97-compatible result normalizer
+- history fetch/cache/latency owner
+- v0.15.19-compatible profile metrics
+- exact authoritative Riot Grade linkage
+
+Riot Grade linkage is fail-closed and non-scoring:
+
+- trusted `riot-primary-update` records only
+- exact gameId + championId
+- PUUID match when available
+- legacy/unverified records rejected
+- searched-player missing Grade is explained rather than substituted with local-player Grade
+
+Remaining Profile work: profile/result render owners and final UI role integration.
+
+### Research
+
+Canonical Research now includes:
+
+- read-only existing IndexedDB/checkpoint access
+- memory-only rebuild/cache selection
+- v0.3.1 active-sampling policy port
+- 159-match resume fixture
+- saturation/headroom/duplicate guards
+- Phase-B singleton exclusion
+- B2 manual-only / automatic collection disabled
+
+Remaining Research work: rating engine + current useful Research UI integration. Do not resurrect obsolete v0.15.129 patch ownership or auto-run B2.
+
+### CI cleanup
+
+Repository inventory currently reports **0 historical automatic workflows**. Historical version-pinned workflows are no longer active automatic gates.
 
 ## 20-step program status
 
-Legend: `DONE`, `ACTIVE`, `PARTIAL`, `BLOCKED-LATER`.
+Legend: DONE / ACTIVE / PARTIAL / BLOCKED-LATER.
 
 1. **DONE** — v0.15.135 Golden Baseline frozen.
 2. **DONE** — repository inventory + runtime dependency/owner map.
-3. **DONE/MAINTAIN** — historical automatic version-pinned workflows removed from active workflow set; functional suites are maintained as migration grows.
-4. **PARTIAL** — semantic UI role registry exists; permanent roles are being added with canonical UI owners. Complete only when production canonical UI is fully role-addressable.
-5. **DONE** — final assembled-runtime gate exists.
-6. **PARTIAL** — Windows Electron synthetic DOM E2E is green; installed production-app E2E/real-Windows acceptance still required.
-7. **PARTIAL** — synthetic Windows screenshots + semantic geometry baseline exist; installed-app visual baseline remains required.
-8. **PARTIAL** — synthetic rerender/duplicate-resource soak exists; prolonged real League/AutoSync soak remains required.
-9. **PARTIAL** — privacy-safe diagnostics collector **and canonical panel/copy UX** are shadow-ready; final production navigation/menu integration remains pending.
-10. **PARTIAL** — stable app/state/Research identity guards + synthetic 159-match checkpoint persistence exist; complete installed-app migration fixture remains required.
-11. **DONE/MAINTAIN** — Golden runtime fingerprints + deterministic behavioral differential fixture suite are active; extend for every migrated domain.
-12. **DONE** — canonical `src/` tree and owner registry exist.
-13. **ACTIVE** — subsystem migration in shadow mode; see matrix below.
-14. **ACTIVE** — hotfix **intent** is reimplemented in canonical modules instead of carrying patch-of-patch files forward.
-15. **ACTIVE** — legacy-vs-canonical differential/shadow gates run in CI.
-16. **BLOCKED-LATER** — remove legacy runtime chain only after full owner parity + installed acceptance.
-17. **BLOCKED-LATER** — minimize manifest/package after legacy chain removal plan is proven.
-18. **BLOCKED-LATER** — v0.16.0 RC after canonical owners + installed/real-League acceptance gates.
+3. **DONE/MAINTAIN** — historical automatic CI cleaned; feature-oriented gates maintained.
+4. **PARTIAL** — semantic UI role registry exists; production canonical UI still needs full role coverage.
+5. **DONE** — final assembled-runtime test exists.
+6. **PARTIAL** — Windows Electron synthetic E2E green; installed-app/real-Windows acceptance pending.
+7. **PARTIAL** — screenshot + semantic geometry artifacts exist; installed-app visual baseline pending.
+8. **PARTIAL** — synthetic rerender/resource soak exists; prolonged real League/AutoSync soak pending.
+9. **PARTIAL** — privacy-safe DIAG collector + canonical panel/copy UX exist; production navigation entry pending.
+10. **PARTIAL** — stable state/Research identities and synthetic 159-checkpoint persistence covered; installed migration fixture pending.
+11. **DONE/MAINTAIN** — Golden fingerprints + deterministic differential fixtures active.
+12. **DONE** — canonical `src/` tree + owner registry.
+13. **ACTIVE** — subsystem canonical migration/shadow parity.
+14. **ACTIVE** — hotfix intent is absorbed without preserving patch-of-patch ownership.
+15. **ACTIVE** — legacy-vs-canonical shadow/differential comparison.
+16. **BLOCKED-LATER** — legacy active runtime removal only after full parity + installed acceptance.
+17. **BLOCKED-LATER** — manifest/package minimization after Step 16 proof.
+18. **BLOCKED-LATER** — v0.16 RC after all release gates.
 19. **BLOCKED-LATER** — production CLEAN BASELINE promotion.
-20. **PARTIAL** — single-owner/canonical rules exist; final AGENTS/CI enforcement must be completed before promotion.
+20. **PARTIAL** — single-owner/canonical rules exist; final AGENTS/CI enforcement before promotion.
 
-## Step 13 subsystem migration matrix
+## Step 13 migration matrix
 
-### Full shadow coverage (production inactive)
+### Full shadow candidates, production inactive
 
-- `main/bootstrap`
-- `preload/IPC`
-- `state/persistence`
-- `resource lifecycle`
-- `updater transaction + boot/probation guard`
-- `AutoSync concurrency/history helpers`
-- `shared Riot grade/data helpers`
-- `Draft risk engine`
+- main/bootstrap
+- preload/IPC
+- state/persistence
+- resource lifecycle
+- updater transaction + boot/probation guard
+- AutoSync concurrency/history helpers
+- shared Riot grade/data helpers
+- Draft risk engine
+- RANDOM IN GAME
+- Item
+- diagnostics core/panel
 
-### Broad/partial shadow coverage
+### Partial shadows still needing owner completion
 
-- **RANDOM PICK**
-  - shadow: candidate DNA, selected-candidate state, exhaustive TOP5 enumeration/order
-  - remaining: exact legacy `teamScore`, final render owner
-- **RANDOM IN GAME**
-  - shadow: semantic signature, volatile HUD, tick coordinator, shop/build pipeline
-  - remaining: runtime scheduler, final coach render
-- **DATA**
-  - shadow: Patch Notes generic-shell intent, workspace topology/mode detection
-  - remaining: final mode owner, tier/detail layout, Patch Notes render owner
-- **Item**
-  - shadow: catalog identity, recommendation gate, art resolver, lifecycle-safe DOM art runtime, catalog IPC contract, active v0.15.64 catalog service/IPC owner semantics
-  - remaining: production main/renderer integration and installed-app acceptance; do not cut over independently
-- **Profile/Results**
-  - shadow: v0.15.97-compatible result normalizer/local participant/game-key parser
-  - remaining: history fetch owner, profile metrics, result/profile render, Riot-grade linkage
-- **Research**
-  - shadow: read-only existing IndexedDB/checkpoint storage and memory rebuild/cache selection
-  - remaining: rating engine, UI, active-sampling/B2 migration
-  - automatic network collection remains disabled/manual-only
-- **Diagnostics**
-  - shadow: collector, stable-role panel, JSON copy UX
-  - remaining: final production navigation/menu entry and installed-app verification
+**RANDOM PICK**
+- shadow: candidate DNA, selection state, exhaustive TOP5 enumeration/order
+- protected boundary: canonical code still injects legacy `teamScore`
+- remaining: locate exact active installed/assembled `teamScore` source and migrate without changing math; final render owner
+
+**DATA**
+- shadow: Patch Notes generic-shell intent, workspace topology, mode/navigation behavior
+- remaining: final tier/detail layout + Patch Notes render owner; replace temporary semantic sweep architecture with stable-role canonical layout
+
+**Profile / Results**
+- shadow: result normalizer, history service, profile metrics, Riot Grade exact-link
+- remaining: profile render, results render, permanent semantic roles
+
+**Research**
+- shadow: storage + v0.3.1 sampling policy
+- remaining: rating engine + useful Research UI
+- network collection remains disabled/manual-only
 
 ## Exact next-work order
 
-Continue in small independently verifiable slices:
+1. **RANDOM PICK `teamScore` source discovery and migration**. Do not guess scoring math. Use actual assembled/installed runtime source or equivalent repository evidence.
+2. **RANDOM PICK final render owner** with stable `data-ui-role` contracts.
+3. **DATA final layout/render owner** and permanent Patch Notes rule without relying on v0.15.135 semantic-sweep fallback as the final architecture.
+4. **Profile + Results render owners** with stable semantic roles.
+5. **Research rating engine + current useful Research UI**; keep storage identity and manual-only B2.
+6. Wire DIAG into the future canonical shell.
+7. Strengthen installed-app migration / real Windows / real League AutoSync soak acceptance.
+8. Only after all above: Steps 16–20 (legacy active-chain removal → minimal package → RC → production).
 
-1. **RANDOM PICK `teamScore` + final render owner** — first locate the exact active scoring source from repository/runtime assembly. Do not reconstruct scoring from memory and do not change scoring math.
-2. **RANDOM IN GAME scheduler + coach render** — move final ownership under lifecycle single-owner rules.
-3. **DATA mode/layout/render** — use permanent semantic roles; preserve v0.15.135 Patch Notes behavior without keeping semantic sweep as the permanent architecture.
-4. **Profile history/metrics/render/Riot-grade link**.
-5. **Research rating engine/UI/active sampling** — port only current useful behavior; do not revive obsolete v0.15.129 storage/UI and never auto-trigger B2 collection.
-6. Wire the canonical **DIAG panel** into the future canonical navigation only after the owning UI shell is migrated.
-7. Run installed-app compatibility + real Windows/League acceptance before any cutover.
-8. Only then plan Steps 16–20.
+## Known blockers / discoveries
 
-### Known discovery for the next session
-
-- Active RANDOM runtime owner remains `runtime-v015100` under v0.15.115 single-owner baseline.
-- `update/v0.15.100/runtime-source-stability-v015100.js` controls selected-candidate preview locks but does **not** itself define the core `teamScore` scoring function.
-- `reference/installed-v0.15.49/random-practice-pick-fragment.html` is an exact real-installed DOM reference, but it contains markup rather than the scoring engine.
-- Therefore the next session must locate `teamScore` in the actual assembled/base runtime before writing canonical scoring code. A missing GitHub code-search hit is **not** permission to guess.
+- Active RANDOM owner remains `runtime-v015100` under the v0.15.115 single-owner baseline.
+- `update/v0.15.100/runtime-source-stability-v015100.js` controls selection/preview behavior but does not itself define the core `teamScore` math.
+- The exact `teamScore` math must be recovered from the real assembled/base runtime before canonical implementation. A missing code-search result is not permission to reconstruct it from memory.
+- Synthetic Windows CI is a strong regression gate but is not real installed-app acceptance.
 
 ## Fresh-chat continuation prompt
 
 ```text
-칼바람 프로그램 v0.16.0 CLEAN BASELINE 작업 계속.
+칼바람 프로그램 v0.16.0 CLEAN BASELINE 계속.
 기억으로 추측하지 말고 dbswo2910-oss/ARAM-Fearless-Draft 저장소를 source of truth로 사용해.
 AGENTS.md → docs/CURRENT_STATE.md → update/current-state.json → update/manifest.json → docs/KNOWN_ISSUES.md → docs/V0160_CLEAN_BASELINE_PROGRESS.md → Issue #83 → Draft PR #84 → 최신 CI 순서로 복원해.
-production main v0.15.135 Golden Baseline은 건드리지 말고 stability/v0160-clean-baseline-phaseb에서 계속 작업해.
-먼저 최신 PR HEAD와 Stability Foundation / Full Regression / AI Continuity 결과를 확인하고, progress 문서의 'Exact next-work order'에서 아직 끝나지 않은 첫 항목부터 실제 GitHub 패치를 진행해.
-CI 실패 시 프로그램 문제인지 audit fixture 문제인지 구분해서 root cause를 수정하고 재검증해.
-작업을 마칠 때 이 progress 문서와 Issue #83/PR #84 중 최소 하나에 현재 HEAD, green CI, 완료 범위, 다음 정확한 작업을 남겨서 다음 새 채팅이 이어받을 수 있게 해.
+production main v0.15.135 Golden Baseline은 건드리지 말고 stability/v0160-clean-baseline-phaseb에서 진행해.
+최신 PR HEAD와 Stability Foundation / Full Regression / AI Continuity를 먼저 확인하고, progress 문서의 Exact next-work order에서 아직 끝나지 않은 첫 항목부터 실제 GitHub 패치를 진행해.
+CI 실패는 프로그램 로직 문제인지 audit fixture 문제인지 구분해서 root cause를 수정하고 다시 검증해.
+작업 종료 때 이 progress 문서와 PR #84 또는 Issue #83에 현재 HEAD, 마지막 fully-green SHA/CI, 완료 범위, 미완료 범위, 다음 정확한 작업을 남겨 새 채팅에서도 바로 이어지게 해.
 ```
 
 ## End-of-session continuity rule
 
-Every substantial stabilization session must leave durable repository evidence containing:
+Every substantial session must leave durable repository evidence containing:
 
 - current branch HEAD
-- last fully green code checkpoint and CI run numbers
+- last fully green code checkpoint + CI run numbers
 - newly migrated scope
 - remaining legacy/planned scope
 - exact next task
-- explicit statement that production `main` was or was not changed
+- whether production `main` changed
 
-Preferred durable locations: **this file + Issue #83 progress comment + PR #84 body**. Chat memory is not a substitute.
+Chat memory is never the source of truth.
