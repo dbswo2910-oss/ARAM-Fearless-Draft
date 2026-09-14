@@ -10,7 +10,7 @@ const owners=Object.freeze({
   lifecycle:{canonical:'src/core/lifecycle',legacy:'resource-lifecycle-v015118',status:'shadow'},
   updater:{canonical:'src/updater',legacy:'v0.15.79 safety baseline + successors',status:'shadow'},
   autosync:{canonical:'src/autosync',legacy:'autosync-concurrency-v015119',status:'shadow'},
-  riot:{canonical:'src/riot',legacy:'current Riot/data service chain',status:'planned'},
+  riot:{canonical:'src/riot',legacy:'riot-grade-collector-v01532 + current Riot/data service chain',status:'shadow'},
   draft:{canonical:'src/draft',legacy:'current Draft runtime chain',status:'planned'},
   random_pick:{canonical:'src/random/pick',legacy:'runtime-v015100 under v0.15.115 single-owner baseline',status:'planned'},
   random_ingame:{canonical:'src/random/ingame',legacy:'current RANDOM IN GAME runtime chain',status:'planned'},
