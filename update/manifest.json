@@ -277,8 +277,7 @@
     },
     {
       "path": "ui-stability-baseline-v015115.js",
-      "source": "update/v0.15.131/ui-stability-baseline-v015115.js",
-      "sha256": "0194f4ce7f693b61e2e30117606b8e15b73d0fe792920aa017fddd25a8c15e8e"
+      "source": "update/v0.15.120/ui-stability-baseline-v015115.js"
     },
     {
       "path": "state-integrity-v015117.js",
@@ -881,7 +880,7 @@
     {
       "path": "runtime-source-stability-v015131.js",
       "source": "update/v0.15.131/runtime-source-stability-v015131.js",
-      "sha256": "57ba37ca16368483a8aac0162d06308f8edd7c09776ee62843dab53a0a03362c"
+      "sha256": "53f895cd3fd1705cb5caabd649630c03007fce908760419fc3e4ce12916d9806"
     },
     {
       "path": "main-v015131.js",

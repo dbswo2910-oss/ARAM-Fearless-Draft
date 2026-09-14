@@ -14,7 +14,7 @@
 ## Active ownership — do not create competing owners
 
 - RANDOM PICK DOM/state owner: **runtime-v015100** (v0.15.115 single-owner baseline)
-- DATA view owner: **ui-stability-v015115** → `update/v0.15.131/ui-stability-baseline-v015115.js`
+- DATA view owner: **ui-stability-v015115** → `update/v0.15.120/ui-stability-baseline-v015115.js`
 - Persistent-state owner: **state-integrity-v015117** → `update/v0.15.117/state-integrity-v015117.js`
 - Resource lifecycle owner: **resource-lifecycle-v015118** → `update/v0.15.118/resource-lifecycle-v015118.js`
 - AutoSync main owner: **autosync-concurrency-v015119** → `update/v0.15.128/autosync-concurrency-v015119.js`
