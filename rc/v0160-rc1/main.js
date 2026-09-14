@@ -67,7 +67,14 @@ function writeReport(body){
 function finishProbe(code){if(!probeMode)return;trace('probe-exit-scheduled',{code});setTimeout(()=>{try{app.exit(code)}catch{process.exit(code)}},250)}
 async function rendererState(win){
   if(!win||win.isDestroyed?.())return null;
-  try{return await win.webContents.executeJavaScript(`(()=>{const s=globalThis.__ARAM_V0160_RC1_STATE__;return s?JSON.parse(JSON.stringify(s)):null})()`,true)}catch(e){trace('renderer-exec-error',{message:e?.message||String(e)});return null}
+  const exec=win.webContents.executeJavaScript(`(()=>{const s=globalThis.__ARAM_V0160_RC1_STATE__;return s?JSON.parse(JSON.stringify(s)):null})()`,true)
+    .then(value=>({kind:'value',value}),error=>({kind:'error',error}));
+  const timeout=new Promise(resolve=>setTimeout(()=>resolve({kind:'timeout'}),1200));
+  const result=await Promise.race([exec,timeout]);
+  if(result.kind==='value')return result.value;
+  if(result.kind==='error')trace('renderer-exec-error',{message:result.error?.message||String(result.error)});
+  else trace('renderer-exec-timeout',{url:(()=>{try{return win.webContents.getURL()}catch{return''}})()});
+  return null;
 }
 function installProbe(){
   trace('probe-installed',{windowCount:BrowserWindow.getAllWindows().length});
