@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARAM v0.16 Stability Synthetic E2E</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#07141f;color:#e7f5ff;font-family:Segoe UI,Arial,sans-serif}button{background:#102c43;color:#e7f5ff;border:1px solid #315d7b;border-radius:8px;padding:8px 12px}.app{padding:18px}.bar{display:flex;gap:8px;margin-bottom:14px}.view{border:1px solid #1e425d;border-radius:14px;background:#0a1d2c;padding:16px;min-height:720px}.panel{border:1px solid #214864;border-radius:12px;background:#0d2436;padding:14px;margin:10px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.card{border:1px solid #2b5875;border-radius:10px;padding:12px;background:#0b2030}.muted{color:#8eb0c8}.hero{padding:24px;border-radius:14px;background:linear-gradient(120deg,#0c2a42,#164a6c);margin:12px 0}.shell-header{display:flex;justify-content:space-between;padding:8px 10px;border:1px solid #36506a;border-radius:8px}.diag{position:fixed;right:14px;bottom:14px;background:#102c43;border:1px solid #4b7896;border-radius:9px;padding:9px 11px;font-size:12px}.hidden{display:none!important}</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar">
+    <button id="navRandom" data-ui-role="nav-random">RANDOM</button>
+    <button id="navData" data-ui-role="nav-data">DATA</button>
+    <button id="navProfile" data-ui-role="nav-profile">PROFILE</button>
+    <button id="navResults" data-ui-role="nav-results">RESULTS</button>
+  </div>
+  <section id="random" data-view="random" data-ui-role="random-root" class="view">
+    <div class="bar"><button id="randomPickMode">PICK</button><button id="randomIngameMode">IN GAME</button></div>
+    <div id="randomPickShell" data-mode="pick">
+      <div id="queueSize" data-ui-role="random-queue-size" class="panel">5인큐</div>
+      <div id="randomInputAnchor" data-ui-role="random-input-anchor" class="panel">팀원 선택</div>
+      <div id="externalInputs" data-ui-role="random-external-inputs" class="panel">외부 입력</div>
+      <div id="manualPartyInputs" data-ui-role="random-party-inputs" class="panel">파티 입력</div>
+      <div id="poolInputs" data-ui-role="random-pool-inputs" class="panel">후보 챔피언</div>
+      <div class="grid"><div id="comboResults" data-ui-role="random-top5" class="panel">TOP 5</div><div id="comboDetail" data-ui-role="random-top5-detail" class="panel">추천 상세</div></div>
+      <div id="randomOurFive" data-ui-role="random-team-five" class="panel">우리팀 5인</div>
+      <div id="randomOurSummary" data-ui-role="random-team-summary" class="panel">우리 조합</div>
+      <div id="randomEnemySummary" data-ui-role="random-enemy-summary" class="panel">상대 요약</div>
+    </div>
+    <div id="randomIngameShell" data-ui-role="random-ingame-shell" data-mode="ingame" class="hidden">
+      <div id="randomLiveSummary" data-ui-role="random-ingame-summary" class="hero">한타 요약</div>
+      <div id="randomLiveBuildAdvice" data-ui-role="random-ingame-build" class="panel">빌드 어드바이스</div>
+      <div class="cards"><div class="card">위협 1</div><div class="card">위협 2</div><div class="card">위협 3</div></div>
+    </div>
+  </section>
+  <section id="data" data-view="data" data-ui-role="data-root" class="view hidden">
+    <div id="dataHubTopNavV015115" data-ui-role="data-subnav" class="bar"><button id="dataTier">챔피언 티어리스트</button><button id="dataPatch">패치노트</button></div>
+    <div id="genericDataHeader" data-ui-role="data-detail-generic-shell-header" class="shell-header"><b>챔피언 상세</b><button>닫기</button></div>
+    <div id="dataCard" data-ui-role="data-card" class="panel">
+      <div id="dataTierPanel"><h2>챔피언 티어</h2><div class="cards"><div class="card">S</div><div class="card">A</div><div class="card">B</div></div></div>
+      <div id="dataPatchNotesV01599" data-ui-role="data-patch-notes" class="hidden"><div class="hero"><h1>26.18 패치노트</h1><p class="muted">일반 칼바람 나락</p></div><div class="cards"><div class="card">챔피언 변경</div><div class="card">아이템 변경</div><div class="card">TOP 6</div></div></div>
+    </div>
+  </section>
+  <section id="profile" data-view="profile" class="view hidden"><button id="pp19open" data-ui-role="profile-launch">프로필 열기</button><div id="pp19ov" data-ui-role="profile-overlay" class="panel"><div id="pp19c" data-ui-role="profile-content"><h2>PLAYER PROFILE</h2><p>Golden baseline synthetic profile</p></div></div></section>
+  <section id="results" data-view="results" class="view hidden"><div class="hero"><h2>RESULTS</h2><p>최근 경기 결과</p></div><div class="cards"><div class="card">승리</div><div class="card">KDA</div><div class="card">ROLE</div></div></section>
+</div>
+<div class="diag" data-ui-role="app-diagnostics">DIAG READY</div>
+<script>window.__ARAM_APP_VERSION__='0.15.135-golden';window.__ARAM_ACTIVE_OWNERS__={random:'runtime-v015100',data:'ui-stability-v015115',state:'state-integrity-v015117',lifecycle:'resource-lifecycle-v015118',autosync:'autosync-concurrency-v015119'};</script>
+<script src="../diagnostics/runtime-diagnostics.js"></script>
+<script src="synthetic-renderer.js"></script>
+</body>
+</html>
