@@ -24,15 +24,17 @@
 - Preserve `aram-fearless-draft` userData identity, `aram-rating-research-v03`, `checkpoint-v03`, v0.15.79 updater safety, v0.15.117 state semantics, v0.15.118 lifecycle semantics, and v0.15.119 AutoSync concurrency semantics.
 - No intended Draft/RANDOM/ROLE/item scoring changes during stabilization.
 
-## Last fully verified code checkpoint
+## Last fully verified checkpoint
 
-PR #84 head **`a9a58619e7ec0208295824a428e73a3009519876`** was fully green for:
+PR #84 head **`f9e9fd2d6e12bf2bfcc9b97bdb30f7bf952e33ff`** was fully green for:
 
-- `v0.16.0 Stability Foundation` **run #302** — SUCCESS, including Windows Electron synthetic E2E
-- `Full Regression Audit` **run #878** — SUCCESS
-- `AI Continuity Audit` **run #293** — SUCCESS
+- `v0.16.0 Stability Foundation` **run #304** — SUCCESS, including Windows Electron synthetic E2E
+- `Full Regression Audit` **run #879** — SUCCESS
+- `AI Continuity Audit` **run #294** — SUCCESS
 
-That checkpoint additionally verifies:
+The immediately preceding code checkpoint `a9a58619e7ec0208295824a428e73a3009519876` introduced the latest Item catalog-service gate; `f9e9fd2...` only updates durable project handoff documentation and confirms the complete suite remains green.
+
+The verified suite includes:
 
 - Item identity/recommendation parity
 - Item art resolver/catalog bridge parity
@@ -158,6 +160,7 @@ Continue in small independently verifiable slices:
 
 - Active RANDOM runtime owner remains `runtime-v015100` under v0.15.115 single-owner baseline.
 - `update/v0.15.100/runtime-source-stability-v015100.js` controls selected-candidate preview locks but does **not** itself define the core `teamScore` scoring function.
+- `reference/installed-v0.15.49/random-practice-pick-fragment.html` is an exact real-installed DOM reference, but it contains markup rather than the scoring engine.
 - Therefore the next session must locate `teamScore` in the actual assembled/base runtime before writing canonical scoring code. A missing GitHub code-search hit is **not** permission to guess.
 
 ## Fresh-chat continuation prompt
