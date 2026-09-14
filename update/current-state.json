@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.131",
-    "message": "v0.15.131 · RESEARCH STORAGE RECOVERY + PATCH NOTES DETAIL FIX",
+    "version": "0.15.132",
+    "message": "v0.15.132 · RESTORE RESEARCH STORAGE ROOT + PATCH NOTES RUNTIME FIX",
     "min_launcher": "2.0.2",
-    "manifest_commit": "b53f7ae1b342a5948961f8d1fceb922394abb6c9"
+    "manifest_commit": "0915deb865a88dbe1c4ce2c6e7d3f31847be126c"
   },
   "package": {
-    "source": "update/v0.15.131/package.json",
-    "version": "0.15.131",
-    "main": "main-v015131.js",
-    "main_source": "update/v0.15.131/main-v015131.js"
+    "source": "update/v0.15.132/package.json",
+    "version": "0.15.132",
+    "main": "main-v015132.js",
+    "main_source": "update/v0.15.132/main-v015132.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.131/runtime-source-stability-v015131.js"
+      "active_runtime_source": "update/v0.15.132/runtime-source-stability-v015132.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",

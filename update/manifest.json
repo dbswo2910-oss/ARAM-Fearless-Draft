@@ -1,6 +1,6 @@
 {
-  "version": "0.15.131",
-  "message": "v0.15.131 · RESEARCH STORAGE RECOVERY + PATCH NOTES DETAIL FIX",
+  "version": "0.15.132",
+  "message": "v0.15.132 · RESTORE RESEARCH STORAGE ROOT + PATCH NOTES RUNTIME FIX",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -817,8 +817,8 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.131/package.json",
-      "sha256": "e2031876ccce55d2b06307f4d295fb2c31383ba48194aa75fcdfecbf185e1894"
+      "source": "update/v0.15.132/package.json",
+      "sha256": "b742ef55953376288a209faffa1014ac7f093ff347cd629feaa3ddf4b46d1f90"
     },
     {
       "path": "rating-engine-v01.js",
@@ -874,8 +874,8 @@
     },
     {
       "path": "research-storage-v015131.js",
-      "source": "update/v0.15.131/research-storage-v015131.js",
-      "sha256": "788b53d209ffacf777e1a116cfddb8cc13e0e3c7a21acb204010bfad6db637aa"
+      "source": "update/v0.15.132/research-storage-v015131.js",
+      "sha256": "74909aa28cdef0b2236f38a14201a1b97da0eb5ac4db1b9035684f88040d5fe6"
     },
     {
       "path": "runtime-source-stability-v015131.js",
@@ -896,6 +896,26 @@
       "path": "cold-start-promotion-v015131.js",
       "source": "update/v0.15.131/cold-start-promotion-v015131.js",
       "sha256": "5fa1da6222dc0c1a8ba55b61521e5cb60c576261a6820bc2be0ac065d526f806"
+    },
+    {
+      "path": "main-v015132.js",
+      "source": "update/v0.15.132/main-v015132.js",
+      "sha256": "e847c34738a7da5bff9937261170aa11f0d7634e00becc63c0166deda3df8e17"
+    },
+    {
+      "path": "successor-route-v015132.js",
+      "source": "update/v0.15.132/successor-route-v015132.js",
+      "sha256": "f9b57f95716e622ae0c491343a187e4f7d8d22ddff9a8bca5d6062619a86dfe4"
+    },
+    {
+      "path": "runtime-source-stability-v015132.js",
+      "source": "update/v0.15.132/runtime-source-stability-v015132.js",
+      "sha256": "47dfc8ed98fe59c1d133401170a56b16623af949ed296dfd1af37c8dd4a1443d"
+    },
+    {
+      "path": "cold-start-promotion-v015132.js",
+      "source": "update/v0.15.132/cold-start-promotion-v015132.js",
+      "sha256": "51d4dc17c4b4c6815ea31ba6bbf150f9a0ee523ad53b1630af2e6f9acb77754d"
     }
   ],
   "delete": [

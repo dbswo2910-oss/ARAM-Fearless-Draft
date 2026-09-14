@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.131**
-- Manifest message: v0.15.131 · RESEARCH STORAGE RECOVERY + PATCH NOTES DETAIL FIX
-- Manifest commit: `b53f7ae1b342a5948961f8d1fceb922394abb6c9`
-- Package: `update/v0.15.131/package.json` → **v0.15.131**
-- Electron entry: `main-v015131.js` → `update/v0.15.131/main-v015131.js`
-- Current runtime stability source: `update/v0.15.131/runtime-source-stability-v015131.js`
+- Active updater: **v0.15.132**
+- Manifest message: v0.15.132 · RESTORE RESEARCH STORAGE ROOT + PATCH NOTES RUNTIME FIX
+- Manifest commit: `0915deb865a88dbe1c4ce2c6e7d3f31847be126c`
+- Package: `update/v0.15.132/package.json` → **v0.15.132**
+- Electron entry: `main-v015132.js` → `update/v0.15.132/main-v015132.js`
+- Current runtime stability source: `update/v0.15.132/runtime-source-stability-v015132.js`
 
 ## Active ownership — do not create competing owners
 
