@@ -33,6 +33,8 @@ jobs:
         run: node tools/stability/ui-contract-audit.js
       - name: Canonical owner registry
         run: node tools/stability/canonical-owner-audit.js
+      - name: Foundational subsystem shadow contracts
+        run: node tools/stability/subsystem-shadow-audit.js
       - name: Final assembled runtime
         run: node tools/stability/final-runtime-audit.js
       - name: Golden runtime fingerprints
