@@ -12,7 +12,7 @@
 6. `docs/V0160_CLEAN_BASELINE_PROGRESS.md`
 7. Issue #83
 8. Draft PR #84
-9. latest PR HEAD + Stability Foundation / Full Regression / AI Continuity runs
+9. latest PR HEAD + Stability Foundation / Installed Windows / Full Regression / AI Continuity runs
 
 ## Non-negotiable safety boundary
 
@@ -25,59 +25,24 @@
 - Preserve v0.15.79 updater safety, v0.15.117 state semantics, v0.15.118 lifecycle semantics, v0.15.119 AutoSync concurrency semantics.
 - No intended Draft/RANDOM/ROLE/item scoring change during stabilization.
 - B2 Research collection remains manual-only; no automatic network collection.
-- Synthetic Windows CI is not installed-app or real-League acceptance.
+- GitHub-hosted Windows acceptance is stronger than synthetic E2E but is still **not** a physical-user-PC or real League Client test.
 
 ## Last fully verified code checkpoint
 
-Code checkpoint **`a83de8a20dffa32e7d0abcb19fb6b3008e42eaf2`** is fully green:
+Code checkpoint **`ad7f847197c126fb32177f712a7c44051aa7d772`** is fully green at the same SHA:
 
-- `v0.16.0 Stability Foundation` **#428 — SUCCESS**
+- `v0.16.0 Stability Foundation` **#550 — SUCCESS**
   - Linux foundation: SUCCESS
   - Windows Electron synthetic: SUCCESS
-- `Full Regression Audit` **#941 — SUCCESS**
-- `AI Continuity Audit` **#356 — SUCCESS**
+- `v0.16.0 Installed Windows Acceptance` **#30 — SUCCESS**
+- `Full Regression Audit` **#1002 — SUCCESS**
+- `AI Continuity Audit` **#417 — SUCCESS**
 
-A newer docs-only HEAD may exist after this checkpoint. Always inspect current Actions before calling that newer HEAD fully verified.
+A newer docs-only HEAD may exist after this checkpoint. Do not replace the fully-green code checkpoint with a docs-only SHA unless all release gates are rechecked there.
 
-## Latest migration slice — RANDOM PICK scoring blocker closed + render core started
+## Canonical migration state
 
-### Recovered scoring math
-
-The exact base `teamScore(names,modes={})` scoring math was recovered from the preserved real Windows v0.15.49 installed `index.html`.
-
-- installed `index.html` SHA-256: `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
-- recovered `teamScore` source SHA-256: `6b1c791d915eb11c2f84310001f8a639b21bef21f15aed0096e6318cd5fcac01`
-
-The old extractor bug was also fixed: it previously mistook the `{}` in default parameter `modes={}` for the function body. The extractor now anchors the body to the final `{` of the matched declaration and has a regression fixture for this exact case.
-
-Canonical shadow coverage now includes:
-
-- `src/random/pick/team-score.js` — recovered base scoring math, source-hash locked to the verified installed baseline.
-- `src/random/pick/team-survival.js` — canonical port of the active v0.15.40 catch-survival metadata wrapper.
-- `random-team-score-canonical-differential-audit.js` — source lineage, catch-survival parity, final wrapped teamScore parity and TOP5 parity.
-
-This is a **parity port**, not a balance change. `score_logic_changed:false` and `random_scoring_changed:false` remain enforced.
-
-### Canonical RANDOM PICK render core
-
-A production-inactive canonical render core now exists at `src/random/pick/render-core.js`.
-
-It currently owns in shadow mode:
-
-- exact-ID binding to permanent semantic roles for `#random`, input/pool anchors, `#comboResults`, `#comboDetail`, `#randomOurFive`, summaries.
-- TOP5 base result rendering.
-- selected-combo detail rendering.
-- one delegated selection listener rather than per-row listener accumulation.
-- explicit listener disposal.
-- selected-combo rerender/persist/analysis routing.
-
-`random-render-core-canonical-audit.js` verifies role binding, TOP5/detail semantic output, idempotent single listener, selection rerender and cleanup. It is chained into the existing RANDOM teamScore Stability Foundation gate.
-
-The final v0.15.90-v0.15.100 candidate-preview presentation layer is **not yet claimed migrated**. The overall RANDOM PICK owner remains planned/production-inactive until that final presentation/interaction parity is absorbed.
-
-## Current subsystem migration matrix
-
-### Full shadow candidates, production inactive
+The targeted Step-13 canonical migration is now complete in **shadow / production-inactive** form for:
 
 - main/bootstrap
 - preload/IPC
@@ -87,76 +52,87 @@ The final v0.15.90-v0.15.100 candidate-preview presentation layer is **not yet c
 - AutoSync concurrency/history helpers
 - shared Riot grade/data helpers
 - Draft risk engine
-- RANDOM IN GAME
-- Item
-- diagnostics core/panel
+- RANDOM IN GAME semantic signature / HUD / coordinator / shop / coach / scheduler
+- RANDOM PICK scoring, selection, TOP5, Candidate DNA, final presentation/render owner
+- DATA workspace/mode/navigation, tier/detail layout and Patch Notes structural render owner
+- Item identity/recommendation/art/catalog/runtime
+- Profile + Results normalizer/history/metrics/Riot linkage and final render owner
+- Research storage/sampling/rating engine/current useful UI; B2 remains manual-only
+- diagnostics collector/panel and canonical diagnostics shell owner
 
-### Partial shadows still needing owner completion
+All of the above remain shadow-only. There has been **no production owner cutover**.
 
-**RANDOM PICK**
-- shadow: candidate DNA
-- shadow: selected-candidate state
-- shadow: exhaustive TOP5 enumeration/order
-- shadow: recovered base `teamScore` math
-- shadow: v0.15.40 catch-survival metadata
-- shadow: base TOP5/detail render core + exact-ID semantic-role binding + disposable selection listener
-- remaining: absorb the final v0.15.90-v0.15.100 candidate-preview/TOP5 presentation behavior into the canonical renderer; then owner-level shadow comparison
-- production owner remains `runtime-v015100` under the v0.15.115 single-owner baseline
+## Installed Windows acceptance — now green
 
-**DATA**
-- shadow: Patch Notes generic-shell intent, workspace topology, mode/navigation behavior
-- remaining: final tier/detail layout + Patch Notes render owner; replace temporary semantic-sweep fallback with structural canonical layout
+The installed-like Windows gate now reconstructs a validated real v0.15.49 installed baseline before materializing Golden v0.15.135.
 
-**Profile / Results**
-- shadow: result normalizer, history service, profile metrics, authoritative Riot Grade exact-link
-- remaining: profile render, results render, permanent semantic roles
+### Reconstructed installed baseline
 
-**Research**
-- shadow: read-only storage/checkpoint + v0.3.1 active-sampling policy
-- remaining: rating engine + current useful Research UI
-- network collection remains disabled/manual-only
+- pinned public v0.14.2 app bundle SHA-256: `2e076de26edb8f20a54bf0e07cfce9b6102f5f97617d8c5a3f65a03cb5671d04`
+- v0.14.2 `index.html` SHA-256: `4a6cc26334e2dd7dd4aaf7ce5bd15315e47ad173baeb134ac40019d2e4906f32`
+- preserved real v0.15.49 installed `index.html` SHA-256: `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
+- compact zstd index delta SHA-256: `194d5ec7ed88418a468f9da1a5b04b0f5d604564813fae271cf30864b9582c24`
+- preserved real v0.15.49 `autosync-core.js` SHA-256: `a9f206df445d06eefc99ae55f1ceb3a7a5ff108a40a8393fa75ec413d2c4aba6`
+
+The v0.15.49 AutoSync base is required because the Golden manifest assumes installed-base helpers such as `normalizeAramHistoryGame` already exist; using the older v0.14.2 core created a false acceptance failure.
+
+### Golden materialization / boot checks
+
+The gate now verifies:
+
+1. exact real v0.15.49 index + AutoSync base reconstruction,
+2. Golden v0.15.135 manifest materialization using raw Git blob bytes so Windows CRLF conversion cannot corrupt pinned hashes,
+3. 236 Golden manifest files plus manifest deletions,
+4. stable-v203 launcher tests/build and `--promote-only --expected-version 0.15.135`,
+5. official Electron **38.7.2** Windows x64 archive with pinned SHA-256 `0401b898a8d83523694bd0afa6dc3035a54c57404a914725baa621c3378b5885` and download retries,
+6. actual Electron cold-start on a GitHub Windows runner,
+7. stable Windows Roaming userData identity `aram-fearless-draft`,
+8. Golden storage-root log presence,
+9. no fatal `App threw an error` / `index contract mismatch`,
+10. canonical shadow payload presence without production activation.
+
+The Stability Foundation Windows synthetic job uses the same pinned Electron runtime path instead of fragile npm postinstall downloading.
 
 ## 20-step program status
 
 1. **DONE** — v0.15.135 Golden Baseline frozen.
 2. **DONE** — repository inventory + runtime dependency/owner map.
-3. **DONE/MAINTAIN** — historical automatic CI cleaned; feature-oriented gates maintained.
-4. **PARTIAL** — semantic UI role registry exists; RANDOM canonical render core now binds key roles, but all production UI is not yet canonical.
-5. **DONE** — final assembled-runtime test.
-6. **PARTIAL** — Windows Electron synthetic E2E green; installed-app/real-Windows acceptance pending.
-7. **PARTIAL** — screenshot + semantic geometry artifacts exist; installed-app visual baseline pending.
-8. **PARTIAL** — synthetic rerender/resource soak exists; prolonged real League/AutoSync soak pending.
-9. **PARTIAL** — privacy-safe DIAG collector + canonical panel/copy UX exist; production navigation entry pending.
-10. **PARTIAL** — stable state/Research identities and synthetic 159-checkpoint persistence covered; installed migration fixture pending.
-11. **DONE/MAINTAIN** — Golden fingerprints + deterministic behavioral differential fixtures active.
+3. **DONE/MAINTAIN** — historical automatic CI cleanup and feature-oriented gates.
+4. **DONE/MAINTAIN** — canonical owners use stable semantic UI roles; keep enforcing uniqueness/visibility contracts.
+5. **DONE** — final assembled-runtime verification.
+6. **DONE for CI scope** — Windows Electron synthetic + installed-like Windows cold-start are green. Physical user PC / real League Client remains an external acceptance boundary.
+7. **PARTIAL** — synthetic screenshot/semantic geometry regression exists; installed physical-PC visual/DPI/font acceptance remains external.
+8. **PARTIAL** — synthetic rerender/resource soak exists; prolonged installed-like AutoSync/updater soak and real League timing remain.
+9. **DONE in shadow** — privacy-safe diagnostics collector/panel + canonical shell owner. Production navigation is deferred to cutover.
+10. **PARTIAL** — state/Research identities and synthetic checkpoint persistence are guarded; deeper installed-state migration fixtures for settings/localStorage/IndexedDB/match cache/Research DB must be proven before cutover.
+11. **DONE/MAINTAIN** — Golden fingerprints + deterministic behavioral differential fixtures.
 12. **DONE** — canonical `src/` tree + owner registry.
-13. **ACTIVE** — subsystem canonical migration/shadow parity; RANDOM PICK scoring math blocker is closed and renderer migration is active.
-14. **ACTIVE** — hotfix intent is absorbed without preserving patch-of-patch ownership.
-15. **ACTIVE** — legacy-vs-canonical shadow/differential comparison.
-16. **BLOCKED-LATER** — legacy active runtime removal only after full parity + installed acceptance.
-17. **BLOCKED-LATER** — manifest/package minimization after Step 16 proof.
-18. **BLOCKED-LATER** — v0.16 RC after all release gates.
-19. **BLOCKED-LATER** — production CLEAN BASELINE promotion.
-20. **PARTIAL** — single-owner/canonical rules exist; final AGENTS/CI enforcement before promotion.
+13. **DONE in shadow** — targeted subsystem canonical migration/owner consolidation.
+14. **DONE/MAINTAIN** — hotfix intent absorbed into canonical owners rather than preserving patch-of-patch ownership.
+15. **DONE/MAINTAIN** — legacy-vs-canonical shadow/differential gates are active.
+16. **NEXT / BLOCKED BY CUTOVER PROOF** — remove legacy active runtime only after persistence/soak/cutover eligibility proof.
+17. **PENDING AFTER 16** — minimal manifest/release package and reproducibility proof.
+18. **PENDING** — v0.16.0 RC release gates.
+19. **PENDING** — production CLEAN BASELINE promotion.
+20. **PARTIAL/MAINTAIN** — single-owner/canonical rules exist; final enforcement remains part of RC/cutover.
 
 ## Exact next-work order
 
-1. **Finish RANDOM PICK candidate-preview/final presentation owner**: absorb current v0.15.90-v0.15.100 visible TOP5/DNA/selected-preview behavior into canonical rendering without reintroducing an overlay.
-2. Promote RANDOM PICK to a complete shadow owner only after owner-level differential/interaction gates pass.
-3. **DATA final layout/render owner** and permanent structural Patch Notes rule.
-4. **Profile + Results render owners** with stable semantic roles.
-5. **Research rating engine + current useful Research UI**, preserving storage identity and manual-only B2.
-6. Wire DIAG into the future canonical shell.
-7. Strengthen installed-app migration / real Windows / real League AutoSync soak acceptance.
-8. Only after all above: Steps 16–20 (legacy active-chain removal → minimal package → RC → production).
+1. **Deep installed-state migration fixture**: preserve settings/localStorage, IndexedDB/match cache, Research DB `aram-rating-research-v03`, checkpoint key `checkpoint-v03`, and the existing 159-match checkpoint fixture across installed-like restart/migration.
+2. **Installed-like AutoSync/updater soak**: repeated startup/restart, queue/concurrency/resource-lifecycle checks, no automatic Research network collection.
+3. **Cutover eligibility matrix**: prove every canonical owner is green and list every remaining dependency on legacy fallback/runtime files.
+4. Only after that proof, remove the legacy active runtime chain on the branch and rerun all differential/Windows/persistence gates.
+5. Build a minimal reproducible v0.16 package/manifest.
+6. Run v0.16 RC gates and physical-Windows/real-League manual acceptance where CI cannot represent the environment.
+7. Production promotion only after explicit approval; do not merge/cut over automatically.
 
-## Known facts / remaining acceptance boundary
+## Known facts / acceptance boundary
 
-- The RANDOM `teamScore` source-discovery blocker is resolved; do not re-derive or redesign the formula.
-- The active production RANDOM owner has **not** been cut over; canonical code is shadow-only.
-- Exact base RANDOM DOM anchors from the real installed baseline remain migration anchors: `#random`, `#randomInputAnchor`, `#poolInputs`, `#comboResults`, `#comboDetail`, `#randomOurFive`, `#randomOurSummary`, `#randomEnemySummary`, `#randomRoles`.
+- RANDOM `teamScore` was recovered from the verified installed v0.15.49 baseline. Do not redesign the formula during stabilization.
+- Canonical RANDOM/DATA/Profile/Research/DIAG owners are complete in shadow but **not active production owners**.
 - Do not reintroduce the retired v0.15.103-v0.15.114 DOM-repair overlay stack.
-- Synthetic Windows CI is a strong regression gate but cannot prove exact installed Electron DPI/font/layout or real League timing.
+- Installed Windows CI proves a reconstructed installed-baseline → Golden materialization → launcher → Electron cold-start path on GitHub-hosted Windows.
+- It does **not** prove physical-machine DPI/font behavior, a real running League Client, live LCU timing, or real user network conditions.
 
 ## Fresh-chat continuation prompt
 
@@ -165,10 +141,11 @@ The final v0.15.90-v0.15.100 candidate-preview presentation layer is **not yet c
 기억으로 추측하지 말고 dbswo2910-oss/ARAM-Fearless-Draft 저장소를 source of truth로 사용해.
 AGENTS.md → docs/CURRENT_STATE.md → update/current-state.json → update/manifest.json → docs/KNOWN_ISSUES.md → docs/V0160_CLEAN_BASELINE_PROGRESS.md → Issue #83 → Draft PR #84 → 최신 CI 순서로 복원해.
 production main v0.15.135 Golden Baseline은 건드리지 말고 stability/v0160-clean-baseline-phaseb에서 진행해.
-progress 문서의 Exact next-work order에서 아직 끝나지 않은 첫 항목부터 실제 GitHub 패치를 진행해.
-RANDOM teamScore는 검증된 설치본에서 복구되어 canonical parity가 green이다. 수학식을 재설계하지 말고 candidate-preview/final render owner부터 이어가.
-CI 실패는 실제 로직 문제인지 audit fixture 문제인지 구분해서 root cause를 수정하고 다시 검증해.
-작업 종료 때 progress 문서와 PR #84 또는 Issue #83에 current HEAD, last fully-green SHA/CI, 완료/미완료 범위, 다음 정확한 작업을 남겨 새 채팅에서도 바로 이어지게 해.
+last fully-green code checkpoint는 ad7f847197c126fb32177f712a7c44051aa7d772이며 Foundation #550, Installed Windows #30, Full Regression #1002, AI Continuity #417이 같은 SHA에서 SUCCESS였다.
+canonical owner migration은 RANDOM/DATA/Profile/Results/Research/DIAG 포함 shadow 단계까지 완료됐다. production cutover는 하지 않았다.
+Exact next-work order의 첫 항목인 installed-state migration fixture부터 실제 GitHub 패치를 진행해.
+CI 실패는 로직 문제/fixture 문제/외부 다운로드 문제를 구분해 root cause를 수정하고 gate를 약화시키지 마라.
+작업 종료 때 current HEAD, last fully-green code SHA/CI, 완료/미완료 범위, 다음 작업, production main 변경 여부를 저장소 문서와 PR/Issue에 남겨라.
 ```
 
 ## End-of-session continuity rule
