@@ -2,6 +2,7 @@
 const fs=require('fs');
 const path=require('path');
 const IMPLEMENTATION_VERSION='0.16-shadow';
+const LEGACY_SAFETY_VERSION='0.15.116';
 const FORMAT_ROOT='update-safety-v01579';
 const SCHEMA=1;
 const CRITICAL_FILES=Object.freeze(['index.html','autosync-core.js','main.js','preload.js','package.json']);
@@ -13,8 +14,10 @@ function safeRelativePath(value){
 function ensure(dir){fs.mkdirSync(dir,{recursive:true})}
 function readJson(file){try{return JSON.parse(fs.readFileSync(file,'utf8'))}catch{return null}}
 function writeJsonAtomic(file,value){ensure(path.dirname(file));const tmp=`${file}.tmp-${process.pid}-${Date.now()}`;fs.writeFileSync(tmp,JSON.stringify(value,null,2),'utf8');try{fs.renameSync(tmp,file)}catch{try{fs.rmSync(file,{force:true})}catch{}fs.renameSync(tmp,file)}}
-function rootOf(opts={}){if(opts.root)return path.resolve(opts.root);return path.resolve(process.cwd(),'.'+FORMAT_ROOT)}
+function defaultRoot(){try{const {app}=require('electron');if(app&&typeof app.getPath==='function')return path.join(app.getPath('userData'),FORMAT_ROOT)}catch{}return path.join(process.cwd(),'.'+FORMAT_ROOT)}
+function rootOf(opts={}){return path.resolve(opts.root||defaultRoot())}
 function pendingPath(root){return path.join(root,'pending-update.json')}
+function failurePath(root){return path.join(root,'safety-failure.json')}
 function historyPath(root){return path.join(root,'safety-history.ndjson')}
 function append(root,event,detail={}){try{ensure(root);fs.appendFileSync(historyPath(root),JSON.stringify({at:new Date().toISOString(),event,detail})+'\n','utf8')}catch{}}
 function copy(src,dst){ensure(path.dirname(dst));fs.copyFileSync(src,dst)}
@@ -25,8 +28,8 @@ function prepareTransaction(opts={}){
   ensure(path.join(root,'snapshots'));const snapshotDir=path.join(root,'snapshots',snapshotName(current));ensure(snapshotDir);const inventory=[];
   try{
     for(const rel of files){const source=path.join(appDir,...rel.split('/')),existed=fs.existsSync(source)&&fs.statSync(source).isFile();inventory.push({rel,existed});if(existed)copy(source,path.join(snapshotDir,...rel.split('/')))}
-    const pending={schema:SCHEMA,state:'prepared',fromVersion:current,toVersion:latest,appDir,snapshotDir,preparedAt:Date.now(),files:inventory,bootCount:0,bootVersion:'',bootStartedAt:0,cleanExitAt:0,cleanExitVersion:'',appliedAt:0};
-    writeJsonAtomic(pendingPath(root),pending);append(root,'UPDATE_PREPARED',{from:current,to:latest,files:inventory.length,snapshotDir});return pending;
+    const pending={schema:SCHEMA,safetyVersion:LEGACY_SAFETY_VERSION,state:'prepared',fromVersion:current,toVersion:latest,appDir,snapshotDir,preparedAt:Date.now(),files:inventory,bootCount:0,bootVersion:'',bootStartedAt:0,cleanExitAt:0,cleanExitVersion:'',appliedAt:0};
+    writeJsonAtomic(pendingPath(root),pending);try{fs.rmSync(failurePath(root),{force:true})}catch{}append(root,'UPDATE_PREPARED',{from:current,to:latest,files:inventory.length,snapshotDir});return pending;
   }catch(error){try{fs.rmSync(snapshotDir,{recursive:true,force:true})}catch{}throw error}
 }
 function markApplied(opts={}){const root=rootOf(opts),file=pendingPath(root),pending=readJson(file);if(!pending)return false;pending.state='applied';pending.appliedAt=Date.now();pending.expectedRelaunch=true;if(opts.from)pending.fromVersion=String(opts.from);if(opts.to)pending.toVersion=String(opts.to);writeJsonAtomic(file,pending);append(root,'UPDATE_APPLIED',{from:pending.fromVersion,to:pending.toVersion});return true}
@@ -37,4 +40,4 @@ function restoreSnapshot(pending,opts={}){
   append(root,'AUTO_ROLLBACK',{from:pending.toVersion,to:pending.fromVersion,snapshotDir:pending.snapshotDir});try{fs.rmSync(pendingPath(root),{force:true})}catch{}writeJsonAtomic(path.join(root,'last-rollback.json'),{at:Date.now(),from:pending.toVersion,to:pending.fromVersion,snapshotDir:pending.snapshotDir});return true;
 }
 function readPending(opts={}){return readJson(pendingPath(rootOf(opts)))}
-module.exports={IMPLEMENTATION_VERSION,FORMAT_ROOT,SCHEMA,CRITICAL_FILES,safeRelativePath,rootOf,prepareTransaction,markApplied,abortTransaction,restoreSnapshot,readPending,production_active:false,score_logic_changed:false,random_scoring_changed:false,_test:{readJson,writeJsonAtomic,snapshotName,pendingPath}};
+module.exports={IMPLEMENTATION_VERSION,LEGACY_SAFETY_VERSION,FORMAT_ROOT,SCHEMA,CRITICAL_FILES,safeRelativePath,defaultRoot,rootOf,prepareTransaction,markApplied,abortTransaction,restoreSnapshot,readPending,production_active:false,score_logic_changed:false,random_scoring_changed:false,_test:{readJson,writeJsonAtomic,snapshotName,pendingPath,failurePath,historyPath,append}};
