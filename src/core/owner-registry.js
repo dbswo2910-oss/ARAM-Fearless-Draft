@@ -17,7 +17,7 @@ const owners=Object.freeze({
   data:{canonical:'src/data',legacy:'ui-stability-v015115',status:'shadow'},
   items:{canonical:'src/items',legacy:'current item catalog/recommendation owners',status:'shadow'},
   profile:{canonical:'src/profile',legacy:'current history/profile/results chain',status:'shadow'},
-  research:{canonical:'src/research',legacy:'current Research UI/storage read-only integration',status:'planned'},
+  research:{canonical:'src/research',legacy:'current Research UI/storage read-only integration',status:'shadow'},
   diagnostics:{canonical:'src/diagnostics',legacy:'stability/diagnostics/runtime-diagnostics.js',status:'shadow'}
 });
 function getOwner(name){return owners[name]||null}
