@@ -1,33 +1,72 @@
-name: v0.16.0 Historical CI Cleanup Export
+name: v0.16.0 Historical CI Cleanup Apply
 
 on:
+  workflow_dispatch:
   push:
     branches: [ stability/v0160-clean-baseline-phaseb ]
     paths:
-      - tools/stability/normalize-historical-workflows.js
-  workflow_dispatch:
+      - .github/workflows/v0160-ci-cleanup-trigger.txt
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   normalize:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - name: Checkout
+      - name: Checkout stabilization branch
         uses: actions/checkout@v4
+        with:
+          ref: stability/v0160-clean-baseline-phaseb
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Normalize historical version-pinned workflows to manual-only
-        run: node tools/stability/normalize-historical-workflows.js
-      - name: Upload normalized workflow tree and report
+      - name: Normalize historical version-pinned workflows in place
+        run: node tools/stability/normalize-historical-workflows.js --in-place
+      - name: Validate cleanup scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff --name-only)
+          printf '%s\n' "${changed[@]}"
+          for path in "${changed[@]}"; do
+            case "$path" in
+              .github/workflows/v015*.yml|audit-output/stability/historical-workflow-normalization.json|.github/workflows/v0160-ci-cleanup-trigger.txt)
+                ;;
+              *)
+                echo "Unexpected cleanup change: $path" >&2
+                exit 1
+                ;;
+            esac
+          done
+          git diff --exit-code -- update/manifest.json update/current-state.json update/v0.15.135 || {
+            echo 'Production baseline changed during CI cleanup.' >&2
+            exit 1
+          }
+      - name: Remove one-shot trigger
+        shell: bash
+        run: rm -f .github/workflows/v0160-ci-cleanup-trigger.txt
+      - name: Commit normalized historical workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/v015*.yml audit-output/stability/historical-workflow-normalization.json 2>/dev/null || true
+          git add -u .github/workflows/v0160-ci-cleanup-trigger.txt 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'No historical workflow changes were required.'
+            exit 0
+          fi
+          git commit -m 'ci: retire historical version-pinned workflow triggers'
+          git push origin HEAD:stability/v0160-clean-baseline-phaseb
+      - name: Upload cleanup report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v0160-historical-workflow-normalized-tree
-          path: |
-            .github/workflows
-            audit-output/stability/historical-workflow-normalization.json
-          if-no-files-found: error
+          name: v0160-historical-workflow-cleanup-report
+          path: audit-output/stability/historical-workflow-normalization.json
+          if-no-files-found: warn
