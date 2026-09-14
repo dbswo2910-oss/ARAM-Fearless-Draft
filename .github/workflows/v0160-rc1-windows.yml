@@ -129,9 +129,25 @@ jobs:
         run: |
           $exe = Join-Path $env:RC_PORTABLE_DIR 'ARAM_Fearless_Draft_v0.16.0-rc1.exe'
           if (!(Test-Path $exe)) { throw "portable RC executable missing: $exe" }
+          Remove-Item $env:RC_REPORT -Force -ErrorAction SilentlyContinue
           $env:ARAM_V0160_RC_REPORT = $env:RC_REPORT
-          $p = Start-Process -FilePath $exe -ArgumentList @('--aram-rc1-probe','--aram-rc1-reset-sandbox') -PassThru -Wait
-          if (!(Test-Path $env:RC_REPORT)) { throw 'RC1 probe report missing' }
+          $p = Start-Process -FilePath $exe -ArgumentList @('--aram-rc1-probe','--aram-rc1-reset-sandbox') -PassThru
+          $deadline = (Get-Date).AddSeconds(50)
+          while ((Get-Date) -lt $deadline -and !(Test-Path $env:RC_REPORT)) {
+            if ($p.HasExited) { break }
+            Start-Sleep -Milliseconds 750
+            $p.Refresh()
+          }
+          $p.Refresh()
+          if (!(Test-Path $env:RC_REPORT)) {
+            if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+            throw "RC1 probe report missing after bounded wait; exited=$($p.HasExited) exitCode=$(if($p.HasExited){$p.ExitCode}else{'n/a'})"
+          }
+          Start-Sleep -Milliseconds 500
+          if (-not $p.HasExited) {
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+            Start-Sleep -Milliseconds 250
+          }
           $report = Get-Content $env:RC_REPORT -Raw | ConvertFrom-Json
           if ($report.status -ne 'SUCCESS') { throw "RC1 probe failed: $($report | ConvertTo-Json -Depth 8)" }
           if (-not $report.sandbox.production_untouched) { throw 'RC1 probe used production userData path' }
