@@ -9,6 +9,11 @@ const RC_APPDATA_DIR='ARAM Fearless Draft RC1 Sandbox';
 const RC_MARKER='.v0160-rc1-sandbox.json';
 const reset=process.argv.includes('--aram-rc1-reset-sandbox');
 const probeMode=process.argv.includes('--aram-rc1-probe');
+const earlyReport=process.env.ARAM_V0160_RC_REPORT?path.resolve(process.env.ARAM_V0160_RC_REPORT):null;
+const tracePath=earlyReport?earlyReport+'.trace.log':null;
+function trace(stage,detail={}){try{const row=JSON.stringify({at:new Date().toISOString(),pid:process.pid,stage,...detail});console.log('[v0.16 RC1 trace]',row);if(tracePath){fs.mkdirSync(path.dirname(tracePath),{recursive:true});fs.appendFileSync(tracePath,row+'\n','utf8')}}catch{}}
+trace('main-enter',{argv:process.argv.slice(1)});
+
 const originalAppData=app.getPath('appData');
 const productionUserData=path.join(originalAppData,STABLE_APP_ID);
 const rcAppData=path.join(originalAppData,RC_APPDATA_DIR);
@@ -42,28 +47,35 @@ function seedSandbox(){
 
 let seedResult;
 try{seedResult=seedSandbox()}catch(e){seedResult={seeded:false,reason:'seed-failed',error:e?.message||String(e)}}
+trace('sandbox-seeded',{seedResult,productionUserData,rcUserData});
 app.setPath('appData',rcAppData);
+app.setPath('userData',rcUserData);
 process.env.ARAM_V0160_RC=RC_VERSION;
-console.log('[v0.16 RC1 sandbox]',{productionUserData,rcAppData,userData:path.join(rcAppData,STABLE_APP_ID),seedResult});
+trace('paths-pinned',{appData:app.getPath('appData'),userData:app.getPath('userData')});
+console.log('[v0.16 RC1 sandbox]',{productionUserData,rcAppData,userData:app.getPath('userData'),seedResult});
 
-require('./main-v015135.js');
+trace('golden-require-start');
+try{require('./main-v015135.js');trace('golden-require-return')}catch(e){trace('golden-require-throw',{name:e?.name,message:e?.message,stack:String(e?.stack||'').slice(0,4000)});throw e}
 
 function reportPath(){
   if(process.env.ARAM_V0160_RC_REPORT)return path.resolve(process.env.ARAM_V0160_RC_REPORT);
   return path.join(app.getPath('userData'),'diagnostics','v0160-rc1-probe.json');
 }
 function writeReport(body){
-  const p=reportPath();fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,JSON.stringify(body,null,2)+'\n','utf8');return p;
+  const p=reportPath();fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,JSON.stringify(body,null,2)+'\n','utf8');trace('report-written',{status:body.status,path:p});return p;
 }
-function finishProbe(code){if(!probeMode)return;setTimeout(()=>{try{app.exit(code)}catch{process.exit(code)}},250)}
+function finishProbe(code){if(!probeMode)return;trace('probe-exit-scheduled',{code});setTimeout(()=>{try{app.exit(code)}catch{process.exit(code)}},250)}
 async function rendererState(win){
   if(!win||win.isDestroyed?.())return null;
-  try{return await win.webContents.executeJavaScript(`(()=>{const s=globalThis.__ARAM_V0160_RC1_STATE__;return s?JSON.parse(JSON.stringify(s)):null})()`,true)}catch{return null}
+  try{return await win.webContents.executeJavaScript(`(()=>{const s=globalThis.__ARAM_V0160_RC1_STATE__;return s?JSON.parse(JSON.stringify(s)):null})()`,true)}catch(e){trace('renderer-exec-error',{message:e?.message||String(e)});return null}
 }
 function installProbe(){
-  const started=Date.now(),timeoutMs=30000;
+  trace('probe-installed',{windowCount:BrowserWindow.getAllWindows().length});
+  const started=Date.now(),timeoutMs=30000;let ticks=0;
   const tick=async()=>{
+    ticks++;
     const wins=BrowserWindow.getAllWindows();
+    if(ticks===1||ticks%8===0)trace('probe-tick',{ticks,windowCount:wins.length,urls:wins.map(w=>{try{return w.webContents.getURL()}catch{return''}})});
     for(const win of wins){
       const state=await rendererState(win);
       if(state){
@@ -80,4 +92,4 @@ function installProbe(){
   };
   setTimeout(tick,750);
 }
-app.whenReady().then(installProbe).catch(e=>{try{writeReport({schema:1,rc:RC_VERSION,status:'FAILURE',error:e?.message||String(e)})}catch{}finishProbe(4)});
+app.whenReady().then(()=>{trace('electron-ready',{windowCount:BrowserWindow.getAllWindows().length});installProbe()}).catch(e=>{trace('electron-ready-error',{message:e?.message||String(e)});try{writeReport({schema:1,rc:RC_VERSION,status:'FAILURE',error:e?.message||String(e)})}catch{}finishProbe(4)});
