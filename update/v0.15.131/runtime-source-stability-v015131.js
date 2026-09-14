@@ -30,15 +30,38 @@ function injectResearchUI(src){
   if(!src.includes('__ARAM_PLAYER_PROFILE_V01519__'))throw new Error('v0.15.131 player profile owner marker missing');
   return src+'\n'+SENTINEL+'\n'+payloadSource()+'\n';
 }
+function replaceOne(src,from,to,label){
+  const hits=src.split(from).length-1;
+  if(hits!==1)throw new Error(`v0.15.131 Patch Notes owner contract mismatch (${label}): ${hits}`);
+  return src.replace(from,to);
+}
+function patchPatchNotesOwner(input){
+  let src=String(input||'');
+  if(src.includes("const PRESENTATION='0.15.131';")&&src.includes('PATCH_NOTES_ALWAYS_OPEN_V015131'))return src;
+  src=replaceOne(src,"const PRESENTATION='0.15.120';","const PRESENTATION='0.15.131';",'presentation');
+  const cssAnchor='      @media(max-width:1180px){';
+  const cssPatch=`      /* PATCH_NOTES_ALWAYS_OPEN_V015131: the generic champion-detail header/close row is not part of Patch Notes. */\n      #data.data115View.data115PatchMode .data115DetailBranch > .title,\n      #data.data115View.data115PatchMode .data115DetailBranch > .panel > .title{display:none!important}\n\n`;
+  src=replaceOne(src,cssAnchor,cssPatch+cssAnchor,'css');
+  const modeAnchor="    const mode=requested==='patch'||requested==='tier'?requested:currentDataMode(p.card);";
+  src=replaceOne(src,modeAnchor,modeAnchor+"\n    const patchMode=mode==='patch';\n    if(patchMode){for(const el of [p.detailBranch,p.card]){el.hidden=false;el.removeAttribute('aria-hidden');el.classList.remove('hidden','collapsed','is-collapsed');el.style?.removeProperty?.('display');el.style?.removeProperty?.('visibility');el.style?.removeProperty?.('max-height')}}",'always-open');
+  const titleOld="    if(title){\n      if(!title.dataset.data115Original)title.dataset.data115Original=text(title)||'챔피언 상세';\n      title.textContent=mode==='patch'?'패치노트':title.dataset.data115Original;\n    }";
+  const titleNew="    if(title){\n      if(!title.dataset.data115Original)title.dataset.data115Original=text(title)||'챔피언 상세';\n      title.hidden=patchMode;if(patchMode)title.setAttribute('aria-hidden','true');else{title.removeAttribute('aria-hidden');title.textContent=title.dataset.data115Original}\n    }";
+  src=replaceOne(src,titleOld,titleNew,'title-row');
+  const clickAnchor="  document.addEventListener('click',e=>{\n    if(e.target?.closest?.('#randomPickModeBtn,#randomIngameModeBtn'))queueMicrotask(claimRandom);\n  },false);";
+  const closeGuard="\n\n  document.addEventListener('click',e=>{const view=$('#data');if(!view?.classList.contains('data115PatchMode'))return;const p=dataParts(),btn=e.target?.closest?.('button');if(!p||!btn||!p.detailBranch.contains(btn)||!/닫기/.test(text(btn)))return;e.preventDefault();e.stopImmediatePropagation();syncData('patch')},true);";
+  src=replaceOne(src,clickAnchor,clickAnchor+closeGuard,'legacy-close-guard');
+  return src;
+}
 function patchRuntimeSource(file,input){
   let src=prior.patchRuntimeSource(file,input);
-  if(file==='ui-stability-baseline-v015115.js')src=readLocal('ui-stability-baseline-v015115.js');
+  if(file==='ui-stability-baseline-v015115.js')src=patchPatchNotesOwner(src);
   if(file==='player-profile-v01519.js')src=injectResearchUI(src);
   return src;
 }
 module.exports={
   ...prior,
   patchRuntimeSource,
+  patchPatchNotesOwner,
   score_logic_changed:false,
   random_scoring_changed:false,
   item_recommendation_logic_changed:prior.item_recommendation_logic_changed===true,
@@ -55,6 +78,6 @@ module.exports={
   active_sampling_in_production:false,
   b2_collector_in_production:false,
   research_evaluator_in_production:false,
-  activation_targets:[...new Set([...(prior.activation_targets||[]),'player-profile-v01519.js'])],
+  activation_targets:[...new Set([...(prior.activation_targets||[]),'player-profile-v01519.js','ui-stability-baseline-v015115.js'])],
   policy_version:'0.15.131'
 };
