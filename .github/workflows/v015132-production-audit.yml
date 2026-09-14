@@ -1,90 +1,27 @@
-name: v0.15.132 Production Release Audit
+name: v0.15.132 Historical Production Audit
 
 on:
-  push:
-    branches:
-      - fix/v0.15.132-storage-root-patchnotes-runtime
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'update/v0.15.132/**'
-      - 'update/manifest.json'
-      - 'update/current-state.json'
-      - 'docs/CURRENT_STATE.md'
-      - 'tools/v015132-production-audit.js'
-      - '.github/workflows/v015132-production-audit.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  audit:
+  archived-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22.x'
-      - name: Compile v0.15.132 package
+      - name: Verify current continuity
         run: |
-          node -c update/v0.15.132/main-v015132.js
-          node -c update/v0.15.132/successor-route-v015132.js
-          node -c update/v0.15.132/runtime-source-stability-v015132.js
-          node -c update/v0.15.132/research-storage-v015131.js
-          node -c update/v0.15.132/cold-start-promotion-v015132.js
+          node tools/sync-current-state.js --check
+          node tools/ai-continuity-audit.js
+      - name: Preserve historical v0.15.132 audit source
+        run: |
           node -c tools/v015132-production-audit.js
-      - name: v0.15.132 root-cause fixtures
-        run: node tools/v015132-production-audit.js
-      - name: Cold-start launcher fixtures
-        working-directory: launcher/stable-v203
-        run: go test -v ./...
-      - name: Full Regression
-        run: node tools/full-regression-audit.js
-      - name: Match History
-        run: node tools/v015131-history-preservation-audit.js
-      - name: Player Profile
-        run: node tools/profile-ux-audit.js
-      - name: AutoSync
-        run: node tools/v015119-autosync-concurrency-audit.js
-      - name: RANDOM
-        run: node tools/v015121-random-practice-restore-audit.js
-      - name: DATA and Patch Notes
-        run: node tools/v015120-data-subnav-audit.js
-      - name: Item
-        run: node tools/item-recommendation-v01581-audit.js
-      - name: Updater safety
-        run: |
-          node tools/v015115-single-owner-stability-audit.js
-          node tools/v015116-runtime-update-stability-audit.js
-          node tools/v015117-state-integrity-audit.js
-          node tools/v015118-resource-lifecycle-audit.js
-      - name: AI continuity snapshot
-        run: node tools/sync-current-state.js --check
-      - name: AI continuity
-        run: node tools/ai-continuity-audit.js
-      - name: Upload reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: v015132-production-release-audit
-          path: |
-            audit-output/v015132-production-report.json
-            audit-output/full-regression-report.json
-            audit-output/profile-ux-report.json
-            audit-output/v015119-autosync-concurrency-report.json
-            audit-output/v015121-random-practice-restore-report.json
-            audit-output/v015120-data-subnav-report.json
-            audit-output/v015116-runtime-update-stability-report.json
-            audit-output/ai-continuity-report.json
-          if-no-files-found: warn
+          echo 'Historical exact-version audit is manual-only because v0.15.132 is superseded by the real-Windows follow-up.'
