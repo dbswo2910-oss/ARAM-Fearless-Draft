@@ -101,3 +101,8 @@ The first activated v0.15.125 manifest mapped installed `aram-build-stats-curren
 **Storage/cold-start:** `VERIFIED_REAL_WINDOWS`. The user supplied v0.15.132 Windows evidence showing the preserved 159-match Research checkpoint is visible again and confirmed repeated full exit/relaunch stays on v0.15.132 rather than resurrecting an older version.
 
 **Patch Notes shell:** `VERIFY_REAL_WINDOWS`. The same v0.15.132 screenshot still showed the outer generic `챔피언 상세 / 닫기` row above otherwise-correct Patch Notes content. v0.15.132 CI missed the real nesting and CSS-priority behavior. v0.15.133 fixes this inside the existing DATA owner by walking only the exact `#dataCard` ancestor chain, forcing the generic shell row to `display:none!important` in Patch Notes mode, and restoring it in tier mode. A post-v0.15.133 Windows screenshot is required before closing GitHub issue #79.
+
+
+## v0.15.134 Patch Notes shell title correction
+
+**Status:** `VERIFY_REAL_WINDOWS`. v0.15.133 was visually rejected by the user because the generic `챔피언 상세 / 닫기` row remained. The follow-up now modifies the exact shell title object resolved by the existing DATA owner instead of inferring topology from `#dataCard` ancestors. One post-v0.15.134 Windows screenshot is required before closing issue #79.

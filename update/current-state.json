@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.133",
-    "message": "v0.15.133 · REAL-WINDOWS PATCH NOTES SHELL FIX + CONTINUITY CLEANUP",
+    "version": "0.15.134",
+    "message": "v0.15.134 · PATCH NOTES RESOLVED TITLE FIX",
     "min_launcher": "2.0.2",
     "manifest_commit": "ff3a0275507feb28b2c295dbe9fa128a65a4a80f"
   },
   "package": {
-    "source": "update/v0.15.133/package.json",
-    "version": "0.15.133",
-    "main": "main-v015133.js",
-    "main_source": "update/v0.15.133/main-v015133.js"
+    "source": "update/v0.15.134/package.json",
+    "version": "0.15.134",
+    "main": "main-v015134.js",
+    "main_source": "update/v0.15.134/main-v015134.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.133/runtime-source-stability-v015133.js"
+      "active_runtime_source": "update/v0.15.134/runtime-source-stability-v015134.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",
@@ -221,24 +221,29 @@
       "must_verify": []
     },
     "patch_notes_shell_header_v015133": {
+      "status": "failed_real_windows",
+      "evidence": "User supplied a real Windows v0.15.133 screenshot. Patch Notes content was healthy but the outer generic 챔피언 상세 / 닫기 row still remained. Root cause: the v0.15.133 follow-up searched only the #dataCard ancestor chain, while the live shell title is resolved separately by syncData() from the detail branch.",
+      "must_verify": []
+    },
+    "patch_notes_shell_header_v015134": {
       "status": "pending",
-      "evidence": "A real Windows v0.15.132 screenshot proved the Patch Notes content renders but the outer generic 챔피언 상세 / 닫기 shell row survives. v0.15.133 adds an exact #dataCard-ancestor fix and a nested-DOM regression fixture; final acceptance still requires a post-update Windows screenshot.",
+      "evidence": "v0.15.134 patches the exact title variable already resolved by the existing ui-stability-v015115 syncData() owner and forces inline display:none!important in Patch Notes mode. Final acceptance requires one real Windows screenshot.",
       "must_verify": [
-        "Update/relaunch to v0.15.133 and open DATA > 패치노트",
+        "Update/relaunch to v0.15.134 and open DATA > 패치노트",
         "Confirm the outer 챔피언 상세 / 닫기 row is absent while Patch Notes hero/champion/item/TOP6/list/quick-nav remain visible",
-        "Switch back to 챔피언 티어리스트 and confirm the normal detail header behavior returns"
+        "Switch back to 챔피언 티어리스트 and confirm the normal detail header returns"
       ]
     }
   },
   "next_planned_work": {
-    "version": "0.15.134",
+    "version": "0.15.135",
     "theme": "ARAM RATING v0.3.1 MAINLINE REBASE",
     "status": "planned",
-    "intent": "Rebase the useful research-only ARAM Rating v0.3.1 sampling/B2 work onto the post-v0.15.133 mainline without reviving obsolete v0.15.129 UI/storage code or changing production scoring owners.",
+    "intent": "Rebase the useful research-only ARAM Rating v0.3.1 sampling/B2 work onto the post-v0.15.134 mainline without reviving obsolete v0.15.129 UI/storage code or changing production scoring owners.",
     "guardrails": [
-      "start from the current mainline after v0.15.133 rather than continuing the diverged PR #74 head directly",
-      "preserve v0.15.132 stable userData/checkpoint recovery",
-      "reuse current v0.15.131+ Research UI/storage production files instead of old v0.15.129 copies",
+      "start from the current mainline after v0.15.134 rather than continuing the diverged PR #74 head directly",
+      "preserve the stable aram-fearless-draft userData/checkpoint recovery",
+      "reuse current Research UI/storage production files instead of old v0.15.129 copies",
       "keep B2 manual-only until explicit user action",
       "do not change Draft/RANDOM/ROLE/item scoring, AutoSync ownership, or DATA ownership"
     ]

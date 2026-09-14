@@ -1,6 +1,6 @@
 {
-  "version": "0.15.133",
-  "message": "v0.15.133 · REAL-WINDOWS PATCH NOTES SHELL FIX + CONTINUITY CLEANUP",
+  "version": "0.15.134",
+  "message": "v0.15.134 · PATCH NOTES RESOLVED TITLE FIX",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -817,8 +817,8 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.133/package.json",
-      "sha256": "7ed9b779d3630288716918f6f8599f59627a92ae92c7e541639fcb180a7f21a1"
+      "source": "update/v0.15.134/package.json",
+      "sha256": "1497545de8ca88408585d656a746391b8bc2723e9c536f64223d5b078acc1d7e"
     },
     {
       "path": "rating-engine-v01.js",
@@ -936,6 +936,26 @@
       "path": "cold-start-promotion-v015133.js",
       "source": "update/v0.15.133/cold-start-promotion-v015133.js",
       "sha256": "79586522118d248dbfb0afab2897f67c7dc2aa2b73cbf5a28387cb93ff370ac1"
+    },
+    {
+      "path": "main-v015134.js",
+      "source": "update/v0.15.134/main-v015134.js",
+      "sha256": "01be0b0ee40f87346e8980f80352ad49daffcf81ae28e4fe2e84e5d4838cb01a"
+    },
+    {
+      "path": "successor-route-v015134.js",
+      "source": "update/v0.15.134/successor-route-v015134.js",
+      "sha256": "42e51f8b364187733eff672d5b7075abd36521c96693eb63a4c50cbff53c2100"
+    },
+    {
+      "path": "runtime-source-stability-v015134.js",
+      "source": "update/v0.15.134/runtime-source-stability-v015134.js",
+      "sha256": "6df305c4344385ce1fec5b498d6b00823ad1d529d54a82b677fe9fb343371e8c"
+    },
+    {
+      "path": "cold-start-promotion-v015134.js",
+      "source": "update/v0.15.134/cold-start-promotion-v015134.js",
+      "sha256": "27dbdbc1412edd1e78c515064643039fc7164077a3bc85e92a9e819167b0ad3e"
     }
   ],
   "delete": [
