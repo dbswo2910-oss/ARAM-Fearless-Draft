@@ -7,39 +7,36 @@ $ErrorActionPreference='Stop'
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
 Remove-Item $Report -Force -ErrorAction SilentlyContinue
 Remove-Item ($Report + '.trace.log') -Force -ErrorAction SilentlyContinue
-$stdout=Join-Path $EvidenceDir 'rc1-stdout.log'
-$stderr=Join-Path $EvidenceDir 'rc1-stderr.log'
 $traceCopy=Join-Path $EvidenceDir 'rc1-main-trace.log'
-Remove-Item $stdout,$stderr,$traceCopy -Force -ErrorAction SilentlyContinue
+Remove-Item $traceCopy -Force -ErrorAction SilentlyContinue
 function Save-Trace {
   if(Test-Path ($Report+'.trace.log')){Copy-Item ($Report+'.trace.log') $traceCopy -Force}
 }
+function Kill-Tree([int]$PidToKill) {
+  try { & taskkill.exe /PID $PidToKill /T /F 2>$null | Out-Null } catch {}
+}
 $env:ARAM_V0160_RC_REPORT=$Report
-$p=Start-Process -FilePath $Exe -ArgumentList @('--aram-rc1-probe','--aram-rc1-reset-sandbox') -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
-$deadline=(Get-Date).AddSeconds(50)
+$p=Start-Process -FilePath $Exe -ArgumentList @('--aram-rc1-probe','--aram-rc1-reset-sandbox') -PassThru
+$deadline=(Get-Date).AddSeconds(42)
 while((Get-Date) -lt $deadline -and !(Test-Path $Report)){
-  if($p.HasExited){break}
-  Start-Sleep -Milliseconds 750
   $p.Refresh()
+  if($p.HasExited){break}
+  Start-Sleep -Milliseconds 500
 }
 $p.Refresh()
-if(!(Test-Path $Report)){
-  Save-Trace
-  $trace=if(Test-Path ($Report+'.trace.log')){Get-Content ($Report+'.trace.log') -Raw}else{''}
-  $out=if(Test-Path $stdout){Get-Content $stdout -Raw}else{''}
-  $err=if(Test-Path $stderr){Get-Content $stderr -Raw}else{''}
-  if(-not $p.HasExited){Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue;Start-Sleep -Milliseconds 250}
-  throw "RC1 probe report missing after bounded wait. TRACE:`n$trace`nSTDOUT:`n$out`nSTDERR:`n$err"
-}
-Start-Sleep -Milliseconds 500
-if(-not $p.HasExited){Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue;Start-Sleep -Milliseconds 250}
 Save-Trace
+if(!(Test-Path $Report)){
+  $trace=if(Test-Path ($Report+'.trace.log')){Get-Content ($Report+'.trace.log') -Raw}else{''}
+  if(-not $p.HasExited){Kill-Tree $p.Id}
+  throw "RC1 probe report missing after bounded wait. TRACE:`n$trace"
+}
 Copy-Item $Report (Join-Path $EvidenceDir 'rc1-probe.json') -Force
 $parsed=Get-Content $Report -Raw | ConvertFrom-Json
+if(-not $p.HasExited){Kill-Tree $p.Id}
 if($parsed.status -ne 'SUCCESS'){throw "RC1 probe failed: $($parsed | ConvertTo-Json -Depth 8)"}
 if(-not $parsed.sandbox.production_untouched){throw 'RC1 probe used production userData path'}
 if(-not $parsed.renderer.diagnostics){throw 'canonical diagnostics owner inactive'}
 if(-not $parsed.renderer.data){throw 'canonical DATA owner inactive'}
 if($parsed.renderer.errors.Count -ne 0){throw "RC1 renderer errors: $($parsed.renderer.errors -join '; ')"}
-Write-Host "RC1 PROBE: SUCCESS"
+Write-Host 'RC1 PROBE: SUCCESS'
 $parsed | ConvertTo-Json -Depth 8
