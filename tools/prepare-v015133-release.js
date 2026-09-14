@@ -30,7 +30,7 @@ manifest.files=files;
 const manual=readJson('docs/continuity-manual.json');
 manual.real_world_validation=manual.real_world_validation||{};
 manual.real_world_validation.v015132_storage_root_and_cold_start={
-  status:'verified_real_windows',
+  status:'verified',
   evidence:'User supplied a real Windows v0.15.132 screenshot showing the preserved 159-match Research checkpoint and confirmed repeated full exit/relaunch stays on v0.15.132 instead of falling back to an older version.',
   must_verify:[]
 };
@@ -79,13 +79,6 @@ if(!known.includes(knownMarker)){
   known+=`\n\n${knownMarker}\n\n**Storage/cold-start:** \`VERIFIED_REAL_WINDOWS\`. The user supplied v0.15.132 Windows evidence showing the preserved 159-match Research checkpoint is visible again and confirmed repeated full exit/relaunch stays on v0.15.132 rather than resurrecting an older version.\n\n**Patch Notes shell:** \`VERIFY_REAL_WINDOWS\`. The same v0.15.132 screenshot still showed the outer generic \`챔피언 상세 / 닫기\` row above otherwise-correct Patch Notes content. v0.15.132 CI missed the real nesting and CSS-priority behavior. v0.15.133 fixes this inside the existing DATA owner by walking only the exact \`#dataCard\` ancestor chain, forcing the generic shell row to \`display:none!important\` in Patch Notes mode, and restoring it in tier mode. A post-v0.15.133 Windows screenshot is required before closing GitHub issue #79.\n`;
 }
 write('docs/KNOWN_ISSUES.md',known);
-
-let agents=read('AGENTS.md');
-const agentsMarker='## v0.15.133 real-Windows Patch Notes shell rule';
-if(!agents.includes(agentsMarker)){
-  agents+=`\n\n${agentsMarker}\n\n- Keep DATA ownership in \`ui-stability-v015115\`; do not create a new Patch Notes overlay owner.\n- A shell title may be nested between \`#dataCard\` and the resolved DATA detail branch. Do not assume it is only a direct child.\n- In Patch Notes mode, hide only generic \`챔피언 상세 / 닫기\` shell titles found on that exact ancestry; do not text-scan the whole document.\n- Use an inline \`display:none!important\` (plus hidden/aria-hidden) for the shell row because the real Windows stylesheet can override the HTML \`hidden\` attribute with an important display rule.\n- Restore the shell title when returning to Champion Tier List.\n- Keep scoring, RANDOM scoring, Rating math, AutoSync and item recommendation behavior unchanged.\n`;
-}
-write('AGENTS.md',agents);
 
 write('update/manifest.json',JSON.stringify(manifest,null,2)+'\n');
 require('./sync-current-state').sync();
