@@ -1,2 +1,2 @@
 'use strict';
-module.exports={subsystem:'random_ingame',status:'planned',legacy:'runtime-random-ingame-v01570 + coach/ux/shop layers',ui_roles:['random-ingame-shell','random-ingame-summary','random-ingame-build'],components:{semantic_signature:'shadow',volatile_hud:'shadow',runtime_scheduler:'planned',coach_render:'planned',shop_pipeline:'planned'},production_active:false};
+module.exports={subsystem:'random_ingame',status:'planned',legacy:'runtime-random-ingame-v01570 + coach/ux/shop layers',ui_roles:['random-ingame-shell','random-ingame-summary','random-ingame-build'],components:{semantic_signature:'shadow',volatile_hud:'shadow',tick_coordinator:'shadow',runtime_scheduler:'planned',coach_render:'planned',shop_pipeline:'planned'},production_active:false};
