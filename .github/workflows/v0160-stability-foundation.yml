@@ -1,0 +1,74 @@
+name: v0.16.0 Stability Foundation
+
+on:
+  push:
+    branches:
+      - stability/v0160-clean-baseline-foundation
+      - stability/v0160-clean-baseline-phaseb
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Golden baseline contract
+        run: node tools/stability/golden-baseline-audit.js
+      - name: Repository inventory and runtime dependency graph
+        run: node tools/stability/inventory.js
+      - name: UI contract registry
+        run: node tools/stability/ui-contract-audit.js
+      - name: Final assembled runtime
+        run: node tools/stability/final-runtime-audit.js
+      - name: State and Research compatibility
+        run: node tools/stability/state-compat-audit.js
+      - name: Diagnostics contract
+        run: node tools/stability/diagnostics-audit.js
+      - name: Existing full regression core
+        run: node tools/full-regression-audit.js
+      - name: AI continuity
+        run: node tools/ai-continuity-audit.js
+      - name: Upload foundation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-stability-foundation
+          path: |
+            audit-output/stability
+            audit-output/full-regression-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: error
+
+  windows-electron-synthetic:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run synthetic Windows Electron DOM / storage / soak / screenshots
+        shell: pwsh
+        run: npx --yes electron@38.7.2 stability/e2e/synthetic-main.js
+      - name: Upload Windows synthetic screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-windows-electron-synthetic
+          path: audit-output/stability/windows-e2e
+          if-no-files-found: error
