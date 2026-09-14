@@ -34,6 +34,8 @@ jobs:
       - name: Download pinned public base app bundle
         shell: pwsh
         run: |
+          $outDir = Join-Path $PWD 'audit-output\stability\installed-windows'
+          New-Item -ItemType Directory -Force -Path $outDir | Out-Null
           $zip = Join-Path $env:RUNNER_TEMP 'aram-base-v0142.zip'
           $uri = 'https://github.com/dbswo2910-oss/ARAM-Fearless-Draft/releases/download/v0.14.2/ARAM_Fearless_Draft_appbundle_v0.14.2.zip'
           Invoke-WebRequest -Uri $uri -OutFile $zip
@@ -43,12 +45,13 @@ jobs:
           if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
           Expand-Archive -Path $zip -DestinationPath $extract -Force
           $candidates = Get-ChildItem $extract -Recurse -Filter package.json | Where-Object {
-            Test-Path (Join-Path $_.Directory.FullName 'index.html') -and Test-Path (Join-Path $_.Directory.FullName 'main.js')
+            (Test-Path (Join-Path $_.Directory.FullName 'index.html')) -and (Test-Path (Join-Path $_.Directory.FullName 'main.js'))
           }
           if (-not $candidates) { throw 'could not locate base app root containing package.json/index.html/main.js' }
           $base = ($candidates | Sort-Object { $_.FullName.Length } | Select-Object -First 1).Directory.FullName
           "BASE_APP_DIR=$base" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "INSTALLED_APP=$($env:RUNNER_TEMP)\aram-installed-app" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          [ordered]@{status='SUCCESS';stage='BASE_BUNDLE_VERIFIED';sha256=$hash;base_dir=$base} | ConvertTo-Json | Set-Content -Path (Join-Path $outDir 'base-bundle.json') -Encoding utf8
 
       - name: Materialize current Golden installed app plus canonical shadow payload
         shell: pwsh
