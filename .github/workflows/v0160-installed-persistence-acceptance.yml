@@ -187,8 +187,12 @@ jobs:
           Run-Golden 2
           Verify-State 2
 
-          $mirror = Join-Path $env:STABLE_USER_DATA 'state-integrity-v015117\mirrors\renderer-local-storage.json'
-          if (!(Test-Path $mirror)) { throw "renderer localStorage mirror missing after Golden boots: $mirror" }
+          $roaming = [Environment]::GetFolderPath([Environment+SpecialFolder]::ApplicationData)
+          $stableMirror = Join-Path $env:STABLE_USER_DATA 'state-integrity-v015117\mirrors\renderer-local-storage.json'
+          $goldenFallbackMirror = Join-Path $roaming 'ARAM Fearless Draft\state-integrity-v015117\mirrors\renderer-local-storage.json'
+          $mirror = @($stableMirror,$goldenFallbackMirror) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $mirror) { throw "renderer localStorage mirror missing after Golden boots; checked stable=$stableMirror fallback=$goldenFallbackMirror" }
+          $mirrorLocation = if ([IO.Path]::GetFullPath($mirror).StartsWith([IO.Path]::GetFullPath($env:STABLE_USER_DATA),[StringComparison]::OrdinalIgnoreCase)) { 'stable-userData' } else { 'golden-preload-fallback' }
           $m = Get-Content $mirror -Raw | ConvertFrom-Json
           $fixtureEntry = $m.payload.entries.'aram_v0160_persistence_fixture_v1'
           $favoritesEntry = $m.payload.entries.'aram_match_lab_favorites_v1'
@@ -205,6 +209,8 @@ jobs:
             electron_runtime_sha256=$env:PINNED_ELECTRON_SHA256
             local_storage_preserved=$true
             state_integrity_mirror_preserved=$true
+            state_integrity_mirror_path=$mirror
+            state_integrity_mirror_location=$mirrorLocation
             research_database='aram-rating-research-v03'
             research_checkpoint_key='checkpoint-v03'
             research_checkpoint_matches=159
