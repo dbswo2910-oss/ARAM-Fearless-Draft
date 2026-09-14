@@ -11,7 +11,7 @@ const owners=Object.freeze({
   updater:{canonical:'src/updater',legacy:'v0.15.79 safety baseline + successors',status:'shadow'},
   autosync:{canonical:'src/autosync',legacy:'autosync-concurrency-v015119',status:'shadow'},
   riot:{canonical:'src/riot',legacy:'riot-grade-collector-v01532 + current Riot/data service chain',status:'shadow'},
-  draft:{canonical:'src/draft',legacy:'current Draft runtime chain',status:'planned'},
+  draft:{canonical:'src/draft',legacy:'draft-risk-board-v01546 + current Draft runtime chain',status:'shadow'},
   random_pick:{canonical:'src/random/pick',legacy:'runtime-v015100 under v0.15.115 single-owner baseline',status:'planned'},
   random_ingame:{canonical:'src/random/ingame',legacy:'current RANDOM IN GAME runtime chain',status:'planned'},
   data:{canonical:'src/data',legacy:'ui-stability-v015115',status:'planned'},
