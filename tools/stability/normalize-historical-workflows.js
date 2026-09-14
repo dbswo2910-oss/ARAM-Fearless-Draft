@@ -1,5 +1,6 @@
 'use strict';
 // One-shot normalizer for Phase A/Step 3. Historical workflow bodies stay intact; only automatic triggers are retired.
+// Exported artifact is applied through the connected repository writer because GitHub Actions cannot update workflow files without workflow scope.
 const fs=require('fs');
 const path=require('path');
 const ROOT=path.resolve(__dirname,'../..');
