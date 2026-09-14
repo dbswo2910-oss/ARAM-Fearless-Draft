@@ -94,7 +94,8 @@ jobs:
               Invoke-WebRequest -Uri $uri -OutFile $zip
               $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
               if ($hash -ne $expected) { throw "Electron SHA mismatch: $hash" }
-              $ok = $true; break
+              $ok = $true
+              break
             } catch {
               Write-Warning "Electron download attempt $attempt failed: $($_.Exception.Message)"
               if ($attempt -lt 3) { Start-Sleep -Seconds (8*$attempt) }
@@ -109,21 +110,19 @@ jobs:
           New-Item -ItemType Directory -Force -Path $appDst | Out-Null
           Copy-Item (Join-Path $env:RC_APP_DIR '*') $appDst -Recurse -Force
           Copy-Item (Join-Path $env:RC_PORTABLE_DIR 'electron.exe') (Join-Path $env:RC_PORTABLE_DIR 'ARAM_Fearless_Draft_v0.16.0-rc1.exe') -Force
-          @'
-@echo off
-cd /d "%~dp0"
-start "ARAM Fearless Draft v0.16 RC1" "ARAM_Fearless_Draft_v0.16.0-rc1.exe"
-'@ | Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'START_RC1.cmd') -Encoding ascii
-          @'
-ARAM Fearless Draft v0.16.0 RC1
-
-1. Close the normal production app before first RC launch.
-2. Run START_RC1.cmd (or ARAM_Fearless_Draft_v0.16.0-rc1.exe).
-3. RC1 clones production userData into an isolated sandbox on first launch.
-4. Production userData is not used for RC writes.
-5. Use --aram-rc1-reset-sandbox to recreate the RC sandbox from production state.
-6. This RC is not connected to production auto-release and must not replace the normal installation yet.
-'@ | Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'RC1_README.txt') -Encoding utf8
+          $startLines = @('@echo off','cd /d "%~dp0"','start "ARAM Fearless Draft v0.16 RC1" "ARAM_Fearless_Draft_v0.16.0-rc1.exe"')
+          Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'START_RC1.cmd') -Value $startLines -Encoding ascii
+          $readmeLines = @(
+            'ARAM Fearless Draft v0.16.0 RC1',
+            '',
+            '1. Close the normal production app before first RC launch.',
+            '2. Run START_RC1.cmd (or ARAM_Fearless_Draft_v0.16.0-rc1.exe).',
+            '3. RC1 clones production userData into an isolated sandbox on first launch.',
+            '4. Production userData is not used for RC writes.',
+            '5. Use --aram-rc1-reset-sandbox to recreate the RC sandbox from production state.',
+            '6. This RC is not connected to production auto-release and must not replace the normal installation yet.'
+          )
+          Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'RC1_README.txt') -Value $readmeLines -Encoding utf8
 
       - name: Boot portable RC1 and verify canonical renderer activation
         shell: pwsh
