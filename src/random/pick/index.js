@@ -6,4 +6,5 @@ const top5=require('./top5');
 const teamScoreAdapter=require('./team-score-adapter');
 const teamScore=require('./team-score');
 const teamSurvival=require('./team-survival');
-module.exports={contract,dna,selection,top5,teamScoreAdapter,teamScore,teamSurvival,production_active:false,score_logic_changed:false,random_scoring_changed:false};
+const renderCore=require('./render-core');
+module.exports={contract,dna,selection,top5,teamScoreAdapter,teamScore,teamSurvival,renderCore,production_active:false,score_logic_changed:false,random_scoring_changed:false};
