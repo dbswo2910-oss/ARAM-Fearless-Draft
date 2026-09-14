@@ -5,7 +5,7 @@
   "active": {
     "version": "0.15.130",
     "message": "v0.15.130 · SEARCHED PLAYER RATING + COLD START PROMOTION — resolved PUUID production UI",
-    "min_launcher": "2.0.3",
+    "min_launcher": "2.0.2",
     "manifest_commit": "5b5ed4f88016bfad3e5c6b79d7ad990196f054c3"
   },
   "package": {
