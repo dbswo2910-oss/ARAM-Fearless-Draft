@@ -99,6 +99,8 @@ jobs:
         run: node tools/stability/profile-history-canonical-differential-audit.js
       - name: Canonical Profile Riot Grade exact-link audit
         run: node tools/stability/profile-riot-grade-link-canonical-audit.js
+      - name: Canonical Profile Results final shadow owner
+        run: node tools/stability/profile-results-final-owner-audit.js
       - name: Canonical Research storage differential
         run: node tools/stability/research-storage-canonical-differential-audit.js
       - name: Canonical Research v0.3.1 sampling policy
