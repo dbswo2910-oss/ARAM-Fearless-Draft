@@ -1,4 +1,5 @@
 'use strict';
+// One-shot normalizer for Phase A/Step 3. Historical workflow bodies stay intact; only automatic triggers are retired.
 const fs=require('fs');
 const path=require('path');
 const ROOT=path.resolve(__dirname,'../..');
