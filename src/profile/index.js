@@ -2,4 +2,5 @@
 const contract=require('./contract');
 const results=require('./results-normalizer');
 const metrics=require('./metrics');
-module.exports={contract,results,metrics,production_active:false,score_logic_changed:false,random_scoring_changed:false};
+const history=require('./history-service');
+module.exports={contract,results,metrics,history,production_active:false,score_logic_changed:false,random_scoring_changed:false};
