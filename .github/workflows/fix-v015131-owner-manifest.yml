@@ -1,0 +1,51 @@
+name: Fix v0.15.131 DATA Owner Manifest
+
+on:
+  push:
+    branches:
+      - release/v0.15.131-research-storage-patchnotes
+    paths:
+      - .github/workflows/fix-v015131-owner-manifest.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/v0.15.131-research-storage-patchnotes
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Preserve approved DATA owner source and refresh hashes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          p=Path('update/manifest.json');m=json.loads(p.read_text(encoding='utf-8'))
+          by={x['path']:x for x in m['files']}
+          owner=by['ui-stability-baseline-v015115.js']
+          owner['source']='update/v0.15.120/ui-stability-baseline-v015115.js'
+          owner.pop('sha256',None)
+          rt=by['runtime-source-stability-v015131.js']
+          rt['source']='update/v0.15.131/runtime-source-stability-v015131.js'
+          rt['sha256']=hashlib.sha256(Path(rt['source']).read_bytes()).hexdigest()
+          m['version']='0.15.131';m['min_launcher']='2.0.2'
+          p.write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+          rm -f update/v0.15.131/ui-stability-baseline-v015115.js tools/build-v015131.py
+          node tools/sync-current-state.js
+          node tools/v015131-production-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+      - name: Commit manifest contract fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A update/manifest.json update/current-state.json docs/CURRENT_STATE.md update/v0.15.131/ui-stability-baseline-v015115.js tools/build-v015131.py
+          git commit -m 'fix: keep DATA owner source approved in v0.15.131'
+          git push origin HEAD:release/v0.15.131-research-storage-patchnotes
