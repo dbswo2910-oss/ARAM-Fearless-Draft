@@ -3,22 +3,22 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.129",
-    "message": "v0.15.129 · ARAM RATING RESEARCH UI — local personal Research card in Player Profile",
-    "min_launcher": "2.0.2",
+    "version": "0.15.130",
+    "message": "v0.15.130 · SEARCHED PLAYER RATING + COLD START PROMOTION — resolved PUUID production UI",
+    "min_launcher": "2.0.3",
     "manifest_commit": "5b5ed4f88016bfad3e5c6b79d7ad990196f054c3"
   },
   "package": {
-    "source": "update/v0.15.129/package.json",
-    "version": "0.15.129",
-    "main": "main-v015129.js",
-    "main_source": "update/v0.15.129/main-v015129.js"
+    "source": "update/v0.15.130/package.json",
+    "version": "0.15.130",
+    "main": "main-v015130.js",
+    "main_source": "update/v0.15.130/main-v015130.js"
   },
   "owners": {
     "random_pick": {
       "owner": "runtime-v015100",
       "contract": "v0.15.115 single-owner baseline",
-      "active_runtime_source": "update/v0.15.129/runtime-source-stability-v015129.js"
+      "active_runtime_source": "update/v0.15.130/runtime-source-stability-v015130.js"
     },
     "data_view": {
       "owner": "ui-stability-v015115",

@@ -1,7 +1,7 @@
 'use strict';
 /* ARAM Rating Research UI v0.1 · searched-player PUUID join fix. No network collection. */
 (()=>{
-  const VERSION='aram-rating-ui-v015129-search-puuid-fix',FLAG_KEY='aram_rating_research_ui_enabled_v015129',DB_NAME='aram-rating-research-v03',STORE='kv',CHECKPOINT_KEY='checkpoint-v03',LATEST_RUN_KEY='rating-ui-latest-run-v01',HARD_CAP=500;
+  const VERSION='aram-rating-ui-v015130-production-target-puuid',FLAG_KEY='aram_rating_research_ui_enabled_v015130',DB_NAME='aram-rating-research-v03',STORE='kv',CHECKPOINT_KEY='checkpoint-v03',LATEST_RUN_KEY='rating-ui-latest-run-v01',HARD_CAP=500;
   try{window.aramRatingResearchUIV01?.dispose?.()}catch{}
   let disposed=false,observer=null,observedNode=null,mountQueued=false,mounting=false,latestRun=null,lastError=null,booting=true,lastIdentityKey='',lastDiagnostic=null;
   const enabled=()=>{try{return localStorage.getItem(FLAG_KEY)!=='false'}catch{return true}};window.ARAM_RATING_RESEARCH_UI=enabled();
