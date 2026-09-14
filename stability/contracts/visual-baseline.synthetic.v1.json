@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "scope": "synthetic Windows Electron contract fixture only",
+  "electron": "38.7.2",
+  "golden_reference": "v0.15.135 behavior contract",
+  "screens": {
+    "random-pick.png": {"sha256": "157e87a176263e8138db061f7cf282f26c297e9fc1c2886d1e6a0f8a2e9b92a4", "bytes": 41638},
+    "random-ingame.png": {"sha256": "af4a909d616553af529ad83ece35bfc69283707ab7b3e08f4fab799d716d48aa", "bytes": 41559},
+    "data-tier.png": {"sha256": "bd6f383c989cce7eb3b27072eb130eb39e9ea72e2e73340668bb937d0efe9b0c", "bytes": 15965},
+    "data-patch-notes.png": {"sha256": "ceb1e85194bcd2bc5ba14b77585885839e1461c362f0d27353ef154cf54503e3", "bytes": 78267},
+    "player-profile.png": {"sha256": "541b11af7d91e9c182307d6e457a49de0ccf991f05854d5f158680c4207d4414", "bytes": 14183},
+    "results.png": {"sha256": "4f647d775b852d2279733996c1d5c2762d08a18558cf9ad54366896a34eb9c52", "bytes": 68931}
+  },
+  "acceptance": {
+    "hashes_are_reference_not_release_gate": true,
+    "reason": "Windows runner/font/Chromium rasterization can change pixels without a semantic regression. DOM contracts remain the hard gate until a perceptual diff is introduced.",
+    "production_installed_app_visual_acceptance": "pending"
+  }
+}
