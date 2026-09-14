@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.133**
-- Manifest message: v0.15.133 · REAL-WINDOWS PATCH NOTES SHELL FIX + CONTINUITY CLEANUP
-- Manifest commit: `ff3a0275507feb28b2c295dbe9fa128a65a4a80f`
-- Package: `update/v0.15.133/package.json` → **v0.15.133**
-- Electron entry: `main-v015133.js` → `update/v0.15.133/main-v015133.js`
-- Current runtime stability source: `update/v0.15.133/runtime-source-stability-v015133.js`
+- Active updater: **v0.15.134**
+- Manifest message: v0.15.134 · PATCH NOTES RESOLVED TITLE FIX
+- Manifest commit: `05c4281e107dda566572faaaf223f817bac55c22`
+- Package: `update/v0.15.134/package.json` → **v0.15.134**
+- Electron entry: `main-v015134.js` → `update/v0.15.134/main-v015134.js`
+- Current runtime stability source: `update/v0.15.134/runtime-source-stability-v015134.js`
 
 ## Active ownership — do not create competing owners
 
@@ -44,14 +44,15 @@
 - **startup_update_notice_v015127** — `pending`: CI verifies a one-shot startup call into the existing transactional updater with no new updater/preload owner. Final automatic download/apply/relaunch behavior requires Windows acceptance against a future newer manifest.
 - **match_history_latency_v015128** — `pending`: CI simulates cache-first/coalesced history requests, quick/deep separation and latest-game probes. Real League Client timing is still required to accept perceived latency and post-game freshness.
 - **v015132_storage_root_and_cold_start** — `verified`: User supplied a real Windows v0.15.132 screenshot showing the preserved 159-match Research checkpoint and confirmed repeated full exit/relaunch stays on v0.15.132 instead of falling back to an older version.
-- **patch_notes_shell_header_v015133** — `pending`: A real Windows v0.15.132 screenshot proved the Patch Notes content renders but the outer generic 챔피언 상세 / 닫기 shell row survives. v0.15.133 adds an exact #dataCard-ancestor fix and a nested-DOM regression fixture; final acceptance still requires a post-update Windows screenshot.
+- **patch_notes_shell_header_v015133** — `failed_real_windows`: User supplied a real Windows v0.15.133 screenshot. Patch Notes content was healthy but the outer generic 챔피언 상세 / 닫기 row still remained. Root cause: the v0.15.133 follow-up searched only the #dataCard ancestor chain, while the live shell title is resolved separately by syncData() from the detail branch.
+- **patch_notes_shell_header_v015134** — `pending`: v0.15.134 patches the exact title variable already resolved by the existing ui-stability-v015115 syncData() owner and forces inline display:none!important in Patch Notes mode. Final acceptance requires one real Windows screenshot.
 
 ## Next planned work
 
-- Version: **0.15.134**
+- Version: **0.15.135**
 - Theme: **ARAM RATING v0.3.1 MAINLINE REBASE**
 - Status: `planned`
-- Intent: Rebase the useful research-only ARAM Rating v0.3.1 sampling/B2 work onto the post-v0.15.133 mainline without reviving obsolete v0.15.129 UI/storage code or changing production scoring owners.
+- Intent: Rebase the useful research-only ARAM Rating v0.3.1 sampling/B2 work onto the post-v0.15.134 mainline without reviving obsolete v0.15.129 UI/storage code or changing production scoring owners.
 
 ## Retired UI overlays — regression guard
 

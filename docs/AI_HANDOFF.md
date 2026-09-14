@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.133**
+- Active updater version: **v0.15.134**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -478,3 +478,12 @@ Match history loading now uses the existing AutoSync concurrency owner for a ses
 - The v0.15.133 audit includes a nested-DOM fixture reproducing the topology missed by v0.15.132. CI still does not replace the final Windows screenshot.
 - Scoring, RANDOM scoring, Rating calculations, AutoSync, item recommendation logic, and persistent-state ownership are unchanged.
 - After this cleanup, the next planned development line is ARAM Rating v0.3.1 rebased from the current mainline rather than continuing the stale PR #74 head directly.
+
+
+## v0.15.134 Patch Notes resolved-title correction
+
+- Real Windows v0.15.133 evidence shows the outer `챔피언 상세 / 닫기` shell row still survives in Patch Notes mode.
+- The v0.15.133 ancestor-chain helper was structurally incomplete: the live generic title can be a separate panel under the resolved detail branch rather than an ancestor of `#dataCard`.
+- v0.15.134 keeps the existing DATA single owner and runtime target. It patches the exact `title` variable already resolved by `syncData()`, adding inline `display:none!important` in Patch Notes mode and restoring the original title in tier mode.
+- The v0.15.134 audit runs the real source through `patchRuntimeSource('input-interaction-stability-v01539.js', source)` and asserts the direct resolved-title transform, so an isolated helper cannot mask a production-path miss.
+- Scoring, RANDOM scoring, Rating calculations, AutoSync, item recommendation logic, Research storage, and persistent-state ownership are unchanged.

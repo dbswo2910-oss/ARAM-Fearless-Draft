@@ -55,7 +55,7 @@ for(const row of current.retired_ui_overlays||[]){
 if((current.retired_ui_overlays||[]).length<10)throw new Error('retired UI overlay register unexpectedly incomplete');
 ok('retired-overlay-regression-guard');
 
-const allowed=new Set(['pending','known_stale_baseline','verified','blocked']);
+const allowed=new Set(['pending','known_stale_baseline','verified','blocked','failed_real_windows']);
 for(const [key,row] of Object.entries(manual.real_world_validation||{})){
   if(!allowed.has(row.status))throw new Error(`invalid real-world validation status ${key}: ${row.status}`);
 }
