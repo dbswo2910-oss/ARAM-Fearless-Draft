@@ -57,6 +57,8 @@ jobs:
         run: node tools/stability/random-top5-canonical-differential-audit.js
       - name: Canonical RANDOM IN GAME semantic signature differential
         run: node tools/stability/random-ingame-semantic-canonical-differential-audit.js
+      - name: Canonical RANDOM IN GAME volatile HUD differential
+        run: node tools/stability/random-ingame-volatile-canonical-differential-audit.js
       - name: Final assembled runtime
         run: node tools/stability/final-runtime-audit.js
       - name: Golden runtime fingerprints
