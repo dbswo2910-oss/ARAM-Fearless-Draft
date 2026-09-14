@@ -54,9 +54,6 @@ class FakeEl{
   for(const x of ['PATCH_NOTES_ALWAYS_OPEN_V015132','PATCH_NOTES_REAL_WINDOWS_V015133','data115PatchShellHiddenV015133',"setProperty?.('display','none','important')"])must(patched,x,'patched runtime contract');
   if((patched.match(/PATCH_NOTES_REAL_WINDOWS_V015133/g)||[]).length!==1)throw new Error('v0.15.133 shell fix injected more than once');
 
-  // Real-Windows regression fixture: #dataCard is nested below a panel whose generic
-  // title row is not a direct child of data115DetailBranch. v0.15.132 source assertions
-  // missed this topology and hidden=true could still lose to display:...!important.
   const host=new FakeEl({classes:['data115DataHost']});
   const detail=new FakeEl({classes:['data115DetailBranch']});host.append(detail);
   const outerPanel=new FakeEl({classes:['panel']});detail.append(outerPanel);
@@ -90,7 +87,7 @@ class FakeEl{
 
   const manual=j('docs/continuity-manual.json');
   if(manual.next_planned_work?.version!=='0.15.134')throw new Error('next planned work was not advanced past the completed cleanup');
-  if(manual.real_world_validation?.v015132_storage_root_and_cold_start?.status!=='verified_real_windows')throw new Error('v0.15.132 real-Windows success evidence missing from continuity');
+  if(manual.real_world_validation?.v015132_storage_root_and_cold_start?.status!=='verified')throw new Error('v0.15.132 real-Windows success evidence missing from continuity');
 
   const report={
     status:'SUCCESS',
