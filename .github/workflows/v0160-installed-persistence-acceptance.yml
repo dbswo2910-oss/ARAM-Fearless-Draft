@@ -129,10 +129,13 @@ jobs:
         shell: pwsh
         run: |
           $report = Join-Path $PWD 'audit-output\stability\installed-persistence\probe-seed.json'
-          & $env:PINNED_ELECTRON_EXE "$PWD\tools\stability\windows-persistence-probe.js" --mode seed --app-dir "$env:INSTALLED_APP" --user-data "$env:STABLE_USER_DATA" --report "$report"
-          if ($LASTEXITCODE -ne 0) { throw "pre-upgrade persistence seed failed: $LASTEXITCODE" }
+          $probe = Join-Path $PWD 'tools\stability\windows-persistence-probe.js'
+          $stdout = Join-Path $PWD 'audit-output\stability\installed-persistence\probe-seed-stdout.log'
+          $stderr = Join-Path $PWD 'audit-output\stability\installed-persistence\probe-seed-stderr.log'
+          $p = Start-Process -FilePath $env:PINNED_ELECTRON_EXE -ArgumentList @($probe,'--mode','seed','--app-dir',$env:INSTALLED_APP,'--user-data',$env:STABLE_USER_DATA,'--report',$report) -RedirectStandardOutput $stdout -RedirectStandardError $stderr -Wait -PassThru
+          if (!(Test-Path $report)) { throw "pre-upgrade persistence seed report missing; exit=$($p.ExitCode)" }
           $r = Get-Content $report -Raw | ConvertFrom-Json
-          if ($r.status -ne 'SUCCESS' -or $r.research_checkpoint_matches -ne 159 -or -not $r.local_storage_exact -or -not $r.research_checkpoint_exact) { throw 'pre-upgrade persistence seed verification failed' }
+          if ($p.ExitCode -ne 0 -or $r.status -ne 'SUCCESS' -or $r.research_checkpoint_matches -ne 159 -or -not $r.local_storage_exact -or -not $r.research_checkpoint_exact -or -not $r.research_latest_run_exact) { throw "pre-upgrade persistence seed verification failed; exit=$($p.ExitCode); status=$($r.status)" }
 
       - name: Apply Golden v0.15.135 manifest in place
         shell: pwsh
@@ -151,6 +154,7 @@ jobs:
         run: |
           $electron = $env:PINNED_ELECTRON_EXE
           $outDir = Join-Path $PWD 'audit-output\stability\installed-persistence'
+          $probe = Join-Path $PWD 'tools\stability\windows-persistence-probe.js'
           function Run-Golden([int]$cycle) {
             $stdout = Join-Path $outDir "golden-cycle-$cycle-stdout.log"
             $stderr = Join-Path $outDir "golden-cycle-$cycle-stderr.log"
@@ -171,10 +175,12 @@ jobs:
           }
           function Verify-State([int]$cycle) {
             $report = Join-Path $outDir "probe-verify-$cycle.json"
-            & $electron "$PWD\tools\stability\windows-persistence-probe.js" --mode verify --app-dir "$env:INSTALLED_APP" --user-data "$env:STABLE_USER_DATA" --report "$report"
-            if ($LASTEXITCODE -ne 0) { throw "persistence verify cycle $cycle failed: $LASTEXITCODE" }
+            $stdout = Join-Path $outDir "probe-verify-$cycle-stdout.log"
+            $stderr = Join-Path $outDir "probe-verify-$cycle-stderr.log"
+            $p = Start-Process -FilePath $electron -ArgumentList @($probe,'--mode','verify','--app-dir',$env:INSTALLED_APP,'--user-data',$env:STABLE_USER_DATA,'--report',$report) -RedirectStandardOutput $stdout -RedirectStandardError $stderr -Wait -PassThru
+            if (!(Test-Path $report)) { throw "persistence verify cycle $cycle report missing; exit=$($p.ExitCode)" }
             $r = Get-Content $report -Raw | ConvertFrom-Json
-            if ($r.status -ne 'SUCCESS' -or $r.research_checkpoint_matches -ne 159 -or -not $r.local_storage_exact -or -not $r.research_checkpoint_exact -or -not $r.research_latest_run_exact) { throw "persistence verify cycle $cycle mismatch" }
+            if ($p.ExitCode -ne 0 -or $r.status -ne 'SUCCESS' -or $r.research_checkpoint_matches -ne 159 -or -not $r.local_storage_exact -or -not $r.research_checkpoint_exact -or -not $r.research_latest_run_exact) { throw "persistence verify cycle $cycle mismatch; exit=$($p.ExitCode); status=$($r.status)" }
           }
           Run-Golden 1
           Verify-State 1
