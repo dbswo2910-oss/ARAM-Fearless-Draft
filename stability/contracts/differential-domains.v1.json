@@ -3,24 +3,24 @@
   "golden_version": "0.15.135",
   "policy": "Structural consolidation must preserve deterministic outputs for these domains unless an explicitly approved product/scoring change updates the golden snapshot.",
   "domains": [
-    {"name":"draft-judgment","type":"deterministic-output","must_match":true,"gate":"draft-contract"},
-    {"name":"random-top5","type":"deterministic-output","must_match":true,"gate":"random-top5"},
-    {"name":"random-candidate-dna","type":"deterministic-output","must_match":true,"gate":"random-candidate-dna"},
-    {"name":"time-power","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture"},
-    {"name":"item-recommendation","type":"deterministic-output","must_match":true,"gate":"item-recommendation"},
-    {"name":"role-profile","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture"},
-    {"name":"player-profile","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture"},
-    {"name":"match-history-parser","type":"deterministic-output","must_match":true,"gate":"match-history-parser"},
-    {"name":"result-selection","type":"deterministic-output","must_match":true,"gate":"match-history-parser"},
-    {"name":"riot-grade-linking","type":"deterministic-output","must_match":true,"gate":"riot-grade-linking"},
-    {"name":"research-ui-read-only-view","type":"presentation-data-contract","must_match":true,"gate":"windows-synthetic+diagnostics"}
+    {"name":"draft-judgment","type":"deterministic-output","must_match":true,"gate":"draft-contract","golden_hash":true},
+    {"name":"random-top5","type":"deterministic-output","must_match":true,"gate":"random-top5","golden_hash":true},
+    {"name":"random-candidate-dna","type":"deterministic-output","must_match":true,"gate":"random-candidate-dna","golden_hash":true},
+    {"name":"time-power","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture","golden_hash":false},
+    {"name":"item-recommendation","type":"deterministic-output","must_match":true,"gate":"item-recommendation","golden_hash":true},
+    {"name":"role-profile","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture","golden_hash":false},
+    {"name":"player-profile","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture","golden_hash":false},
+    {"name":"match-history-parser","type":"deterministic-output","must_match":true,"gate":"match-history-parser","golden_hash":true},
+    {"name":"result-selection","type":"deterministic-output","must_match":true,"gate":"match-history-parser","golden_hash":true},
+    {"name":"riot-grade-linking","type":"deterministic-output","must_match":true,"gate":"riot-grade-linking","golden_hash":true},
+    {"name":"research-ui-read-only-view","type":"presentation-data-contract","must_match":true,"gate":"windows-synthetic+diagnostics","golden_hash":false}
   ],
   "supporting_invariants": ["state-integrity","autosync-concurrency"],
-  "snapshot_status": "behavioral_gate_v1_collecting_normalized_golden_outputs",
+  "snapshot_status": "behavioral_golden_v1_active_partial_domain_coverage",
   "notes": [
-    "Snapshots use synthetic or repository fixtures, never the user's personal raw history/PUUID.",
-    "Randomness must be seeded or replaced with deterministic fixtures before canonical shadow comparison.",
-    "Live Riot/LCU network timing belongs to soak/E2E and is not a deterministic snapshot domain.",
-    "Normalized stdout hashes are evidence for the current legacy owner; they are not a substitute for new-owner shadow comparison."
+    "Golden hashes are normalized repository/synthetic fixture outputs only; no personal raw history/PUUID.",
+    "The v0.15.100 RANDOM TOP5 audit has one explicitly pinned package-pointer assertion; its exact expected successor mismatch is itself hash-gated and all feature checks must remain unchanged.",
+    "Time-power, role-profile and player-profile still require dedicated pure input/output fixtures before owner cutover.",
+    "Live Riot/LCU network timing belongs to soak/E2E and is not a deterministic snapshot domain."
   ]
 }
