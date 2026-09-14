@@ -1,0 +1,128 @@
+name: v0.16.0 Installed Windows Acceptance
+
+on:
+  push:
+    branches:
+      - stability/v0160-clean-baseline-phaseb
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installed-windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: launcher/stable-v203/go.mod
+
+      - name: Download pinned public base app bundle
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'aram-base-v0142.zip'
+          $uri = 'https://github.com/dbswo2910-oss/ARAM-Fearless-Draft/releases/download/v0.14.2/ARAM_Fearless_Draft_appbundle_v0.14.2.zip'
+          Invoke-WebRequest -Uri $uri -OutFile $zip
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($hash -ne '2e076de26edb8f20a54bf0e07cfce9b6102f5f97617d8c5a3f65a03cb5671d04') { throw "base bundle SHA-256 mismatch: $hash" }
+          $extract = Join-Path $env:RUNNER_TEMP 'aram-base-extracted'
+          if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
+          Expand-Archive -Path $zip -DestinationPath $extract -Force
+          $candidates = Get-ChildItem $extract -Recurse -Filter package.json | Where-Object {
+            Test-Path (Join-Path $_.Directory.FullName 'index.html') -and Test-Path (Join-Path $_.Directory.FullName 'main.js')
+          }
+          if (-not $candidates) { throw 'could not locate base app root containing package.json/index.html/main.js' }
+          $base = ($candidates | Sort-Object { $_.FullName.Length } | Select-Object -First 1).Directory.FullName
+          "BASE_APP_DIR=$base" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "INSTALLED_APP=$($env:RUNNER_TEMP)\aram-installed-app" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Materialize current Golden installed app plus canonical shadow payload
+        shell: pwsh
+        run: |
+          node tools/stability/materialize-installed-app.js --base "$env:BASE_APP_DIR" --out "$env:INSTALLED_APP"
+          if ($LASTEXITCODE -ne 0) { throw 'installed app materialization failed' }
+          Get-ChildItem "$env:INSTALLED_APP\canonical-shadow\src" -Recurse -Filter *.js | ForEach-Object {
+            node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { throw "canonical Windows syntax failed: $($_.FullName)" }
+          }
+
+      - name: Validate stable launcher against installed candidate
+        shell: pwsh
+        run: |
+          Push-Location launcher/stable-v203
+          go test ./...
+          if ($LASTEXITCODE -ne 0) { throw 'launcher tests failed' }
+          go build -o "$env:RUNNER_TEMP\ARAM_Fearless_Draft_Launcher_windows_x64.exe" .
+          if ($LASTEXITCODE -ne 0) { throw 'launcher build failed' }
+          Pop-Location
+          $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'aram-localappdata'
+          $env:APPDATA = Join-Path $env:RUNNER_TEMP 'aram-appdata'
+          New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA,$env:APPDATA | Out-Null
+          & "$env:RUNNER_TEMP\ARAM_Fearless_Draft_Launcher_windows_x64.exe" --promote-only --app-dir "$env:INSTALLED_APP" --expected-version '0.15.135'
+          if ($LASTEXITCODE -ne 0) { throw "launcher promote-only failed: $LASTEXITCODE" }
+          "ISOLATED_LOCALAPPDATA=$env:LOCALAPPDATA" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "ISOLATED_APPDATA=$env:APPDATA" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install pinned Electron runtime
+        shell: pwsh
+        run: npm install --no-save --no-package-lock electron@44.2.0
+
+      - name: Cold-start materialized installed app on Windows
+        shell: pwsh
+        run: |
+          $env:LOCALAPPDATA = $env:ISOLATED_LOCALAPPDATA
+          $env:APPDATA = $env:ISOLATED_APPDATA
+          $electron = Join-Path $PWD 'node_modules\electron\dist\electron.exe'
+          if (!(Test-Path $electron)) { throw "Electron executable missing: $electron" }
+          $outDir = Join-Path $PWD 'audit-output\stability\installed-windows'
+          New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+          $stdout = Join-Path $outDir 'installed-stdout.log'
+          $stderr = Join-Path $outDir 'installed-stderr.log'
+          $p = Start-Process -FilePath $electron -ArgumentList @("$env:INSTALLED_APP", '--aram-launcher-cold-start') -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+          Start-Sleep -Seconds 12
+          $alive = -not $p.HasExited
+          $exitCode = $null
+          if ($p.HasExited) { $exitCode = $p.ExitCode }
+          $stableUserData = Join-Path $env:APPDATA 'aram-fearless-draft'
+          $userDataExists = Test-Path $stableUserData
+          $report = [ordered]@{
+            status = if ($alive -and $userDataExists) { 'SUCCESS' } else { 'FAILURE' }
+            stage = 'INSTALLED_WINDOWS_COLD_START'
+            golden_version = '0.15.135'
+            windows_runner = $true
+            actual_electron_process_alive_after_12s = $alive
+            exit_code = $exitCode
+            stable_user_data_identity = 'aram-fearless-draft'
+            stable_user_data_created = $userDataExists
+            canonical_shadow_payload_present = (Test-Path (Join-Path $env:INSTALLED_APP 'canonical-shadow\src'))
+            production_manifest_unchanged = $true
+            real_league_client_tested = $false
+            acceptance_scope = 'Windows GitHub-hosted runner; materialized installed-like Golden app cold-start. This is stronger than synthetic fixture but is not a physical-user-PC or real League Client acceptance.'
+          }
+          $report | ConvertTo-Json -Depth 5 | Set-Content -Path (Join-Path $outDir 'installed-windows-report.json') -Encoding utf8
+          if ($alive) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+          Get-Process electron -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+          if (-not $alive) { throw "installed Electron exited early; code=$exitCode" }
+          if (-not $userDataExists) { throw "stable userData root was not created: $stableUserData" }
+
+      - name: Upload installed Windows evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-installed-windows-acceptance
+          path: audit-output/stability/installed-windows
+          if-no-files-found: error
