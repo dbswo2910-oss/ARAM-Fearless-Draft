@@ -15,9 +15,10 @@ if(!fs.existsSync(newEngine))fs.copyFileSync(oldEngine,newEngine);
 if(!fs.readFileSync(oldEngine).equals(fs.readFileSync(newEngine)))throw new Error('rating engine must be byte-identical to v0.15.129');
 
 let ui=fs.readFileSync(path.join(DIR,'research-ui-devtools.js'),'utf8');
-if(ui.includes("const VERSION='aram-rating-ui-v015129-search-puuid-fix';"))ui=exact(ui,"const VERSION='aram-rating-ui-v015129-search-puuid-fix';","const VERSION='aram-rating-ui-v015130-production-target-puuid';",'ui version');
-if(ui.includes("const FLAG_KEY='aram_rating_research_ui_enabled_v015129';"))ui=exact(ui,"const FLAG_KEY='aram_rating_research_ui_enabled_v015129';","const FLAG_KEY='aram_rating_research_ui_enabled_v015130';",'feature flag');
-if(!ui.includes("const VERSION='aram-rating-ui-v015130-production-target-puuid';")||!ui.includes("const FLAG_KEY='aram_rating_research_ui_enabled_v015130';"))throw new Error('v0.15.130 UI production transform missing');
+const oldUiVersion='aram-rating-ui-v015129-search-puuid-fix',newUiVersion='aram-rating-ui-v015130-production-target-puuid';
+const oldFlag='aram_rating_research_ui_enabled_v015129',newFlag='aram_rating_research_ui_enabled_v015130';
+if(ui.includes(oldUiVersion))ui=exact(ui,oldUiVersion,newUiVersion,'ui version');else if(!ui.includes(newUiVersion))throw new Error('v0.15.130 UI version transform missing');
+if(ui.includes(oldFlag))ui=exact(ui,oldFlag,newFlag,'feature flag');else if(!ui.includes(newFlag))throw new Error('v0.15.130 UI feature flag transform missing');
 if(ui.includes('raw.githubusercontent.com')||ui.includes('getAramMatchHistory('))throw new Error('production Research UI must stay local-only and must not collect history');
 fs.writeFileSync(path.join(DIR,'research-ui-devtools.js'),ui);
 
