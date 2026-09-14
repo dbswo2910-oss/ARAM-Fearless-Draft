@@ -1,2 +1,2 @@
 'use strict';
-module.exports={subsystem:'data',status:'planned',legacy:'ui-stability-v015115',ui_roles:['data-root','data-card','data-subnav','data-patch-notes','data-detail-generic-shell-header'],patch_notes_rule:'generic champion detail header absent in Patch Notes mode and restored in tier mode',production_active:false};
+module.exports={subsystem:'data',status:'planned',legacy:'ui-stability-v015115',ui_roles:['data-root','data-card','data-subnav','data-patch-notes','data-detail-generic-shell-header'],components:{patch_mode_shell:'shadow',mode_owner:'planned',tier_detail_layout:'planned',patch_notes_render:'planned'},patch_notes_rule:'generic champion detail header absent in Patch Notes mode and restored in tier mode',production_active:false};
