@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "golden_version": "0.15.135",
+  "policy": "Structural consolidation must preserve deterministic outputs for these domains unless an explicitly approved product/scoring change updates the golden snapshot.",
+  "domains": [
+    {"name":"draft-judgment","type":"deterministic-output","must_match":true},
+    {"name":"random-top5","type":"deterministic-output","must_match":true},
+    {"name":"random-candidate-dna","type":"deterministic-output","must_match":true},
+    {"name":"time-power","type":"deterministic-output","must_match":true},
+    {"name":"item-recommendation","type":"deterministic-output","must_match":true},
+    {"name":"role-profile","type":"deterministic-output","must_match":true},
+    {"name":"player-profile","type":"deterministic-output","must_match":true},
+    {"name":"match-history-parser","type":"deterministic-output","must_match":true},
+    {"name":"result-selection","type":"deterministic-output","must_match":true},
+    {"name":"riot-grade-linking","type":"deterministic-output","must_match":true},
+    {"name":"research-ui-read-only-view","type":"presentation-data-contract","must_match":true}
+  ],
+  "snapshot_status": "registry_created_snapshots_pending",
+  "notes": [
+    "Snapshots must use synthetic or public-safe fixtures, never the user's personal raw history/PUUID.",
+    "Randomness must be seeded or replaced with deterministic fixtures before comparison.",
+    "Live Riot/LCU network timing belongs to soak/E2E and is not a deterministic snapshot domain."
+  ]
+}
