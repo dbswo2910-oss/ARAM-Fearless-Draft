@@ -15,7 +15,7 @@ L.must(next.findAuthoritativeRecord({records:[wrongPuuid]},match)===null,'puuid 
 L.must(next.findAuthoritativeRecord({records:[trusted]},{gameId:'123456789',me:{puuid:'PUUID-A'}})===null,'missing championId must fail closed');
 const view=next.buildLinkView({state,match,roleScore:85,localPuuid:'PUUID-A'});L.must(view.status==='linked'&&view.role_grade==='A+'&&view.riot_grade==='A+'&&view.scoring_use===false&&view.authoritative_only===true,'linked view contract drift');
 const searched=next.buildLinkView({state:{records:[]},match:{gameId:'123456789',me:{puuid:'PUUID-X',championId:99}},roleScore:80,puuid:'PUUID-X',localPuuid:'PUUID-A'});L.must(searched.reason==='searched-player-grade-not-collected','searched-player explanation drift');
-for(const [a,b,expected] of [['A+','A+','두 평가가 비슷한 구간'],['B','A+','Riot 등급이 우리보다 5단계 높음 · 저평가 검토'],['S','A','우리 등급이 Riot보다 3단계 높음 · 고평가 검토']])L.must(next.verdict(a,b)===expected,`verdict drift ${a}/${b}`);
+for(const [a,b,expected] of [['A+','A+','두 평가가 비슷한 구간'],['B','A+','Riot 등급이 우리보다 4단계 높음 · 저평가 검토'],['S','A','우리 등급이 Riot보다 3단계 높음 · 고평가 검토']])L.must(next.verdict(a,b)===expected,`verdict drift ${a}/${b}`);
 L.must(next.production_active===false&&next.score_logic_changed===false&&next.riot_grade_scoring_use===false,'Profile Riot Grade link must remain shadow/non-scoring');
 L.write('audit-output/stability/profile-riot-grade-link-canonical.json',{status:'SUCCESS',production_active:false,implementation:next.IMPLEMENTATION_VERSION,authority:'v0.15.122 riot-primary-update only',exact_link:['gameId','championId','puuid when available'],legacy_unverified_rejected:true,scoring_use:false,cutover_allowed:false});
 console.log('PROFILE RIOT GRADE LINK CANONICAL: SUCCESS');
