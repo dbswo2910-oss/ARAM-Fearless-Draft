@@ -1,0 +1,168 @@
+name: v0.16.0 RC1 Windows Candidate
+
+on:
+  push:
+    branches:
+      - rc/v0160-clean-baseline-rc1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rc-static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: RC1 static safety audit
+        run: |
+          node --check rc/v0160-rc1/main.js
+          node --check rc/v0160-rc1/renderer-entry.js
+          node --check tools/rc/build-canonical-browser-bundle.js
+          node --check tools/rc/materialize-v0160-rc1.js
+          node tools/rc/v0160-rc1-audit.js
+      - name: Canonical regression gates
+        run: |
+          node tools/stability/canonical-owner-audit.js
+          node tools/stability/behavioral-differential-audit.js
+          node tools/stability/cutover-readiness-audit.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0160-rc1-static-audit
+          path: audit-output/rc/v0160-rc1
+          if-no-files-found: warn
+
+  rc-windows-portable:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Restore validated v0.15.49 installed baseline
+        shell: pwsh
+        run: |
+          $work = Join-Path $env:RUNNER_TEMP 'v0160-rc1-work'
+          New-Item -ItemType Directory -Force -Path $work | Out-Null
+          $baseFile = Join-Path $work 'base-path.txt'
+          ./tools/rc/restore-v01549-base.ps1 -DestinationRoot $work -BasePathFile $baseFile
+          $base = (Get-Content $baseFile -Raw).Trim()
+          if (!(Test-Path (Join-Path $base 'index.html'))) { throw "restored base invalid: $base" }
+          "BASE_APP_DIR=$base" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RC_APP_DIR=$work\app" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RC_PORTABLE_DIR=$work\portable" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RC_REPORT=$work\rc1-probe.json" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Materialize Golden then activate isolated RC1
+        shell: pwsh
+        run: |
+          node tools/stability/materialize-installed-app.js --base "$env:BASE_APP_DIR" --out "$env:RC_APP_DIR"
+          if ($LASTEXITCODE -ne 0) { throw 'Golden materialization failed' }
+          node tools/rc/materialize-v0160-rc1.js --app "$env:RC_APP_DIR"
+          if ($LASTEXITCODE -ne 0) { throw 'RC1 materialization failed' }
+          foreach ($f in @('main-v0160-rc1.js','v0160-canonical-browser-bundle.js','v0160-rc1-renderer.js')) {
+            node --check (Join-Path $env:RC_APP_DIR $f)
+            if ($LASTEXITCODE -ne 0) { throw "RC1 syntax failed: $f" }
+          }
+          $pkg = Get-Content (Join-Path $env:RC_APP_DIR 'package.json') -Raw | ConvertFrom-Json
+          if ($pkg.main -ne 'main-v0160-rc1.js') { throw "RC1 package main mismatch: $($pkg.main)" }
+          if ($pkg.version -ne '0.15.135') { throw "Golden compatibility version drift: $($pkg.version)" }
+          $index = Get-Content (Join-Path $env:RC_APP_DIR 'index.html') -Raw
+          if ($index -notmatch 'V0160_RC1_CANONICAL_START') { throw 'RC1 renderer injection marker missing' }
+
+      - name: Download pinned Electron 38.7.2 and build portable candidate
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64.zip'
+          $uri = 'https://github.com/electron/electron/releases/download/v38.7.2/electron-v38.7.2-win32-x64.zip'
+          $expected = '0401b898a8d83523694bd0afa6dc3035a54c57404a914725baa621c3378b5885'
+          $ok = $false
+          for ($attempt=1; $attempt -le 3; $attempt++) {
+            try {
+              Remove-Item $zip -Force -ErrorAction SilentlyContinue
+              Invoke-WebRequest -Uri $uri -OutFile $zip
+              $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($hash -ne $expected) { throw "Electron SHA mismatch: $hash" }
+              $ok = $true; break
+            } catch {
+              Write-Warning "Electron download attempt $attempt failed: $($_.Exception.Message)"
+              if ($attempt -lt 3) { Start-Sleep -Seconds (8*$attempt) }
+            }
+          }
+          if (-not $ok) { throw 'Electron download failed after retries' }
+          if (Test-Path $env:RC_PORTABLE_DIR) { Remove-Item $env:RC_PORTABLE_DIR -Recurse -Force }
+          Expand-Archive -Path $zip -DestinationPath $env:RC_PORTABLE_DIR -Force
+          $resources = Join-Path $env:RC_PORTABLE_DIR 'resources'
+          Remove-Item (Join-Path $resources 'default_app.asar') -Force -ErrorAction SilentlyContinue
+          $appDst = Join-Path $resources 'app'
+          New-Item -ItemType Directory -Force -Path $appDst | Out-Null
+          Copy-Item (Join-Path $env:RC_APP_DIR '*') $appDst -Recurse -Force
+          Copy-Item (Join-Path $env:RC_PORTABLE_DIR 'electron.exe') (Join-Path $env:RC_PORTABLE_DIR 'ARAM_Fearless_Draft_v0.16.0-rc1.exe') -Force
+          @'
+@echo off
+cd /d "%~dp0"
+start "ARAM Fearless Draft v0.16 RC1" "ARAM_Fearless_Draft_v0.16.0-rc1.exe"
+'@ | Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'START_RC1.cmd') -Encoding ascii
+          @'
+ARAM Fearless Draft v0.16.0 RC1
+
+1. Close the normal production app before first RC launch.
+2. Run START_RC1.cmd (or ARAM_Fearless_Draft_v0.16.0-rc1.exe).
+3. RC1 clones production userData into an isolated sandbox on first launch.
+4. Production userData is not used for RC writes.
+5. Use --aram-rc1-reset-sandbox to recreate the RC sandbox from production state.
+6. This RC is not connected to production auto-release and must not replace the normal installation yet.
+'@ | Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'RC1_README.txt') -Encoding utf8
+
+      - name: Boot portable RC1 and verify canonical renderer activation
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:RC_PORTABLE_DIR 'ARAM_Fearless_Draft_v0.16.0-rc1.exe'
+          if (!(Test-Path $exe)) { throw "portable RC executable missing: $exe" }
+          $env:ARAM_V0160_RC_REPORT = $env:RC_REPORT
+          $p = Start-Process -FilePath $exe -ArgumentList @('--aram-rc1-probe','--aram-rc1-reset-sandbox') -PassThru -Wait
+          if (!(Test-Path $env:RC_REPORT)) { throw 'RC1 probe report missing' }
+          $report = Get-Content $env:RC_REPORT -Raw | ConvertFrom-Json
+          if ($report.status -ne 'SUCCESS') { throw "RC1 probe failed: $($report | ConvertTo-Json -Depth 8)" }
+          if (-not $report.sandbox.production_untouched) { throw 'RC1 probe used production userData path' }
+          if (-not $report.renderer.diagnostics) { throw 'canonical diagnostics owner inactive' }
+          if (-not $report.renderer.data) { throw 'canonical DATA owner inactive' }
+          if ($report.renderer.errors.Count -ne 0) { throw "RC1 renderer errors: $($report.renderer.errors -join '; ')" }
+          Copy-Item $env:RC_REPORT (Join-Path $env:RC_PORTABLE_DIR 'RC1_PROBE_SUCCESS.json') -Force
+
+      - name: Add physical Windows / League acceptance checklist
+        shell: pwsh
+        run: |
+          Copy-Item 'docs/V0160_RC1_MANUAL_ACCEPTANCE.md' (Join-Path $env:RC_PORTABLE_DIR 'MANUAL_ACCEPTANCE.md') -Force
+          $hashes = Get-ChildItem $env:RC_PORTABLE_DIR -File | ForEach-Object { [ordered]@{name=$_.Name;sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant();bytes=$_.Length} }
+          [ordered]@{schema=1;rc='0.16.0-rc.1';built_from_commit='${{ github.sha }}';golden_base='0.15.135';electron='38.7.2';production=$false;portable_files=$hashes} | ConvertTo-Json -Depth 5 | Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'RC1_BUILD_MANIFEST.json') -Encoding utf8
+
+      - name: Upload portable RC1
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARAM_Fearless_Draft_v0.16.0-rc1_windows_x64_portable
+          path: ${{ env.RC_PORTABLE_DIR }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload RC1 audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-rc1-windows-evidence
+          path: |
+            audit-output/rc/v0160-rc1
+            ${{ env.RC_REPORT }}
+          if-no-files-found: warn
+          retention-days: 14
