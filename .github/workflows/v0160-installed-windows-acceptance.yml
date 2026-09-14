@@ -143,8 +143,8 @@ jobs:
           Expand-Archive -Path $zip -DestinationPath $runtime -Force
           $electron = Join-Path $runtime 'electron.exe'
           if (!(Test-Path $electron)) { throw "Electron binary missing after extract: $electron" }
-          & $electron --version
-          if ($LASTEXITCODE -ne 0) { throw "Electron version probe failed: $LASTEXITCODE" }
+          $electronVersion = (& $electron --version | Out-String).Trim()
+          if ($electronVersion -ne 'v38.7.2') { throw "Electron version probe mismatch: $electronVersion" }
           "PINNED_ELECTRON_EXE=$electron" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "PINNED_ELECTRON_SHA256=$expected" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
