@@ -8,7 +8,7 @@ const wrongPuuid={...trusted,puuid:'PUUID-B',grade:'B'};
 const legacy={...trusted,grade:'S+',gradeProvenance:riot.LEGACY_PROVENANCE,trustedRiotGrade:false};
 const state={records:[legacy,wrongChampion,wrongPuuid,trusted]};
 const match={gameId:'123456789',me:{puuid:'PUUID-A',championId:99}};
-const linked=next.findAuthoritativeRecord(state,match);L.must(linked===trusted,'must link exact trusted gameId + championId + local puuid');
+const linked=next.findAuthoritativeRecord(state,match);L.must(!!linked&&linked.grade==='A+'&&riot.canonGameId(linked.gameId)==='123456789'&&Number(linked.championId)===99&&linked.puuid==='PUUID-A'&&linked.gradeProvenance===riot.PRIMARY_PROVENANCE,'must link exact trusted gameId + championId + local puuid');
 L.must(next.findAuthoritativeRecord({records:[legacy]},match)===null,'legacy/unverified Riot Grade must never link');
 L.must(next.findAuthoritativeRecord({records:[wrongChampion]},match)===null,'champion mismatch must never link');
 L.must(next.findAuthoritativeRecord({records:[wrongPuuid]},match)===null,'puuid mismatch must never link');
