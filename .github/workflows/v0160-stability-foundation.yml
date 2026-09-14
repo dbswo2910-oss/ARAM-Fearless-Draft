@@ -57,6 +57,8 @@ jobs:
         run: node tools/stability/random-top5-canonical-differential-audit.js
       - name: Canonical RANDOM teamScore boundary
         run: node tools/stability/random-team-score-boundary-audit.js
+      - name: Installed teamScore source extractor self-test
+        run: node tools/stability/team-score-source-extractor-audit.js
       - name: Canonical RANDOM IN GAME semantic signature differential
         run: node tools/stability/random-ingame-semantic-canonical-differential-audit.js
       - name: Canonical RANDOM IN GAME volatile HUD differential
