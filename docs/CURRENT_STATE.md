@@ -6,7 +6,7 @@
 
 - Active updater: **v0.15.134**
 - Manifest message: v0.15.134 · PATCH NOTES RESOLVED TITLE FIX
-- Manifest commit: `ff3a0275507feb28b2c295dbe9fa128a65a4a80f`
+- Manifest commit: `05c4281e107dda566572faaaf223f817bac55c22`
 - Package: `update/v0.15.134/package.json` → **v0.15.134**
 - Electron entry: `main-v015134.js` → `update/v0.15.134/main-v015134.js`
 - Current runtime stability source: `update/v0.15.134/runtime-source-stability-v015134.js`

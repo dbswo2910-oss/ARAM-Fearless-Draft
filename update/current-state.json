@@ -6,7 +6,7 @@
     "version": "0.15.134",
     "message": "v0.15.134 · PATCH NOTES RESOLVED TITLE FIX",
     "min_launcher": "2.0.2",
-    "manifest_commit": "ff3a0275507feb28b2c295dbe9fa128a65a4a80f"
+    "manifest_commit": "05c4281e107dda566572faaaf223f817bac55c22"
   },
   "package": {
     "source": "update/v0.15.134/package.json",
