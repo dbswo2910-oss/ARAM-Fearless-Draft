@@ -43,7 +43,7 @@ jobs:
           node -c update/v0.15.131/research-ui-core.js
           node -c update/v0.15.131/research-storage-v015131.js
           node -c update/v0.15.131/research-ui-devtools.js
-          node -c update/v0.15.131/ui-stability-baseline-v015115.js
+          node -c update/v0.15.120/ui-stability-baseline-v015115.js
           node -c update/v0.15.131/runtime-source-stability-v015131.js
           node -c update/v0.15.131/main-v015131.js
           node -c update/v0.15.131/successor-route-v015131.js
