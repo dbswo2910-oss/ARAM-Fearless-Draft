@@ -7,6 +7,9 @@
   const state={version:'0.16.0-rc.1',startedAt:Date.now(),data:false,diagnostics:false,research:false,randomRoles:false,puuidReady:false,errors:[]};
   globalThis.__ARAM_V0160_RC1_STATE__=state;
   document.documentElement?.setAttribute?.('data-v0160-rc','rc1');
+  const TELEMETRY='__ARAM_V0160_RC1_STATE__';
+  function publish(stage){try{console.log(TELEMETRY+JSON.stringify({stage,version:state.version,startedAt:state.startedAt,data:state.data,diagnostics:state.diagnostics,research:state.research,randomRoles:state.randomRoles,puuidReady:state.puuidReady,errors:[...state.errors]}))}catch{}}
+  publish('entry');
 
   const style=document.createElement('style');
   style.id='v0160Rc1Style';
@@ -25,7 +28,7 @@
   badge.id='v0160Rc1Badge';badge.type='button';badge.setAttribute('data-ui-role','v0160-rc-status');
   document.body?.appendChild(badge);
   function statusText(){const n=['DATA','DIAG','RESEARCH'].filter((_,i)=>[state.data,state.diagnostics,state.research][i]).length;return `v0.16 RC1 · <b>${n}/3 canonical active</b>`}
-  function paint(){badge.innerHTML=statusText();badge.classList.toggle('rc-warn',state.errors.length>0);badge.title=state.errors.length?state.errors.join('\n'):'Golden shell + canonical owner activation canary';}
+  function paint(){badge.innerHTML=statusText();badge.classList.toggle('rc-warn',state.errors.length>0);badge.title=state.errors.length?state.errors.join('\n'):'Golden shell + canonical owner activation canary';publish('paint')}
   badge.addEventListener('click',()=>{const s={version:state.version,data:state.data,diagnostics:state.diagnostics,research:state.research,randomRoles:state.randomRoles,puuidReady:state.puuidReady,errorCount:state.errors.length};alert(`v0.16 RC1 CANARY\n${JSON.stringify(s,null,2)}\n\n이 빌드는 production이 아니며 자동 업데이트 배포 대상이 아닙니다.`)});
   function safe(label,fn){try{return fn()}catch(e){state.errors.push(`${label}: ${e?.message||String(e)}`);console.error('[v0.16 RC1]',label,e);paint();return null}}
 
@@ -81,4 +84,5 @@
   globalThis.__ARAM_V0160_RC1_DISPOSE__=()=>{observer.disconnect();try{dataOwner?.dispose?.()}catch{}try{diagnosticsOwner?.dispose?.()}catch{}try{researchOwner?.dispose?.()}catch{}badge.remove();style.remove();delete globalThis.__ARAM_V0160_RC1_ACTIVE__};
   activateData();bindRandomRoles();void refreshPuuid().then(()=>activateResearch());void activateResearch();paint();
   console.log('[v0.16 RC1] canonical activation canary mounted',{version:state.version,canonicalModules:api.__rc?.moduleCount||0});
+  publish('mounted');
 })();
