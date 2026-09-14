@@ -1,7 +1,7 @@
 {
   "version": "0.15.130",
   "message": "v0.15.130 · SEARCHED PLAYER RATING + COLD START PROMOTION — resolved PUUID production UI",
-  "min_launcher": "2.0.3",
+  "min_launcher": "2.0.2",
   "files": [
     {
       "path": "live-strength-v01513.js",
