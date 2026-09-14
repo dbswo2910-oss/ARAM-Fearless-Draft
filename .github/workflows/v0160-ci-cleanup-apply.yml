@@ -34,7 +34,7 @@ jobs:
           printf '%s\n' "${changed[@]}"
           for path in "${changed[@]}"; do
             case "$path" in
-              .github/workflows/v015*.yml|audit-output/stability/historical-workflow-normalization.json)
+              .github/workflows/v015*.yml|audit-output/stability/historical-workflow-normalization.json|.github/workflows/v0160-ci-cleanup-trigger.txt)
                 ;;
               *)
                 echo "Unexpected cleanup change: $path" >&2
@@ -46,11 +46,13 @@ jobs:
             echo 'Production baseline changed during CI cleanup.' >&2
             exit 1
           }
-      - name: Stage normalized tree for export
+      - name: Stage normalized workflow tree
         shell: bash
         run: |
-          mkdir -p audit-output/stability/historical-workflow-tree/.github/workflows
-          cp .github/workflows/v015*.yml audit-output/stability/historical-workflow-tree/.github/workflows/
+          set -euo pipefail
+          rm -rf audit-output/stability/historical-workflow-tree
+          mkdir -p audit-output/stability/historical-workflow-tree/workflows
+          cp .github/workflows/v015*.yml audit-output/stability/historical-workflow-tree/workflows/
       - name: Upload normalized workflow tree and report
         uses: actions/upload-artifact@v4
         with:
