@@ -55,6 +55,7 @@ function reportPath(){
 function writeReport(body){
   const p=reportPath();fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,JSON.stringify(body,null,2)+'\n','utf8');return p;
 }
+function finishProbe(code){if(!probeMode)return;setTimeout(()=>{try{app.exit(code)}catch{process.exit(code)}},250)}
 async function rendererState(win){
   if(!win||win.isDestroyed?.())return null;
   try{return await win.webContents.executeJavaScript(`(()=>{const s=globalThis.__ARAM_V0160_RC1_STATE__;return s?JSON.parse(JSON.stringify(s)):null})()`,true)}catch{return null}
@@ -68,19 +69,15 @@ function installProbe(){
       if(state){
         const ok=state.version===RC_VERSION&&state.diagnostics===true&&state.data===true&&Array.isArray(state.errors)&&state.errors.length===0;
         const body={schema:1,rc:RC_VERSION,status:ok?'SUCCESS':'FAILURE',at:new Date().toISOString(),probe_mode:probeMode,sandbox:{production_path:productionUserData,rc_appdata:rcAppData,rc_user_data:app.getPath('userData'),production_untouched:path.resolve(app.getPath('userData'))!==path.resolve(productionUserData),seed:seedResult},renderer:state};
-        const out=writeReport(body);console.log('[v0.16 RC1 probe]',body.status,out,body.renderer);
-        if(probeMode){process.exitCode=ok?0:2;setTimeout(()=>app.quit(),350)}
-        return;
+        const out=writeReport(body);console.log('[v0.16 RC1 probe]',body.status,out,body.renderer);finishProbe(ok?0:2);return;
       }
     }
     if(Date.now()-started>=timeoutMs){
       const body={schema:1,rc:RC_VERSION,status:'FAILURE',at:new Date().toISOString(),probe_mode:probeMode,sandbox:{production_path:productionUserData,rc_appdata:rcAppData,rc_user_data:app.getPath('userData'),production_untouched:path.resolve(app.getPath('userData'))!==path.resolve(productionUserData),seed:seedResult},renderer:null,error:'canonical renderer state unavailable before timeout'};
-      const out=writeReport(body);console.error('[v0.16 RC1 probe] FAILURE',out);
-      if(probeMode){process.exitCode=3;app.quit()}
-      return;
+      const out=writeReport(body);console.error('[v0.16 RC1 probe] FAILURE',out);finishProbe(3);return;
     }
     setTimeout(tick,750);
   };
   setTimeout(tick,750);
 }
-app.whenReady().then(installProbe).catch(e=>{try{writeReport({schema:1,rc:RC_VERSION,status:'FAILURE',error:e?.message||String(e)})}catch{}if(probeMode){process.exitCode=4;app.quit()}});
+app.whenReady().then(installProbe).catch(e=>{try{writeReport({schema:1,rc:RC_VERSION,status:'FAILURE',error:e?.message||String(e)})}catch{}finishProbe(4)});
