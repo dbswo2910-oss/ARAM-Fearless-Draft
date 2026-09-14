@@ -63,6 +63,7 @@ jobs:
           "RC_APP_DIR=$work\app" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "RC_PORTABLE_DIR=$work\portable" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "RC_REPORT=$work\rc1-probe.json" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RC_EVIDENCE_DIR=$work\evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Materialize Golden then activate isolated RC1
         shell: pwsh
@@ -78,8 +79,7 @@ jobs:
           $pkg = Get-Content (Join-Path $env:RC_APP_DIR 'package.json') -Raw | ConvertFrom-Json
           if ($pkg.main -ne 'main-v0160-rc1.js') { throw "RC1 package main mismatch: $($pkg.main)" }
           if ($pkg.version -ne '0.15.135') { throw "Golden compatibility version drift: $($pkg.version)" }
-          $index = Get-Content (Join-Path $env:RC_APP_DIR 'index.html') -Raw
-          if ($index -notmatch 'V0160_RC1_CANONICAL_START') { throw 'RC1 renderer injection marker missing' }
+          if ((Get-Content (Join-Path $env:RC_APP_DIR 'index.html') -Raw) -notmatch 'V0160_RC1_CANONICAL_START') { throw 'RC1 renderer injection marker missing' }
 
       - name: Download pinned Electron 38.7.2 and build portable candidate
         shell: pwsh
@@ -110,53 +110,18 @@ jobs:
           New-Item -ItemType Directory -Force -Path $appDst | Out-Null
           Copy-Item (Join-Path $env:RC_APP_DIR '*') $appDst -Recurse -Force
           Copy-Item (Join-Path $env:RC_PORTABLE_DIR 'electron.exe') (Join-Path $env:RC_PORTABLE_DIR 'ARAM_Fearless_Draft_v0.16.0-rc1.exe') -Force
-          $startLines = @('@echo off','cd /d "%~dp0"','start "ARAM Fearless Draft v0.16 RC1" "ARAM_Fearless_Draft_v0.16.0-rc1.exe"')
-          Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'START_RC1.cmd') -Value $startLines -Encoding ascii
-          $readmeLines = @(
-            'ARAM Fearless Draft v0.16.0 RC1',
-            '',
-            '1. Close the normal production app before first RC launch.',
-            '2. Run START_RC1.cmd (or ARAM_Fearless_Draft_v0.16.0-rc1.exe).',
-            '3. RC1 clones production userData into an isolated sandbox on first launch.',
-            '4. Production userData is not used for RC writes.',
-            '5. Use --aram-rc1-reset-sandbox to recreate the RC sandbox from production state.',
-            '6. This RC is not connected to production auto-release and must not replace the normal installation yet.'
-          )
-          Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'RC1_README.txt') -Value $readmeLines -Encoding utf8
+          Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'START_RC1.cmd') -Value @('@echo off','cd /d "%~dp0"','start "ARAM Fearless Draft v0.16 RC1" "ARAM_Fearless_Draft_v0.16.0-rc1.exe"') -Encoding ascii
+          Set-Content -Path (Join-Path $env:RC_PORTABLE_DIR 'RC1_README.txt') -Value @('ARAM Fearless Draft v0.16.0 RC1','','Close the normal production app before first RC launch.','Run START_RC1.cmd.','RC1 clones production userData into an isolated sandbox and does not use the production path for writes.','Use --aram-rc1-reset-sandbox to reseed the RC sandbox.','Do not replace the normal installation with this RC yet.') -Encoding utf8
 
       - name: Boot portable RC1 and verify canonical renderer activation
         shell: pwsh
         run: |
           $exe = Join-Path $env:RC_PORTABLE_DIR 'ARAM_Fearless_Draft_v0.16.0-rc1.exe'
           if (!(Test-Path $exe)) { throw "portable RC executable missing: $exe" }
-          Remove-Item $env:RC_REPORT -Force -ErrorAction SilentlyContinue
-          $env:ARAM_V0160_RC_REPORT = $env:RC_REPORT
-          $p = Start-Process -FilePath $exe -ArgumentList @('--aram-rc1-probe','--aram-rc1-reset-sandbox') -PassThru
-          $deadline = (Get-Date).AddSeconds(50)
-          while ((Get-Date) -lt $deadline -and !(Test-Path $env:RC_REPORT)) {
-            if ($p.HasExited) { break }
-            Start-Sleep -Milliseconds 750
-            $p.Refresh()
-          }
-          $p.Refresh()
-          if (!(Test-Path $env:RC_REPORT)) {
-            if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
-            throw "RC1 probe report missing after bounded wait; exited=$($p.HasExited) exitCode=$(if($p.HasExited){$p.ExitCode}else{'n/a'})"
-          }
-          Start-Sleep -Milliseconds 500
-          if (-not $p.HasExited) {
-            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-            Start-Sleep -Milliseconds 250
-          }
-          $report = Get-Content $env:RC_REPORT -Raw | ConvertFrom-Json
-          if ($report.status -ne 'SUCCESS') { throw "RC1 probe failed: $($report | ConvertTo-Json -Depth 8)" }
-          if (-not $report.sandbox.production_untouched) { throw 'RC1 probe used production userData path' }
-          if (-not $report.renderer.diagnostics) { throw 'canonical diagnostics owner inactive' }
-          if (-not $report.renderer.data) { throw 'canonical DATA owner inactive' }
-          if ($report.renderer.errors.Count -ne 0) { throw "RC1 renderer errors: $($report.renderer.errors -join '; ')" }
+          ./tools/rc/run-v0160-rc1-probe.ps1 -Exe $exe -Report $env:RC_REPORT -EvidenceDir $env:RC_EVIDENCE_DIR
           Copy-Item $env:RC_REPORT (Join-Path $env:RC_PORTABLE_DIR 'RC1_PROBE_SUCCESS.json') -Force
 
-      - name: Add physical Windows / League acceptance checklist
+      - name: Add physical Windows and League acceptance checklist
         shell: pwsh
         run: |
           Copy-Item 'docs/V0160_RC1_MANUAL_ACCEPTANCE.md' (Join-Path $env:RC_PORTABLE_DIR 'MANUAL_ACCEPTANCE.md') -Force
@@ -178,6 +143,8 @@ jobs:
           name: v0160-rc1-windows-evidence
           path: |
             audit-output/rc/v0160-rc1
+            ${{ env.RC_EVIDENCE_DIR }}
             ${{ env.RC_REPORT }}
+            ${{ env.RC_REPORT }}.trace.log
           if-no-files-found: warn
           retention-days: 14
