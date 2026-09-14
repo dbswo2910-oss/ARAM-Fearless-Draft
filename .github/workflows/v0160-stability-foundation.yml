@@ -31,8 +31,12 @@ jobs:
         run: node tools/stability/inventory.js
       - name: UI contract registry
         run: node tools/stability/ui-contract-audit.js
+      - name: Canonical owner registry
+        run: node tools/stability/canonical-owner-audit.js
       - name: Final assembled runtime
         run: node tools/stability/final-runtime-audit.js
+      - name: Golden runtime fingerprints
+        run: node tools/stability/runtime-fingerprint-audit.js
       - name: State and Research compatibility
         run: node tools/stability/state-compat-audit.js
       - name: Diagnostics contract
