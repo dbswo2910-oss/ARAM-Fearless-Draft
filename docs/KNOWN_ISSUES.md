@@ -106,3 +106,8 @@ The first activated v0.15.125 manifest mapped installed `aram-build-stats-curren
 ## v0.15.134 Patch Notes shell title correction
 
 **Status:** `VERIFY_REAL_WINDOWS`. v0.15.133 was visually rejected by the user because the generic `챔피언 상세 / 닫기` row remained. The follow-up now modifies the exact shell title object resolved by the existing DATA owner instead of inferring topology from `#dataCard` ancestors. One post-v0.15.134 Windows screenshot is required before closing issue #79.
+
+
+## v0.15.135 Patch Notes shell semantic correction
+
+**Status:** `VERIFY_REAL_WINDOWS`. v0.15.134 was visually rejected by the user because the generic `챔피언 상세 / 닫기` row remained. v0.15.135 no longer assumes one exact title node; it uses a tightly scoped semantic match under `#data` plus a child-list replacement observer, while excluding the Patch Notes content itself. One post-v0.15.135 Windows screenshot is required before closing issue #79.

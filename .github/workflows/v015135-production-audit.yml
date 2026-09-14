@@ -1,0 +1,58 @@
+name: v0.15.135 Production Release Audit
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'update/v0.15.135/**'
+      - 'update/manifest.json'
+      - 'update/current-state.json'
+      - 'docs/CURRENT_STATE.md'
+      - 'docs/continuity-manual.json'
+      - 'docs/AI_HANDOFF.md'
+      - 'docs/KNOWN_ISSUES.md'
+      - 'tools/v015135-production-audit.js'
+      - 'tools/prepare-v015135-release.js'
+      - '.github/workflows/v015135-production-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Compile v0.15.135 package
+        run: |
+          node -c update/v0.15.135/main-v015135.js
+          node -c update/v0.15.135/successor-route-v015135.js
+          node -c update/v0.15.135/runtime-source-stability-v015135.js
+          node -c update/v0.15.135/cold-start-promotion-v015135.js
+          node -c tools/prepare-v015135-release.js
+          node -c tools/v015135-production-audit.js
+      - name: v0.15.135 semantic shell regression
+        run: node tools/v015135-production-audit.js
+      - name: Full Regression
+        run: node tools/full-regression-audit.js
+      - name: AI Continuity Audit
+        run: node tools/ai-continuity-audit.js
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v015135-production-release-audit
+          path: |
+            audit-output/v015135-production-report.json
+            audit-output/full-regression-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: warn
