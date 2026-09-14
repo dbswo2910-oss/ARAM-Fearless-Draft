@@ -1,133 +1,29 @@
-name: v0.15.125 Activate ARAM Build Stat Cache
+name: v0.15.125 Historical ARAM Build Cache Activation Audit
 
 on:
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'data/aram-builds/current.json'
-      - 'update/data/aram-builds/current.json'
-      - 'update/manifest.json'
-      - 'update/v0.15.125/**'
-      - 'tools/aram-build-stats-refresh.js'
-      - 'tools/v015125-aram-build-stat-cache-audit.js'
-      - 'tools/v015125-activate-aram-build-stat-cache.js'
-      - 'tools/v015124-startup-successor-route-audit.js'
-      - 'tools/runtime-stability-v01571-audit.js'
-      - 'tools/runtime-stability-v01573-audit.js'
-      - 'tools/runtime-stability-v01575-audit.js'
-      - 'tools/runtime-stability-v01578-audit.js'
-      - '.github/workflows/aram-build-stats-refresh.yml'
-      - '.github/workflows/v015125-activate-aram-build-stat-cache.yml'
-  push:
-    branches: [ main ]
-    paths:
-      - 'update/manifest.json'
-      - 'update/v0.15.125/**'
-      - 'tools/aram-build-stats-refresh.js'
-      - 'tools/v015125-aram-build-stat-cache-audit.js'
-      - 'tools/v015125-activate-aram-build-stat-cache.js'
-      - 'tools/v015124-startup-successor-route-audit.js'
-      - 'tools/runtime-stability-v01571-audit.js'
-      - 'tools/runtime-stability-v01573-audit.js'
-      - 'tools/runtime-stability-v01575-audit.js'
-      - 'tools/runtime-stability-v01578-audit.js'
-      - '.github/workflows/aram-build-stats-refresh.yml'
-      - '.github/workflows/v015125-activate-aram-build-stat-cache.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: v015125-aram-build-stat-cache-${{ github.ref }}
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  contract-check:
-    if: github.event_name == 'pull_request'
+  archived-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout current repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '24'
-      - name: Prepare updater-safe v0.15.125 candidate in PR workspace
-        run: node tools/v015125-activate-aram-build-stat-cache.js
-      - name: Sync candidate continuity snapshot
+          node-version: '20'
+      - name: Verify current continuity snapshot
+        run: node tools/sync-current-state.js --check
+      - name: Verify current AI continuity
+        run: node tools/ai-continuity-audit.js
+      - name: Historical activation is intentionally disabled
         run: |
-          node tools/sync-current-state.js
-          node tools/ai-continuity-audit.js
-      - name: Validate v0.15.125 ARAM build cache and updater source contract
-        run: node tools/v015125-aram-build-stat-cache-audit.js
-      - name: Re-run startup and core predecessor audits
-        run: |
-          node tools/v015124-startup-successor-route-audit.js
-          node tools/v015123-patch-notes-startup-notice-audit.js
-          node tools/v015122-riot-grade-accuracy-audit.js
-          node tools/v015121-random-practice-restore-audit.js
-          node tools/v015120-data-subnav-audit.js
-          node tools/v015119-autosync-concurrency-audit.js
-          node tools/v015118-resource-lifecycle-audit.js
-          node tools/v015117-state-integrity-audit.js
-          node tools/v015116-runtime-update-stability-audit.js
-          node tools/v015115-single-owner-stability-audit.js
-          node tools/runtime-stability-v01571-audit.js
-          node tools/runtime-stability-v01573-audit.js
-          node tools/runtime-stability-v01575-audit.js
-          node tools/runtime-stability-v01578-audit.js
-          node tools/runtime-stability-v01579-audit.js
-      - name: Full regression on repaired candidate
-        run: node tools/full-regression-audit.js
-
-  activate:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Prepare or repair v0.15.125 activation files
-        run: node tools/v015125-activate-aram-build-stat-cache.js
-      - name: Sync repository continuity snapshot
-        run: |
-          node tools/sync-current-state.js
-          node tools/ai-continuity-audit.js
-      - name: Post-repair feature and predecessor audits
-        run: |
-          node tools/v015125-aram-build-stat-cache-audit.js
-          node tools/v015124-startup-successor-route-audit.js
-          node tools/v015123-patch-notes-startup-notice-audit.js
-          node tools/v015122-riot-grade-accuracy-audit.js
-          node tools/v015121-random-practice-restore-audit.js
-          node tools/v015120-data-subnav-audit.js
-          node tools/v015119-autosync-concurrency-audit.js
-          node tools/v015118-resource-lifecycle-audit.js
-          node tools/v015117-state-integrity-audit.js
-          node tools/v015116-runtime-update-stability-audit.js
-          node tools/v015115-single-owner-stability-audit.js
-          node tools/runtime-stability-v01571-audit.js
-          node tools/runtime-stability-v01573-audit.js
-          node tools/runtime-stability-v01575-audit.js
-          node tools/runtime-stability-v01578-audit.js
-          node tools/runtime-stability-v01579-audit.js
-          node tools/ai-continuity-audit.js
-      - name: Full regression after updater-safe manifest repair
-        run: node tools/full-regression-audit.js
-      - name: Commit verified v0.15.125 repair atomically
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
-          git add update/manifest.json update/data/aram-builds/current.json update/meta/v015125-safe-cache-source.json README.md AGENTS.md docs/AI_HANDOFF.md docs/KNOWN_ISSUES.md docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
-          if git diff --cached --quiet; then
-            echo 'Nothing to commit'
-          else
-            git commit -m 'hotfix v0.15.125 updater-safe ARAM cache source'
-            git push
-          fi
+          echo 'v0.15.125 is superseded. This workflow is audit-only and cannot reactivate an old manifest.'
+          node -c tools/v015125-aram-build-stat-cache-audit.js

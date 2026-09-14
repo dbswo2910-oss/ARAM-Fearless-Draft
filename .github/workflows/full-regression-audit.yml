@@ -121,6 +121,8 @@ jobs:
         run: node tools/v015119-autosync-concurrency-audit.js
       - name: Run v0.15.128 match-history latency audit
         run: node tools/v015128-history-latency-audit.js
+      - name: Run v0.15.133 real-Windows Patch Notes shell audit
+        run: node tools/v015133-production-audit.js
       - name: Run AI continuity audit
         run: node tools/ai-continuity-audit.js
       - name: Assemble current updater overlay
@@ -192,6 +194,7 @@ jobs:
             audit-output/v015118-resource-lifecycle-report.json
             audit-output/v015119-autosync-concurrency-report.json
             audit-output/v015128-history-latency-report.json
+            audit-output/v015133-production-report.json
             audit-output/ai-continuity-report.json
           if-no-files-found: error
       - name: Upload current runtime overlay

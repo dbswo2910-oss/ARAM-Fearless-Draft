@@ -94,3 +94,10 @@ Observed on real Windows after v0.15.123 activation: `main-v015123.js` threw `v0
 **Status:** `VERIFY_REAL_WINDOWS`
 
 The first activated v0.15.125 manifest mapped installed `aram-build-stats-current.json` directly from repository `data/aram-builds/current.json`. A real Windows screenshot showed `허용되지 않은 update source: data/aram-builds/current.json`. This was the v0.15.116 safety gate working as designed: active update sources must live under `update/`. The hotfix preserves the safety gate, mirrors the canonical cache to `update/data/aram-builds/current.json`, and maps the manifest to that updater-safe source. Re-run update check on Windows before closing this issue.
+
+
+## v0.15.132 real-Windows storage recovery + v0.15.133 Patch Notes shell follow-up
+
+**Storage/cold-start:** `VERIFIED_REAL_WINDOWS`. The user supplied v0.15.132 Windows evidence showing the preserved 159-match Research checkpoint is visible again and confirmed repeated full exit/relaunch stays on v0.15.132 rather than resurrecting an older version.
+
+**Patch Notes shell:** `VERIFY_REAL_WINDOWS`. The same v0.15.132 screenshot still showed the outer generic `챔피언 상세 / 닫기` row above otherwise-correct Patch Notes content. v0.15.132 CI missed the real nesting and CSS-priority behavior. v0.15.133 fixes this inside the existing DATA owner by walking only the exact `#dataCard` ancestor chain, forcing the generic shell row to `display:none!important` in Patch Notes mode, and restoring it in tier mode. A post-v0.15.133 Windows screenshot is required before closing GitHub issue #79.

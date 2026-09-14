@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.132**
-- Manifest message: v0.15.132 · RESTORE RESEARCH STORAGE ROOT + PATCH NOTES RUNTIME FIX
-- Manifest commit: `0915deb865a88dbe1c4ce2c6e7d3f31847be126c`
-- Package: `update/v0.15.132/package.json` → **v0.15.132**
-- Electron entry: `main-v015132.js` → `update/v0.15.132/main-v015132.js`
-- Current runtime stability source: `update/v0.15.132/runtime-source-stability-v015132.js`
+- Active updater: **v0.15.133**
+- Manifest message: v0.15.133 · REAL-WINDOWS PATCH NOTES SHELL FIX + CONTINUITY CLEANUP
+- Manifest commit: `ff3a0275507feb28b2c295dbe9fa128a65a4a80f`
+- Package: `update/v0.15.133/package.json` → **v0.15.133**
+- Electron entry: `main-v015133.js` → `update/v0.15.133/main-v015133.js`
+- Current runtime stability source: `update/v0.15.133/runtime-source-stability-v015133.js`
 
 ## Active ownership — do not create competing owners
 
@@ -35,7 +35,7 @@
 - **random_pick_after_v015115_single_owner_reset** — `pending`: v0.15.121 restores RANDOM entry/render/input/TOP5-result coordination with one disposable event owner. CI is green only after activation; a post-v0.15.121 real-Windows screenshot/video is still required for final acceptance.
 - **autosync_v015119_real_league_soak** — `pending`: Code-level async race simulations and CI pass, but a prolonged real League Client/LCU/Live Client session has not been recorded as completed acceptance evidence.
 - **installed_app_snapshot** — `known_stale_baseline`: Latest preserved real installed-app baseline is v0.15.49 while the active updater is newer.
-- **data_patch_notes_subnav_v015120** — `pending`: Repository structural/regression audits can validate ownership and routing, but a post-v0.15.120 real-Windows screenshot is still required for visual acceptance.
+- **data_patch_notes_subnav_v015120** — `pending`: A real Windows v0.15.132 screenshot now confirms Patch Notes uses the broad DATA workspace, hides the tier branch, and renders compact champion cards. Switching back to Champion Tier List remains the final visual check; the separate generic shell-header defect is tracked by patch_notes_shell_header_v015133.
 - **riot_grade_accuracy_v015122** — `pending`: Synthetic LCU parser and exact-link CI prove that memberGrades are excluded and only primary gameId+championId records are authoritative. One newly completed real League game still needs direct client-grade comparison.
 - **patch_notes_startup_notice_v015123** — `pending`: CI validates exact per-patch dismissal semantics, one-shot injection, and routing through the existing DATA owner. Real Windows Electron appearance/navigation still needs confirmation.
 - **startup_recovery_v015124** — `pending`: Repository CI now executes the exact successor route transform against the real v0.15.122 predecessor source. The user supplied a real Windows screenshot proving v0.15.123 crashed before UI creation; v0.15.124 must be relaunched on Windows to confirm recovery.
@@ -43,13 +43,15 @@
 - **match_search_label_v015126** — `pending`: CI can prove the label payload is scoped to #history/header and that internal Match Lab/history identifiers and scoring owners are byte-preserved, but final visible wording requires the installed Windows UI.
 - **startup_update_notice_v015127** — `pending`: CI verifies a one-shot startup call into the existing transactional updater with no new updater/preload owner. Final automatic download/apply/relaunch behavior requires Windows acceptance against a future newer manifest.
 - **match_history_latency_v015128** — `pending`: CI simulates cache-first/coalesced history requests, quick/deep separation and latest-game probes. Real League Client timing is still required to accept perceived latency and post-game freshness.
+- **v015132_storage_root_and_cold_start** — `verified`: User supplied a real Windows v0.15.132 screenshot showing the preserved 159-match Research checkpoint and confirmed repeated full exit/relaunch stays on v0.15.132 instead of falling back to an older version.
+- **patch_notes_shell_header_v015133** — `pending`: A real Windows v0.15.132 screenshot proved the Patch Notes content renders but the outer generic 챔피언 상세 / 닫기 shell row survives. v0.15.133 adds an exact #dataCard-ancestor fix and a nested-DOM regression fixture; final acceptance still requires a post-update Windows screenshot.
 
 ## Next planned work
 
-- Version: **0.15.120**
-- Theme: **SAFE MODE / CRASH-LOOP ISOLATION**
+- Version: **0.15.134**
+- Theme: **ARAM RATING v0.3.1 MAINLINE REBASE**
 - Status: `planned`
-- Intent: If a module repeatedly breaks startup or runtime readiness, isolate the failing optional subsystem and boot a minimal usable app instead of making the entire application unavailable.
+- Intent: Rebase the useful research-only ARAM Rating v0.3.1 sampling/B2 work onto the post-v0.15.133 mainline without reviving obsolete v0.15.129 UI/storage code or changing production scoring owners.
 
 ## Retired UI overlays — regression guard
 

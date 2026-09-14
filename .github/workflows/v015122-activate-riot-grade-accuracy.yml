@@ -1,26 +1,17 @@
-name: v0.15.122 Activate Riot Grade Accuracy
+name: v0.15.122 Historical Riot Grade Activation Audit
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'update/v0.15.122/**'
-      - 'tools/v015122-riot-grade-accuracy-audit.js'
-      - 'tools/v015122-activate-riot-grade-accuracy.js'
-      - '.github/workflows/v015122-riot-grade-accuracy-audit.yml'
-      - '.github/workflows/v015122-activate-riot-grade-accuracy.yml'
-      - '.github/workflows/full-regression-audit.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  activate:
+  archived-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
-      - name: Checkout
+      - name: Checkout current repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -28,49 +19,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Verify v0.15.122 preconditions
+      - name: Verify current continuity snapshot
+        run: node tools/sync-current-state.js --check
+      - name: Verify current AI continuity
+        run: node tools/ai-continuity-audit.js
+      - name: Historical activation is intentionally disabled
         run: |
-          node tools/v015122-riot-grade-accuracy-audit.js
-          node tools/v015121-random-practice-restore-audit.js
-          node tools/v015120-data-subnav-audit.js
-          node tools/v015119-autosync-concurrency-audit.js
-          node tools/v015118-resource-lifecycle-audit.js
-          node tools/v015117-state-integrity-audit.js
-          node tools/v015116-runtime-update-stability-audit.js
-          node tools/v015115-single-owner-stability-audit.js
-          node tools/runtime-stability-v01579-audit.js
-          node tools/ai-continuity-audit.js
-          node tools/full-regression-audit.js
-      - name: Prepare v0.15.122 activation files
-        run: node tools/v015122-activate-riot-grade-accuracy.js
-      - name: Sync repository continuity snapshot
-        run: |
-          node tools/sync-current-state.js
-          node tools/ai-continuity-audit.js
-      - name: Post-activation Riot Grade and predecessor audits
-        run: |
-          node tools/v015122-riot-grade-accuracy-audit.js
-          node tools/v015121-random-practice-restore-audit.js
-          node tools/v015120-data-subnav-audit.js
-          node tools/v015119-autosync-concurrency-audit.js
-          node tools/v015118-resource-lifecycle-audit.js
-          node tools/v015117-state-integrity-audit.js
-          node tools/v015116-runtime-update-stability-audit.js
-          node tools/v015115-single-owner-stability-audit.js
-          node tools/runtime-stability-v01579-audit.js
-          node tools/ai-continuity-audit.js
-      - name: Full regression after active-manifest mutation
-        run: node tools/full-regression-audit.js
-      - name: Commit verified activation atomically
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '418982+github-actions[bot]@users.noreply.github.com'
-          git add \
-            update/manifest.json README.md AGENTS.md docs/AI_HANDOFF.md docs/KNOWN_ISSUES.md \
-            docs/continuity-manual.json docs/CURRENT_STATE.md update/current-state.json
-          if git diff --cached --quiet; then
-            echo 'Nothing to commit'
-          else
-            git commit -m 'release v0.15.122 riot grade accuracy'
-            git push
-          fi
+          echo 'v0.15.122 is superseded. This workflow is audit-only and must never mutate update/manifest.json or push an old release.'
+          node -c tools/v015122-riot-grade-accuracy-audit.js
