@@ -41,6 +41,8 @@ jobs:
         run: node tools/stability/lifecycle-canonical-differential-audit.js
       - name: Canonical updater transaction differential
         run: node tools/stability/updater-canonical-differential-audit.js
+      - name: Canonical updater boot guard differential
+        run: node tools/stability/updater-boot-guard-canonical-differential-audit.js
       - name: Canonical AutoSync semantic differential
         run: node tools/stability/autosync-canonical-differential-audit.js
       - name: Canonical Riot semantic differential
