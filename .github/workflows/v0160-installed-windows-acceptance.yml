@@ -82,7 +82,13 @@ jobs:
 
       - name: Install pinned Electron runtime
         shell: pwsh
-        run: npm install --no-save --no-package-lock electron@44.2.0
+        run: |
+          npm install --no-save --no-package-lock electron@38.7.2
+          if ($LASTEXITCODE -ne 0) { throw "Electron install failed: $LASTEXITCODE" }
+          $electron = Join-Path $PWD 'node_modules\electron\dist\electron.exe'
+          if (!(Test-Path $electron)) { throw "Electron binary missing after install: $electron" }
+          & $electron --version
+          if ($LASTEXITCODE -ne 0) { throw "Electron version probe failed: $LASTEXITCODE" }
 
       - name: Cold-start materialized installed app on Windows
         shell: pwsh
@@ -107,6 +113,7 @@ jobs:
             stage = 'INSTALLED_WINDOWS_COLD_START'
             golden_version = '0.15.135'
             windows_runner = $true
+            electron_version = '38.7.2'
             actual_electron_process_alive_after_12s = $alive
             exit_code = $exitCode
             stable_user_data_identity = 'aram-fearless-draft'
@@ -114,7 +121,7 @@ jobs:
             canonical_shadow_payload_present = (Test-Path (Join-Path $env:INSTALLED_APP 'canonical-shadow\src'))
             production_manifest_unchanged = $true
             real_league_client_tested = $false
-            acceptance_scope = 'Windows GitHub-hosted runner; materialized installed-like Golden app cold-start. This is stronger than synthetic fixture but is not a physical-user-PC or real League Client acceptance.'
+            acceptance_scope = 'Windows GitHub-hosted runner; materialized installed-like Golden app cold-start using the same pinned Electron runner as synthetic Windows E2E. This is stronger than synthetic fixture but is not a physical-user-PC or real League Client acceptance.'
           }
           $report | ConvertTo-Json -Depth 5 | Set-Content -Path (Join-Path $outDir 'installed-windows-report.json') -Encoding utf8
           if ($alive) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
