@@ -144,13 +144,39 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install pinned Electron runner
+      - name: Download and verify pinned Electron runner
         shell: pwsh
-        run: npm install --no-save --no-package-lock electron@38.7.2
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64.zip'
+          $runtime = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64'
+          $uri = 'https://github.com/electron/electron/releases/download/v38.7.2/electron-v38.7.2-win32-x64.zip'
+          $expected = '0401b898a8d83523694bd0afa6dc3035a54c57404a914725baa621c3378b5885'
+          $downloaded = $false
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            try {
+              Remove-Item $zip -Force -ErrorAction SilentlyContinue
+              Invoke-WebRequest -Uri $uri -OutFile $zip
+              $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($hash -ne $expected) { throw "Electron ZIP SHA-256 mismatch: $hash" }
+              $downloaded = $true
+              break
+            } catch {
+              Write-Warning "Electron download attempt $attempt failed: $($_.Exception.Message)"
+              if ($attempt -lt 3) { Start-Sleep -Seconds (10 * $attempt) }
+            }
+          }
+          if (-not $downloaded) { throw 'Pinned Electron download failed after 3 attempts' }
+          if (Test-Path $runtime) { Remove-Item $runtime -Recurse -Force }
+          Expand-Archive -Path $zip -DestinationPath $runtime -Force
+          $exe = Join-Path $runtime 'electron.exe'
+          if (!(Test-Path $exe)) { throw "Electron executable missing after extract: $exe" }
+          $electronVersion = (& $exe --version | Out-String).Trim()
+          if ($electronVersion -ne 'v38.7.2') { throw "Electron version probe mismatch: $electronVersion" }
+          "SYNTHETIC_ELECTRON_EXE=$exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Run Windows Electron restart-persistence / DOM / soak / screenshots
         shell: pwsh
         run: |
-          $exe = Join-Path $PWD 'node_modules/electron/dist/electron.exe'
+          $exe = $env:SYNTHETIC_ELECTRON_EXE
           if (!(Test-Path $exe)) { throw "Electron executable missing: $exe" }
           $proc = Start-Process -FilePath $exe -ArgumentList 'stability/e2e/synthetic-main.js' -Wait -PassThru -NoNewWindow
           if ($proc.ExitCode -ne 0) { throw "Electron synthetic E2E exited $($proc.ExitCode)" }
