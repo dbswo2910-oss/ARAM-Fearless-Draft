@@ -55,6 +55,8 @@ jobs:
         run: node tools/stability/random-selection-canonical-differential-audit.js
       - name: Canonical RANDOM TOP5 enumeration differential
         run: node tools/stability/random-top5-canonical-differential-audit.js
+      - name: Canonical RANDOM teamScore boundary
+        run: node tools/stability/random-team-score-boundary-audit.js
       - name: Canonical RANDOM IN GAME semantic signature differential
         run: node tools/stability/random-ingame-semantic-canonical-differential-audit.js
       - name: Canonical RANDOM IN GAME volatile HUD differential
@@ -63,10 +65,16 @@ jobs:
         run: node tools/stability/random-ingame-coordinator-canonical-differential-audit.js
       - name: Canonical RANDOM IN GAME shop differential
         run: node tools/stability/random-ingame-shop-canonical-differential-audit.js
+      - name: Canonical RANDOM IN GAME coach render differential
+        run: node tools/stability/random-ingame-coach-render-canonical-differential-audit.js
+      - name: Canonical RANDOM IN GAME scheduler differential
+        run: node tools/stability/random-ingame-scheduler-canonical-differential-audit.js
       - name: Canonical DATA Patch Notes shell differential
         run: node tools/stability/data-patch-shell-canonical-differential-audit.js
       - name: Canonical DATA workspace topology differential
         run: node tools/stability/data-workspace-canonical-differential-audit.js
+      - name: Canonical DATA mode and navigation differential
+        run: node tools/stability/data-mode-canonical-differential-audit.js
       - name: Canonical Item identity and recommendation differential
         run: node tools/stability/item-canonical-differential-audit.js
       - name: Canonical Item art resolver and catalog bridge differential
