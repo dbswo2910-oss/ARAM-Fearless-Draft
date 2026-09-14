@@ -81,6 +81,8 @@ jobs:
         run: node tools/stability/data-workspace-canonical-differential-audit.js
       - name: Canonical DATA mode and navigation differential
         run: node tools/stability/data-mode-canonical-differential-audit.js
+      - name: Canonical DATA final layout/render shadow owner
+        run: node tools/stability/data-final-owner-audit.js
       - name: Canonical Item identity and recommendation differential
         run: node tools/stability/item-canonical-differential-audit.js
       - name: Canonical Item art resolver and catalog bridge differential
