@@ -117,6 +117,8 @@ jobs:
         run: node tools/stability/state-compat-audit.js
       - name: Diagnostics contract
         run: node tools/stability/diagnostics-audit.js
+      - name: Canonical diagnostics shell owner
+        run: node tools/stability/diagnostics-owner-audit.js
       - name: Existing full regression core
         run: node tools/full-regression-audit.js
       - name: AI continuity
