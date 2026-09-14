@@ -269,3 +269,13 @@ node tools/ai-continuity-audit.js
 - Expose timing/counter telemetry for diagnosis, but do not feed it into gameplay scoring.
 - `score_logic_changed:false`, `random_scoring_changed:false`; item recommendation, Riot Grade, RANDOM composition/champion scoring and DATA ownership remain unchanged.
 - CI proves cache/priority/probe/concurrency contracts only. Perceived speed and post-game freshness still require a real League Client session before acceptance.
+
+
+## v0.15.133 real-Windows Patch Notes shell rule
+
+- Keep DATA ownership in `ui-stability-v015115`; do not create a new Patch Notes overlay owner.
+- A shell title may be nested between `#dataCard` and the resolved DATA detail branch. Do not assume it is only a direct child.
+- In Patch Notes mode, hide only generic `챔피언 상세 / 닫기` shell titles found on that exact ancestry; do not text-scan the whole document.
+- Use an inline `display:none!important` (plus hidden/aria-hidden) for the shell row because the real Windows stylesheet can override the HTML `hidden` attribute with an important display rule.
+- Restore the shell title when returning to Champion Tier List.
+- Keep scoring, RANDOM scoring, Rating math, AutoSync and item recommendation behavior unchanged.

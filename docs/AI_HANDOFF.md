@@ -16,7 +16,7 @@ Repository: `dbswo2910-oss/ARAM-Fearless-Draft`
 
 ## Current versions
 
-- Active updater version: **v0.15.128**
+- Active updater version: **v0.15.133**
 - Balance/data patch tracked by project: **26.18**
 - Latest real installed snapshot supplied by the user: **v0.15.49** AutoUpdate/appfiles
 - Installed baseline `index.html`: 35,359,059 bytes, SHA-256 `8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906`
@@ -468,3 +468,13 @@ After desktop startup, the renderer invokes the already-exposed `window.aramDesk
 ### v0.15.128 — match-history latency
 
 Match history loading now uses the existing AutoSync concurrency owner for a session-scoped cache and request priority. 전적검색 paints compatible cached rows first, performs a smaller interactive recent scan, and only launches the historical deep scan as background backfill when the visible list is still short. Background history work yields while an interactive history request is in flight. RANDOM result synchronization no longer repeats the full history scan on every retry; it uses a bounded current-account standard-ARAM latest-match probe first, then retains the old full loader as fallback. Both main-process and renderer timing counters are exposed for diagnosis. No new recurring poller/MutationObserver or competing AutoSync owner is introduced, and scoring/item/Riot Grade logic is unchanged.
+
+
+## v0.15.133 real-Windows Patch Notes shell baseline
+
+- Real Windows v0.15.132 evidence confirms the stable `aram-fearless-draft` userData root sees the preserved 159-match Research checkpoint and cold relaunch no longer falls back to an older app version.
+- The same screenshot proves v0.15.132 did **not** fully remove the outer `챔피언 상세 / 닫기` DATA shell row in Patch Notes mode even though source-contract CI passed.
+- v0.15.133 keeps DATA ownership in `ui-stability-v015115` and only extends the already injected `input-interaction-stability-v01539.js` transform. It walks the exact `#dataCard` ancestor chain inside the resolved detail branch and hides only generic champion-detail/close title rows with inline `display:none!important` while Patch Notes is active, restoring them in tier mode.
+- The v0.15.133 audit includes a nested-DOM fixture reproducing the topology missed by v0.15.132. CI still does not replace the final Windows screenshot.
+- Scoring, RANDOM scoring, Rating calculations, AutoSync, item recommendation logic, and persistent-state ownership are unchanged.
+- After this cleanup, the next planned development line is ARAM Rating v0.3.1 rebased from the current mainline rather than continuing the stale PR #74 head directly.
