@@ -1,0 +1,202 @@
+name: Bootstrap v0.15.131 Production
+
+on:
+  push:
+    branches: [ release/v0.15.131-research-storage-patchnotes ]
+    paths: [ '.github/workflows/bootstrap-v015131-production.yml' ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/v0.15.131-research-storage-patchnotes
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build v0.15.131 successor package
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, hashlib, shutil
+          root=Path('.')
+          src=root/'update/v0.15.130'; dst=root/'update/v0.15.131'
+          if dst.exists(): shutil.rmtree(dst)
+          dst.mkdir(parents=True)
+          for name in ['rating-engine-v01.js','research-ui-core.js','research-ui-devtools.js','ARAM_Fearless_Draft_Launcher_windows_x64.exe']:
+              shutil.copy2(src/name,dst/name)
+
+          # Engine is deliberately byte-identical. UI core only changes unavailable-state copy.
+          core=(dst/'research-ui-core.js').read_text(encoding='utf-8')
+          old="if(vm.kind==='unavailable')return shell('',`<div class=\"arui-empty\">Research data unavailable<small>연구 데이터 로드에 실패했습니다. 기존 전적검색에는 영향을 주지 않습니다.</small></div>`);"
+          new="if(vm.kind==='unavailable'){const copies={loading:['연구 데이터 불러오는 중','기존 연구 데이터를 확인하고 있습니다.'],database_unavailable:['연구 데이터 저장소를 열 수 없음','기존 전적검색에는 영향이 없습니다. 진단 로그에서 실패 단계를 확인할 수 있습니다.'],checkpoint_missing:['기존 연구 데이터가 보이지 않음','저장된 연구 체크포인트를 찾지 못했습니다. 데이터를 초기화하거나 다시 수집하지 않습니다.'],dataset_empty:['분석할 연구 데이터 없음','저장소는 열렸지만 분석할 경기가 없습니다.'],player_not_found:['분석 데이터 없음','이 플레이어는 아직 분석 데이터에 포함되지 않았습니다.']};const c=copies[vm.state]||copies.database_unavailable;return shell('',`<div class=\"arui-empty\"><b>${esc(c[0])}</b><small>${esc(c[1])}</small></div>`)};"
+          assert old in core, 'v130 unavailable render contract not found'
+          core=core.replace(old,new,1)
+          (dst/'research-ui-core.js').write_text(core,encoding='utf-8')
+
+          storage=r'''\'use strict\';
+(function(root,factory){const api=factory();if(typeof module===\'object\'&&module.exports)module.exports=api;if(root)root.ARAMRatingResearchStorageV015131=api})(typeof globalThis!==\'undefined\'?globalThis:this,function(){
+  const DB_NAME=\'aram-rating-research-v03\',STORE=\'kv\',CHECKPOINT_KEY=\'checkpoint-v03\',LATEST_RUN_KEY=\'rating-ui-latest-run-v01\';
+  const asArray=x=>Array.isArray(x)?x:[];
+  function checkpointStamp(cp){const xs=asArray(cp?.matches),last=xs.at(-1),id=last?.gameId??last?.id??last?.matchId??\'\';return[cp?.seed_fingerprint||\'\',cp?.phase||\'\',cp?.status||\'\',cp?.sampling_version||cp?.config?.samplingVersion||\'\',xs.length,cp?.finished_at_v031||cp?.finished_at||\'\',id].join(\'|\')}
+  function sourceMeta(cp){return{phase:String(cp?.phase||\'UNKNOWN\'),status:String(cp?.status||\'unknown\'),sampling_version:String(cp?.sampling_version||cp?.config?.samplingVersion||\'v0.3\'),source:`IndexedDB ${DB_NAME}/${CHECKPOINT_KEY}`}}
+  async function databaseExists(idb,name){if(typeof idb?.databases!==\'function\')return null;try{const xs=await idb.databases();return xs.some(x=>x?.name===name)}catch{return null}}
+  async function openExistingDatabase(idb,name=DB_NAME){
+    if(!idb?.open)throw Object.assign(new Error(\'indexedDB_unavailable\'),{stage:\'indexeddb_open\'});
+    const known=await databaseExists(idb,name);if(known===false)return{db:null,missing:true,created:false};
+    return new Promise((resolve,reject)=>{let created=false;const req=idb.open(name);req.onupgradeneeded=e=>{if(Number(e.oldVersion||0)===0){created=true;try{req.transaction.abort()}catch{}}};req.onsuccess=()=>resolve({db:req.result,missing:false,created:false});req.onerror=()=>{if(created&&req.error?.name===\'AbortError\')resolve({db:null,missing:true,created:true});else reject(Object.assign(req.error||new Error(\'indexeddb_open_failed\'),{stage:\'indexeddb_open\'}))};req.onblocked=()=>reject(Object.assign(new Error(\'indexeddb_open_blocked\'),{stage:\'indexeddb_open\'}))})
+  }
+  function readKey(db,store,key){return new Promise((resolve,reject)=>{let tx;try{tx=db.transaction(store,\'readonly\')}catch(e){reject(Object.assign(e,{stage:\'schema_check\'}));return}const req=tx.objectStore(store).get(key);req.onsuccess=()=>resolve(req.result??null);req.onerror=()=>reject(Object.assign(req.error||new Error(\'indexeddb_read_failed\'),{stage:`read:${key}`}))})}
+  function countRatings(run){return Object.values(run?.players||{}).filter(p=>p?.models&&Object.keys(p.models).length>0).length}
+  function selectRun(checkpoint,stored,opts={}){
+    const matches=asArray(checkpoint?.matches);if(!checkpoint)return{state:\'checkpoint_missing\',run:null,source:\'none\'};if(matches.length===0)return{state:\'dataset_empty\',run:null,source:\'checkpoint\'};
+    const stamp=(opts.checkpointStamp||checkpointStamp)(checkpoint);
+    if(!opts.forceBuild&&stored?.schema===\'aram-rating-ui-latest-run-v01\'&&stored?.source_run?.checkpoint_stamp===stamp)return{state:\'available\',run:stored,source:\'derived_cache\'};
+    const engine=opts.engine;if(!engine?.buildLatestRun)throw Object.assign(new Error(\'rating_engine_unavailable\'),{stage:\'rating_engine_init\'});
+    const run=engine.buildLatestRun(matches,(opts.sourceMeta||sourceMeta)(checkpoint));run.source_run={checkpoint_key:CHECKPOINT_KEY,checkpoint_stamp:stamp,checkpoint_finished_at:checkpoint.finished_at_v031||checkpoint.finished_at||null,checkpoint_status:checkpoint.status||null,checkpoint_phase:checkpoint.phase||null};return{state:\'available\',run,source:\'checkpoint_rebuild_memory\'}
+  }
+  async function loadExisting(opts={}){
+    const diag={db_name:DB_NAME,indexeddb_open:false,db_version:null,object_stores:[],checkpoint_found:false,match_count:0,player_count:0,rating_state_count:0,cache_status:\'not_checked\',source:\'none\',error_stage:\'\',error_name:\'\',error_message:\'\'};let db=null;
+    try{
+      const opened=await openExistingDatabase(opts.indexedDBRef||globalThis.indexedDB,DB_NAME);if(opened.missing)return{state:\'checkpoint_missing\',run:null,diagnostic:diag};db=opened.db;diag.indexeddb_open=true;diag.db_version=db.version;diag.object_stores=Array.from(db.objectStoreNames||[]);if(!diag.object_stores.includes(STORE))throw Object.assign(new Error(`object_store_missing:${STORE}`),{stage:\'schema_check\'});
+      const cp=await readKey(db,STORE,CHECKPOINT_KEY);diag.checkpoint_found=!!cp;diag.match_count=asArray(cp?.matches).length;if(!cp)return{state:\'checkpoint_missing\',run:null,diagnostic:diag};if(diag.match_count===0)return{state:\'dataset_empty\',run:null,diagnostic:diag};
+      let stored=null;try{stored=await readKey(db,STORE,LATEST_RUN_KEY);diag.cache_status=stored?\'read\':\'missing\'}catch(e){diag.cache_status=`ignored_read_error:${e?.name||\'Error\'}`}
+      const selected=selectRun(cp,stored,{engine:opts.engine,forceBuild:opts.forceBuild,checkpointStamp:opts.checkpointStamp,sourceMeta:opts.sourceMeta});diag.source=selected.source;diag.player_count=Number(selected.run?.dataset?.players)||Object.keys(selected.run?.players||{}).length;diag.rating_state_count=countRatings(selected.run);return{state:selected.state,run:selected.run,diagnostic:diag};
+    }catch(e){diag.error_stage=e?.stage||\'load\';diag.error_name=e?.name||\'Error\';diag.error_message=e?.message||String(e);return{state:\'database_unavailable\',run:null,diagnostic:diag,error:e}}finally{try{db?.close?.()}catch{}}
+  }
+  return{DB_NAME,STORE,CHECKPOINT_KEY,LATEST_RUN_KEY,checkpointStamp,sourceMeta,databaseExists,openExistingDatabase,readKey,selectRun,loadExisting,policy_version:\'0.15.131\',read_only_boot:true,destructive_migration:false};
+});
+'''
+          (dst/'research-storage-v015131.js').write_text(storage,encoding='utf-8')
+
+          ui=(dst/'research-ui-devtools.js').read_text(encoding='utf-8')
+          ui=ui.replace("const VERSION='aram-rating-ui-v015130-production-target-puuid'","const VERSION='aram-rating-ui-v015131-production-storage-recovery'",1)
+          ui=ui.replace("let disposed=false,observer=null,observedNode=null,mountQueued=false,mounting=false,latestRun=null,lastError=null,booting=true,lastIdentityKey='',lastDiagnostic=null;","let disposed=false,observer=null,observedNode=null,mountQueued=false,mounting=false,latestRun=null,lastError=null,booting=true,lastIdentityKey='',lastDiagnostic=null,bootState='loading',lastBootLogKey='',bootDiagnostic={db_name:DB_NAME,indexeddb_open:false,db_version:null,object_stores:[],checkpoint_found:false,match_count:0,player_count:0,rating_state_count:0,identity_resolved:'(none)',render_status:'loading',error_stage:'',error_name:'',error_message:'',renderer_origin:String(location?.origin||''),renderer_protocol:String(location?.protocol||''),renderer_entry:String(location?.pathname||'').split('/').pop()||''};",1)
+          a=ui.index("  function dbOpen()") ; b=ui.index("  async function ensureModules()",a); assert a>=0 and b>a
+          ui=ui[:a]+ui[b:]
+          ui=ui.replace("async function ensureModules(){if(!globalThis.ARAMRatingResearchEngineV01)throw new Error('ARAMRatingResearchEngineV01 bundled module unavailable');if(!globalThis.ARAMRatingResearchUICoreV01)throw new Error('ARAMRatingResearchUICoreV01 bundled module unavailable');return{E:globalThis.ARAMRatingResearchEngineV01,U:globalThis.ARAMRatingResearchUICoreV01}}","async function ensureModules(){if(!globalThis.ARAMRatingResearchEngineV01)throw Object.assign(new Error('ARAMRatingResearchEngineV01 bundled module unavailable'),{stage:'rating_engine_init'});if(!globalThis.ARAMRatingResearchUICoreV01)throw Object.assign(new Error('ARAMRatingResearchUICoreV01 bundled module unavailable'),{stage:'ui_core_init'});if(!globalThis.ARAMRatingResearchStorageV015131)throw Object.assign(new Error('ARAMRatingResearchStorageV015131 bundled module unavailable'),{stage:'storage_module_init'});return{E:globalThis.ARAMRatingResearchEngineV01,U:globalThis.ARAMRatingResearchUICoreV01,S:globalThis.ARAMRatingResearchStorageV015131}}",1)
+          a=ui.index("  async function buildAndStoreLatest") ; b=ui.index("  function state()",a); assert a>=0 and b>a
+          block=r'''  async function synchronizeLatestRun(opts={}){const{E,S}=await ensureModules();bootState='loading';bootDiagnostic.render_status='loading';bootDiagnostic.error_stage='';bootDiagnostic.error_name='';bootDiagnostic.error_message='';const out=await S.loadExisting({indexedDBRef:indexedDB,engine:E,forceBuild:!!opts.forceBuild,checkpointStamp,sourceMeta});bootState=out.state||'database_unavailable';Object.assign(bootDiagnostic,out.diagnostic||{});latestRun=out.run||null;if(out.error){lastError=String(out.error?.message||out.error);bootDiagnostic.error_stage=out.diagnostic?.error_stage||out.error?.stage||'load';bootDiagnostic.error_name=out.error?.name||'Error';bootDiagnostic.error_message=lastError}else lastError=null;return latestRun}
+'''
+          ui=ui[:a]+block+ui[b:]
+          marker="  function css(){"
+          logfn=r'''  function emitBootDiagnostic(r=null,force=false){const U=globalThis.ARAMRatingResearchUICoreV01;if(r)bootDiagnostic.identity_resolved=U?.maskPuuid?.(r.puuid)||'(none)';const d=bootDiagnostic,k=JSON.stringify([bootState,d.indexeddb_open,d.db_version,d.checkpoint_found,d.match_count,d.player_count,d.rating_state_count,d.identity_resolved,d.render_status,d.error_stage,d.error_name,d.error_message]);if(!force&&k===lastBootLogKey)return d;lastBootLogKey=k;console.log(`[ARAM Rating Research boot]\nDB name: ${DB_NAME}\nIndexedDB open: ${d.indexeddb_open}\nDB version: ${d.db_version??'(unknown)'}\nobject stores: ${(d.object_stores||[]).join(', ')||'(none)'}\ncheckpoint-v03 found: ${d.checkpoint_found}\nmatch count: ${d.match_count||0}\nplayer count: ${d.player_count||0}\nrating state count: ${d.rating_state_count||0}\nidentity resolved: ${d.identity_resolved||'(none)'}\nrender status: ${d.render_status||bootState}\nerror stage: ${d.error_stage||'(none)'}\nerror name: ${d.error_name||'(none)'}\nerror message: ${d.error_message||'(none)'}`);return d}
+'''
+          assert marker in ui; ui=ui.replace(marker,logfn+marker,1)
+          oldmount="let vm;if(lastError&&!latestRun)vm={kind:'unavailable',message:lastError};else if(!latestRun)vm={kind:'unavailable',message:'Research data unavailable'};else vm=U?.buildViewModel(latestRun,r.puuid,{hardCap:HARD_CAP})||{kind:'unavailable'};"
+          newmount="let vm;if(!latestRun)vm={kind:'unavailable',state:bootState,message:lastError||bootState};else vm=U?.buildViewModel(latestRun,r.puuid,{hardCap:HARD_CAP})||{kind:'unavailable',state:'database_unavailable'};if(vm?.kind==='no_data')bootState='player_not_found';else if(vm?.kind==='player')bootState=vm.sample?.key==='insufficient'?'insufficient_sample':'available';bootDiagnostic.identity_resolved=U?.maskPuuid?.(r.puuid)||'(none)';bootDiagnostic.render_status=bootState;"
+          assert oldmount in ui; ui=ui.replace(oldmount,newmount,1)
+          ui=ui.replace("lastIdentityKey=key;emitDiagnostic(r);ensureProfileObserver();return true","lastIdentityKey=key;emitDiagnostic(r);emitBootDiagnostic(r);ensureProfileObserver();return true",1)
+          a=ui.index("  async function refreshLocal()") ; b=ui.index("  function onClick",a); assert a>=0 and b>a
+          refresh=r'''  async function refreshLocal(){const btn=document.querySelector('#aramRatingResearchCardV01 [data-arui-action="refresh"]');if(btn)btn.disabled=true;try{await ensureModules();await synchronizeLatestRun({forceBuild:true});lastIdentityKey='';mount();return{status:latestRun?'ok':bootState,dataset:latestRun?.dataset||null,selection:latestRun?.selection||null}}catch(e){lastError=String(e?.message||e);bootState='database_unavailable';bootDiagnostic.error_stage=e?.stage||'refresh';bootDiagnostic.error_name=e?.name||'Error';bootDiagnostic.error_message=lastError;console.warn('[ARAM Rating Research UI] local refresh unavailable',e);mount();emitBootDiagnostic(null,true);return{status:'unavailable',error:lastError}}finally{const b=document.querySelector('#aramRatingResearchCardV01 [data-arui-action="refresh"]');if(b)b.disabled=false}}
+'''
+          ui=ui[:a]+refresh+ui[b:]
+          ui=ui.replace("status:()=>({enabled:enabled()&&!disposed,booting,latest_run:!!latestRun,last_error:lastError,dataset:latestRun?.dataset||null,selection:latestRun?.selection||null,identity:lastDiagnostic})","status:()=>({enabled:enabled()&&!disposed,booting,boot_state:bootState,boot_diagnostic:bootDiagnostic,latest_run:!!latestRun,last_error:lastError,dataset:latestRun?.dataset||null,selection:latestRun?.selection||null,identity:lastDiagnostic}),debugBoot:()=>emitBootDiagnostic(resolution(),true)",1)
+          oldboot="(async()=>{try{await ensureModules();if(enabled()){await synchronizeLatestRun();lastError=null}else lastError='Research UI disabled by local feature flag'}catch(e){lastError=String(e?.message||e);console.warn('[ARAM Rating Research UI] unavailable; production match history/profile is unchanged',e)}finally{booting=false;try{ensureProfileObserver();mount()}catch{}window.__ARAM_RATING_RESEARCH_UI_V01__=!!enabled()}})();"
+          newboot="(async()=>{try{bootState='loading';bootDiagnostic.error_stage='module_init';await ensureModules();if(enabled()){await synchronizeLatestRun()}else{lastError='Research UI disabled by local feature flag';bootState='database_unavailable'}}catch(e){lastError=String(e?.message||e);bootState='database_unavailable';bootDiagnostic.error_stage=e?.stage||bootDiagnostic.error_stage||'boot';bootDiagnostic.error_name=e?.name||'Error';bootDiagnostic.error_message=lastError;console.warn('[ARAM Rating Research UI] unavailable; production match history/profile is unchanged',e)}finally{booting=false;try{ensureProfileObserver();mount()}catch(e){bootDiagnostic.render_status='render_failed';bootDiagnostic.error_stage='render';bootDiagnostic.error_name=e?.name||'Error';bootDiagnostic.error_message=e?.message||String(e)}emitBootDiagnostic(null,true);window.__ARAM_RATING_RESEARCH_UI_V01__=!!enabled()}})();"
+          assert oldboot in ui; ui=ui.replace(oldboot,newboot,1)
+          (dst/'research-ui-devtools.js').write_text(ui,encoding='utf-8')
+
+          # Existing DATA owner fix: patch-note detail is always open and its generic champion-detail header is suppressed only in patch mode.
+          data_src=(root/'update/v0.15.120/ui-stability-baseline-v015115.js').read_text(encoding='utf-8')
+          data_src=data_src.replace("const PRESENTATION='0.15.120';","const PRESENTATION='0.15.131';",1)
+          css_anchor='      @media(max-width:1180px){'
+          css_patch='''      /* v0.15.131: Patch Notes owns the full detail branch. Hide the generic champion-detail title/close row only while Patch Notes is active. */\n      #data.data115View.data115PatchMode .data115DetailBranch > .title,\n      #data.data115View.data115PatchMode .data115DetailBranch > .panel > .title{display:none!important}\n\n'''
+          assert css_anchor in data_src; data_src=data_src.replace(css_anchor,css_patch+css_anchor,1)
+          mode_anchor="    const mode=requested==='patch'||requested==='tier'?requested:currentDataMode(p.card);"
+          mode_patch=mode_anchor+"\n    const patchMode=mode==='patch';\n    if(patchMode){for(const el of [p.detailBranch,p.card]){el.hidden=false;el.removeAttribute('aria-hidden');el.classList.remove('hidden','collapsed','is-collapsed');el.style?.removeProperty?.('display');el.style?.removeProperty?.('visibility');el.style?.removeProperty?.('max-height')}}"
+          assert mode_anchor in data_src; data_src=data_src.replace(mode_anchor,mode_patch,1)
+          title_old="    if(title){\n      if(!title.dataset.data115Original)title.dataset.data115Original=text(title)||'챔피언 상세';\n      title.textContent=mode==='patch'?'패치노트':title.dataset.data115Original;\n    }"
+          title_new="    if(title){\n      if(!title.dataset.data115Original)title.dataset.data115Original=text(title)||'챔피언 상세';\n      title.hidden=patchMode;\n      if(patchMode){title.setAttribute('aria-hidden','true')}else{title.removeAttribute('aria-hidden');title.textContent=title.dataset.data115Original}\n    }"
+          assert title_old in data_src; data_src=data_src.replace(title_old,title_new,1)
+          click_anchor="  document.addEventListener('click',e=>{\n    if(e.target?.closest?.('#randomPickModeBtn,#randomIngameModeBtn'))queueMicrotask(claimRandom);\n  },false);"
+          click_new="  document.addEventListener('click',e=>{\n    if(e.target?.closest?.('#randomPickModeBtn,#randomIngameModeBtn'))queueMicrotask(claimRandom);\n  },false);\n\n  document.addEventListener('click',e=>{\n    const view=$('#data');if(!view?.classList.contains('data115PatchMode'))return;\n    const p=dataParts(),btn=e.target?.closest?.('button');if(!p||!btn||!p.detailBranch.contains(btn)||!/닫기/.test(text(btn)))return;\n    e.preventDefault();e.stopImmediatePropagation();syncData('patch');\n  },true);"
+          assert click_anchor in data_src; data_src=data_src.replace(click_anchor,click_new,1)
+          (dst/'ui-stability-baseline-v015115.js').write_text(data_src,encoding='utf-8')
+
+          runtime=(src/'runtime-source-stability-v015130.js').read_text(encoding='utf-8').replace('V015130','V015131').replace('v0.15.130','v0.15.131').replace("'0.15.130'","'0.15.131'")
+          runtime=runtime.replace("  const ui=readLocal('research-ui-devtools.js');","  const storage=readLocal('research-storage-v015131.js');\n  const ui=readLocal('research-ui-devtools.js');",1)
+          runtime=runtime.replace("  if(!ui.includes('aramRatingResearchUIV01'))throw new Error('v0.15.131 research UI runtime contract mismatch');","  if(!storage.includes('ARAMRatingResearchStorageV015131'))throw new Error('v0.15.131 research storage contract mismatch');\n  if(!ui.includes('aramRatingResearchUIV01'))throw new Error('v0.15.131 research UI runtime contract mismatch');",1)
+          runtime=runtime.replace("cached=[engine,core,ui].join('\\n;\\n');","cached=[engine,core,storage,ui].join('\\n;\\n');",1)
+          runtime=runtime.replace("  aram_rating_search_target_rerender:true,","  aram_rating_search_target_rerender:true,\n  aram_rating_storage_read_only_recovery:true,\n  aram_rating_checkpoint_preserved:true,\n  patch_notes_detail_header_removed:true,",1)
+          (dst/'runtime-source-stability-v015131.js').write_text(runtime,encoding='utf-8')
+
+          main=(src/'main-v015130.js').read_text(encoding='utf-8').replace('v015130','v015131').replace('V015130','V015131').replace('0.15.130','0.15.131')
+          (dst/'main-v015131.js').write_text(main,encoding='utf-8')
+          route=(src/'successor-route-v015130.js').read_text(encoding='utf-8').replace('v015130','v015131').replace('0.15.130','0.15.131')
+          (dst/'successor-route-v015131.js').write_text(route,encoding='utf-8')
+          cold=(src/'cold-start-promotion-v015130.js').read_text(encoding='utf-8').replace('v015130','v015131').replace('0.15.130','0.15.131').replace('promotion-v015130.json','promotion-v015131.json')
+          (dst/'cold-start-promotion-v015131.js').write_text(cold,encoding='utf-8')
+          pkg={'name':'aram-fearless-draft-update','version':'0.15.131','description':'Upgrade package v0.15.131 - Research IndexedDB recovery + always-visible Patch Notes detail','main':'main-v015131.js'}
+          (dst/'package.json').write_text(json.dumps(pkg,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Manifest stays bootstrap-compatible with v0.15.129/v0.15.130 launcher 2.0.2.
+          mp=root/'update/manifest.json'; manifest=json.loads(mp.read_text(encoding='utf-8'))
+          manifest['version']='0.15.131';manifest['message']='v0.15.131 · RESEARCH STORAGE RECOVERY + PATCH NOTES DETAIL FIX';manifest['min_launcher']='2.0.2'
+          sources={
+            'package.json':'update/v0.15.131/package.json',
+            'rating-engine-v01.js':'update/v0.15.131/rating-engine-v01.js',
+            'research-ui-core.js':'update/v0.15.131/research-ui-core.js',
+            'research-ui-devtools.js':'update/v0.15.131/research-ui-devtools.js',
+            'ui-stability-baseline-v015115.js':'update/v0.15.131/ui-stability-baseline-v015115.js',
+            'ARAM_Fearless_Draft_Launcher_windows_x64.exe':'update/v0.15.131/ARAM_Fearless_Draft_Launcher_windows_x64.exe'
+          }
+          additions={
+            'research-storage-v015131.js':'update/v0.15.131/research-storage-v015131.js',
+            'runtime-source-stability-v015131.js':'update/v0.15.131/runtime-source-stability-v015131.js',
+            'main-v015131.js':'update/v0.15.131/main-v015131.js',
+            'successor-route-v015131.js':'update/v0.15.131/successor-route-v015131.js',
+            'cold-start-promotion-v015131.js':'update/v0.15.131/cold-start-promotion-v015131.js'
+          }
+          by={f['path']:f for f in manifest['files']}
+          for target,source in {**sources,**additions}.items():
+              entry=by.get(target)
+              if entry is None:
+                  entry={'path':target};manifest['files'].append(entry);by[target]=entry
+              entry['source']=source
+              entry['sha256']=hashlib.sha256((root/source).read_bytes()).hexdigest()
+          mp.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # v0.15.131 audits.
+          audit=r'''\'use strict\';
+const fs=require('fs'),path=require('path'),crypto=require('crypto');const ROOT=path.resolve(__dirname,'..');const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8'),buf=p=>fs.readFileSync(path.join(ROOT,p));const must=(s,n,l)=>{if(!String(s).includes(n))throw new Error(`v0.15.131 missing ${l}: ${n}`)},mustNot=(s,n,l)=>{if(String(s).includes(n))throw new Error(`v0.15.131 forbidden ${l}: ${n}`)};
+const m=JSON.parse(read('update/manifest.json'));if(m.version!=='0.15.131'||String(m.min_launcher)!=='2.0.2')throw new Error('v0.15.131 manifest/bootstrap mismatch');const map=new Map(m.files.map(x=>[x.path,x.source]));
+for(const [p,s] of Object.entries({'package.json':'update/v0.15.131/package.json','rating-engine-v01.js':'update/v0.15.131/rating-engine-v01.js','research-ui-core.js':'update/v0.15.131/research-ui-core.js','research-ui-devtools.js':'update/v0.15.131/research-ui-devtools.js','research-storage-v015131.js':'update/v0.15.131/research-storage-v015131.js','runtime-source-stability-v015131.js':'update/v0.15.131/runtime-source-stability-v015131.js','main-v015131.js':'update/v0.15.131/main-v015131.js','successor-route-v015131.js':'update/v0.15.131/successor-route-v015131.js','cold-start-promotion-v015131.js':'update/v0.15.131/cold-start-promotion-v015131.js','ui-stability-baseline-v015115.js':'update/v0.15.131/ui-stability-baseline-v015115.js'})){if(map.get(p)!==s)throw new Error(`manifest mismatch ${p}`)}
+if(!buf('update/v0.15.131/rating-engine-v01.js').equals(buf('update/v0.15.130/rating-engine-v01.js')))throw new Error('rating engine changed');
+const old=read('update/v0.15.130/research-ui-devtools.js'),ui=read('update/v0.15.131/research-ui-devtools.js'),storage=read('update/v0.15.131/research-storage-v015131.js'),data=read('update/v0.15.131/ui-stability-baseline-v015115.js');must(old,'indexedDB.open(DB_NAME,1)','v130 explicit DB version');must(old,'await kvSet(LATEST_RUN_KEY,run)','v130 fatal derived-cache write');must(storage,"DB_NAME='aram-rating-research-v03'",'canonical DB');must(storage,"CHECKPOINT_KEY='checkpoint-v03'",'canonical checkpoint');must(storage,"STORE='kv'",'canonical store');must(storage,'idb.open(name)','versionless existing DB open');must(storage,"transaction(store,'readonly')",'read-only transaction');mustNot(storage,'deleteDatabase(','database deletion');mustNot(storage,"'readwrite'",'boot write transaction');mustNot(storage,'.put(','derived cache write');mustNot(ui,'indexedDB.deleteDatabase','destructive migration');mustNot(ui,'localStorage.clear','local storage reset');
+for(const x of ['[ARAM Rating Research boot]','DB name:','IndexedDB open:','DB version:','object stores:','checkpoint-v03 found:','match count:','player count:','rating state count:','identity resolved:','render status:','error stage:','error name:','error message:'])must(ui,x,'boot diagnostic');for(const x of ['loading','database_unavailable','checkpoint_missing','dataset_empty','player_not_found','insufficient_sample','available'])must(ui,x,'boot state');
+const S=require('../update/v0.15.131/research-storage-v015131.js');let built=0;const cp={phase:'B1',status:'complete',sampling_version:'v0.3',matches:Array.from({length:159},(_,i)=>({gameId:`g${i}`}))};const fake={buildLatestRun(matches){built++;return{schema:'aram-rating-ui-latest-run-v01',dataset:{matches:matches.length,players:1238},players:{p:{games:2,models:{elo:{}}}}}}};const chosen=S.selectRun(cp,null,{engine:fake});if(chosen.state!=='available'||chosen.run.dataset.matches!==159||chosen.run.dataset.players!==1238||built!==1)throw new Error('159-match checkpoint recovery fixture failed');
+const E=require('../update/v0.15.131/rating-engine-v01.js'),U=require('../update/v0.15.131/research-ui-core.js');function game(i,players,ids={}){const ps=players.map((p,j)=>({puuid:p,gameName:ids[p]?.gameName,tagLine:ids[p]?.tagLine,riotId:ids[p]?.riotId,teamId:j<5?100:200,win:j<5?(i%2===0):(i%2!==0)}));return{gameId:`fixture-${i}`,queueId:450,gameEndTimestamp:1700000000000+i*60000,gameVersion:'26.18.1',participants:ps,me:{player:ps[0]}}}const ids={P0:{riotId:'Current#KR1'},P1:{riotId:'SearchA#KR1'},TWO:{riotId:'SearchB#KR1'},SINGLE:{riotId:'SearchOne#KR1'}};const matches=[];for(let i=0;i<12;i++){const ps=Array.from({length:10},(_,j)=>`P${j}`);if(i<2)ps[8]='TWO';if(i===11)ps[9]='SINGLE';matches.push(game(i,ps,ids))}const run=E.buildLatestRun(matches,{phase:'B1',status:'complete',sampling_version:'v0.3'});let r=U.resolveTargetIdentity({targetMode:'current',localAccount:{puuid:'P0'},matches},'');if(U.buildViewModel(run,r.puuid).kind!=='player')throw new Error('self fixture');r=U.resolveTargetIdentity({targetMode:'searched',target:{riotId:'SearchB#KR1'},localAccount:{puuid:'P0'},matches},'SearchB#KR1');let vm=U.buildViewModel(run,r.puuid);if(r.puuid!=='TWO'||vm.kind!=='player'||vm.player.games!==2)throw new Error('other 2+ fixture');const keyA=`A|${r.puuid}`;r=U.resolveTargetIdentity({targetMode:'searched',target:{riotId:'SearchOne#KR1'},localAccount:{puuid:'P0'},matches},'SearchOne#KR1');vm=U.buildViewModel(run,r.puuid);if(vm.kind!=='player'||vm.player.games!==1||vm.sample.label!=='표본 부족')throw new Error('one-match fixture');const keyB=`B|${r.puuid}`;if(keyA===keyB)throw new Error('A-B rerender identity fixture');if(U.buildViewModel(run,'ABSENT').kind!=='no_data')throw new Error('absent fixture');
+must(data,"const PRESENTATION='0.15.131'",'DATA owner revision');must(data,'.data115PatchMode .data115DetailBranch > .title','patch detail title removal');must(data,'title.hidden=patchMode','patch title state');must(data,"!/닫기/.test(text(btn))",'patch close interception');must(data,"[data-v115-tab=\"patch\"]",'Patch Notes nav retained');must(data,'dh99ChampionGrid','champion cards retained');must(data,'dh99Side','right rail retained');
+const report={status:'SUCCESS',version:'0.15.131,',root_cause_contract:{v130_explicit_db_version:true,v130_derived_cache_write_was_fatal:true},db:{name:S.DB_NAME,store:S.STORE,checkpoint:S.CHECKPOINT_KEY,read_only_boot:S.read_only_boot},fixtures:{checkpoint_159:'PASS',self:'PASS',other_2_plus:'PASS',other_1:'PASS 표본 부족',db_absent_player:'PASS 분석 데이터 없음',search_A_to_B:'PASS',patch_header_removed:'PASS',patch_quick_nav_preserved:'PASS'},rating_engine_byte_identical:true};report.version='0.15.131';fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/v015131-production-report.json'),JSON.stringify(report,null,2)+'\n');console.log('v0.15.131 PRODUCTION AUDIT: SUCCESS');
+'''
+          (root/'tools/v015131-production-audit.js').write_text(audit,encoding='utf-8')
+          history=read_history=(root/'tools/v015130-history-preservation-audit.js').read_text(encoding='utf-8').replace('v0.15.130','v0.15.131').replace('v015130','v015131').replace("../update/v0.15.130/runtime-source-stability-v015130","../update/v0.15.131/runtime-source-stability-v015131")
+          (root/'tools/v015131-history-preservation-audit.js').write_text(history,encoding='utf-8')
+
+          wf='''name: v0.15.131 Production Release Audit\n\non:\n  push:\n    branches: [ release/v0.15.131-research-storage-patchnotes ]\n  pull_request:\n    branches: [ main ]\n    paths:\n      - 'update/v0.15.131/**'\n      - 'update/manifest.json'\n      - 'update/current-state.json'\n      - 'tools/v015131-production-audit.js'\n      - 'tools/v015131-history-preservation-audit.js'\n      - '.github/workflows/v015131-production-audit.yml'\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\njobs:\n  audit:\n    runs-on: ubuntu-latest\n    timeout-minutes: 20\n    steps:\n      - uses: actions/checkout@v4\n        with: { fetch-depth: 0 }\n      - uses: actions/setup-node@v4\n        with: { node-version: '20' }\n      - uses: actions/setup-go@v5\n        with: { go-version: '1.22.x' }\n      - name: Compile v0.15.131 package\n        run: |\n          node -c update/v0.15.131/rating-engine-v01.js\n          node -c update/v0.15.131/research-ui-core.js\n          node -c update/v0.15.131/research-storage-v015131.js\n          node -c update/v0.15.131/research-ui-devtools.js\n          node -c update/v0.15.131/ui-stability-baseline-v015115.js\n          node -c update/v0.15.131/runtime-source-stability-v015131.js\n          node -c update/v0.15.131/main-v015131.js\n          node -c update/v0.15.131/successor-route-v015131.js\n          node -c update/v0.15.131/cold-start-promotion-v015131.js\n          node -c tools/v015131-production-audit.js\n      - name: Research + Patch Notes fixtures\n        run: node tools/v015131-production-audit.js\n      - name: Cold-start launcher fixtures\n        working-directory: launcher/stable-v203\n        run: go test -v ./...\n      - name: Full Regression\n        run: node tools/full-regression-audit.js\n      - name: Match History\n        run: node tools/v015131-history-preservation-audit.js\n      - name: Player Profile\n        run: node tools/profile-ux-audit.js\n      - name: AutoSync\n        run: node tools/v015119-autosync-concurrency-audit.js\n      - name: RANDOM\n        run: node tools/v015121-random-practice-restore-audit.js\n      - name: DATA and Patch Notes owner\n        run: node tools/v015120-data-subnav-audit.js\n      - name: Item\n        run: node tools/item-recommendation-v01581-audit.js\n      - name: Updater safety\n        run: |\n          node tools/v015115-single-owner-stability-audit.js\n          node tools/v015116-runtime-update-stability-audit.js\n          node tools/v015117-state-integrity-audit.js\n          node tools/v015118-resource-lifecycle-audit.js\n      - name: AI continuity snapshot\n        run: node tools/sync-current-state.js --check\n      - name: AI continuity\n        run: node tools/ai-continuity-audit.js\n      - name: Upload reports\n        if: always()\n        uses: actions/upload-artifact@v4\n        with:\n          name: v015131-production-release-audit\n          path: |\n            audit-output/v015131-production-report.json\n            audit-output/full-regression-report.json\n            audit-output/profile-ux-report.json\n            audit-output/v015119-autosync-concurrency-report.json\n            audit-output/v015121-random-practice-restore-report.json\n            audit-output/v015120-data-subnav-report.json\n            audit-output/v015116-runtime-update-stability-report.json\n            audit-output/ai-continuity-report.json\n          if-no-files-found: warn\n'''
+          (root/'.github/workflows/v015131-production-audit.yml').write_text(wf,encoding='utf-8')
+          PY
+      - name: Sync continuity metadata
+        run: node tools/sync-current-state.js
+      - name: Validate generated release
+        run: |
+          node -c update/v0.15.131/research-storage-v015131.js
+          node -c update/v0.15.131/research-ui-devtools.js
+          node -c update/v0.15.131/ui-stability-baseline-v015115.js
+          node tools/v015131-production-audit.js
+      - name: Commit generated v0.15.131 release
+        run: |
+          rm .github/workflows/bootstrap-v015131-production.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/v0.15.131 update/manifest.json update/current-state.json docs/CURRENT_STATE.md tools/v015131-production-audit.js tools/v015131-history-preservation-audit.js .github/workflows/v015131-production-audit.yml .github/workflows/bootstrap-v015131-production.yml
+          git commit -m 'release: v0.15.131 recover Research DB and keep Patch Notes detail open [v015131-generated]'
+          git push origin HEAD:release/v0.15.131-research-storage-patchnotes
