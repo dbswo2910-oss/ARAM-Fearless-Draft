@@ -1,0 +1,37 @@
+name: v0.15.135 Prepare Release Metadata
+
+on:
+  push:
+    branches:
+      - fix/v015135-patchnotes-shell-semantic-owner
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: fix/v015135-patchnotes-shell-semantic-owner
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Prepare manifest and continuity
+        run: node tools/prepare-v015135-release.js
+      - name: Commit generated release metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update/manifest.json update/current-state.json docs/CURRENT_STATE.md docs/continuity-manual.json docs/AI_HANDOFF.md docs/KNOWN_ISSUES.md
+          if git diff --cached --quiet; then
+            echo "No metadata changes"
+            exit 0
+          fi
+          git commit -m "release-meta: v0.15.135 generated manifest and continuity"
+          git push origin HEAD:fix/v015135-patchnotes-shell-semantic-owner
