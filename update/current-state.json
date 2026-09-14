@@ -6,7 +6,7 @@
     "version": "0.15.133",
     "message": "v0.15.133 · REAL-WINDOWS PATCH NOTES SHELL FIX + CONTINUITY CLEANUP",
     "min_launcher": "2.0.2",
-    "manifest_commit": "b8a795bc2c66163ac4d31fe71ae90b61a2c28f08"
+    "manifest_commit": "ff3a0275507feb28b2c295dbe9fa128a65a4a80f"
   },
   "package": {
     "source": "update/v0.15.133/package.json",

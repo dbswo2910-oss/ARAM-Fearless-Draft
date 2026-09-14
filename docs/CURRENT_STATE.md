@@ -6,7 +6,7 @@
 
 - Active updater: **v0.15.133**
 - Manifest message: v0.15.133 · REAL-WINDOWS PATCH NOTES SHELL FIX + CONTINUITY CLEANUP
-- Manifest commit: `b8a795bc2c66163ac4d31fe71ae90b61a2c28f08`
+- Manifest commit: `ff3a0275507feb28b2c295dbe9fa128a65a4a80f`
 - Package: `update/v0.15.133/package.json` → **v0.15.133**
 - Electron entry: `main-v015133.js` → `update/v0.15.133/main-v015133.js`
 - Current runtime stability source: `update/v0.15.133/runtime-source-stability-v015133.js`
