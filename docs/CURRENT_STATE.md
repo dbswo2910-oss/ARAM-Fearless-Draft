@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.129**
-- Manifest message: v0.15.129 · ARAM RATING RESEARCH UI — local personal Research card in Player Profile
+- Active updater: **v0.15.130**
+- Manifest message: v0.15.130 · SEARCHED PLAYER RATING + COLD START PROMOTION — resolved PUUID production UI
 - Manifest commit: `5b5ed4f88016bfad3e5c6b79d7ad990196f054c3`
-- Package: `update/v0.15.129/package.json` → **v0.15.129**
-- Electron entry: `main-v015129.js` → `update/v0.15.129/main-v015129.js`
-- Current runtime stability source: `update/v0.15.129/runtime-source-stability-v015129.js`
+- Package: `update/v0.15.130/package.json` → **v0.15.130**
+- Electron entry: `main-v015130.js` → `update/v0.15.130/main-v015130.js`
+- Current runtime stability source: `update/v0.15.130/runtime-source-stability-v015130.js`
 
 ## Active ownership — do not create competing owners
 

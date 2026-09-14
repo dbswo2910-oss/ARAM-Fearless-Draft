@@ -1,0 +1,6 @@
+{
+  "name": "aram-fearless-draft-update",
+  "version": "0.15.130",
+  "description": "Upgrade package v0.15.130 - production searched-player Rating UI + cold-start entrypoint promotion",
+  "main": "main-v015130.js"
+}

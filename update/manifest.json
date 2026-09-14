@@ -1,7 +1,7 @@
 {
-  "version": "0.15.129",
-  "message": "v0.15.129 · ARAM RATING RESEARCH UI — local personal Research card in Player Profile",
-  "min_launcher": "2.0.2",
+  "version": "0.15.130",
+  "message": "v0.15.130 · SEARCHED PLAYER RATING + COLD START PROMOTION — resolved PUUID production UI",
+  "min_launcher": "2.0.3",
   "files": [
     {
       "path": "live-strength-v01513.js",
@@ -817,19 +817,23 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.129/package.json"
+      "source": "update/v0.15.130/package.json",
+      "sha256": "29267c9e404b551cdcdc19da6fb1b169879961d0e10857a2a24f8f2c57c1cc6b"
     },
     {
       "path": "rating-engine-v01.js",
-      "source": "update/v0.15.129/rating-engine-v01.js"
+      "source": "update/v0.15.130/rating-engine-v01.js",
+      "sha256": "76ad43a6e2072376997292fa44a3ec594b01eb28f4c473637391819937b64aa4"
     },
     {
       "path": "research-ui-core.js",
-      "source": "update/v0.15.129/research-ui-core.js"
+      "source": "update/v0.15.130/research-ui-core.js",
+      "sha256": "6b21d85be46327823d9a4ce866a3d84d53084ea5be933052609150a2a614d954"
     },
     {
       "path": "research-ui-devtools.js",
-      "source": "update/v0.15.129/research-ui-devtools.js"
+      "source": "update/v0.15.130/research-ui-devtools.js",
+      "sha256": "dee95b6d29c25632b0369cd99d5eedfea2b33dc58a4a822471298a3b0c104979"
     },
     {
       "path": "runtime-source-stability-v015129.js",
@@ -842,6 +846,31 @@
     {
       "path": "successor-route-v015129.js",
       "source": "update/v0.15.129/successor-route-v015129.js"
+    },
+    {
+      "path": "runtime-source-stability-v015130.js",
+      "source": "update/v0.15.130/runtime-source-stability-v015130.js",
+      "sha256": "8ef498173eab06cdfc25e33dec4eba7cb24bfab0afc8e1451caa5b50d3c7b39f"
+    },
+    {
+      "path": "main-v015130.js",
+      "source": "update/v0.15.130/main-v015130.js",
+      "sha256": "31350d76f7e78b0cf9246dcd35b50ed7d17e01305316be9d91b902e2a57b4522"
+    },
+    {
+      "path": "successor-route-v015130.js",
+      "source": "update/v0.15.130/successor-route-v015130.js",
+      "sha256": "0e24713ae3c914f8873fa3719158d593e0a3aa1c13a5822ba65e69bd5d04ea80"
+    },
+    {
+      "path": "cold-start-promotion-v015130.js",
+      "source": "update/v0.15.130/cold-start-promotion-v015130.js",
+      "sha256": "05de9903e7ebd2a7965bb3cb42b2e032a271add5d40a5089679f14d13136d678"
+    },
+    {
+      "path": "ARAM_Fearless_Draft_Launcher_windows_x64.exe",
+      "source": "update/v0.15.130/ARAM_Fearless_Draft_Launcher_windows_x64.exe",
+      "sha256": "3ac0c067800cc827c59b8c7842e911e412666f93128791650b3d574bcea69b80"
     }
   ],
   "delete": [
