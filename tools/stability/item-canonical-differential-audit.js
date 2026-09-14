@@ -26,7 +26,7 @@ for(const tree of ['루덴의 동반자 → 라바돈의 죽음모자 → 가시
 for(const item of ['루덴의 동반자','가시 갑옷','태양불꽃 방패','흐르는 물의 지팡이','6655','unknown'])L.must(old.itemClassV01581(item)===next.itemClass(item),`item class drift ${item}`);
 const ctxs=[
   {local:{items:[{itemID:6655,name:'루덴의 동반자'}]},currentGold:1430},
-  {local:{itemIds:[3075,3020]},myItems:[{id:3001,name:'태양불꽃 방패'}]},currentGold:null},
+  {local:{itemIds:[3075,3020]},myItems:[{id:3001,name:'태양불꽃 방패'}],currentGold:null},
   {local:{inventory:['루덴의 동반자',{itemId:'3089',displayName:'라바돈의 죽음모자'}]},currentGold:'975'}
 ];
 for(const [i,ctx] of ctxs.entries()){
