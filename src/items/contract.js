@@ -1,2 +1,2 @@
 'use strict';
-module.exports={subsystem:'items',status:'planned',migration_rule:'catalog identity and recommendation outputs require differential parity before cutover',production_active:false};
+module.exports={subsystem:'items',status:'planned',legacy:'v0.15.80 canonical item identity + v0.15.81 recommendation gate + current art/catalog runtime',components:{catalog_identity:'shadow',recommendation_gate:'shadow',art_runtime:'planned',catalog_ipc:'planned'},migration_rule:'catalog identity and recommendation outputs require differential parity before cutover',production_active:false};
