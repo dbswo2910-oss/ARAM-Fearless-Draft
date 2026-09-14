@@ -1,0 +1,9 @@
+'use strict';
+const fs=require('fs');const path=require('path');const ROOT=path.resolve(__dirname,'..');const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');const must=(s,n,l)=>{if(!String(s).includes(n))throw new Error(`v0.15.130 history preservation missing ${l}: ${n}`)};
+const runtime=require('../update/v0.15.130/runtime-source-stability-v015130');
+if(runtime.history_latency_changed!==true||runtime.history_cache_first!==true||runtime.history_background_deep_scan!==true||runtime.result_latest_probe!==true)throw new Error('v0.15.128 history flags not preserved through v0.15.130');
+const queue=runtime.patchRuntimeSource('match-lab-queue-v01517.js',read('update/v0.15.17/match-lab-queue-v01517.js'));
+must(queue,'/* ARAM_HISTORY_LATENCY_V015128 */','history payload');must(queue,'__ARAM_HISTORY_LATENCY_V015128__','history readiness');must(queue,'cacheOnly:true','cache-first');must(queue,"priority:'background'",'deep backfill');
+const coach=runtime.patchRuntimeSource('random-ingame-coach-v01550.js',read('update/v0.15.50/random-ingame-coach-v01550.js'));
+must(coach,'aramHistoryLatencyV015128?.probeLatest','latest-game probe');must(coach,'const waits=[0,700,1100,1700,2600,4000,6500,10000,15000,15000,15000];','bounded retry schedule');
+new Function(queue);new Function(coach);console.log('v0.15.130 MATCH HISTORY PRESERVATION AUDIT: SUCCESS');
