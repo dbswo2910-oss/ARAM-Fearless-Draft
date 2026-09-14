@@ -8,7 +8,7 @@ const owners=Object.freeze({
   preload:{canonical:'src/preload',legacy:'update/v0.15.117/preload.js',status:'shadow'},
   state:{canonical:'src/state',legacy:'state-integrity-v015117',status:'shadow'},
   lifecycle:{canonical:'src/core/lifecycle',legacy:'resource-lifecycle-v015118',status:'shadow'},
-  updater:{canonical:'src/updater',legacy:'v0.15.79 safety baseline + successors',status:'planned'},
+  updater:{canonical:'src/updater',legacy:'v0.15.79 safety baseline + successors',status:'shadow'},
   autosync:{canonical:'src/autosync',legacy:'autosync-concurrency-v015119',status:'planned'},
   riot:{canonical:'src/riot',legacy:'current Riot/data service chain',status:'planned'},
   draft:{canonical:'src/draft',legacy:'current Draft runtime chain',status:'planned'},
