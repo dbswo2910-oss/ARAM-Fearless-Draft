@@ -43,7 +43,7 @@
 - **match_search_label_v015126** — `pending`: CI can prove the label payload is scoped to #history/header and that internal Match Lab/history identifiers and scoring owners are byte-preserved, but final visible wording requires the installed Windows UI.
 - **startup_update_notice_v015127** — `pending`: CI verifies a one-shot startup call into the existing transactional updater with no new updater/preload owner. Final automatic download/apply/relaunch behavior requires Windows acceptance against a future newer manifest.
 - **match_history_latency_v015128** — `pending`: CI simulates cache-first/coalesced history requests, quick/deep separation and latest-game probes. Real League Client timing is still required to accept perceived latency and post-game freshness.
-- **v015132_storage_root_and_cold_start** — `verified_real_windows`: User supplied a real Windows v0.15.132 screenshot showing the preserved 159-match Research checkpoint and confirmed repeated full exit/relaunch stays on v0.15.132 instead of falling back to an older version.
+- **v015132_storage_root_and_cold_start** — `verified`: User supplied a real Windows v0.15.132 screenshot showing the preserved 159-match Research checkpoint and confirmed repeated full exit/relaunch stays on v0.15.132 instead of falling back to an older version.
 - **patch_notes_shell_header_v015133** — `pending`: A real Windows v0.15.132 screenshot proved the Patch Notes content renders but the outer generic 챔피언 상세 / 닫기 shell row survives. v0.15.133 adds an exact #dataCard-ancestor fix and a nested-DOM regression fixture; final acceptance still requires a post-update Windows screenshot.
 
 ## Next planned work

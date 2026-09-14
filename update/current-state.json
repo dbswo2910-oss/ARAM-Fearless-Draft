@@ -216,7 +216,7 @@
       ]
     },
     "v015132_storage_root_and_cold_start": {
-      "status": "verified_real_windows",
+      "status": "verified",
       "evidence": "User supplied a real Windows v0.15.132 screenshot showing the preserved 159-match Research checkpoint and confirmed repeated full exit/relaunch stays on v0.15.132 instead of falling back to an older version.",
       "must_verify": []
     },
