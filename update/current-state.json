@@ -6,7 +6,7 @@
     "version": "0.15.135",
     "message": "v0.15.135 · PATCH NOTES SEMANTIC SHELL SWEEP",
     "min_launcher": "2.0.2",
-    "manifest_commit": "05c4281e107dda566572faaaf223f817bac55c22"
+    "manifest_commit": "a0a9e9fb0dff5650aae811c6a416e00465f092ee"
   },
   "package": {
     "source": "update/v0.15.135/package.json",

@@ -6,7 +6,7 @@
 
 - Active updater: **v0.15.135**
 - Manifest message: v0.15.135 · PATCH NOTES SEMANTIC SHELL SWEEP
-- Manifest commit: `05c4281e107dda566572faaaf223f817bac55c22`
+- Manifest commit: `a0a9e9fb0dff5650aae811c6a416e00465f092ee`
 - Package: `update/v0.15.135/package.json` → **v0.15.135**
 - Electron entry: `main-v015135.js` → `update/v0.15.135/main-v015135.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
