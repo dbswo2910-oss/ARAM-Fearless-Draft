@@ -31,7 +31,7 @@ jobs:
         with:
           go-version-file: launcher/stable-v203/go.mod
 
-      - name: Download pinned public base and restore validated v0.15.49 installed index
+      - name: Download pinned public base and restore validated v0.15.49 installed baseline
         shell: pwsh
         run: |
           $outDir = Join-Path $PWD 'audit-output\stability\installed-windows'
@@ -59,7 +59,7 @@ jobs:
           if ($fixtureMeta.part_count -ne 7) { throw "fixture metadata part_count mismatch: $($fixtureMeta.part_count)" }
           if ($fixtureMeta.source_index_sha256 -ne $sourceIndexHash) { throw "fixture source index SHA-256 mismatch: $($fixtureMeta.source_index_sha256)" }
           $parts = @(Get-ChildItem $fixtureDir -Filter 'index-v0142-to-v01549.zst.b64.part*' | Sort-Object Name)
-          if ($parts.Count -ne 7) { throw "expected 7 v0.15.49 delta parts, found $($parts.Count)" }
+          if ($parts.Count -ne 7) { throw "expected 7 v0.15.49 index delta parts, found $($parts.Count)" }
           $base64 = (($parts | ForEach-Object { Get-Content $_.FullName -Raw }) -join '') -replace '\s',''
           $patch = Join-Path $env:RUNNER_TEMP 'index-v0142-to-v01549.zstpatch'
           [IO.File]::WriteAllBytes($patch,[Convert]::FromBase64String($base64))
@@ -77,6 +77,23 @@ jobs:
           if ($fixtureMeta.target_index_sha256 -ne $targetIndexHash) { throw "fixture metadata target index SHA-256 mismatch: $($fixtureMeta.target_index_sha256)" }
           Move-Item -Path $rebuilt -Destination $baseIndex -Force
 
+          # The updater manifest assumes the installed base already contains the v0.15.49 AutoSync core.
+          # Reconstruct that exact user-installed file rather than keeping the older v0.14.2 core.
+          $coreParts = @(Get-ChildItem $fixtureDir -Filter 'autosync-core-v01549.zst.b64.part*' | Sort-Object Name)
+          if ($coreParts.Count -ne 4) { throw "expected 4 v0.15.49 AutoSync core fixture parts, found $($coreParts.Count)" }
+          $coreBase64 = (($coreParts | ForEach-Object { Get-Content $_.FullName -Raw }) -join '') -replace '\s',''
+          $coreZst = Join-Path $env:RUNNER_TEMP 'autosync-core-v01549.zst'
+          [IO.File]::WriteAllBytes($coreZst,[Convert]::FromBase64String($coreBase64))
+          $coreZstHash = (Get-FileHash $coreZst -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($coreZstHash -ne 'abf29e3738ca5c1f81e5d1f0aaab0ae7df5bdb19da4a260536626734ed8dd80e') { throw "v0.15.49 AutoSync fixture SHA-256 mismatch: $coreZstHash" }
+          $coreRestored = Join-Path $env:RUNNER_TEMP 'autosync-core-v01549.js'
+          if (Test-Path $coreRestored) { Remove-Item $coreRestored -Force }
+          & zstd -d $coreZst -o $coreRestored
+          if ($LASTEXITCODE -ne 0) { throw "v0.15.49 AutoSync core reconstruction failed: $LASTEXITCODE" }
+          $coreHash = (Get-FileHash $coreRestored -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($coreHash -ne 'a9f206df445d06eefc99ae55f1ceb3a7a5ff108a40a8393fa75ec413d2c4aba6') { throw "restored v0.15.49 AutoSync core SHA-256 mismatch: $coreHash" }
+          Move-Item -Path $coreRestored -Destination (Join-Path $base 'autosync-core.js') -Force
+
           "BASE_APP_DIR=$base" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "INSTALLED_APP=$($env:RUNNER_TEMP)\aram-installed-app" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           [ordered]@{
@@ -86,6 +103,7 @@ jobs:
             source_index_sha256=$sourceIndexHash
             index_delta_sha256=$patchHash
             restored_index_sha256=$targetIndexHash
+            restored_autosync_core_sha256=$coreHash
             restored_installed_baseline='0.15.49'
             base_dir=$base
           } | ConvertTo-Json | Set-Content -Path (Join-Path $outDir 'base-bundle.json') -Encoding utf8
@@ -195,7 +213,7 @@ jobs:
             canonical_shadow_payload_present = (Test-Path (Join-Path $env:INSTALLED_APP 'canonical-shadow\src'))
             production_manifest_unchanged = $true
             real_league_client_tested = $false
-            acceptance_scope = 'Windows GitHub-hosted runner; validated v0.15.49 installed-index baseline reconstructed from pinned v0.14.2 public bundle, Golden v0.15.135 manifest materialized, stable launcher promoted, and actual Electron cold-start executed. This is not a physical-user-PC or real League Client acceptance.'
+            acceptance_scope = 'Windows GitHub-hosted runner; validated v0.15.49 installed baseline reconstructed from pinned v0.14.2 public bundle, Golden v0.15.135 manifest materialized, stable launcher promoted, and actual Electron cold-start executed. This is not a physical-user-PC or real League Client acceptance.'
           }
           $report | ConvertTo-Json -Depth 5 | Set-Content -Path (Join-Path $outDir 'installed-windows-report.json') -Encoding utf8
           if ($alive) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
