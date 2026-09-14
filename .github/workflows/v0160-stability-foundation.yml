@@ -85,6 +85,8 @@ jobs:
         run: node tools/stability/item-catalog-service-canonical-differential-audit.js
       - name: Canonical Profile Results parser differential
         run: node tools/stability/profile-results-canonical-differential-audit.js
+      - name: Canonical Profile metrics differential
+        run: node tools/stability/profile-metrics-canonical-differential-audit.js
       - name: Canonical Research storage differential
         run: node tools/stability/research-storage-canonical-differential-audit.js
       - name: Final assembled runtime
