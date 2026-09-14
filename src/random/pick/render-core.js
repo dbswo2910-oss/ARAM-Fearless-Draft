@@ -1,34 +1,14 @@
 'use strict';
 const IMPLEMENTATION_VERSION='0.16-shadow';
 const ROLE_BY_ID=Object.freeze({
-  random:'random-root',
-  randomInputAnchor:'random-input-anchor',
-  externalInputs:'random-external-inputs',
-  manualPartyInputs:'random-party-inputs',
-  poolInputs:'random-pool-inputs',
-  comboResults:'random-top5',
-  comboDetail:'random-top5-detail',
-  randomOurFive:'random-team-five',
-  randomOurSummary:'random-team-summary',
-  randomEnemySummary:'random-enemy-summary'
+  random:'random-root',randomInputAnchor:'random-input-anchor',externalInputs:'random-external-inputs',manualPartyInputs:'random-party-inputs',poolInputs:'random-pool-inputs',comboResults:'random-top5',comboDetail:'random-top5-detail',randomOurFive:'random-team-five',randomOurSummary:'random-team-summary',randomEnemySummary:'random-enemy-summary'
 });
 function bindStableRoles(document){
   if(!document||typeof document.getElementById!=='function')throw new Error('document with getElementById required');
-  const bound=[];
-  for(const [id,role] of Object.entries(ROLE_BY_ID)){
-    const el=document.getElementById(id);if(!el)continue;
-    el.setAttribute('data-ui-role',role);bound.push({id,role});
-  }
-  return bound;
+  const bound=[];for(const [id,role] of Object.entries(ROLE_BY_ID)){const el=document.getElementById(id);if(!el)continue;el.setAttribute('data-ui-role',role);bound.push({id,role})}return bound;
 }
 function comboResultsHtml(combos=[],selectedCombo=0,{championIconHtml=(()=>''),escapeHtml=(x=>String(x??''))}={}){
-  return (combos||[]).map((x,i)=>{
-    const party=x.party||x.sel||[],locks=x.locked||[],adds=x.sel||[];
-    const names=party.join(' + '),lockHtml=locks.length?`<div class="muted" style="font-size:9px">🔒 고정 ${locks.join(' · ')}${adds.length?` · 추천 ${adds.join(' · ')}`:''}</div>`:'';
-    const icons=party.map(n=>`<span class="comboIconChip">${championIconHtml(n,'draft')}<span>${escapeHtml(n)}</span></span>`).join('');
-    const score=Number(x.score);const scoreText=Number.isFinite(score)?score.toFixed(1):'0.0';
-    return `<div class="combo comboRank${i+1} ${i===selectedCombo?'selected':''}" data-random-combo-index="${i}"><div class="comboHead"><span class="comboRank">${i+1}</span><div class="names">${escapeHtml(names)}${lockHtml}<div class="comboIconLine">${icons}</div></div><span class="comboScore">${scoreText}</span></div><div class="desc"><span class="routeMini">${escapeHtml(x.direction??'')}</span><br>${escapeHtml(x.reason??'')}</div></div>`;
-  }).join('');
+  return (combos||[]).map((x,i)=>{const party=x.party||x.sel||[],locks=x.locked||[],adds=x.sel||[],names=party.join(' + '),lockHtml=locks.length?`<div class="muted" style="font-size:9px">🔒 고정 ${escapeHtml(locks.join(' · '))}${adds.length?` · 추천 ${escapeHtml(adds.join(' · '))}`:''}</div>`:'',icons=party.map(n=>`<span class="comboIconChip">${championIconHtml(n,'draft')}<span>${escapeHtml(n)}</span></span>`).join(''),score=Number(x.score),scoreText=Number.isFinite(score)?score.toFixed(1):'0.0';return `<div class="combo comboRank${i+1} ${i===selectedCombo?'selected':''}" data-random-combo-index="${i}"><div class="comboHead"><span class="comboRank">${i+1}</span><div class="names">${escapeHtml(names)}${lockHtml}<div class="comboIconLine">${icons}</div></div><span class="comboScore">${scoreText}</span></div><div class="desc"><span class="routeMini">${escapeHtml(x.direction??'')}</span><br>${escapeHtml(x.reason??'')}</div></div>`}).join('');
 }
 function comboDetailHtml(x,{nval=(v=>Number(v)||0),teamBushUtilityValue=null,teamBushMetricText=null,teamBushAxisText=null,modes={}}={}){
   if(!x)return '<div class="muted">후보를 입력하세요.</div>';
@@ -41,13 +21,13 @@ function comboDetailHtml(x,{nval=(v=>Number(v)||0),teamBushUtilityValue=null,tea
 function createRenderCore({document,state,championIconHtml,nval,teamBushUtilityValue,teamBushMetricText,teamBushAxisText,persist=(()=>{}),renderAnalysis=(()=>{})}={}){
   if(!document||!state)throw new Error('document and state required');
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const deps={championIconHtml:typeof championIconHtml==='function'?championIconHtml:()=>'',escapeHtml:esc};
+  const deps={championIconHtml:typeof championIconHtml==='function'?championIconHtml:()=>'',escapeHtml:esc};let selectionHandler=null;
   function renderResults(){const el=document.getElementById('comboResults');if(!el)return false;el.innerHTML=comboResultsHtml(state.combos||[],Number(state.selectedCombo)||0,deps);bindStableRoles(document);return true}
   function renderDetail(){const el=document.getElementById('comboDetail');if(!el)return false;const x=(state.combos||[])[Number(state.selectedCombo)||0];el.innerHTML=comboDetailHtml(x,{nval,teamBushUtilityValue,teamBushMetricText,teamBushAxisText,modes:state.ourModes||{}});bindStableRoles(document);return true}
   function select(index){const max=Math.max(0,(state.combos||[]).length-1);state.selectedCombo=Math.max(0,Math.min(Number(index)||0,max));persist();renderResults();renderDetail();renderAnalysis();return state.selectedCombo}
-  function bindSelection(){const root=document.getElementById('comboResults');if(!root||root.dataset.canonicalPickRenderBound==='1')return false;root.dataset.canonicalPickRenderBound='1';root.addEventListener('click',e=>{const row=e.target?.closest?.('[data-random-combo-index]');if(!row||!root.contains(row))return;select(row.getAttribute('data-random-combo-index'))});return true}
+  function bindSelection(){const root=document.getElementById('comboResults');if(!root||selectionHandler)return false;selectionHandler=e=>{const row=e.target?.closest?.('[data-random-combo-index]');if(!row||!root.contains(row))return;select(row.getAttribute('data-random-combo-index'))};root.addEventListener('click',selectionHandler);return true}
   function render(){bindStableRoles(document);renderResults();renderDetail();bindSelection();return true}
-  function dispose(){const root=document.getElementById('comboResults');if(root)delete root.dataset.canonicalPickRenderBound}
+  function dispose(){const root=document.getElementById('comboResults');if(root&&selectionHandler)root.removeEventListener('click',selectionHandler);selectionHandler=null}
   return{render,renderResults,renderDetail,select,bindSelection,bindStableRoles:()=>bindStableRoles(document),dispose};
 }
 module.exports={IMPLEMENTATION_VERSION,ROLE_BY_ID,bindStableRoles,comboResultsHtml,comboDetailHtml,createRenderCore,production_active:false,score_logic_changed:false,random_scoring_changed:false};
