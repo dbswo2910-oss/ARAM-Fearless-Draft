@@ -1,0 +1,20 @@
+'use strict';
+const L=require('./lib');
+const C=L.json('stability/contracts/ui-contracts.v1.json');
+L.must(C.schema===1&&Array.isArray(C.roles)&&C.roles.length>=10,'UI contract registry incomplete');
+const roles=C.roles.map(x=>x.role);L.must(new Set(roles).size===roles.length,'duplicate UI semantic roles');
+const allJs=L.walk().filter(x=>/\.js$/.test(x)&&/^(update|tools)\//.test(x));
+const corpus=allJs.map(x=>{try{return L.read(x)}catch{return''}}).join('\n');
+const rows=C.roles.map(r=>{
+  L.must(/^[-a-z0-9]+$/.test(r.role),`invalid data-ui-role name ${r.role}`);
+  L.must(/^#[A-Za-z0-9_-]+$/.test(r.legacy_selector),`legacy selector must be exact id for migration safety: ${r.legacy_selector}`);
+  const id=r.legacy_selector.slice(1);
+  const legacy_anchor_present=corpus.includes(id);
+  L.must(legacy_anchor_present,`legacy UI anchor not found in repository JS: ${r.legacy_selector}`);
+  const canonicalToken=`data-ui-role=\"${r.role}\"`;
+  return{...r,legacy_anchor_present,canonical_role_present:corpus.includes(canonicalToken)||corpus.includes(`data-ui-role='${r.role}'`)};
+});
+const installed=rows.filter(x=>x.canonical_role_present).length;
+const report={status:'SUCCESS',stage:installed===rows.length?'CANONICAL_ROLES_INSTALLED':'MIGRATION_REGISTRY_READY',roles:rows.length,canonical_roles_present:installed,canonical_roles_pending:rows.length-installed,mode_contracts:C.mode_contracts,rows};
+L.write('audit-output/stability/ui-contract-report.json',report);
+console.log('UI CONTRACT AUDIT:',report.stage,`${installed}/${rows.length} canonical roles present`);
