@@ -35,6 +35,8 @@ jobs:
         run: node tools/stability/canonical-owner-audit.js
       - name: Foundational subsystem shadow contracts
         run: node tools/stability/subsystem-shadow-audit.js
+      - name: Canonical state semantic differential
+        run: node tools/stability/state-canonical-differential-audit.js
       - name: Final assembled runtime
         run: node tools/stability/final-runtime-audit.js
       - name: Golden runtime fingerprints
@@ -70,9 +72,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Install pinned Electron runner
+        shell: pwsh
+        run: npm install --no-save --no-package-lock electron@38.7.2
       - name: Run Windows Electron restart-persistence / DOM / soak / screenshots
         shell: pwsh
-        run: npx --yes electron@38.7.2 stability/e2e/synthetic-main.js
+        run: |
+          $exe = Join-Path $PWD 'node_modules/electron/dist/electron.exe'
+          if (!(Test-Path $exe)) { throw "Electron executable missing: $exe" }
+          $proc = Start-Process -FilePath $exe -ArgumentList 'stability/e2e/synthetic-main.js' -Wait -PassThru -NoNewWindow
+          if ($proc.ExitCode -ne 0) { throw "Electron synthetic E2E exited $($proc.ExitCode)" }
+          $report = Join-Path $PWD 'audit-output/stability/windows-e2e/synthetic-e2e-report.json'
+          if (!(Test-Path $report)) { throw "Synthetic E2E report missing after Electron exit: $report" }
+          Get-ChildItem -Recurse 'audit-output/stability/windows-e2e' | Select-Object FullName,Length
       - name: Upload Windows synthetic screenshots and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
