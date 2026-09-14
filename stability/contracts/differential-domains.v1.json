@@ -3,22 +3,24 @@
   "golden_version": "0.15.135",
   "policy": "Structural consolidation must preserve deterministic outputs for these domains unless an explicitly approved product/scoring change updates the golden snapshot.",
   "domains": [
-    {"name":"draft-judgment","type":"deterministic-output","must_match":true},
-    {"name":"random-top5","type":"deterministic-output","must_match":true},
-    {"name":"random-candidate-dna","type":"deterministic-output","must_match":true},
-    {"name":"time-power","type":"deterministic-output","must_match":true},
-    {"name":"item-recommendation","type":"deterministic-output","must_match":true},
-    {"name":"role-profile","type":"deterministic-output","must_match":true},
-    {"name":"player-profile","type":"deterministic-output","must_match":true},
-    {"name":"match-history-parser","type":"deterministic-output","must_match":true},
-    {"name":"result-selection","type":"deterministic-output","must_match":true},
-    {"name":"riot-grade-linking","type":"deterministic-output","must_match":true},
-    {"name":"research-ui-read-only-view","type":"presentation-data-contract","must_match":true}
+    {"name":"draft-judgment","type":"deterministic-output","must_match":true,"gate":"draft-contract"},
+    {"name":"random-top5","type":"deterministic-output","must_match":true,"gate":"random-top5"},
+    {"name":"random-candidate-dna","type":"deterministic-output","must_match":true,"gate":"random-candidate-dna"},
+    {"name":"time-power","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture"},
+    {"name":"item-recommendation","type":"deterministic-output","must_match":true,"gate":"item-recommendation"},
+    {"name":"role-profile","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture"},
+    {"name":"player-profile","type":"deterministic-output","must_match":true,"gate":"pending-pure-fixture"},
+    {"name":"match-history-parser","type":"deterministic-output","must_match":true,"gate":"match-history-parser"},
+    {"name":"result-selection","type":"deterministic-output","must_match":true,"gate":"match-history-parser"},
+    {"name":"riot-grade-linking","type":"deterministic-output","must_match":true,"gate":"riot-grade-linking"},
+    {"name":"research-ui-read-only-view","type":"presentation-data-contract","must_match":true,"gate":"windows-synthetic+diagnostics"}
   ],
-  "snapshot_status": "registry_created_snapshots_pending",
+  "supporting_invariants": ["state-integrity","autosync-concurrency"],
+  "snapshot_status": "behavioral_gate_v1_collecting_normalized_golden_outputs",
   "notes": [
-    "Snapshots must use synthetic or public-safe fixtures, never the user's personal raw history/PUUID.",
-    "Randomness must be seeded or replaced with deterministic fixtures before comparison.",
-    "Live Riot/LCU network timing belongs to soak/E2E and is not a deterministic snapshot domain."
+    "Snapshots use synthetic or repository fixtures, never the user's personal raw history/PUUID.",
+    "Randomness must be seeded or replaced with deterministic fixtures before canonical shadow comparison.",
+    "Live Riot/LCU network timing belongs to soak/E2E and is not a deterministic snapshot domain.",
+    "Normalized stdout hashes are evidence for the current legacy owner; they are not a substitute for new-owner shadow comparison."
   ]
 }

@@ -15,7 +15,7 @@ permissions:
 jobs:
   foundation:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,6 +37,8 @@ jobs:
         run: node tools/stability/final-runtime-audit.js
       - name: Golden runtime fingerprints
         run: node tools/stability/runtime-fingerprint-audit.js
+      - name: Behavioral differential fixture suite
+        run: node tools/stability/behavioral-differential-audit.js
       - name: State and Research compatibility
         run: node tools/stability/state-compat-audit.js
       - name: Diagnostics contract
@@ -58,7 +60,7 @@ jobs:
 
   windows-electron-synthetic:
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,7 +68,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Run synthetic Windows Electron DOM / storage / soak / screenshots
+      - name: Run Windows Electron restart-persistence / DOM / soak / screenshots
         shell: pwsh
         run: npx --yes electron@38.7.2 stability/e2e/synthetic-main.js
       - name: Upload Windows synthetic screenshots and diagnostics
