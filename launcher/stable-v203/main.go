@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -22,6 +23,11 @@ func main() {
 	}
 	self, _ := os.Executable()
 	cwd, _ := os.Getwd()
+	bootID := strconv.FormatInt(time.Now().UTC().UnixNano(), 36)
+	canonical, canonicalErr := ensureCanonicalLauncher(local, self)
+	shortcuts := scanShortcutsWindows()
+	repairs := repairProductShortcuts(shortcuts, canonical)
+	duplicates := scanKnownLauncherExecutables(local, self)
 	cands := discoverCandidates(local)
 	d := LauncherDiagnostic{Schema: 1, At: time.Now().UTC().Format(time.RFC3339Nano), LauncherVersion: launcherVersion, LauncherExecutable: self, LauncherSHA256: fileSHA256(self), CWD: cwd, LocalAppData: local, Candidates: cands, DuplicateInstalls: false, BootSource: "outer-launcher-cold-start"}
 	valid := 0
@@ -33,7 +39,9 @@ func main() {
 	d.DuplicateInstalls = valid > 1
 	selected, ok := selectCandidate(cands)
 	if !ok {
-		fail(local, d, fmt.Errorf("no valid installed appfiles found; launcher will not overwrite or rehydrate a stale embedded base"))
+		err := fmt.Errorf("no valid installed appfiles found; launcher will not overwrite or rehydrate a stale embedded base")
+		fail(local, d, err)
+		appendBootRecord(local, BootJournalRecord{Schema: 2, At: time.Now().UTC().Format(time.RFC3339Nano), ProcessKind: "launcher", PID: os.Getpid(), BootID: bootID, Executable: self, ExecutableSHA256: fileSHA256(self), ExecutableModifiedTime: fileModifiedTime(self), CWD: cwd, AppVersion: "(none)", RuntimeVersion: "launcher-" + launcherVersion, InstalledVersion: "(none)", ActiveVersion: "(none)", BootTarget: "(none)", LaunchSource: "outer-launcher-cold-start", RelaunchTarget: "(none)", CanonicalLauncher: canonical, Shortcuts: shortcuts, ShortcutRepairs: repairs, DuplicateExecutables: duplicates, Note: err.Error()})
 		return
 	}
 	d.SelectedAppDir = selected.AppDir
@@ -50,10 +58,51 @@ func main() {
 	}
 	d.ElectronExecutable = electron
 	writeDiagnostic(local, d)
-	bootID := strconv.FormatInt(time.Now().UTC().UnixNano(), 36)
+	pointerErr := writeActiveInstall(local, self, selected)
+	activeVersion := selected.Version
+	if a := readActiveInstall(local); a != nil && a.Version != "" {
+		activeVersion = a.Version
+	}
+	noteParts := []string{"highest-valid-installed-appfiles selected; no embedded app hydration"}
+	if canonicalErr != nil {
+		noteParts = append(noteParts, "canonical launcher copy failed: "+canonicalErr.Error())
+	}
+	if pointerErr != nil {
+		noteParts = append(noteParts, "active pointer write failed: "+pointerErr.Error())
+	}
+	if len(repairs) > 0 {
+		noteParts = append(noteParts, fmt.Sprintf("shortcut repairs attempted=%d", len(repairs)))
+	}
+	appendBootRecord(local, BootJournalRecord{
+		Schema:                 2,
+		At:                     time.Now().UTC().Format(time.RFC3339Nano),
+		ProcessKind:            "launcher",
+		PID:                    os.Getpid(),
+		BootID:                 bootID,
+		Executable:             self,
+		ExecutableSHA256:       fileSHA256(self),
+		ExecutableModifiedTime: fileModifiedTime(self),
+		CWD:                    cwd,
+		AppVersion:             selected.Version,
+		RuntimeVersion:         "launcher-" + launcherVersion,
+		InstalledVersion:       selected.Version,
+		ActiveVersion:          activeVersion,
+		BootTarget:             selected.AppDir,
+		LaunchSource:           "outer-launcher-cold-start",
+		LastKnownGood:          "(Electron safety owner)",
+		PendingUpdate:          "(Electron safety owner)",
+		RelaunchTarget:         electron + " -> " + selected.AppDir,
+		RollbackReason:         "(none at launcher selection)",
+		ResourcesAppAsar:       "(not applicable to outer launcher)",
+		CanonicalLauncher:      canonical,
+		Shortcuts:              shortcuts,
+		ShortcutRepairs:        repairs,
+		DuplicateExecutables:   duplicates,
+		Note:                   strings.Join(noteParts, "; "),
+	})
 	cmd := exec.Command(electron, selected.AppDir, "--aram-launcher-cold-start")
 	cmd.Dir = selected.AppDir
-	cmd.Env = append(os.Environ(), "ARAM_LAUNCHER_VERSION="+launcherVersion, "ARAM_LAUNCHER_EXECUTABLE="+self, "ARAM_LAUNCHER_APPDIR="+selected.AppDir, "ARAM_LAUNCHER_SELECTED_VERSION="+selected.Version, "ARAM_LAUNCHER_BOOT_ID="+bootID)
+	cmd.Env = append(os.Environ(), "ARAM_LAUNCHER_VERSION="+launcherVersion, "ARAM_LAUNCHER_EXECUTABLE="+self, "ARAM_LAUNCHER_CANONICAL="+canonical, "ARAM_LAUNCHER_APPDIR="+selected.AppDir, "ARAM_LAUNCHER_SELECTED_VERSION="+selected.Version, "ARAM_LAUNCHER_BOOT_ID="+bootID)
 	if err := cmd.Start(); err != nil {
 		fail(local, d, err)
 		return
