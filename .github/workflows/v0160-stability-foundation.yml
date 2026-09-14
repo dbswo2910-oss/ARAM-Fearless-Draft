@@ -53,6 +53,8 @@ jobs:
         run: node tools/stability/random-dna-canonical-differential-audit.js
       - name: Canonical RANDOM selection state differential
         run: node tools/stability/random-selection-canonical-differential-audit.js
+      - name: Canonical RANDOM TOP5 enumeration differential
+        run: node tools/stability/random-top5-canonical-differential-audit.js
       - name: Final assembled runtime
         run: node tools/stability/final-runtime-audit.js
       - name: Golden runtime fingerprints
