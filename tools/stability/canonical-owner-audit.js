@@ -1,0 +1,12 @@
+'use strict';
+const L=require('./lib');
+const R=require('../../src/core/owner-registry');
+L.must(R.production_active===false,'canonical src must not be production-active before migration gates pass');
+L.must(R.assertSingleOwner()===true,'canonical owner registry duplicate path');
+const required=['main','preload','state','lifecycle','updater','autosync','riot','draft','random_pick','random_ingame','data','items','profile','research','diagnostics'];
+for(const x of required)L.must(R.owners[x],`missing canonical owner ${x}`);
+const active=Object.entries(R.owners).filter(([,x])=>x.status==='active');
+L.must(active.length===0,'canonical subsystem activated before shadow migration approval');
+const report={status:'SUCCESS',production_active:R.production_active,subsystems:required.length,statuses:Object.fromEntries(Object.entries(R.owners).map(([k,v])=>[k,v.status])),policy_version:R.policy_version};
+L.write('audit-output/stability/canonical-owner-report.json',report);
+console.log('CANONICAL OWNER AUDIT: SUCCESS · source tree exists but remains shadow/planned');

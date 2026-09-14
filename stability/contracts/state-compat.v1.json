@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "stable_app_identity": "aram-fearless-draft",
+  "golden_version": "0.15.135",
+  "rules": {
+    "silent_reset_forbidden": true,
+    "malformed_json_must_not_destroy_last_known_good": true,
+    "intentional_tombstones_must_not_resurrect": true,
+    "migration_required_for_schema_or_identity_change": true,
+    "personal_data_fixture_must_be_synthetic_or_redacted": true
+  },
+  "surfaces": [
+    {"name":"main-process persisted state","owner":"state-integrity-v015117","kind":"filesystem-json","must_preserve":true},
+    {"name":"renderer localStorage","owner":"renderer/base + feature owners","kind":"localStorage","must_preserve":true},
+    {"name":"Research IndexedDB","owner":"research-storage-v015131/v015132 lineage","kind":"indexedDB","database":"aram-rating-research-v03","must_preserve":true},
+    {"name":"Research checkpoint","owner":"Research","kind":"indexedDB-record","key":"checkpoint-v03","must_preserve":true},
+    {"name":"match history/cache","owner":"history/autosync lineage","kind":"mixed-cache","must_preserve":true},
+    {"name":"updater safety snapshot/LKG","owner":"v0.15.79 + v0.15.116 integrity","kind":"filesystem","must_preserve":true}
+  ],
+  "real_windows_reference": {
+    "research_checkpoint_accepted_matches_observed": 159,
+    "note": "Acceptance metadata only. Do not commit the user's personal IndexedDB contents. Canonical migration must prove the old database can be opened read-only before any write/migration."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "format": "zstd-patch-from-v0142-index",
+  "part_count": 7,
+  "source_release": "v0.14.2",
+  "source_bundle_sha256": "2e076de26edb8f20a54bf0e07cfce9b6102f5f97617d8c5a3f65a03cb5671d04",
+  "source_index_sha256": "4a6cc26334e2dd7dd4aaf7ce5bd15315e47ad173baeb134ac40019d2e4906f32",
+  "patch_sha256": "194d5ec7ed88418a468f9da1a5b04b0f5d604564813fae271cf30864b9582c24",
+  "target_installed_baseline": "v0.15.49",
+  "target_index_sha256": "8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906",
+  "source_index_bytes": 35136540,
+  "target_index_bytes": 35359059,
+  "provenance": "validated installed v0.15.49 reference snapshot"
+}

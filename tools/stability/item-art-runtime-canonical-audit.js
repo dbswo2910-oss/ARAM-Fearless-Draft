@@ -1,0 +1,20 @@
+'use strict';
+const L=require('./lib');
+const mod=require('../../src/items/art-runtime');
+const source=L.read('src/items/art-runtime.js');
+L.must(!/setInterval\s*\(/.test(source),'canonical item art runtime must not create interval polling');
+L.must((source.match(/new MutationObserverClass\s*\(/g)||[]).length===1,'canonical item art runtime must have one observer construction site');
+L.must(source.includes('registerCleanup(stop)'),'canonical item art runtime must support lifecycle cleanup registration');
+const catalog={ok:true,version:'fixture',items:{'6655':{name:'루덴의 동반자',map12:true,purchasable:true,standardLiveId:true,full:true,iconPrimaryUrl:'https://cdn.example/item/6655.png',iconFallbackUrls:['https://fallback.example/item/6655.png']}}};
+let observerCreated=0,observed=0,disconnected=0,cleanupCount=0;
+class FakeObserver{constructor(cb){this.cb=cb;observerCreated++}observe(){observed++}disconnect(){disconnected++}}
+const styleNodes=[];
+const doc={documentElement:{},head:{appendChild:x=>styleNodes.push(x)},getElementById:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),dataset:{},style:{},set textContent(v){this._text=v},get textContent(){return this._text||''}}),querySelectorAll:()=>[]};
+const runtime=mod.createArtRuntime({documentRef:doc,MutationObserverClass:FakeObserver,getCatalog:async()=>catalog,registerCleanup:fn=>{cleanupCount++;L.must(fn===runtime.stop,'registered cleanup must be runtime.stop')}});
+runtime.setCatalog(catalog);L.must(runtime.resolve('루덴의 동반자')?.id==='6655','item art runtime resolver wiring drift');
+runtime.start();runtime.start();L.must(observerCreated===1&&observed===1,'item art runtime start must be idempotent single-observer');L.must(cleanupCount===1,'item art runtime cleanup must register exactly once');L.must(styleNodes.length===1,'item art runtime canonical style must be installed once');
+const img={tagName:'IMG',dataset:{itemId:'6655'},style:{},currentSrc:'https://cdn.example/item/6655.png?cache=1',getAttribute:n=>n==='src'?'https://cdn.example/item/6655.png?cache=1':'',closest:()=>null};runtime.refreshImg(img);L.must(img.dataset.aramItemArtReady==='1'&&img.dataset.aramItemArtCandidate==='0','primary item art ready semantics drift');
+const before=runtime.getAuditReport();L.must(before.singleOwner===true&&before.recurringFullDocumentScan===false&&before.observerActive===true,'item art runtime audit contract drift');runtime.stop();L.must(disconnected===1&&runtime.getObserver()===null&&runtime.isStarted()===false,'item art runtime stop/disconnect drift');runtime.stop();L.must(disconnected===1,'item art runtime stop must be idempotent');
+L.must(mod.production_active===false&&mod.score_logic_changed===false&&mod.item_recommendation_logic_changed===false,'item art runtime shadow must remain inactive/scoring-neutral');
+const legacy=L.read('update/v0.15.66/item-art-runtime-v01566.js');for(const token of ['childList:true','attributes:true','attributeFilter:[\'src\',\'data-item-id\',\'alt\',\'title\']','recurringFullDocumentScan:false'])L.must(legacy.includes(token),`Golden item art runtime contract missing ${token}`);
+const report={status:'SUCCESS',production_active:false,observer_created:observerCreated,observe_calls:observed,disconnect_calls:disconnected,lifecycle_cleanup_registrations:cleanupCount,semantic_contract:['single MutationObserver owner','idempotent start/stop','explicit lifecycle cleanup','no interval polling','primary/fallback art resolver reuse','no scoring/recommendation changes'],main_catalog_handler_migrated:false,cutover_allowed:false};L.write('audit-output/stability/item-art-runtime-canonical.json',report);console.log('ITEM ART RUNTIME CANONICAL AUDIT: SUCCESS · lifecycle-safe shadow owner ready');
