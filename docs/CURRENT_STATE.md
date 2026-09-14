@@ -4,12 +4,12 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.130**
-- Manifest message: v0.15.130 · SEARCHED PLAYER RATING + COLD START PROMOTION — resolved PUUID production UI
-- Manifest commit: `5b5ed4f88016bfad3e5c6b79d7ad990196f054c3`
-- Package: `update/v0.15.130/package.json` → **v0.15.130**
-- Electron entry: `main-v015130.js` → `update/v0.15.130/main-v015130.js`
-- Current runtime stability source: `update/v0.15.130/runtime-source-stability-v015130.js`
+- Active updater: **v0.15.131**
+- Manifest message: v0.15.131 · RESEARCH STORAGE RECOVERY + PATCH NOTES DETAIL FIX
+- Manifest commit: `b53f7ae1b342a5948961f8d1fceb922394abb6c9`
+- Package: `update/v0.15.131/package.json` → **v0.15.131**
+- Electron entry: `main-v015131.js` → `update/v0.15.131/main-v015131.js`
+- Current runtime stability source: `update/v0.15.131/runtime-source-stability-v015131.js`
 
 ## Active ownership — do not create competing owners
 

@@ -1,0 +1,96 @@
+name: v0.15.131 Production Release Audit
+
+on:
+  push:
+    branches:
+      - release/v0.15.131-research-storage-patchnotes
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'update/v0.15.131/**'
+      - 'update/manifest.json'
+      - 'update/current-state.json'
+      - 'docs/CURRENT_STATE.md'
+      - 'tools/v015131-production-audit.js'
+      - 'tools/v015131-history-preservation-audit.js'
+      - '.github/workflows/v015131-production-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+      - name: Compile package
+        run: |
+          node -c update/v0.15.131/rating-engine-v01.js
+          node -c update/v0.15.131/research-ui-core.js
+          node -c update/v0.15.131/research-storage-v015131.js
+          node -c update/v0.15.131/research-ui-devtools.js
+          node -c update/v0.15.120/ui-stability-baseline-v015115.js
+          node -c update/v0.15.131/runtime-source-stability-v015131.js
+          node -c update/v0.15.131/main-v015131.js
+          node -c update/v0.15.131/successor-route-v015131.js
+          node -c update/v0.15.131/cold-start-promotion-v015131.js
+          node -c tools/v015131-production-audit.js
+          node -c tools/v015131-history-preservation-audit.js
+      - name: Research and Patch Notes fixtures
+        run: node tools/v015131-production-audit.js
+      - name: Cold-start launcher fixtures
+        working-directory: launcher/stable-v203
+        run: go test -v ./...
+      - name: Full Regression
+        run: node tools/full-regression-audit.js
+      - name: Match History
+        run: node tools/v015131-history-preservation-audit.js
+      - name: Player Profile
+        run: node tools/profile-ux-audit.js
+      - name: AutoSync
+        run: node tools/v015119-autosync-concurrency-audit.js
+      - name: RANDOM
+        run: node tools/v015121-random-practice-restore-audit.js
+      - name: DATA and Patch Notes
+        run: node tools/v015120-data-subnav-audit.js
+      - name: Item
+        run: node tools/item-recommendation-v01581-audit.js
+      - name: Updater safety
+        run: |
+          node tools/v015115-single-owner-stability-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+      - name: AI continuity snapshot
+        run: node tools/sync-current-state.js --check
+      - name: AI continuity
+        run: node tools/ai-continuity-audit.js
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v015131-production-release-audit
+          path: |
+            audit-output/v015131-production-report.json
+            audit-output/full-regression-report.json
+            audit-output/profile-ux-report.json
+            audit-output/v015119-autosync-concurrency-report.json
+            audit-output/v015121-random-practice-restore-report.json
+            audit-output/v015120-data-subnav-report.json
+            audit-output/v015116-runtime-update-stability-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: warn
