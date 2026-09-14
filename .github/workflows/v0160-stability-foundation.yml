@@ -45,6 +45,8 @@ jobs:
         run: node tools/stability/updater-boot-guard-canonical-differential-audit.js
       - name: Canonical AutoSync semantic differential
         run: node tools/stability/autosync-canonical-differential-audit.js
+      - name: Canonical AutoSync updater lifecycle soak
+        run: node tools/stability/autosync-updater-lifecycle-soak-audit.js
       - name: Canonical Riot semantic differential
         run: node tools/stability/riot-canonical-differential-audit.js
       - name: Canonical Draft semantic differential
@@ -115,6 +117,8 @@ jobs:
         run: node tools/stability/behavioral-differential-audit.js
       - name: State and Research compatibility
         run: node tools/stability/state-compat-audit.js
+      - name: Cutover readiness matrix audit
+        run: node tools/stability/cutover-readiness-audit.js
       - name: Diagnostics contract
         run: node tools/stability/diagnostics-audit.js
       - name: Canonical diagnostics shell owner
