@@ -1,2 +1,4 @@
 'use strict';
-module.exports=require('./transaction');
+const transaction=require('./transaction');
+const bootGuard=require('./boot-guard');
+module.exports={...transaction,bootGuard};
