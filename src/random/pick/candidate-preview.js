@@ -4,8 +4,23 @@ const DNA_LANES=Object.freeze([
   ['engage','한타 개시(Engage)'],['poke','포킹(Poke)'],['front','프론트라인(Frontline)'],['sustain','지속 전투(Sustain)'],['cc','군중 제어(CC)']
 ]);
 const PRESENTATION_ROLES=Object.freeze({dna:'random-candidate-dna',quick:'random-quick-judgment',row:'random-candidate-row',badge:'random-candidate-selected-badge'});
-function clampPct(v,fallback=50){const n=Number(v);return Number.isFinite(n)?Math.max(0,Math.min(100,n)):fallback}
+function finite(v){const n=Number(v);return Number.isFinite(n)?n:null}
+function clampPct(v,fallback=50){const n=finite(v);return n===null?fallback:Math.max(0,Math.min(100,n))}
 function normalizeProfile(profile={}){return{adPct:clampPct(profile.adPct),apPct:clampPct(profile.apPct)}}
+function damageShareFromMeta(meta={},text=''){
+  const t=(String(text||'')+' '+String(meta?.damageType||meta?.damage_type||meta?.damage||meta?.role||meta?.class||meta?.position||'')+' '+String(Array.isArray(meta?.roles)?meta.roles.join(' '):'')+' '+String(Array.isArray(meta?.tags)?meta.tags.join(' '):'')).toLowerCase();
+  const ad=finite(meta?.adPct??meta?.ad_pct??meta?.physicalPct??meta?.physical_pct??meta?.adWeight??meta?.ad_weight),ap=finite(meta?.apPct??meta?.ap_pct??meta?.magicPct??meta?.magic_pct??meta?.apWeight??meta?.ap_weight);
+  if(ad!==null||ap!==null){const a=ad??0,p=ap??0,s=a+p;if(s>0)return{ad:a/s,ap:p/s,source:'meta'}}
+  if(/mixed|hybrid|혼합|하이브리드|균형/.test(t))return{ad:.5,ap:.5,source:'type'};
+  if(/ap브루저|ap\b|메이지|마법|magic/.test(t)&&!/ad브루저/.test(t))return{ad:.15,ap:.85,source:'type'};
+  if(/ad브루저|원딜|marksman|물리|physical|\bad\b/.test(t))return{ad:.85,ap:.15,source:'type'};
+  return null;
+}
+function projectCandidateDamageProfile({reference={},meta=null,text='',direct=null}={}){
+  const da=finite(direct?.adPct),dp=finite(direct?.apPct);if(da!==null||dp!==null){const a=da??Math.max(0,100-(dp??0)),p=dp??Math.max(0,100-a),s=a+p||100;return{adPct:Math.round(a/s*100),apPct:Math.round(p/s*100),source:'dataset'}}
+  const share=damageShareFromMeta(meta||{},text);if(!share)return{adPct:clampPct(reference.adPct),apPct:clampPct(reference.apPct),source:'base'};
+  const dm=String(reference.damage||'').match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);let a=dm?Number(dm[1]):clampPct(reference.adPct),p=dm?Number(dm[2]):clampPct(reference.apPct),fixed=Math.max(1,(Number(reference.ext)||0)+(Number(reference.locked)||0)),unit=(a+p)>0?(a+p)/fixed:1;a+=unit*share.ad;p+=unit*share.ap;const total=a+p||1;return{adPct:Math.round(a/total*100),apPct:Math.round(p/total*100),source:share.source};
+}
 function defaultEsc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function metricHtml(label,x={},esc=defaultEsc){const cls=x?.missing?' missing':(x?.preview?' preview':'');return `<div class="rp90DnaMetric${cls}" data-dna-lane="${esc(label)}"><div class="rp90DnaTop"><span>${esc(label)}</span><b>${esc(x?.state||'확인')}</b></div><div class="rp90DnaBar" style="--v:${clampPct(x?.pct,0)}%"><i></i></div></div>`}
 function candidateDnaHtml(preview,{name,profile,score,desc}={},escapeHtml=defaultEsc){
@@ -37,4 +52,4 @@ function createCandidatePreviewController({document,selectionState,dnaEngine,ref
   function handleRow(row){return apply(row)}
   return{apply,restore,clear,render,handleRow,rowName,rowProfile,rowScore,rowDesc,reflectRows};
 }
-module.exports={IMPLEMENTATION_VERSION,DNA_LANES,PRESENTATION_ROLES,normalizeProfile,metricHtml,candidateDnaHtml,quickJudgmentModel,quickJudgmentHtml,createCandidatePreviewController,production_active:false,score_logic_changed:false,random_scoring_changed:false};
+module.exports={IMPLEMENTATION_VERSION,DNA_LANES,PRESENTATION_ROLES,finite,normalizeProfile,damageShareFromMeta,projectCandidateDamageProfile,metricHtml,candidateDnaHtml,quickJudgmentModel,quickJudgmentHtml,createCandidatePreviewController,production_active:false,score_logic_changed:false,random_scoring_changed:false};
