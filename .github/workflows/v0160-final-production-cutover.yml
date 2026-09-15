@@ -1,0 +1,74 @@
+name: v0.16.0 Final Production Cutover
+
+on:
+  push:
+    branches:
+      - release/v0160-production-cutover
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cutover-head-preflight:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Finalize exact tested production manifest
+        run: node tools/stability/finalize-v0160-production-manifest.js
+      - name: Validate production cutover head
+        run: node tools/stability/final-production-cutover-audit.js
+      - name: Commit finalized production manifest if needed
+        shell: bash
+        run: |
+          if git diff --quiet -- update/manifest.json; then
+            echo "Production manifest already finalized."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update/manifest.json
+          git commit -m "release: switch production manifest to v0.16.0"
+          git push origin HEAD:release/v0160-production-cutover
+      - name: Upload cutover evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-final-production-cutover-head
+          path: audit-output/stability/final-production-cutover-report.json
+          if-no-files-found: warn
+
+  cutover-merged-tree-preflight:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate exact PR merge tree including current main
+        env:
+          CUTOVER_MERGE_TREE: '1'
+        run: node tools/stability/final-production-cutover-audit.js
+      - name: Upload merged-tree cutover evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-final-production-cutover-merge-tree
+          path: audit-output/stability/final-production-cutover-report.json
+          if-no-files-found: warn
