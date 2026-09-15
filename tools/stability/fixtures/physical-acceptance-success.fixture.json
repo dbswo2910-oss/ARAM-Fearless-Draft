@@ -1,0 +1,35 @@
+{
+  "status": "SUCCESS",
+  "stage": "PHYSICAL_WINDOWS_LEAGUE_ACCEPTANCE",
+  "evidence_kind": "synthetic-ci-fixture",
+  "privacy_safe": true,
+  "raw_personal_data_in_report": false,
+  "candidate_version": "0.15.135",
+  "canonical_shadow_payload_present": true,
+  "production_cutover": false,
+  "legacy_removal": false,
+  "app_alive_after_18s": true,
+  "app_exit_code": null,
+  "stable_user_data_identity": "aram-fearless-draft",
+  "storage_identity_logged": true,
+  "fatal_load_error": false,
+  "autosync_or_lcu_log_signal": true,
+  "league": {
+    "lockfile_found": true,
+    "lcu_connected": true,
+    "http_status": 200,
+    "puuid_present": true,
+    "credentials_in_report": false
+  },
+  "research": {
+    "database": "aram-rating-research-v03",
+    "checkpoint": "checkpoint-v03",
+    "expected_matches": 159,
+    "before_matches": 159,
+    "after_matches": 159,
+    "checkpoint_stable": true,
+    "checkpoint_digest_before": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "checkpoint_digest_after": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "acceptance_scope": "Physical Windows PC + real League Client/LCU contract fixture only. Synthetic CI evidence; never valid for release cutover."
+}

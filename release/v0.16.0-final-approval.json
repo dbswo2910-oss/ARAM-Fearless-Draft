@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "stage": "V0160_FINAL_PRODUCTION_RELEASE_APPROVAL",
+  "release": "0.16.0",
+  "approved_from_rc_head": "249b8ff5258f0a9ba22974cc0a55079a3d34043c",
+  "physical_evidence_sha256": "34f782275d40ca023ccb88624f04286b8e5b2904ef0c0e76ad9c63153f2fa0ec",
+  "approval": {
+    "final_production_release_approved": true,
+    "production_candidate_implementation_authorized": true,
+    "manifest_switch_authorized_only_after_all_post_activation_gates_green": true,
+    "main_merge_authorized_only_after_all_post_activation_gates_green": true,
+    "legacy_removal_authorized": false
+  },
+  "abort_policy": {
+    "on_any_gate_failure": "STOP_BEFORE_MAIN_OR_MANIFEST_MUTATION",
+    "golden_rollback_target": "0.15.135"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "stage": "V0160_CUTOVER_PREPARATION_APPROVAL",
+  "release": "0.16.0",
+  "golden_version": "0.15.135",
+  "rc_branch": "rc/v0160-canonical-activation",
+  "validated_rc_head": "7dd0b921170db86d9001c299065fcca4f0d3983d",
+  "physical_acceptance": {
+    "status": "SUCCESS",
+    "evidence_sha256": "34f782275d40ca023ccb88624f04286b8e5b2904ef0c0e76ad9c63153f2fa0ec",
+    "candidate_version": "0.15.135",
+    "stable_user_data_identity": "aram-fearless-draft",
+    "research_database": "aram-rating-research-v03",
+    "research_checkpoint": "checkpoint-v03",
+    "research_matches_before": 159,
+    "research_matches_after": 159,
+    "checkpoint_digest": "da9f4d570cd56b9f273734ad4c8a0c7c779f5104f0783502c784d503b2be0140",
+    "real_lcu_http_status": 200
+  },
+  "approval": {
+    "cutover_preparation_approved": true,
+    "approval_scope": "prepare-and-validate-production-cutover-plan",
+    "final_production_release_approved": false,
+    "production_cutover_authorized": false,
+    "legacy_removal_authorized": false
+  },
+  "safety": {
+    "main_mutation_allowed_in_this_stage": false,
+    "manifest_mutation_allowed_in_this_stage": false,
+    "canonical_activation_allowed_in_this_stage": false,
+    "legacy_runtime_deletion_allowed_in_this_stage": false
+  }
+}

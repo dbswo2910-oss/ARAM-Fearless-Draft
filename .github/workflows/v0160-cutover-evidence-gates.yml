@@ -1,0 +1,58 @@
+name: v0.16.0 Cutover Evidence Gates
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cutover-evidence-gates:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate gate syntax
+        shell: pwsh
+        run: |
+          node --check tools/stability/physical-acceptance-ingest-audit.js
+          if ($LASTEXITCODE -ne 0) { throw 'physical ingest syntax failed' }
+          node --check tools/stability/cutover-approval-gate.js
+          if ($LASTEXITCODE -ne 0) { throw 'cutover approval gate syntax failed' }
+      - name: Stage 1 contract-test physical ingest
+        shell: pwsh
+        run: |
+          node tools/stability/physical-acceptance-ingest-audit.js --report tools/stability/fixtures/physical-acceptance-success.fixture.json --contract-test
+          if ($LASTEXITCODE -ne 0) { throw 'physical evidence contract fixture failed' }
+          $r = Get-Content audit-output/stability/physical-acceptance-ingest-report.json -Raw | ConvertFrom-Json
+          if ($r.status -ne 'SUCCESS' -or -not $r.synthetic_fixture -or $r.release_evidence -or $r.production_cutover_authorized) { throw 'physical ingest contract classification mismatch' }
+      - name: Prove synthetic evidence is rejected as release evidence
+        shell: pwsh
+        run: |
+          node tools/stability/physical-acceptance-ingest-audit.js --report tools/stability/fixtures/physical-acceptance-success.fixture.json
+          if ($LASTEXITCODE -eq 0) { throw 'synthetic fixture was incorrectly accepted as release evidence' }
+          exit 0
+      - name: Stage 2 prove cutover is blocked without physical evidence
+        shell: pwsh
+        run: |
+          node tools/stability/cutover-approval-gate.js --assert-blocked
+          if ($LASTEXITCODE -ne 0) { throw 'missing-evidence hard block contract failed' }
+          $r = Get-Content audit-output/stability/cutover-approval-gate.json -Raw | ConvertFrom-Json
+          if ($r.status -ne 'BLOCKED' -or $r.readiness_eligible -or $r.production_cutover_authorized -or $r.legacy_removal_authorized) { throw 'cutover hard block state mismatch' }
+      - name: Prove synthetic evidence cannot unlock cutover
+        shell: pwsh
+        run: |
+          node tools/stability/cutover-approval-gate.js --physical-report tools/stability/fixtures/physical-acceptance-success.fixture.json --assert-blocked
+          if ($LASTEXITCODE -ne 0) { throw 'synthetic-evidence cutover block contract failed' }
+          $r = Get-Content audit-output/stability/cutover-approval-gate.json -Raw | ConvertFrom-Json
+          if ($r.status -ne 'BLOCKED' -or $r.physical_acceptance_release_evidence -or $r.production_cutover_authorized) { throw 'synthetic evidence incorrectly unlocked cutover' }
+      - name: Upload gate reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-cutover-evidence-gates
+          path: audit-output/stability
+          if-no-files-found: error
