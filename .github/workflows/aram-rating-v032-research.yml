@@ -1,0 +1,76 @@
+name: ARAM Rating v0.3.2 Research
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'research/aram-rating-v032/**'
+      - 'tools/research/aram-rating-v032-audit.js'
+      - 'tools/research/aram-rating-v032-b3-audit.js'
+      - 'tools/research/aram-rating-v032-b3-runner-audit.js'
+      - 'tools/research/aram-rating-v032-b3-evaluator-audit.js'
+      - 'tools/research/aram-rating-v032-b4-audit.js'
+      - 'tools/research/aram-rating-v032-b4-runner-audit.js'
+      - 'tools/research/aram-rating-v032-b4-evaluator-audit.js'
+      - 'tools/research/aram-rating-v032-b4-cold-start-diagnostic-audit.js'
+      - 'tools/research/aram-rating-v032-b5-preview-audit.js'
+      - 'tools/research/aram-rating-v032-b51-preview-audit.js'
+      - 'tools/research/aram-rating-v032-b51-runner-audit.js'
+      - 'tools/research/aram-rating-v032-b51r2-preflight-audit.js'
+      - '.github/workflows/aram-rating-v032-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  accuracy-first-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run synthetic/offline v0.3.2 audit
+        run: node tools/research/aram-rating-v032-audit.js
+      - name: Run B3 density-first preview audit
+        run: node tools/research/aram-rating-v032-b3-audit.js
+      - name: Run B3 manual runner safety audit
+        run: node tools/research/aram-rating-v032-b3-runner-audit.js
+      - name: Run B3 1000 evaluator safety audit
+        run: node tools/research/aram-rating-v032-b3-evaluator-audit.js
+      - name: Run B4 mature-network preview audit
+        run: node tools/research/aram-rating-v032-b4-audit.js
+      - name: Run B4 mature-network runner safety audit
+        run: node tools/research/aram-rating-v032-b4-runner-audit.js
+      - name: Run B4 mature-network evaluator safety audit
+        run: node tools/research/aram-rating-v032-b4-evaluator-audit.js
+      - name: Run B4 cold-start diagnostic safety audit
+        run: node tools/research/aram-rating-v032-b4-cold-start-diagnostic-audit.js
+      - name: Run B5 closed-network preview audit
+        run: node tools/research/aram-rating-v032-b5-preview-audit.js
+      - name: Run B5.1 match-level closed preview audit
+        run: node tools/research/aram-rating-v032-b51-preview-audit.js
+      - name: Run B5.1 evidence-first manual runner safety audit
+        run: node tools/research/aram-rating-v032-b51-runner-audit.js
+      - name: Run B5.1 R2 one-shot preflight safety audit
+        run: node tools/research/aram-rating-v032-b51r2-preflight-audit.js
+      - name: Upload aggregate/synthetic audits only
+        uses: actions/upload-artifact@v4
+        with:
+          name: aram-rating-v032-research-audit
+          path: |
+            audit-output/aram-rating-v032-audit.json
+            audit-output/aram-rating-v032-b3-audit.json
+            audit-output/aram-rating-v032-b3-runner-audit.json
+            audit-output/aram-rating-v032-b3-evaluator-audit.json
+            audit-output/aram-rating-v032-b4-audit.json
+            audit-output/aram-rating-v032-b4-runner-audit.json
+            audit-output/aram-rating-v032-b4-evaluator-audit.json
+            audit-output/aram-rating-v032-b4-cold-start-diagnostic-audit.json
+            audit-output/aram-rating-v032-b5-preview-audit.json
+            audit-output/aram-rating-v032-b51-preview-audit.json
+            audit-output/aram-rating-v032-b51-runner-audit.json
+            audit-output/aram-rating-v032-b51r2-preflight-audit.json
+          if-no-files-found: error

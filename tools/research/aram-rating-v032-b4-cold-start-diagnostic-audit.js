@@ -1,0 +1,13 @@
+'use strict';
+const fs=require('fs'),path=require('path');
+const ROOT=path.resolve(__dirname,'../..'),R=path.join(ROOT,'research/aram-rating-v032');
+let pass=0;const ok=(c,m)=>{if(!c)throw new Error('B4 COLD START DIAGNOSTIC AUDIT: '+m);pass++};
+const p=path.join(R,'phase-b4-v032-cold-start-diagnostic-devtools.js'),s=fs.readFileSync(p,'utf8');new Function(s);
+for(const needle of["DB='aram-rating-research-v03'","CP_KEY='checkpoint-v03'","MIN_MATCHES=1900","B4_COLD_START_DIAGNOSTIC","no_cold","all_2_plus","all_5_plus","all_10_plus","all_20_plus","threshold_no_cold_matches:30","constant_50_log_loss:LOG2","sample_sufficient","performance_improves_50","diagnosis","checkpoint_written:false","riot_lcu_requests:0","raw_puuid_returned:false","READ ONLY"])ok(s.includes(needle),'missing contract '+needle);
+ok(!s.includes('getAramMatchHistory'),'diagnostic must not request Riot/LCU history');
+ok(!s.includes("transaction(STORE,'readwrite')")&&!s.includes('.put(')&&!s.includes('deleteDatabase(')&&!s.includes('localStorage.clear('),'diagnostic must be read-only');
+ok(!s.includes('raw.githubusercontent.com')&&!s.includes('(0,eval)'),'diagnostic must not fetch/eval remote code');
+const manifest=JSON.parse(fs.readFileSync(path.join(ROOT,'update/manifest.json'),'utf8'));ok(manifest.version==='0.16.0','production version drift');ok(!(manifest.files||[]).some(x=>String(x.source||'').includes('cold-start-diagnostic')),'B4 diagnostic shipped in production');
+const report={status:'SUCCESS',passes:pass,phase:'B4',diagnostic:'cold-start',requires_matches:1900,read_only:true,threshold_no_cold_matches:30,riot_lcu_requests:0,checkpoint_writes:0,remote_eval:false,production_changed:false};
+fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/aram-rating-v032-b4-cold-start-diagnostic-audit.json'),JSON.stringify(report,null,2)+'\n');
+console.log(`B4 COLD START DIAGNOSTIC AUDIT: SUCCESS · ${pass} checks`);
