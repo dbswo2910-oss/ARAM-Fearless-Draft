@@ -3,16 +3,16 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.15.135",
-    "message": "v0.15.135 · PATCH NOTES SEMANTIC SHELL SWEEP",
+    "version": "0.16.0",
+    "message": "v0.16.0 · CLEAN BASELINE",
     "min_launcher": "2.0.2",
-    "manifest_commit": "a0a9e9fb0dff5650aae811c6a416e00465f092ee"
+    "manifest_commit": "ce9643f6dfc2b25b9535b2f51cfa0d6a6db63239"
   },
   "package": {
-    "source": "update/v0.15.135/package.json",
-    "version": "0.15.135",
-    "main": "main-v015135.js",
-    "main_source": "update/v0.15.135/main-v015135.js"
+    "source": "update/v0.16.0/package.json",
+    "version": "0.16.0",
+    "main": "main-v0160.js",
+    "main_source": "update/v0.16.0/main-v0160.js"
   },
   "owners": {
     "random_pick": {

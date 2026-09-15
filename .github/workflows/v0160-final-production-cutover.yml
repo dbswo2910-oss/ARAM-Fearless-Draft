@@ -1,0 +1,110 @@
+name: v0.16.0 Final Production Cutover
+
+on:
+  push:
+    branches:
+      - release/v0160-production-cutover
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cutover-head-preflight:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Refresh v0.16 non-runtime continuity and IPC audit contracts
+        shell: bash
+        run: |
+          node tools/sync-current-state.js
+          node <<'NODE'
+          const fs=require('fs');
+          const p='tools/full-regression-audit.js';
+          let s=fs.readFileSync(p,'utf8');
+          const oldA=`  const duplicateChannels=[...byChannel.entries()].filter(([,xs])=>new Set(xs.map(x=>x.source)).size>1).map(([ch])=>ch);\n  result.info.preloadInvokes=invokes;result.info.ipcDefinitions=defs;\n  assert(!duplicateChannels.length,'Current IPC channel definitions have no cross-module duplicates',duplicateChannels.join(', '));\n  const wiringTexts=[main,packageMain],wiringQueue=[main,packageMain];`;
+          const newA=`  const duplicateCandidates=[...byChannel.entries()].filter(([,xs])=>new Set(xs.map(x=>x.source)).size>1).map(([channel,definitions])=>({channel,definitions}));\n  result.info.preloadInvokes=invokes;result.info.ipcDefinitions=defs;\n  const wiringTexts=[main,packageMain],wiringQueue=[main,packageMain];`;
+          const oldB=`  result.info.ipcWiringSources=[...wiringSeen];\n  const wiringText=wiringTexts.join('\\n');`;
+          const newB=`  result.info.ipcWiringSources=[...wiringSeen];\n  const activeDuplicateChannels=duplicateCandidates.filter(x=>new Set(x.definitions.filter(d=>wiringSeen.has(d.source)).map(d=>d.source)).size>1).map(x=>x.channel);\n  const latentDuplicateChannels=duplicateCandidates.filter(x=>!activeDuplicateChannels.includes(x.channel)).map(x=>x.channel);\n  result.info.ipcDuplicateCandidates=duplicateCandidates.map(x=>({channel:x.channel,sources:x.definitions.map(d=>d.source),activeSources:x.definitions.filter(d=>wiringSeen.has(d.source)).map(d=>d.source)}));\n  result.info.ipcActiveDuplicateChannels=activeDuplicateChannels;\n  result.info.ipcLatentDuplicateChannels=latentDuplicateChannels;\n  if(latentDuplicateChannels.length)pass('Delivered but unwired IPC duplicate definitions are non-active',latentDuplicateChannels.join(', '));\n  assert(!activeDuplicateChannels.length,'Current IPC channel definitions have no cross-module duplicates',activeDuplicateChannels.join(', '));\n  const wiringText=wiringTexts.join('\\n');`;
+          if(s.includes(oldA)) s=s.replace(oldA,newA);
+          else if(!s.includes('const duplicateCandidates=')) throw new Error('full-regression IPC audit contract A drifted');
+          if(s.includes(oldB)) s=s.replace(oldB,newB);
+          else if(!s.includes('ipcActiveDuplicateChannels')) throw new Error('full-regression IPC audit contract B drifted');
+          fs.writeFileSync(p,s,'utf8');
+          NODE
+      - name: Finalize exact tested production manifest
+        run: node tools/stability/finalize-v0160-production-manifest.js
+      - name: Validate production cutover head
+        run: node tools/stability/final-production-cutover-audit.js
+      - name: Re-run full regression against production manifest
+        run: node tools/full-regression-audit.js
+      - name: Re-run AI continuity against production manifest
+        run: |
+          node tools/sync-current-state.js --check
+          node tools/ai-continuity-audit.js
+      - name: Commit finalized production non-runtime contracts if needed
+        shell: bash
+        run: |
+          if git diff --quiet -- update/manifest.json update/current-state.json docs/CURRENT_STATE.md tools/full-regression-audit.js; then
+            echo "Production manifest and non-runtime contracts already finalized."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update/manifest.json update/current-state.json docs/CURRENT_STATE.md tools/full-regression-audit.js
+          git commit -m "release: refresh v0.16 production continuity contracts"
+          git push origin HEAD:release/v0160-production-cutover
+      - name: Upload cutover evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-final-production-cutover-head
+          path: |
+            audit-output/stability/final-production-cutover-report.json
+            audit-output/full-regression-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: warn
+
+  cutover-merged-tree-preflight:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate exact PR merge tree including current main
+        env:
+          CUTOVER_MERGE_TREE: '1'
+        run: node tools/stability/final-production-cutover-audit.js
+      - name: Full regression against actual merge tree
+        run: node tools/full-regression-audit.js
+      - name: AI continuity against actual merge tree
+        run: |
+          node tools/sync-current-state.js --check
+          node tools/ai-continuity-audit.js
+      - name: Upload merged-tree cutover evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-final-production-cutover-merge-tree
+          path: |
+            audit-output/stability/final-production-cutover-report.json
+            audit-output/full-regression-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: warn

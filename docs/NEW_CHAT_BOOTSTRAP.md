@@ -15,7 +15,8 @@ Use this when continuing ARAM Fearless Draft in a fresh ChatGPT/Codex/AI session
 4) update/manifest.json
 5) docs/KNOWN_ISSUES.md
 6) docs/AI_HANDOFF.md
-7) 최신 main commit, 최근 merged PR, 관련 GitHub Actions 결과
+7) docs/V0160_CLEAN_BASELINE_PROGRESS.md 가 존재하면 읽고 Issue #83 / Draft PR #84 / 최신 관련 CI까지 확인
+8) 최신 main commit, 최근 merged PR, 관련 GitHub Actions 결과
 
 작업 시작 전에 5줄 안팎으로 현재 활성 버전 / UI·state·resource·AutoSync owner / 아직 실제 Windows 검증이 남은 항목 / 다음 예정 작업 / 이번 요청이 scoring·UI·state·AutoSync 중 무엇을 건드리는지 먼저 확인해.
 
@@ -33,11 +34,13 @@ Before editing:
 2. Use `docs/CURRENT_STATE.md` for the compact human handoff and `update/current-state.json` for machine-readable ownership/version state.
 3. Read `docs/KNOWN_ISSUES.md` before proposing a fix so historical failure modes are not repeated.
 4. Read `docs/AI_HANDOFF.md` only after the compact current-state files; it is intentionally long historical context.
-5. Inspect the latest main commit and recent merged PR/CI rather than assuming the last chat ended at the latest release.
-6. Before writing code, identify the current owner of the subsystem being changed.
-7. After a release changes `update/manifest.json`, run `node tools/sync-current-state.js` before committing the release metadata.
-8. Before declaring completion, run `node tools/ai-continuity-audit.js` plus the relevant feature audit and Full Regression Audit.
+5. If `docs/V0160_CLEAN_BASELINE_PROGRESS.md` exists, read it before touching the active v0.16 stabilization branch and then verify its claims against Issue #83, Draft PR #84 and latest CI.
+6. Inspect the latest main commit and recent merged PR/CI rather than assuming the last chat ended at the latest release.
+7. Before writing code, identify the current owner of the subsystem being changed.
+8. After a release changes `update/manifest.json`, run `node tools/sync-current-state.js` before committing the release metadata.
+9. Before declaring completion, run `node tools/ai-continuity-audit.js` plus the relevant feature audit and Full Regression Audit.
+10. At the end of substantial v0.16 stabilization work, update durable progress evidence (`docs/V0160_CLEAN_BASELINE_PROGRESS.md` and Issue #83 or PR #84) with current HEAD, green CI, completed scope and exact next task.
 
 ## Why this exists
 
-Long development chats can lose details when a new conversation starts. This protocol makes the repository itself the durable project memory. Chat memory is useful context, but it is never authoritative over the current manifest, owner contracts, known-issue register, and CI state.
+Long development chats can lose details when a new conversation starts. This protocol makes the repository itself the durable project memory. Chat memory is useful context, but it is never authoritative over the current manifest, owner contracts, known-issue register, active stabilization progress document, and CI state.

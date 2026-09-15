@@ -1,0 +1,2 @@
+'use strict';
+module.exports={subsystem:'research',status:'shadow',database:'aram-rating-research-v03',checkpoint:'checkpoint-v03',components:{storage_read:'shadow',rating_engine:'planned',research_ui:'planned',active_sampling:'shadow-v0.3.1'},migration_policy:'read old checkpoint successfully before any write',network_collection_default:false,b2_manual_only:true,automatic_collection:false,production_active:false,score_logic_changed:false};

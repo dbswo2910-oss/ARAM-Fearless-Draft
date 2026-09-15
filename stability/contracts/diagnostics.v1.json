@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "version": "0.15.135-golden",
+  "policy": "Diagnostics must be safe to share, must not become a second feature owner, and must never mutate gameplay, scoring, storage, or AutoSync state.",
+  "required_sections": [
+    "app",
+    "view",
+    "ui",
+    "storage",
+    "research",
+    "autosync",
+    "runtime"
+  ],
+  "privacy": {
+    "mask_puuid": true,
+    "mask_riot_id": true,
+    "mask_auth_tokens": true,
+    "mask_absolute_user_paths": true,
+    "raw_match_history_forbidden": true,
+    "raw_indexeddb_export_forbidden": true
+  },
+  "required_fields": {
+    "app": ["version", "app_identity"],
+    "view": ["current_view", "current_mode"],
+    "ui": ["duplicate_ids", "contract_violations"],
+    "storage": ["user_data_identity", "local_storage_available", "indexeddb_available"],
+    "research": ["database_name", "checkpoint_key", "checkpoint_readable"],
+    "autosync": ["status", "queue_depth"],
+    "runtime": ["owners", "loaded_modules"]
+  },
+  "future_ui_role": "app-diagnostics",
+  "export_format": "application/json"
+}

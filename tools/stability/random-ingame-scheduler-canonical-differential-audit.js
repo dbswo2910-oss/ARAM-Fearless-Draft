@@ -1,0 +1,17 @@
+'use strict';
+const L=require('./lib');const next=require('../../src/random/ingame/scheduler');
+const legacy=L.read('update/v0.15.70/runtime-random-ingame-v01570.js');
+for(const marker of ["timer=upstreamSetInterval.call(window,()=>tick(false),1000)","nativeDocAdd.call(document,'click'","#randomPickModeBtn,#randomIngameModeBtn","document,'visibilitychange'","window.addEventListener?.('focus'","architecture:'single-heartbeat + semantic render gate + hidden legacy renderer suppression'"])L.must(legacy.includes(marker),`legacy scheduler marker missing: ${marker}`);
+const listeners={doc:{},win:{}},timeouts=[],intervals=[];let cleared=0,mode='ingame',ux=0,body=0,icons=0;const calls=[];
+const documentRef={visibilityState:'visible',addEventListener(type,fn){listeners.doc[type]=fn},removeEventListener(type,fn){if(listeners.doc[type]===fn)delete listeners.doc[type]}};
+const windowRef={addEventListener(type,fn){listeners.win[type]=fn},removeEventListener(type,fn){if(listeners.win[type]===fn)delete listeners.win[type]}};
+const coordinator={tick(force){calls.push(!!force);return{force:!!force}}};
+const scheduler=next.createScheduler({coordinator,documentRef,windowRef,readMode:()=>mode,refreshUx:()=>ux++,bindBodyObserver:()=>body++,scheduleGlobalIcons:()=>icons++,setIntervalFn:(fn,ms)=>{intervals.push({fn,ms});return 77},clearIntervalFn:id=>{if(id===77)cleared++},setTimeoutFn:(fn,ms)=>{timeouts.push({fn,ms});fn();return timeouts.length}});
+L.must(scheduler.start()===true&&scheduler.start()===false,'scheduler must have single start owner');L.must(intervals.length===1&&intervals[0].ms===1000,'legacy 1000ms heartbeat drift');L.must(body===1&&calls.length===1&&calls[0]===true,'start should bind body and force initial tick');
+intervals[0].fn();L.must(calls.at(-1)===false,'heartbeat must use non-forced tick');
+const closestMap=sel=>sel==='#randomPickModeBtn,#randomIngameModeBtn'?{}:null;listeners.doc.click({target:{closest:closestMap}});L.must(ux===1&&calls.at(-1)===true,'ingame mode click must refresh UX and force tick');
+mode='pick';listeners.doc.click({target:{closest:closestMap}});L.must(ux===2&&icons===1,'pick mode click must route to global icons');
+listeners.doc.visibilitychange();L.must(body===2&&icons===2&&calls.at(-1)===true,'visibility restore semantics drift');listeners.win.focus();L.must(body===3&&calls.at(-1)===true,'focus restore semantics drift');
+L.must(scheduler.stop()===true&&scheduler.stop()===false&&cleared===1,'scheduler stop must be idempotent and clear one heartbeat');L.must(!listeners.doc.click&&!listeners.doc.visibilitychange&&!listeners.win.focus,'scheduler listeners must be released on stop');
+L.must(next.production_active===false&&next.lifecycle_single_owner===true&&next.score_logic_changed===false,'canonical scheduler must remain shadow/single-owner/scoring-neutral');
+const report={status:'SUCCESS',production_active:false,implementation:next.IMPLEMENTATION_VERSION,legacy_source:'update/v0.15.70/runtime-random-ingame-v01570.js',semantic_contract:['one 1000ms heartbeat','mode/nav click routing','visibility/focus forced refresh','idempotent start/stop','listener cleanup'],scoring_changed:false,cutover_allowed:false};L.write('audit-output/stability/random-ingame-scheduler-canonical-differential.json',report);console.log('RANDOM IN GAME SCHEDULER CANONICAL DIFFERENTIAL: SUCCESS');

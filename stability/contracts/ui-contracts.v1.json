@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "policy": "Critical UI receives stable data-ui-role identifiers in the canonical v0.16 source. Legacy selectors below are migration anchors only and must not become the new API.",
+  "roles": [
+    {"role":"random-root","legacy_selector":"#random","expected":"one_when_view_exists","domain":"random"},
+    {"role":"random-queue-size","legacy_selector":"#queueSize","expected":"one","domain":"random"},
+    {"role":"random-input-anchor","legacy_selector":"#randomInputAnchor","expected":"one","domain":"random"},
+    {"role":"random-external-inputs","legacy_selector":"#externalInputs","expected":"one","domain":"random"},
+    {"role":"random-party-inputs","legacy_selector":"#manualPartyInputs","expected":"zero_or_one","domain":"random"},
+    {"role":"random-pool-inputs","legacy_selector":"#poolInputs","expected":"one","domain":"random"},
+    {"role":"random-top5","legacy_selector":"#comboResults","expected":"one","domain":"random"},
+    {"role":"random-top5-detail","legacy_selector":"#comboDetail","expected":"one","domain":"random"},
+    {"role":"random-team-five","legacy_selector":"#randomOurFive","expected":"one","domain":"random"},
+    {"role":"random-team-summary","legacy_selector":"#randomOurSummary","expected":"one","domain":"random"},
+    {"role":"random-enemy-summary","legacy_selector":"#randomEnemySummary","expected":"one","domain":"random"},
+    {"role":"random-ingame-shell","legacy_selector":"#randomIngameShell","expected":"one_when_ingame","domain":"random-ingame"},
+    {"role":"random-ingame-summary","legacy_selector":"#randomLiveSummary","expected":"one_when_ingame","domain":"random-ingame"},
+    {"role":"random-ingame-build","legacy_selector":"#randomLiveBuildAdvice","expected":"one_when_ingame","domain":"random-ingame"},
+    {"role":"data-root","legacy_selector":"#data","expected":"one_when_view_exists","domain":"data"},
+    {"role":"data-card","legacy_selector":"#dataCard","expected":"one","domain":"data"},
+    {"role":"data-subnav","legacy_selector":"#dataHubTopNavV015115","expected":"one","domain":"data"},
+    {"role":"data-patch-notes","legacy_selector":"#dataPatchNotesV01599","expected":"one","domain":"data"},
+    {"role":"profile-launch","legacy_selector":"#pp19open","expected":"zero_or_one","domain":"profile"},
+    {"role":"profile-overlay","legacy_selector":"#pp19ov","expected":"zero_or_one","domain":"profile"},
+    {"role":"profile-content","legacy_selector":"#pp19c","expected":"zero_or_one","domain":"profile"},
+    {"role":"results-dashboard","legacy_selector":"#riCoachShellV01550","expected":"one_when_result","domain":"profile-results"},
+    {"role":"research-card","legacy_selector":"#aramRatingResearchCardV01","expected":"zero_or_one","domain":"research"},
+    {"role":"history-hint","legacy_selector":"#historyListHint","expected":"one_when_history_exists","domain":"history"}
+  ],
+  "mode_contracts": [
+    {"mode":"data.patch","must_show":["data-root","data-card","data-subnav","data-patch-notes"],"must_hide_semantic":["data-detail-generic-shell-header"]},
+    {"mode":"random.pick","must_show":["random-root","random-input-anchor","random-pool-inputs","random-top5","random-top5-detail"],"must_hide_semantic":["random-ingame-shell"]},
+    {"mode":"random.ingame","must_show":["random-root","random-ingame-shell","random-ingame-summary","random-ingame-build"],"must_hide_semantic":[]},
+    {"mode":"random.result","must_show":["random-root","random-ingame-shell","results-dashboard"],"must_hide_semantic":[]},
+    {"mode":"profile.research","must_show":["profile-overlay","profile-content","research-card"],"must_hide_semantic":[]}
+  ]
+}

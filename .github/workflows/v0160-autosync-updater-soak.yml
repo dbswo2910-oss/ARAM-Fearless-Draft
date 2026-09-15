@@ -1,0 +1,33 @@
+name: v0.16.0 AutoSync Updater Soak
+
+on:
+  push:
+    branches:
+      - stability/v0160-clean-baseline-phaseb
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Canonical AutoSync updater lifecycle soak
+        run: node tools/stability/autosync-updater-lifecycle-soak-audit.js
+      - name: Upload soak report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-autosync-updater-lifecycle-soak
+          path: audit-output/stability/autosync-updater-lifecycle-soak-report.json
+          if-no-files-found: error

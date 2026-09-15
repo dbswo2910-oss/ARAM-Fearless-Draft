@@ -91,7 +91,8 @@ const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').
       'main-v015128.js':'update/v0.15.128/main-v015128.js'
     };
     for(const [p,s] of Object.entries(preserved))ok(map.get(p)===s,`successor failed to preserve v0.15.128 history dependency ${p}: ${map.get(p)||'missing'}`);
-    const activeRuntimePath=map.get(`runtime-source-stability-v${String(manifest.version).replace(/\./g,'')}.js`);
+    const activeRuntimeKey=String(manifest.version)==='0.16.0'?'runtime-source-stability-v015135.js':`runtime-source-stability-v${String(manifest.version).replace(/\./g,'')}.js`;
+    const activeRuntimePath=map.get(activeRuntimeKey);
     ok(activeRuntimePath&&exists(activeRuntimePath),'successor active runtime source missing');
     const activeRuntime=require(path.join(ROOT,activeRuntimePath));
     ok(activeRuntime.history_latency_changed===true&&activeRuntime.history_cache_first===true&&activeRuntime.history_background_deep_scan===true&&activeRuntime.result_latest_probe===true,'successor runtime did not preserve v0.15.128 history flags');

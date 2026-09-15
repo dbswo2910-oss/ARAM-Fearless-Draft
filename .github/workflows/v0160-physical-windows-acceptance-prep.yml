@@ -1,0 +1,65 @@
+name: v0.16.0 Physical Windows Acceptance Prep
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical-acceptance-harness:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate real-state probe syntax
+        shell: pwsh
+        run: |
+          node --check tools/stability/windows-real-state-probe.js
+          if ($LASTEXITCODE -ne 0) { throw 'windows-real-state-probe.js syntax failed' }
+      - name: Validate PowerShell harness syntax
+        shell: pwsh
+        run: |
+          $path = Join-Path $PWD 'tools\stability\windows-physical-acceptance.ps1'
+          $tokens=$null; $errors=$null
+          [System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | ForEach-Object { Write-Error $_.Message }; throw 'physical acceptance PowerShell syntax failed' }
+      - name: Dry-run privacy and safety contract
+        shell: pwsh
+        run: |
+          $out = Join-Path $PWD 'audit-output\stability\physical-acceptance-prep'
+          powershell -ExecutionPolicy Bypass -File tools/stability/windows-physical-acceptance.ps1 -DryRun -ReportDir $out
+          if ($LASTEXITCODE -ne 0) { throw 'physical acceptance harness dry-run failed' }
+          $r = Get-Content (Join-Path $out 'physical-acceptance-report.json') -Raw | ConvertFrom-Json
+          if ($r.status -ne 'SUCCESS' -or -not $r.privacy_safe -or $r.raw_personal_data_in_report -or $r.production_cutover -or $r.legacy_removal -or $r.expected_research_matches -ne 159) { throw 'physical acceptance dry-run safety contract mismatch' }
+      - name: Build acceptance kit
+        shell: pwsh
+        run: |
+          $kit = Join-Path $PWD 'audit-output\stability\physical-acceptance-kit'
+          New-Item -ItemType Directory -Force -Path $kit | Out-Null
+          Copy-Item tools/stability/windows-physical-acceptance.ps1 $kit
+          Copy-Item tools/stability/windows-real-state-probe.js $kit
+          Copy-Item docs/PHYSICAL_WINDOWS_ACCEPTANCE.md (Join-Path $kit 'README.md')
+          [ordered]@{
+            status='SUCCESS'
+            stage='PHYSICAL_WINDOWS_ACCEPTANCE_PREP'
+            rc_branch='rc/v0160-canonical-activation'
+            expected_research_matches=159
+            stable_user_data_identity='aram-fearless-draft'
+            research_database='aram-rating-research-v03'
+            checkpoint_key='checkpoint-v03'
+            privacy_safe=$true
+            real_user_pc_tested=$false
+            real_league_client_tested=$false
+            production_cutover=$false
+            legacy_removal=$false
+          } | ConvertTo-Json | Set-Content (Join-Path $kit 'kit-manifest.json') -Encoding utf8
+      - name: Upload physical acceptance kit
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-physical-windows-acceptance-kit
+          path: audit-output/stability/physical-acceptance-kit
+          if-no-files-found: error

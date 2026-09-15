@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "golden_version": "0.15.135",
+  "golden_commit": "2048d56ceec2317b4cef225f284443521005994d",
+  "normalization": "ANSI/root-path/ISO timestamps normalized before hashing",
+  "fixtures": {
+    "draft-contract": {"stdout_sha256":"5738dceb1df904e1e7cd55d5b37fd131e064052b9d4de5d0772884fec598b30b","stderr_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","exit_code":0},
+    "random-candidate-dna": {"stdout_sha256":"1f385ef06e83eb5de5251083edb9d6e71096121b6343b2b56bf309020bd763a7","stderr_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","exit_code":0},
+    "random-top5": {"stdout_sha256":"a1994115402b566b10d06891dfcea21d5e6a66316e06a9537547adef87e80ea8","stderr_sha256":"992a512ff5e722049ca81442353cbc0a29384a239c6dca8266e6c42bdf2f7470","exit_code":1,"allowed_legacy_successor_exception":"historical v0.15.100 audit hardcodes active package pointer; feature checks are 25/25 and only current-package pointer check is expected to differ on v0.15.135"},
+    "item-recommendation": {"stdout_sha256":"4cbc1ba4e2f11377bf7627a1f4e5d001d5bd9ae5f8992d93aca5ab12c4da6365","stderr_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","exit_code":0},
+    "match-history-parser": {"stdout_sha256":"ce5ce1fcb905dd0980a3fc08a5b6dec369c13006e6371c2a73faab097e420ae4","stderr_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","exit_code":0},
+    "state-integrity": {"stdout_sha256":"390e5f54f23746354a1649bf75fd8c94b28e2ce54a4ebd80b8c79f41a587a109","stderr_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","exit_code":0},
+    "autosync-concurrency": {"stdout_sha256":"631b6972363cf76cb46d455821208e622b7858dbfc6bb0f1d6c90d5e8dc90659","stderr_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","exit_code":0},
+    "riot-grade-linking": {"stdout_sha256":"9ee994442743e4b1386c5fc5ae79663a208b03c891fcb064edfb6234a26acff5","stderr_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","exit_code":0}
+  },
+  "privacy": "repository/synthetic fixtures only; no personal raw history or PUUID"
+}

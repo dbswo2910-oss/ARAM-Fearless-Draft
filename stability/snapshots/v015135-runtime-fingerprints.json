@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "baseline": "v0.15.135",
+  "scope": "selected final assembled runtime owner/input fingerprints; behavioral snapshots are tracked separately",
+  "domains": {
+    "draft": {
+      "draft-pick-balance-v01517.js": "becb71217348c453deee4c565e2ea3ad3af9f9ab97e5f15b4910d22d747dc2ae",
+      "draft-live-context-v01542.js": "c7893f0288dae8c2b571f48a633a1719ecd3e90f25612049c77c98b84235d4c1",
+      "draft-risk-board-v01546.js": "ef86a4325f0aeb15b0eab17f4465cfe0b1ae277755c5541cb8dd6a72f8d262d3"
+    },
+    "random": {
+      "runtime-random-practice-v01572.js": "4dfc7b5ae11dd369441f12c69b1df8f761f5b1ccd0cadae8b210e51d3b448dc0",
+      "runtime-random-ingame-v01570.js": "cfc6df5a8417c1c10d15c3169f3f1688163a8e82d9391d3fbbf0a3f5272047b8",
+      "random-ingame-shop-v01553.js": "cf91b3fb025a1b292fa56d3c5f9721c95a0242a72b926e54761f6bfc3338676c"
+    },
+    "items": {
+      "item-catalog-v01527.js": "9fc457ee9fda775b55a622dc810cacf2f8b5949e176da0544b47e5c18ab6f8a3",
+      "build-analysis-logic-v01586.js": "e85e1ec380f3d3226ca022e82a74a6715457733c854c9de3b9114621865a0ea7"
+    },
+    "profile": {
+      "player-profile-v01519.js": "0063805eed0c53bc5ffe6712862a1199cd27f0f9d1c7eb6356e2a83e753e6baa",
+      "history-latency-v015128.js": "176043b1e7dc823462fd5ebb6ae75c48b0e9b5171873f14a07384b49eef31bf5",
+      "riot-grade-collector-v01532.js": "cb99725961d86ec42f6eab9f06f5c629006e13e0b073257c961e2ac31a6530c5"
+    },
+    "data": {
+      "input-interaction-stability-v01539.js": "c9a9aa92e434cacc915e9b27f36e281c1ac7dab594748faa5f328154ece20ab8",
+      "ui-stability-baseline-v015115.js": "4bf1eb769766cd0786f56feca7dadc4317ce253b430f852e6a964e6e4a820939"
+    },
+    "autosync": {
+      "runtime-live-autosync-v01571.js": "ab7985581ccb0fc323ed74337cd3d724d829b0817e481ff5afdcec733a5f1178",
+      "autosync-concurrency-v015119.js": "a2e137cacb24c41b671c0b010e5317400136114451b10f6fef0b3935af544813"
+    },
+    "state": {
+      "state-integrity-v015117.js": "81fccaa0e4b8c3a0bc946d276c4eafff9d6a4eadaa44016da2f85154f5403fe2",
+      "resource-lifecycle-v015118.js": "6526bb949b082284d7e25a2c05fbebda2ee4f01f43699cf5a889ecfedf1a7290"
+    },
+    "research": {
+      "rating-engine-v01.js": "76ad43a6e2072376997292fa44a3ec594b01eb28f4c473637391819937b64aa4",
+      "research-ui-core.js": "6b21d85be46327823d9a4ce866a3d84d53084ea5be933052609150a2a614d954",
+      "research-storage-v015131.js": "74909aa28cdef0b2236f38a14201a1b97da0eb5ac4db1b9035684f88040d5fe6"
+    }
+  },
+  "behavioral_snapshot_status": "pending_deterministic_fixture_extraction"
+}

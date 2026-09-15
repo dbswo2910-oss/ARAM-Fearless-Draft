@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "scope": "synthetic Windows Electron semantic geometry gate",
+  "electron": "38.7.2",
+  "golden_reference": "v0.15.135",
+  "tolerance_px": 3,
+  "viewport": {"width": 1008, "height": 655},
+  "scenarios": {
+    "random.pick": {
+      "visible_view": "random",
+      "required_visible": ["random-root", "random-queue-size", "random-input-anchor", "random-top5", "random-top5-detail", "random-team-five"],
+      "required_hidden": ["random-ingame-shell", "data-root", "profile-overlay"],
+      "anchors": {
+        "random-root": [18, 65, 957, 720],
+        "random-top5": [35, 444, 456, 51],
+        "random-top5-detail": [503, 444, 456, 51]
+      }
+    },
+    "random.ingame": {
+      "visible_view": "random",
+      "required_visible": ["random-root", "random-ingame-shell", "random-ingame-summary", "random-ingame-build"],
+      "required_hidden": ["random-top5", "random-top5-detail", "data-root"],
+      "anchors": {
+        "random-root": [18, 65, 957, 720],
+        "random-ingame-shell": [35, 129, 923, 189]
+      }
+    },
+    "data.tier": {
+      "visible_view": "data",
+      "required_visible": ["data-root", "data-subnav", "data-detail-generic-shell-header", "data-card"],
+      "required_hidden": ["data-patch-notes", "random-root", "profile-overlay"],
+      "anchors": {
+        "data-root": [18, 65, 957, 720],
+        "data-detail-generic-shell-header": [35, 132, 923, 54],
+        "data-card": [35, 196, 923, 149]
+      }
+    },
+    "data.patch": {
+      "visible_view": "data",
+      "required_visible": ["data-root", "data-subnav", "data-card", "data-patch-notes"],
+      "required_hidden": ["data-detail-generic-shell-header", "random-root", "profile-overlay"],
+      "anchors": {
+        "data-root": [18, 65, 957, 720],
+        "data-card": [35, 132, 923, 272],
+        "data-patch-notes": [50, 159, 893, 230]
+      }
+    },
+    "profile": {
+      "visible_view": "profile",
+      "required_visible": ["profile-launch", "profile-overlay", "profile-content"],
+      "required_hidden": ["data-root", "random-root"],
+      "anchors": {
+        "profile-overlay": [35, 128, 923, 139],
+        "profile-content": [50, 163, 893, 73]
+      }
+    },
+    "results": {
+      "visible_view": "results",
+      "required_visible": ["nav-results", "app-diagnostics"],
+      "required_hidden": ["data-root", "random-root", "profile-overlay"],
+      "anchors": {
+        "app-diagnostics": [888, 605, 91, 36]
+      }
+    }
+  },
+  "acceptance": {
+    "semantic_geometry_is_hard_gate": true,
+    "pixel_hashes_are_advisory": true,
+    "installed_app_visual_acceptance": "still required before v0.16.0 release"
+  }
+}

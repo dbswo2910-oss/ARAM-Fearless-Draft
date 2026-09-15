@@ -1,0 +1,232 @@
+name: v0.16.0 Installed Windows Acceptance
+
+on:
+  push:
+    branches:
+      - stability/v0160-clean-baseline-phaseb
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installed-windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: launcher/stable-v203/go.mod
+
+      - name: Download pinned public base and restore validated v0.15.49 installed baseline
+        shell: pwsh
+        run: |
+          $outDir = Join-Path $PWD 'audit-output\stability\installed-windows'
+          New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+          $zip = Join-Path $env:RUNNER_TEMP 'aram-base-v0142.zip'
+          $uri = 'https://github.com/dbswo2910-oss/ARAM-Fearless-Draft/releases/download/v0.14.2/ARAM_Fearless_Draft_appbundle_v0.14.2.zip'
+          Invoke-WebRequest -Uri $uri -OutFile $zip
+          $bundleHash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($bundleHash -ne '2e076de26edb8f20a54bf0e07cfce9b6102f5f97617d8c5a3f65a03cb5671d04') { throw "base bundle SHA-256 mismatch: $bundleHash" }
+
+          $extract = Join-Path $env:RUNNER_TEMP 'aram-base-extracted'
+          if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
+          Expand-Archive -Path $zip -DestinationPath $extract -Force
+          $candidates = Get-ChildItem $extract -Recurse -Filter package.json | Where-Object {
+            (Test-Path (Join-Path $_.Directory.FullName 'index.html')) -and (Test-Path (Join-Path $_.Directory.FullName 'main.js'))
+          }
+          if (-not $candidates) { throw 'could not locate base app root containing package.json/index.html/main.js' }
+          $base = ($candidates | Sort-Object { $_.FullName.Length } | Select-Object -First 1).Directory.FullName
+          $baseIndex = Join-Path $base 'index.html'
+          $sourceIndexHash = (Get-FileHash $baseIndex -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($sourceIndexHash -ne '4a6cc26334e2dd7dd4aaf7ce5bd15315e47ad173baeb134ac40019d2e4906f32') { throw "v0.14.2 index SHA-256 mismatch: $sourceIndexHash" }
+
+          $fixtureDir = Join-Path $PWD 'tools\stability\fixtures'
+          $fixtureMeta = Get-Content (Join-Path $fixtureDir 'index-v0142-to-v01549.fixture.json') -Raw | ConvertFrom-Json
+          if ($fixtureMeta.part_count -ne 7) { throw "fixture metadata part_count mismatch: $($fixtureMeta.part_count)" }
+          if ($fixtureMeta.source_index_sha256 -ne $sourceIndexHash) { throw "fixture source index SHA-256 mismatch: $($fixtureMeta.source_index_sha256)" }
+          $parts = @(Get-ChildItem $fixtureDir -Filter 'index-v0142-to-v01549.zst.b64.part*' | Sort-Object Name)
+          if ($parts.Count -ne 7) { throw "expected 7 v0.15.49 index delta parts, found $($parts.Count)" }
+          $base64 = (($parts | ForEach-Object { Get-Content $_.FullName -Raw }) -join '') -replace '\s',''
+          $patch = Join-Path $env:RUNNER_TEMP 'index-v0142-to-v01549.zstpatch'
+          [IO.File]::WriteAllBytes($patch,[Convert]::FromBase64String($base64))
+          $patchHash = (Get-FileHash $patch -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($patchHash -ne '194d5ec7ed88418a468f9da1a5b04b0f5d604564813fae271cf30864b9582c24') { throw "index delta SHA-256 mismatch: $patchHash" }
+          if ($fixtureMeta.patch_sha256 -ne $patchHash) { throw "fixture metadata patch SHA-256 mismatch: $($fixtureMeta.patch_sha256)" }
+          & zstd --version
+          if ($LASTEXITCODE -ne 0) { throw 'zstd is unavailable on the Windows runner' }
+          $rebuilt = Join-Path $env:RUNNER_TEMP 'index-v01549-rebuilt.html'
+          if (Test-Path $rebuilt) { Remove-Item $rebuilt -Force }
+          & zstd -d "--patch-from=$baseIndex" $patch -o $rebuilt
+          if ($LASTEXITCODE -ne 0) { throw "v0.15.49 index reconstruction failed: $LASTEXITCODE" }
+          $targetIndexHash = (Get-FileHash $rebuilt -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($targetIndexHash -ne '8de7a8eb03e363b808439d48673a4808809d82db67bc1b7955e80414a8782906') { throw "rebuilt v0.15.49 index SHA-256 mismatch: $targetIndexHash" }
+          if ($fixtureMeta.target_index_sha256 -ne $targetIndexHash) { throw "fixture metadata target index SHA-256 mismatch: $($fixtureMeta.target_index_sha256)" }
+          Move-Item -Path $rebuilt -Destination $baseIndex -Force
+
+          # The updater manifest assumes the installed base already contains the v0.15.49 AutoSync core.
+          # Reconstruct that exact user-installed file rather than keeping the older v0.14.2 core.
+          $coreParts = @(Get-ChildItem $fixtureDir -Filter 'autosync-core-v01549.zst.b64.part*' | Sort-Object Name)
+          if ($coreParts.Count -ne 4) { throw "expected 4 v0.15.49 AutoSync core fixture parts, found $($coreParts.Count)" }
+          $coreBase64 = (($coreParts | ForEach-Object { Get-Content $_.FullName -Raw }) -join '') -replace '\s',''
+          $coreZst = Join-Path $env:RUNNER_TEMP 'autosync-core-v01549.zst'
+          [IO.File]::WriteAllBytes($coreZst,[Convert]::FromBase64String($coreBase64))
+          $coreZstHash = (Get-FileHash $coreZst -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($coreZstHash -ne 'abf29e3738ca5c1f81e5d1f0aaab0ae7df5bdb19da4a260536626734ed8dd80e') { throw "v0.15.49 AutoSync fixture SHA-256 mismatch: $coreZstHash" }
+          $coreRestored = Join-Path $env:RUNNER_TEMP 'autosync-core-v01549.js'
+          if (Test-Path $coreRestored) { Remove-Item $coreRestored -Force }
+          & zstd -d $coreZst -o $coreRestored
+          if ($LASTEXITCODE -ne 0) { throw "v0.15.49 AutoSync core reconstruction failed: $LASTEXITCODE" }
+          $coreHash = (Get-FileHash $coreRestored -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($coreHash -ne 'a9f206df445d06eefc99ae55f1ceb3a7a5ff108a40a8393fa75ec413d2c4aba6') { throw "restored v0.15.49 AutoSync core SHA-256 mismatch: $coreHash" }
+          Move-Item -Path $coreRestored -Destination (Join-Path $base 'autosync-core.js') -Force
+
+          "BASE_APP_DIR=$base" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "INSTALLED_APP=$($env:RUNNER_TEMP)\aram-installed-app" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          [ordered]@{
+            status='SUCCESS'
+            stage='BASE_BUNDLE_V01549_COMPAT_VERIFIED'
+            bundle_sha256=$bundleHash
+            source_index_sha256=$sourceIndexHash
+            index_delta_sha256=$patchHash
+            restored_index_sha256=$targetIndexHash
+            restored_autosync_core_sha256=$coreHash
+            restored_installed_baseline='0.15.49'
+            base_dir=$base
+          } | ConvertTo-Json | Set-Content -Path (Join-Path $outDir 'base-bundle.json') -Encoding utf8
+
+      - name: Materialize current Golden installed app plus canonical shadow payload
+        shell: pwsh
+        run: |
+          node tools/stability/materialize-installed-app.js --base "$env:BASE_APP_DIR" --out "$env:INSTALLED_APP"
+          if ($LASTEXITCODE -ne 0) { throw 'installed app materialization failed' }
+          Get-ChildItem "$env:INSTALLED_APP\canonical-shadow\src" -Recurse -Filter *.js | ForEach-Object {
+            node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { throw "canonical Windows syntax failed: $($_.FullName)" }
+          }
+
+      - name: Validate stable launcher against installed candidate
+        shell: pwsh
+        run: |
+          Push-Location launcher/stable-v203
+          go test ./...
+          if ($LASTEXITCODE -ne 0) { throw 'launcher tests failed' }
+          go build -o "$env:RUNNER_TEMP\ARAM_Fearless_Draft_Launcher_windows_x64.exe" .
+          if ($LASTEXITCODE -ne 0) { throw 'launcher build failed' }
+          Pop-Location
+          $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'aram-localappdata'
+          $env:APPDATA = Join-Path $env:RUNNER_TEMP 'aram-appdata'
+          New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA,$env:APPDATA | Out-Null
+          & "$env:RUNNER_TEMP\ARAM_Fearless_Draft_Launcher_windows_x64.exe" --promote-only --app-dir "$env:INSTALLED_APP" --expected-version '0.15.135'
+          if ($LASTEXITCODE -ne 0) { throw "launcher promote-only failed: $LASTEXITCODE" }
+          "ISOLATED_LOCALAPPDATA=$env:LOCALAPPDATA" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "ISOLATED_APPDATA=$env:APPDATA" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Download and verify pinned Electron runtime
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64.zip'
+          $runtime = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64'
+          $uri = 'https://github.com/electron/electron/releases/download/v38.7.2/electron-v38.7.2-win32-x64.zip'
+          $expected = '0401b898a8d83523694bd0afa6dc3035a54c57404a914725baa621c3378b5885'
+          $downloaded = $false
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            try {
+              Remove-Item $zip -Force -ErrorAction SilentlyContinue
+              Invoke-WebRequest -Uri $uri -OutFile $zip
+              $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($hash -ne $expected) { throw "Electron ZIP SHA-256 mismatch: $hash" }
+              $downloaded = $true
+              break
+            } catch {
+              Write-Warning "Electron download attempt $attempt failed: $($_.Exception.Message)"
+              if ($attempt -lt 3) { Start-Sleep -Seconds (10 * $attempt) }
+            }
+          }
+          if (-not $downloaded) { throw 'Pinned Electron download failed after 3 attempts' }
+          if (Test-Path $runtime) { Remove-Item $runtime -Recurse -Force }
+          Expand-Archive -Path $zip -DestinationPath $runtime -Force
+          $electron = Join-Path $runtime 'electron.exe'
+          if (!(Test-Path $electron)) { throw "Electron binary missing after extract: $electron" }
+          $electronVersion = (& $electron --version | Out-String).Trim()
+          if ($electronVersion -ne 'v38.7.2') { throw "Electron version probe mismatch: $electronVersion" }
+          "PINNED_ELECTRON_EXE=$electron" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "PINNED_ELECTRON_SHA256=$expected" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Cold-start materialized installed app on Windows
+        shell: pwsh
+        run: |
+          $env:LOCALAPPDATA = $env:ISOLATED_LOCALAPPDATA
+          $env:APPDATA = $env:ISOLATED_APPDATA
+          $electron = $env:PINNED_ELECTRON_EXE
+          if (!(Test-Path $electron)) { throw "Electron executable missing: $electron" }
+          $outDir = Join-Path $PWD 'audit-output\stability\installed-windows'
+          New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+          $stdout = Join-Path $outDir 'installed-stdout.log'
+          $stderr = Join-Path $outDir 'installed-stderr.log'
+
+          # Electron app.getPath('appData') uses the Windows roaming known folder, not a process-local APPDATA override.
+          $roaming = [Environment]::GetFolderPath([Environment+SpecialFolder]::ApplicationData)
+          $stableUserData = Join-Path $roaming 'aram-fearless-draft'
+          if (Test-Path $stableUserData) { Remove-Item $stableUserData -Recurse -Force }
+
+          $p = Start-Process -FilePath $electron -ArgumentList @("$env:INSTALLED_APP", '--aram-launcher-cold-start') -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+          Start-Sleep -Seconds 12
+          $alive = -not $p.HasExited
+          $exitCode = $null
+          if ($p.HasExited) { $exitCode = $p.ExitCode }
+          $stdoutText = if (Test-Path $stdout) { Get-Content $stdout -Raw } else { '' }
+          $stderrText = if (Test-Path $stderr) { Get-Content $stderr -Raw } else { '' }
+          $storageIdentityLogged = ($stdoutText -match '\[v0\.15\.135 storage-root\]') -and ($stdoutText -match 'aram-fearless-draft')
+          $fatalLoadError = ($stderrText -match 'App threw an error') -or ($stderrText -match 'index contract mismatch')
+          $userDataExists = Test-Path $stableUserData
+          $success = $alive -and $storageIdentityLogged -and (-not $fatalLoadError) -and $userDataExists
+          $report = [ordered]@{
+            status = if ($success) { 'SUCCESS' } else { 'FAILURE' }
+            stage = 'INSTALLED_WINDOWS_COLD_START'
+            golden_version = '0.15.135'
+            restored_installed_baseline = '0.15.49'
+            windows_runner = $true
+            electron_version = '38.7.2'
+            electron_runtime_source = 'official GitHub release ZIP'
+            electron_runtime_sha256 = $env:PINNED_ELECTRON_SHA256
+            actual_electron_process_alive_after_12s = $alive
+            exit_code = $exitCode
+            stable_user_data_identity = 'aram-fearless-draft'
+            stable_user_data_path = $stableUserData
+            stable_user_data_created = $userDataExists
+            storage_identity_logged = $storageIdentityLogged
+            fatal_load_error = $fatalLoadError
+            canonical_shadow_payload_present = (Test-Path (Join-Path $env:INSTALLED_APP 'canonical-shadow\src'))
+            production_manifest_unchanged = $true
+            real_league_client_tested = $false
+            acceptance_scope = 'Windows GitHub-hosted runner; validated v0.15.49 installed baseline reconstructed from pinned v0.14.2 public bundle, Golden v0.15.135 manifest materialized, stable launcher promoted, and actual Electron cold-start executed. This is not a physical-user-PC or real League Client acceptance.'
+          }
+          $report | ConvertTo-Json -Depth 5 | Set-Content -Path (Join-Path $outDir 'installed-windows-report.json') -Encoding utf8
+          if ($alive) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+          Get-Process electron -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+          if (-not $alive) { throw "installed Electron exited early; code=$exitCode" }
+          if (-not $storageIdentityLogged) { throw 'stable storage-root identity was not logged by the Golden runtime' }
+          if ($fatalLoadError) { throw 'installed Electron reported a fatal app-load/index contract error' }
+          if (-not $userDataExists) { throw "stable userData root was not created: $stableUserData" }
+
+      - name: Upload installed Windows evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-installed-windows-acceptance
+          path: audit-output/stability/installed-windows
+          if-no-files-found: error

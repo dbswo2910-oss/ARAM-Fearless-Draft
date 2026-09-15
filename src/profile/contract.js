@@ -1,0 +1,2 @@
+'use strict';
+module.exports={subsystem:'profile',status:'shadow',legacy:'v0.15.97 result parser + v0.15.128 history latency + v0.15.19 profile metrics + v0.15.122 Riot Grade authority',responsibilities:['match history','player profile','results','Riot Grade linking'],components:{results_normalizer:'shadow',history_fetch:'shadow',profile_metrics:'shadow',results_render:'planned',profile_render:'planned',riot_grade_link:'shadow'},production_active:false,score_logic_changed:false,profile_scoring_changed:false};

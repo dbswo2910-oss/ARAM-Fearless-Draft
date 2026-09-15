@@ -1,0 +1,196 @@
+name: v0.16.0 Stability Foundation
+
+on:
+  push:
+    branches:
+      - stability/v0160-clean-baseline-foundation
+      - stability/v0160-clean-baseline-phaseb
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Golden baseline contract
+        run: node tools/stability/golden-baseline-audit.js
+      - name: Repository inventory and runtime dependency graph
+        run: node tools/stability/inventory.js
+      - name: UI contract registry
+        run: node tools/stability/ui-contract-audit.js
+      - name: Canonical owner registry
+        run: node tools/stability/canonical-owner-audit.js
+      - name: Foundational subsystem shadow contracts
+        run: node tools/stability/subsystem-shadow-audit.js
+      - name: Canonical state semantic differential
+        run: node tools/stability/state-canonical-differential-audit.js
+      - name: Canonical lifecycle semantic differential
+        run: node tools/stability/lifecycle-canonical-differential-audit.js
+      - name: Canonical updater transaction differential
+        run: node tools/stability/updater-canonical-differential-audit.js
+      - name: Canonical updater boot guard differential
+        run: node tools/stability/updater-boot-guard-canonical-differential-audit.js
+      - name: Canonical AutoSync semantic differential
+        run: node tools/stability/autosync-canonical-differential-audit.js
+      - name: Canonical AutoSync updater lifecycle soak
+        run: node tools/stability/autosync-updater-lifecycle-soak-audit.js
+      - name: Canonical Riot semantic differential
+        run: node tools/stability/riot-canonical-differential-audit.js
+      - name: Canonical Draft semantic differential
+        run: node tools/stability/draft-canonical-differential-audit.js
+      - name: Canonical RANDOM candidate DNA differential
+        run: node tools/stability/random-dna-canonical-differential-audit.js
+      - name: Canonical RANDOM selection state differential
+        run: node tools/stability/random-selection-canonical-differential-audit.js
+      - name: Canonical RANDOM TOP5 enumeration differential
+        run: node tools/stability/random-top5-canonical-differential-audit.js
+      - name: Canonical RANDOM teamScore boundary
+        run: node tools/stability/random-team-score-boundary-audit.js
+      - name: Installed teamScore source extractor self-test
+        run: node tools/stability/team-score-source-extractor-audit.js
+      - name: Canonical RANDOM render core
+        run: node tools/stability/random-render-core-canonical-audit.js
+      - name: Canonical RANDOM PICK final shadow owner
+        run: node tools/stability/random-pick-final-owner-audit.js
+      - name: Canonical RANDOM IN GAME semantic signature differential
+        run: node tools/stability/random-ingame-semantic-canonical-differential-audit.js
+      - name: Canonical RANDOM IN GAME volatile HUD differential
+        run: node tools/stability/random-ingame-volatile-canonical-differential-audit.js
+      - name: Canonical RANDOM IN GAME coordinator differential
+        run: node tools/stability/random-ingame-coordinator-canonical-differential-audit.js
+      - name: Canonical RANDOM IN GAME shop differential
+        run: node tools/stability/random-ingame-shop-canonical-differential-audit.js
+      - name: Canonical RANDOM IN GAME coach render differential
+        run: node tools/stability/random-ingame-coach-render-canonical-differential-audit.js
+      - name: Canonical RANDOM IN GAME scheduler differential
+        run: node tools/stability/random-ingame-scheduler-canonical-differential-audit.js
+      - name: Canonical DATA Patch Notes shell differential
+        run: node tools/stability/data-patch-shell-canonical-differential-audit.js
+      - name: Canonical DATA workspace topology differential
+        run: node tools/stability/data-workspace-canonical-differential-audit.js
+      - name: Canonical DATA mode and navigation differential
+        run: node tools/stability/data-mode-canonical-differential-audit.js
+      - name: Canonical DATA final layout/render shadow owner
+        run: node tools/stability/data-final-owner-audit.js
+      - name: Canonical Item identity and recommendation differential
+        run: node tools/stability/item-canonical-differential-audit.js
+      - name: Canonical Item art resolver and catalog bridge differential
+        run: node tools/stability/item-art-catalog-canonical-differential-audit.js
+      - name: Canonical Item art runtime lifecycle audit
+        run: node tools/stability/item-art-runtime-canonical-audit.js
+      - name: Canonical Item catalog service differential
+        run: node tools/stability/item-catalog-service-canonical-differential-audit.js
+      - name: Canonical Profile Results parser differential
+        run: node tools/stability/profile-results-canonical-differential-audit.js
+      - name: Canonical Profile metrics differential
+        run: node tools/stability/profile-metrics-canonical-differential-audit.js
+      - name: Canonical Profile history service differential
+        run: node tools/stability/profile-history-canonical-differential-audit.js
+      - name: Canonical Profile Riot Grade exact-link audit
+        run: node tools/stability/profile-riot-grade-link-canonical-audit.js
+      - name: Canonical Profile Results final shadow owner
+        run: node tools/stability/profile-results-final-owner-audit.js
+      - name: Canonical Research storage differential
+        run: node tools/stability/research-storage-canonical-differential-audit.js
+      - name: Canonical Research v0.3.1 sampling policy
+        run: node tools/stability/research-sampling-v031-canonical-audit.js
+      - name: Canonical Research final shadow owner
+        run: node tools/stability/research-final-owner-audit.js
+      - name: Final assembled runtime
+        run: node tools/stability/final-runtime-audit.js
+      - name: Golden runtime fingerprints
+        run: node tools/stability/runtime-fingerprint-audit.js
+      - name: Behavioral differential fixture suite
+        run: node tools/stability/behavioral-differential-audit.js
+      - name: State and Research compatibility
+        run: node tools/stability/state-compat-audit.js
+      - name: Cutover readiness matrix audit
+        run: node tools/stability/cutover-readiness-audit.js
+      - name: Diagnostics contract
+        run: node tools/stability/diagnostics-audit.js
+      - name: Canonical diagnostics shell owner
+        run: node tools/stability/diagnostics-owner-audit.js
+      - name: Existing full regression core
+        run: node tools/full-regression-audit.js
+      - name: AI continuity
+        run: node tools/ai-continuity-audit.js
+      - name: Upload foundation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-stability-foundation
+          path: |
+            audit-output/stability
+            audit-output/full-regression-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: error
+
+  windows-electron-synthetic:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Download and verify pinned Electron runner
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64.zip'
+          $runtime = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64'
+          $uri = 'https://github.com/electron/electron/releases/download/v38.7.2/electron-v38.7.2-win32-x64.zip'
+          $expected = '0401b898a8d83523694bd0afa6dc3035a54c57404a914725baa621c3378b5885'
+          $downloaded = $false
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            try {
+              Remove-Item $zip -Force -ErrorAction SilentlyContinue
+              Invoke-WebRequest -Uri $uri -OutFile $zip
+              $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($hash -ne $expected) { throw "Electron ZIP SHA-256 mismatch: $hash" }
+              $downloaded = $true
+              break
+            } catch {
+              Write-Warning "Electron download attempt $attempt failed: $($_.Exception.Message)"
+              if ($attempt -lt 3) { Start-Sleep -Seconds (10 * $attempt) }
+            }
+          }
+          if (-not $downloaded) { throw 'Pinned Electron download failed after 3 attempts' }
+          if (Test-Path $runtime) { Remove-Item $runtime -Recurse -Force }
+          Expand-Archive -Path $zip -DestinationPath $runtime -Force
+          $exe = Join-Path $runtime 'electron.exe'
+          if (!(Test-Path $exe)) { throw "Electron executable missing after extract: $exe" }
+          $electronVersion = (& $exe --version | Out-String).Trim()
+          if ($electronVersion -ne 'v38.7.2') { throw "Electron version probe mismatch: $electronVersion" }
+          "SYNTHETIC_ELECTRON_EXE=$exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Run Windows Electron restart-persistence / DOM / soak / screenshots
+        shell: pwsh
+        run: |
+          $exe = $env:SYNTHETIC_ELECTRON_EXE
+          if (!(Test-Path $exe)) { throw "Electron executable missing: $exe" }
+          $proc = Start-Process -FilePath $exe -ArgumentList 'stability/e2e/synthetic-main.js' -Wait -PassThru -NoNewWindow
+          if ($proc.ExitCode -ne 0) { throw "Electron synthetic E2E exited $($proc.ExitCode)" }
+          $report = Join-Path $PWD 'audit-output/stability/windows-e2e/synthetic-e2e-report.json'
+          if (!(Test-Path $report)) { throw "Synthetic E2E report missing after Electron exit: $report" }
+          Get-ChildItem -Recurse 'audit-output/stability/windows-e2e' | Select-Object FullName,Length
+      - name: Upload Windows synthetic screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-windows-electron-synthetic
+          path: audit-output/stability/windows-e2e
+          if-no-files-found: error
