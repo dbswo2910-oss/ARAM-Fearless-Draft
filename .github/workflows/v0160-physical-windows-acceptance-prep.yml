@@ -1,8 +1,6 @@
 name: v0.16.0 Physical Windows Acceptance Prep
 
 on:
-  push:
-    branches: [ rc/v0160-canonical-activation ]
   workflow_dispatch:
 
 permissions:
