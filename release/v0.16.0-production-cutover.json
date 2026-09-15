@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "stage": "V0160_PRODUCTION_CUTOVER",
+  "release": "0.16.0",
+  "user_authorization": "explicit-production-cutover-approved",
+  "tested_candidate_commit": "e1c01b994adc09c262c16f1efbfad8530cef379f",
+  "candidate_documentation_head": "1c6a31b5bde47ca4c37ea93bf18be74f5fa883e0",
+  "tested_candidate_manifest_sha256": "4274f22596272514280d89c269f7d09060189f1a743efefce97c36502d050a88",
+  "production_manifest_sha256": "d7636e64663ea667da4b74bfd1d31649564f3656f5e8a048ca4293596b013bbe",
+  "production_candidate_gate": {
+    "run_id": 34995131586,
+    "status": "SUCCESS",
+    "artifact_id": 10407322067,
+    "artifact_sha256": "1043cd8f8f714b84f8e41b23160a50429ec8789e19dd5074016fc86e6952dbf4"
+  },
+  "post_activation_regression": {
+    "run_id": 34995131695,
+    "status": "SUCCESS",
+    "core_artifact_id": 10407720421,
+    "core_artifact_sha256": "f38cac71bbf63d67af905d691af8c6b037cb05475b91cac8b530a4188b0341d3",
+    "candidate_artifact_id": 10407645716,
+    "candidate_artifact_sha256": "47222c288f8658792108ff40907b1a6b83f4ce8e7f16617f4e651c7667c86b28",
+    "windows_artifact_id": 10407024503,
+    "windows_artifact_sha256": "0e5b5b9440624dd164a8f470fb8476fa7d17cbeb994cf3f2a376abeacb2941ff"
+  },
+  "physical_acceptance": {
+    "status": "SUCCESS",
+    "evidence_sha256": "34f782275d40ca023ccb88624f04286b8e5b2904ef0c0e76ad9c63153f2fa0ec",
+    "research_matches": "159->159",
+    "lcu_http_status": 200
+  },
+  "main_before_cutover": {
+    "commit": "23f782ce8f491177a024a92caa84f358bdac59f9",
+    "version": "0.15.135",
+    "carry_forward_blobs": {
+      "data/aram-builds/current.json": "4bd02108e9e97a6801ae9c0a336dab8aa4291545",
+      "update/data/aram-builds/current.json": "4bd02108e9e97a6801ae9c0a336dab8aa4291545"
+    }
+  },
+  "safety": {
+    "golden_rollback_target": "0.15.135",
+    "legacy_removal_authorized": false,
+    "probation_required": true,
+    "abort_on_premerge_gate_failure": true
+  },
+  "tested_candidate_payload_sha256": "6aea509133140475952348cef3eaf49db74a36c4e9da03b0aa3bc0d7a608bbd5"
+}
