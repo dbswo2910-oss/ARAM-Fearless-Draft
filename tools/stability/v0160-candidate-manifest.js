@@ -12,8 +12,29 @@ const REQUIRED=[
   ['main-v0160.js','update/v0.16.0/main-v0160.js'],
   ['successor-route-v0160.js','update/v0.16.0/successor-route-v0160.js'],
   ['cold-start-promotion-v0160.js','update/v0.16.0/cold-start-promotion-v0160.js'],
+  ['canonical-owner-bundler-v0160.js','update/v0.16.0/canonical-owner-bundler-v0160.js'],
   ['canonical-renderer-bundle.js','update/v0.16.0/canonical-renderer-bundle.js']
 ];
+
+function collectCanonicalSources(){
+  const out=[];
+  function walk(abs,rel){
+    for(const e of fs.readdirSync(abs,{withFileTypes:true})){
+      const nextAbs=path.join(abs,e.name),nextRel=path.posix.join(rel,e.name);
+      if(e.isDirectory())walk(nextAbs,nextRel);
+      else if(e.isFile()&&/\.js$/i.test(e.name))out.push([`canonical/${nextRel}`,nextRel]);
+    }
+  }
+  walk(p('src'),'src');
+  return out;
+}
+
+function upsert(files,target,source){
+  if(!fs.existsSync(p(source)))throw new Error(`missing v0.16 candidate source: ${source}`);
+  const next={path:target,source,sha256:sha256(source)};
+  const i=files.findIndex(x=>x.path===target);
+  if(i>=0)files[i]={...files[i],...next};else files.push(next);
+}
 
 function buildCandidateManifest(){
   const production=JSON.parse(fs.readFileSync(p('update','manifest.json'),'utf8'));
@@ -22,20 +43,20 @@ function buildCandidateManifest(){
   candidate.version='0.16.0';
   candidate.message='v0.16.0 · CLEAN BASELINE production candidate';
   candidate.min_launcher=production.min_launcher||'2.0.2';
+  candidate.files=Array.isArray(candidate.files)?candidate.files:[];
+  for(const [target,source] of REQUIRED)upsert(candidate.files,target,source);
+  const canonicalSources=collectCanonicalSources();
+  for(const [target,source] of canonicalSources)upsert(candidate.files,target,source);
   candidate.candidate={
     schema:1,
     isolated:true,
     production_manifest_mutated:false,
     golden_rollback_target:'0.15.135',
-    legacy_removal:false
+    legacy_removal:false,
+    canonical_source_materialized:true,
+    canonical_source_count:canonicalSources.length,
+    owner_mode:'production-adapter'
   };
-  candidate.files=Array.isArray(candidate.files)?candidate.files:[];
-  for(const [target,source] of REQUIRED){
-    if(!fs.existsSync(p(source)))throw new Error(`missing v0.16 candidate source: ${source}`);
-    const next={path:target,source,sha256:sha256(source)};
-    const i=candidate.files.findIndex(x=>x.path===target);
-    if(i>=0)candidate.files[i]={...candidate.files[i],...next};else candidate.files.push(next);
-  }
   return candidate;
 }
 
@@ -49,6 +70,6 @@ function writeCandidateManifest(out='audit-output/stability/v0160-candidate-mani
 
 if(require.main===module){
   const {candidate,out}=writeCandidateManifest();
-  console.log('V0.16 CANDIDATE MANIFEST: BUILT',JSON.stringify({version:candidate.version,files:candidate.files.length,out,production_manifest_mutated:false}));
+  console.log('V0.16 CANDIDATE MANIFEST: BUILT',JSON.stringify({version:candidate.version,files:candidate.files.length,canonical_source_count:candidate.candidate.canonical_source_count,out,production_manifest_mutated:false}));
 }
-module.exports={REQUIRED,buildCandidateManifest,writeCandidateManifest};
+module.exports={REQUIRED,collectCanonicalSources,buildCandidateManifest,writeCandidateManifest};
