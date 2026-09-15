@@ -26,7 +26,11 @@ function materialize(outDir){
     const raw=fs.readFileSync(sourcePath);if(f.sha256&&sha(raw)!==String(f.sha256).toLowerCase())throw new Error(`candidate source hash mismatch: ${f.source}`);
     let body=raw,patched=false;
     if(/\.js$/i.test(f.path)){
-      const src=raw.toString('utf8');
+      // GitHub-delivered updater sources are LF-normalized. Windows checkouts can expose
+      // CRLF bytes to this audit, which breaks the Golden patcher's exact-string contracts.
+      // Normalize only the text passed to the runtime patcher so Windows CI reproduces
+      // the delivered source semantics instead of testing checkout newline policy.
+      const src=raw.toString('utf8').replace(/\r\n/g,'\n');
       const next=runtime.patchRuntimeSource(f.path,src);
       new Function(next);
       patched=next!==src;body=Buffer.from(next,'utf8');
