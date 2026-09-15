@@ -78,7 +78,7 @@ if(exists(...rendererPath)&&exists(...bundlerPath)){
 
 if(exists(...mainPath)){
   const main=read(...mainPath);
-  const required=[/buildRendererSource/,/canonical\/src/,/owner-registry\.js/,/production_active!==true/,/patchSuccessorSource/,/main-v015122\.js/,/runtime-source-stability-v015135/,/aram-fearless-draft/];
+  const required=[/buildRendererSource/,/path\.join\(__dirname,'canonical','src'/,/owner-registry\.js/,/production_active!==true/,/patchSuccessorSource/,/main-v015122\.js/,/runtime-source-stability-v015135/,/aram-fearless-draft/];
   if(required.every(x=>x.test(main)))pass('canonical-main-entry','v0.16 main requires the installed canonical registry, injects the owner bundle, and preserves Golden runtime safety/userData');
   else block('canonical-main-entry','v0.16 main entry does not satisfy production-owner + Golden bridge contract');
 }else block('canonical-main-entry','no v0.16 production main integration entry exists');
