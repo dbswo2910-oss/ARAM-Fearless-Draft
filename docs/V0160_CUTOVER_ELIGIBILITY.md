@@ -1,35 +1,48 @@
 # v0.16.0 CLEAN BASELINE — Cutover Eligibility
 
-This document is a release-safety matrix, not a production activation request. `main` stays on the v0.15.135 Golden application code until explicit approval.
+This is the release-safety matrix for the physically accepted v0.16 RC. Production `main` and `update/manifest.json` remain on the v0.15.135 Golden application until the separate final production-release authorization.
 
-## Automated evidence
+## Automated and physical evidence
 
 | Gate | State | Evidence / meaning |
 | --- | --- | --- |
-| Canonical subsystem ownership | PASS (shadow) | All registered canonical owners are `shadow`; `production_active:false`. |
-| Differential / full regression | PASS at prior green checkpoints | Existing Stability Foundation, Full Regression and AI Continuity gates remain mandatory after every release-candidate change. |
-| Installed Windows cold start | PASS | Reconstructed real v0.15.49 installed baseline → materialized Golden v0.15.135 → pinned Electron cold start. |
-| Installed persistence migration | PASS | `v0.16.0 Installed Persistence Acceptance` #5 at `d87f429333da47df78ed5cd8e81b31ef53764031`: real Chromium localStorage + Research IndexedDB `aram-rating-research-v03` / `checkpoint-v03` with 159 synthetic matches survived the in-place update and two Golden restarts; state-integrity mirror was also verified at the actual Golden preload fallback root. |
-| AutoSync / updater / lifecycle deterministic soak | PENDING CURRENT BRANCH CI | `tools/stability/autosync-updater-lifecycle-soak-audit.js` performs repeated single-flight/cache/reset, transaction/rollback/probation and idempotent resource-disposal cycles with zero network or Research collection. |
-| Cutover dependency enumeration | READY | `tools/stability/cutover-readiness-audit.js` enumerates every Golden manifest source plus preserved fallback/storage dependencies into `cutover-readiness-report.json`. |
+| Canonical subsystem ownership | PASS (shadow) | All 15 canonical owners remain `shadow`; `production_active:false`. |
+| Differential / full regression | PASS | RC automated checkpoint passed final-runtime parity, state/Research compatibility, behavioral differential, soak, Full Regression and AI Continuity. |
+| Installed Windows cold start | PASS | Hosted Windows acceptance reconstructs installed baseline and proves Golden cold start. |
+| Installed persistence migration | PASS | Chromium localStorage + Research IndexedDB continuity verified across in-place update and Golden restarts. |
+| Physical user Windows PC | PASS | Real user PC acceptance completed successfully. |
+| Real League Client / LCU | PASS | Real LCU lockfile/auth flow reached HTTP 200 with privacy-safe evidence. |
+| Research continuity | PASS | `aram-rating-research-v03` / `checkpoint-v03` remained 159 -> 159 with unchanged checkpoint digest. |
+| Cutover preparation approval | PASS | Approval is recorded for cutover preparation and validation only. |
+| Production cutover plan | READY | `docs/V0160_PRODUCTION_CUTOVER_PLAN.md` defines package build, activation, regression, manifest switch, probation/rollback and later legacy cleanup. |
+
+Physical evidence SHA-256:
+`34f782275d40ca023ccb88624f04286b8e5b2904ef0c0e76ad9c63153f2fa0ec`
 
 ## Preserved compatibility identities
 
 - Chromium `userData`: `aram-fearless-draft`
 - Research IndexedDB: `aram-rating-research-v03`
 - Research checkpoint key: `checkpoint-v03`
-- v0.15.117 state-integrity preload fallback: `%APPDATA%\ARAM Fearless Draft` (legacy behavior; do not silently rewrite during refactor)
-- v0.15.79 / v0.15.116 transaction + probation safety remains required until canonical updater cutover is proven.
+- v0.15.117 state-integrity preload fallback: `%APPDATA%\ARAM Fearless Draft`
+- v0.15.79 / v0.15.116 transaction + probation safety remains required through canonical updater probation.
 
-## Why legacy runtime is not deleted yet
+## Current release state
 
-The canonical code is intentionally shadow-only. Removing the active Golden runtime before real-client acceptance would turn a safe refactor into a production cutover without evidence. Therefore the generated readiness report currently sets `legacy_runtime_removal_eligible:false` and `production_cutover_eligible:false`.
+- cutover preparation ready: **YES**
+- physical Windows acceptance: **YES**
+- real League/LCU acceptance: **YES**
+- final production release approved: **NO**
+- `update/manifest.json` switched to v0.16.0: **NO**
+- canonical production activation: **NO**
+- legacy runtime removal eligible: **NO**
 
-The remaining external/manual blockers are:
+Legacy runtime remains the Last Known Good rollback path until the production-active canonical candidate passes the complete post-activation gate suite and probation.
 
-1. Physical Windows smoke test on the user machine.
-2. Real League Client / LCU AutoSync timing, credentials, reconnect and queue behavior.
-3. Real DPI/font/rendering smoke test.
-4. Explicit approval to make the canonical runtime production-active.
+## Remaining gates
 
-After the deterministic soak and all standard CI gates are green at one checkpoint, the branch is eligible to become an **RC candidate for manual acceptance**, not yet an automatic production release.
+1. Separate explicit final production-release authorization.
+2. Build/activate the production-active v0.16 candidate without deleting Golden LKG files.
+3. Rerun the complete release gate suite on that production-active candidate.
+4. Switch the manifest only after all gates are green.
+5. Complete probation before any legacy runtime removal.
