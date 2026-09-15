@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "release": "0.16.0",
+  "source_rc_head": "249b8ff5258f0a9ba22974cc0a55079a3d34043c",
+  "final_approval_commit_lineage": true,
+  "candidate_branch": "release/v0160-production-candidate",
+  "production_manifest_mutated": false,
+  "main_mutated": false,
+  "legacy_removed": false,
+  "status": "CANDIDATE_BRANCH_PENDING"
+}
