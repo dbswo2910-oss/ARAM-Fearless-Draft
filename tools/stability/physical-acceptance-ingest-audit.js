@@ -10,7 +10,10 @@ if(!reportArg)throw new Error('usage: node tools/stability/physical-acceptance-i
 const reportPath=path.resolve(reportArg);
 if(!fs.existsSync(reportPath))throw new Error(`physical acceptance report missing: ${reportPath}`);
 const raw=fs.readFileSync(reportPath,'utf8');
-const r=JSON.parse(raw);
+// Windows PowerShell 5.x writes UTF-8 JSON with a BOM. Preserve the original raw
+// bytes for evidence hashing while stripping only the leading BOM for JSON parsing.
+const parseable=raw.replace(/^\uFEFF/,'');
+const r=JSON.parse(parseable);
 const errors=[];
 const need=(cond,msg)=>{if(!cond)errors.push(msg)};
 const eq=(actual,expected,label)=>need(actual===expected,`${label}: expected ${JSON.stringify(expected)} got ${JSON.stringify(actual)}`);
