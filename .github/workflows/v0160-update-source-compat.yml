@@ -29,15 +29,21 @@ jobs:
         run: node tools/release/v0160-update-source-compat.js --apply
       - name: Verify generated updater package
         run: node tools/release/v0160-update-source-compat.js
-      - name: Commit generated distribution payload
+      - name: Refresh non-runtime continuity snapshot
+        run: node tools/sync-current-state.js
+      - name: Verify AI continuity after transport-only manifest change
+        run: |
+          node tools/sync-current-state.js --check
+          node tools/ai-continuity-audit.js
+      - name: Commit generated distribution payload and continuity evidence
         shell: bash
         run: |
-          if git diff --quiet -- update/manifest.json update/v0.16.0/canonical/src; then
-            echo "Generated payload already current."
+          if git diff --quiet -- update/manifest.json update/v0.16.0/canonical/src release/v0.16.0-update-transport-hotfix.json update/current-state.json docs/CURRENT_STATE.md; then
+            echo "Generated payload and continuity snapshot already current."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add update/manifest.json update/v0.16.0/canonical/src
-          git commit -m "fix: package v0.16 canonical sources under allowed update path"
+          git add update/manifest.json update/v0.16.0/canonical/src release/v0.16.0-update-transport-hotfix.json update/current-state.json docs/CURRENT_STATE.md
+          git commit -m "fix: finalize v0.16 updater-compatible transport package"
           git push origin HEAD:fix/v0160-update-source-compat
