@@ -1,0 +1,10 @@
+'use strict';
+const contract=require('./contract');
+const patchModeShell=require('./patch-mode-shell');
+const workspace=require('./workspace');
+const modeController=require('./mode-controller');
+const navigation=require('./navigation');
+const patchNotesRender=require('./patch-notes-render');
+const owner=require('./owner');
+const productionAdapter=require('./production-adapter');
+module.exports={contract,patchModeShell,workspace,modeController,navigation,patchNotesRender,owner,productionAdapter,production_active:true,owner_status:'production',implementation_mode:'production-adapter',score_logic_changed:false,random_scoring_changed:false,legacy_removal_authorized:false};

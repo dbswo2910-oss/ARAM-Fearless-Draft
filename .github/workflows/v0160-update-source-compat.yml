@@ -1,0 +1,49 @@
+name: v0.16.0 Update Source Compatibility
+
+on:
+  push:
+    branches:
+      - fix/v0160-update-source-compat
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package-compat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify legacy updater security remains strict
+        shell: bash
+        run: |
+          grep -F "if(!source.startsWith('update/'))throw new Error" update/v0.15.70/main.js
+      - name: Materialize canonical payload and rewrite manifest sources
+        run: node tools/release/v0160-update-source-compat.js --apply
+      - name: Verify generated updater package
+        run: node tools/release/v0160-update-source-compat.js
+      - name: Refresh non-runtime continuity snapshot
+        run: node tools/sync-current-state.js
+      - name: Verify AI continuity after transport-only manifest change
+        run: |
+          node tools/sync-current-state.js --check
+          node tools/ai-continuity-audit.js
+      - name: Commit generated distribution payload and continuity evidence
+        shell: bash
+        run: |
+          if git diff --quiet -- update/manifest.json update/v0.16.0/canonical/src release/v0.16.0-update-transport-hotfix.json update/current-state.json docs/CURRENT_STATE.md; then
+            echo "Generated payload and continuity snapshot already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update/manifest.json update/v0.16.0/canonical/src release/v0.16.0-update-transport-hotfix.json update/current-state.json docs/CURRENT_STATE.md
+          git commit -m "fix: finalize v0.16 updater-compatible transport package"
+          git push origin HEAD:fix/v0160-update-source-compat

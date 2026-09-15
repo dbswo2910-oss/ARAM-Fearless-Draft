@@ -91,7 +91,13 @@ jobs:
       - name: Validate exact PR merge tree including current main
         env:
           CUTOVER_MERGE_TREE: '1'
-        run: node tools/stability/final-production-cutover-audit.js
+        shell: bash
+        run: |
+          if [ -f release/v0.16.0-update-transport-hotfix.json ]; then
+            node tools/stability/v0160-update-transport-cutover-audit.js
+          else
+            node tools/stability/final-production-cutover-audit.js
+          fi
       - name: Full regression against actual merge tree
         run: node tools/full-regression-audit.js
       - name: AI continuity against actual merge tree
@@ -105,6 +111,7 @@ jobs:
           name: v0160-final-production-cutover-merge-tree
           path: |
             audit-output/stability/final-production-cutover-report.json
+            audit-output/stability/v0160-update-transport-cutover-report.json
             audit-output/full-regression-report.json
             audit-output/ai-continuity-report.json
           if-no-files-found: warn

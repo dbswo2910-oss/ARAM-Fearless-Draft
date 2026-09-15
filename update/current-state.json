@@ -6,7 +6,7 @@
     "version": "0.16.0",
     "message": "v0.16.0 · CLEAN BASELINE",
     "min_launcher": "2.0.2",
-    "manifest_commit": "ce9643f6dfc2b25b9535b2f51cfa0d6a6db63239"
+    "manifest_commit": "574053c5d02cd386c438c94c36bfd416e37ceab3"
   },
   "package": {
     "source": "update/v0.16.0/package.json",
