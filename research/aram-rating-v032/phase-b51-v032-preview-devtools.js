@@ -1,0 +1,17 @@
+'use strict';
+(()=>{
+  const VERSION='v0.3.2',DB='aram-rating-research-v03',STORE='kv',KEY='checkpoint-v03';
+  const CFG=Object.freeze({phase:'B5.1',sampling_profile:'B51_MATCH_LEVEL_CLOSED_PREVIEW',history_limit:50,min_train_observations:5,min_heldout_matches:1,full_evidence_matches:5,skip_headroom_lte:3,skip_duplicate_ratio_gte:.94,preview_candidates:60,automatic_collection:false});
+  function core(){const c=globalThis.ARAMRatingB51MatchLevelClosedCoreV032;if(!c)throw new Error('B51_core_not_loaded_load_b51_match_level_core_first');return c}
+  function openExisting(){return new Promise((res,rej)=>{const q=indexedDB.open(DB);let upgrading=false;q.onupgradeneeded=()=>{upgrading=true;try{q.transaction.abort()}catch{};rej(new Error('research_db_missing_refusing_to_create'))};q.onsuccess=()=>{if(upgrading)return;const db=q.result;if(!db.objectStoreNames.contains(STORE)){db.close();return rej(new Error('research_store_missing'))}res(db)};q.onerror=()=>{if(!upgrading)rej(q.error||new Error('research_db_open_failed'))}})}
+  async function readCp(){const db=await openExisting();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(KEY);r.onsuccess=()=>{db.close();res(r.result??null)};r.onerror=()=>{db.close();rej(r.error)}})}
+  async function preview(){
+    const C=core(),cp=await readCp();if(!cp||cp.schema!=='aram-rating-phase-b-checkpoint-v03')throw new Error('checkpoint_v03_required');
+    const n=C.dedupeMatches(cp.matches||[]).length;if(n<1900)throw new Error('b51_requires_existing_checkpoint_1900_plus_matches_current_'+n);
+    const coverage=C.currentNoColdCoverage(cp.matches||[]),pool=C.buildMatchLevelCandidatePool(cp,CFG),top=pool.slice(0,CFG.preview_candidates);
+    const out={status:'PREVIEW_ONLY',sampling_profile:CFG.sampling_profile,riot_lcu_collection_requests_performed:0,checkpoint_written:false,checkpoint_matches:n,current_no_cold_coverage:coverage,eligible_match_level_candidates:pool.length,selected_count:top.length,min_train_observations:CFG.min_train_observations,min_heldout_matches:CFG.min_heldout_matches,match_level_closed_network_first:true,candidates:top.map((x,i)=>({candidate:'Candidate '+String(i+1).padStart(2,'0'),source_pool:x.source_pool,current_observations:x.current_observation_count,train_observations:x.train_observation_count,heldout_matches:x.heldout_matches,closed_10_of_10_matches:x.closed_10_of_10_matches,ratio_10_of_10:x.closed_10_of_10_ratio,ratio_exact_9_of_10:x.exact_9_of_10_ratio,ratio_exact_8_of_10:x.exact_8_of_10_ratio,ratio_9_plus:x.nine_plus_ratio,ratio_8_plus:x.eight_plus_ratio,avg_known_participants:x.avg_known_participants,avg_unknown_participants:x.avg_unknown_participants,closed_10_of_10_wilson_lower:x.closed_10_of_10_wilson_lower,direct_no_cold_yield_proxy:x.direct_no_cold_yield_proxy,new_player_penalty:x.closed_network_new_player_penalty,match_level_closed_priority:x.b51_priority}))};
+    console.table(out.candidates);console.log('[ARAM Rating v0.3.2] B5.1 MATCH-LEVEL CLOSED PREVIEW ONLY · no Riot/LCU collection request',out);return out;
+  }
+  window.aramRatingB51PreviewV032={version:VERSION,config:{...CFG},preview};
+  console.log('[ARAM Rating v0.3.2] B5.1 match-level closed preview ready. READ ONLY · no Riot/LCU collection · run: await aramRatingB51PreviewV032.preview()');
+})();
