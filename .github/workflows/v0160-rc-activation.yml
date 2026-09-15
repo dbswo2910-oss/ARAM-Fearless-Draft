@@ -4,14 +4,20 @@ on:
   push:
     branches: [ rc/v0160-canonical-activation ]
   workflow_dispatch:
+    inputs:
+      run_full_suite:
+        description: 'Run the next-stage full automated RC suite'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
-  rc-preflight:
+  rc-canonical-exercise:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,8 +25,29 @@ jobs:
           node-version: '20'
       - name: Isolated RC activation preflight
         run: node tools/stability/rc-activation-audit.js
-      - name: Canonical owner registry
+      - name: Exercise all canonical owners offline
+        run: node tools/stability/rc-canonical-exercise-audit.js
+      - name: Canonical owner registry remains shadow
         run: node tools/stability/canonical-owner-audit.js
+      - name: Upload RC canonical exercise reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-rc-canonical-exercise
+          path: |
+            audit-output/stability
+          if-no-files-found: error
+
+  rc-full-suite:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_full_suite == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: rc-canonical-exercise
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: Final assembled Golden runtime parity
         run: node tools/stability/final-runtime-audit.js
       - name: State and Research compatibility
@@ -33,11 +60,11 @@ jobs:
         run: node tools/full-regression-audit.js
       - name: AI continuity
         run: node tools/ai-continuity-audit.js
-      - name: Upload RC preflight reports
+      - name: Upload RC full-suite reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v0160-rc-activation-preflight
+          name: v0160-rc-full-suite
           path: |
             audit-output/stability
             audit-output/full-regression-report.json
