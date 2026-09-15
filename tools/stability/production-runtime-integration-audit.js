@@ -1,6 +1,7 @@
 'use strict';
 const fs=require('fs');
 const path=require('path');
+const {buildCandidateManifest}=require('./v0160-candidate-manifest');
 
 const ROOT=process.cwd();
 const p=(...xs)=>path.join(ROOT,...xs);
@@ -20,14 +21,22 @@ const manifest=json('update','manifest.json');
 if(String(manifest.version)==='0.15.135')pass('golden-manifest-still-safe','production manifest remains v0.15.135 while candidate is incomplete');
 else block('golden-manifest-still-safe',`candidate work must not mutate production manifest before all gates are green; found ${manifest.version}`);
 
+let candidate=null;
+try{
+  candidate=buildCandidateManifest();
+  if(String(candidate.version)==='0.16.0')pass('candidate-manifest','isolated v0.16.0 candidate manifest builds from the untouched Golden manifest');
+  else block('candidate-manifest',`candidate manifest version is ${candidate.version}`);
+}catch(e){block('candidate-manifest',e?.message||String(e))}
+
 const registry=require(p('src','core','owner-registry.js'));
 const rows=Object.entries(registry.owners||{}).map(([name,x])=>({name,status:x?.status,canonical:x?.canonical}));
 if(registry.production_active===true&&rows.length===15&&rows.every(x=>x.status==='production'))pass('canonical-registry-active','all 15 canonical owners are production-active');
 else block('canonical-registry-active',`registry production_active=${registry.production_active}; production owners=${rows.filter(x=>x.status==='production').length}/${rows.length}`);
 
 const v16PkgPath=p('update','v0.16.0','package.json');
+let pkg=null;
 if(exists('update','v0.16.0','package.json')){
-  const pkg=JSON.parse(fs.readFileSync(v16PkgPath,'utf8'));
+  pkg=JSON.parse(fs.readFileSync(v16PkgPath,'utf8'));
   if(String(pkg.version)==='0.16.0')pass('v016-package','dedicated v0.16.0 package exists');
   else block('v016-package',`update/v0.16.0/package.json version is ${pkg.version}`);
   const main=String(pkg.main||'');
@@ -38,29 +47,38 @@ if(exists('update','v0.16.0','package.json')){
   block('v016-main-entry','no v0.16 production main entry exists');
 }
 
-const manifestSources=(manifest.files||[]).map(x=>String(x.source||''));
-const canonicalManifestSources=manifestSources.filter(x=>x.startsWith('src/')||x.startsWith('update/v0.16.0/'));
-if(canonicalManifestSources.length>0)pass('canonical-package-materialization',`${canonicalManifestSources.length} canonical/v0.16 sources are materialized by the manifest`);
-else block('canonical-package-materialization','production manifest materializes zero src/ or update/v0.16.0 canonical sources');
-
-// Renderer integration must be explicit because the Golden BrowserWindow runs with
-// contextIsolation:true and nodeIntegration:false. Shipping CommonJS source alone is not execution.
-const rendererBundleCandidates=[
-  ['update','v0.16.0','canonical-renderer-bundle.js'],
-  ['update','v0.16.0','renderer-v0160.js'],
-  ['src','runtime','production-renderer-entry.js']
+const candidateSources=(candidate?.files||[]).map(x=>String(x.source||''));
+const requiredCandidateSources=[
+  'update/v0.16.0/package.json',
+  'update/v0.16.0/main-v0160.js',
+  'update/v0.16.0/successor-route-v0160.js',
+  'update/v0.16.0/cold-start-promotion-v0160.js',
+  'update/v0.16.0/canonical-renderer-bundle.js'
 ];
-const rendererIntegration=rendererBundleCandidates.find(parts=>exists(...parts));
-if(rendererIntegration)pass('canonical-renderer-entry',rendererIntegration.join('/'));
-else block('canonical-renderer-entry','no production renderer bundle/entry exists to execute canonical CommonJS owners under nodeIntegration:false');
+const missingCandidateSources=requiredCandidateSources.filter(x=>!candidateSources.includes(x));
+if(candidate&&missingCandidateSources.length===0)pass('canonical-package-materialization','isolated candidate manifest materializes the v0.16 package/main/renderer bridge without touching production manifest');
+else block('canonical-package-materialization',`candidate manifest missing: ${missingCandidateSources.join(', ')||'candidate unavailable'}`);
 
-const mainIntegrationCandidates=[
-  ['update','v0.16.0','main-v0160.js'],
-  ['src','runtime','production-main-entry.js']
-];
-const mainIntegration=mainIntegrationCandidates.find(parts=>exists(...parts));
-if(mainIntegration)pass('canonical-main-entry',mainIntegration.join('/'));
-else block('canonical-main-entry','no v0.16 production main integration entry exists');
+const rendererPath=['update','v0.16.0','canonical-renderer-bundle.js'];
+const mainPath=['update','v0.16.0','main-v0160.js'];
+if(exists(...rendererPath)){
+  const renderer=read(...rendererPath);
+  if(/__ARAM_CANONICAL_V0160__/.test(renderer)&&/context_isolation_compatible\s*:\s*true/.test(renderer))pass('canonical-renderer-entry','context-isolation-safe v0.16 renderer bridge exists');
+  else block('canonical-renderer-entry','renderer bridge exists but lacks the v0.16/context-isolation contract');
+}else block('canonical-renderer-entry','no v0.16 renderer bridge exists');
+
+if(exists(...mainPath)){
+  const main=read(...mainPath);
+  const required=[
+    /patchSuccessorSource/,
+    /main-v015122\.js/,
+    /runtime-source-stability-v015135/,
+    /canonical-renderer-bundle\.js/,
+    /aram-fearless-draft/
+  ];
+  if(required.every(x=>x.test(main)))pass('canonical-main-entry','v0.16 main scaffold preserves Golden runtime safety, stable userData, and injects the renderer bridge');
+  else block('canonical-main-entry','v0.16 main entry exists but does not satisfy the Golden bridge contract');
+}else block('canonical-main-entry','no v0.16 production main integration entry exists');
 
 const draftIndex=read('src','draft','index.js');
 if(/production_active\s*:\s*true/.test(draftIndex)&&!/0\.16-shadow/.test(draftIndex))pass('draft-production-owner','Draft canonical export is production-marked');
@@ -80,6 +98,7 @@ const report={
   stage:'V0160_PRODUCTION_RUNTIME_INTEGRATION',
   release:'0.16.0',
   production_manifest_version:String(manifest.version),
+  candidate_manifest_version:String(candidate?.version||''),
   explicit_final_approval:approval?.approval?.final_production_release_approved===true,
   production_cutover_authorized:ready,
   main_merge_authorized:ready,
@@ -93,6 +112,6 @@ const report={
 };
 fs.mkdirSync(p('audit-output','stability'),{recursive:true});
 fs.writeFileSync(p('audit-output','stability','production-runtime-integration-report.json'),JSON.stringify(report,null,2)+'\n','utf8');
-console.log(`V0.16 PRODUCTION RUNTIME INTEGRATION: ${report.status}`,JSON.stringify({passes:passes.length,blockers:blockers.length,manifest:manifest.version}));
+console.log(`V0.16 PRODUCTION RUNTIME INTEGRATION: ${report.status}`,JSON.stringify({passes:passes.length,blockers:blockers.length,manifest:manifest.version,candidate:candidate?.version||null}));
 for(const x of blockers)console.error(`BLOCKER ${x.id}: ${x.detail}`);
 if(!ready)process.exit(1);

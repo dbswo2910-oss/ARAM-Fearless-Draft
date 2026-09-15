@@ -21,12 +21,16 @@ jobs:
       - name: Verify explicit final approval metadata
         run: |
           node -e "const x=require('./release/v0.16.0-final-approval.json'); if(!x.approval?.final_production_release_approved) process.exit(1); console.log('FINAL APPROVAL PRESENT')"
+      - name: Build isolated v0.16 candidate manifest
+        run: node tools/stability/v0160-candidate-manifest.js
       - name: Enforce real canonical production runtime integration
         run: node tools/stability/production-runtime-integration-audit.js
-      - name: Upload production integration report
+      - name: Upload production integration reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: v0160-production-runtime-integration
-          path: audit-output/stability/production-runtime-integration-report.json
+          path: |
+            audit-output/stability/v0160-candidate-manifest.json
+            audit-output/stability/production-runtime-integration-report.json
           if-no-files-found: warn
