@@ -1,0 +1,45 @@
+name: v0.16.0 RC Activation Gate
+
+on:
+  push:
+    branches: [ rc/v0160-canonical-activation ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rc-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Isolated RC activation preflight
+        run: node tools/stability/rc-activation-audit.js
+      - name: Canonical owner registry
+        run: node tools/stability/canonical-owner-audit.js
+      - name: Final assembled Golden runtime parity
+        run: node tools/stability/final-runtime-audit.js
+      - name: State and Research compatibility
+        run: node tools/stability/state-compat-audit.js
+      - name: Behavioral differential
+        run: node tools/stability/behavioral-differential-audit.js
+      - name: AutoSync updater lifecycle soak
+        run: node tools/stability/autosync-updater-lifecycle-soak-audit.js
+      - name: Existing full regression core
+        run: node tools/full-regression-audit.js
+      - name: AI continuity
+        run: node tools/ai-continuity-audit.js
+      - name: Upload RC preflight reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-rc-activation-preflight
+          path: |
+            audit-output/stability
+            audit-output/full-regression-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: error
