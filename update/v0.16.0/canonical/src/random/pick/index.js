@@ -1,0 +1,13 @@
+'use strict';
+const contract=require('./contract');
+const dna=require('./dna');
+const selection=require('./selection-state');
+const top5=require('./top5');
+const teamScoreAdapter=require('./team-score-adapter');
+const teamScore=require('./team-score');
+const teamSurvival=require('./team-survival');
+const candidatePreview=require('./candidate-preview');
+const renderCore=require('./render-core');
+const owner=require('./owner');
+const productionAdapter=require('./production-adapter');
+module.exports={contract,dna,selection,top5,teamScoreAdapter,teamScore,teamSurvival,candidatePreview,renderCore,owner,productionAdapter,production_active:true,owner_status:'production',implementation_mode:'production-adapter',score_logic_changed:false,random_scoring_changed:false,legacy_removal_authorized:false};
