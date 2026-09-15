@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "baseline": {
+    "name": "golden-v0.15.135",
+    "status": "frozen",
+    "frozen_at": "2026-09-15T11:32:00+09:00",
+    "version": "0.15.135",
+    "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
+    "source_commit": "2048d56ceec2317b4cef225f284443521005994d",
+    "frozen_branch": "baseline/v0.15.135-golden",
+    "requested_git_tag": "golden-v0.15.135",
+    "git_tag_status": "pending_tool_support"
+  },
+  "production_identity": {
+    "manifest": "update/manifest.json",
+    "manifest_version": "0.15.135",
+    "package": "update/v0.15.135/package.json",
+    "electron_entry": "update/v0.15.135/main-v015135.js",
+    "runtime_stability_source": "update/v0.15.135/runtime-source-stability-v015135.js"
+  },
+  "comparison_scope": {
+    "ui_and_navigation": "golden_reference",
+    "draft": "golden_reference",
+    "random_pick_and_ingame": "golden_reference",
+    "data": "golden_reference",
+    "profile_and_results": "golden_reference",
+    "items": "golden_reference",
+    "recommendation_outputs": "golden_reference",
+    "settings": "golden_reference",
+    "persistent_storage_identity": "golden_reference",
+    "match_history_and_cache": "golden_reference",
+    "research": {
+      "status": "golden_reference",
+      "checkpoint_matches": 159,
+      "preservation_required": true
+    },
+    "autosync": "golden_reference",
+    "updater_identity": "golden_reference"
+  },
+  "acceptance": {
+    "real_windows_current_state": "user_verified",
+    "golden_branch_matches_release_commit": true,
+    "golden_branch_ahead_by": 0,
+    "golden_branch_behind_by": 0,
+    "unrelated_long_soak_checks_auto_closed": false
+  },
+  "freeze_rules": [
+    "Do not force-move or develop on the frozen baseline branch.",
+    "Do not change production behavior as part of the baseline freeze.",
+    "Treat v0.15.135 observable output as the differential truth unless an intentional change is explicitly approved.",
+    "Preserve the Research 159-match checkpoint and existing storage identity.",
+    "Do not silently reset settings, match caches, IndexedDB/LocalStorage identity, or AutoSync state during refactoring."
+  ],
+  "runtime_changes_in_freeze": []
+}
