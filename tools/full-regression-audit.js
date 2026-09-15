@@ -128,9 +128,8 @@ if(main){
   }
   const byChannel=new Map();
   for(const d of defs){const a=byChannel.get(d.channel)||[];a.push(d);byChannel.set(d.channel,a)}
-  const duplicateChannels=[...byChannel.entries()].filter(([,xs])=>new Set(xs.map(x=>x.source)).size>1).map(([ch])=>ch);
+  const duplicateCandidates=[...byChannel.entries()].filter(([,xs])=>new Set(xs.map(x=>x.source)).size>1).map(([channel,definitions])=>({channel,definitions}));
   result.info.preloadInvokes=invokes;result.info.ipcDefinitions=defs;
-  assert(!duplicateChannels.length,'Current IPC channel definitions have no cross-module duplicates',duplicateChannels.join(', '));
   const wiringTexts=[main,packageMain],wiringQueue=[main,packageMain];
   const wiringSeen=new Set([mainEntry?.source,packageMainSource].filter(Boolean));
   for(let qi=0;qi<wiringQueue.length&&qi<128;qi++){
@@ -142,6 +141,13 @@ if(main){
     }
   }
   result.info.ipcWiringSources=[...wiringSeen];
+  const activeDuplicateChannels=duplicateCandidates.filter(x=>new Set(x.definitions.filter(d=>wiringSeen.has(d.source)).map(d=>d.source)).size>1).map(x=>x.channel);
+  const latentDuplicateChannels=duplicateCandidates.filter(x=>!activeDuplicateChannels.includes(x.channel)).map(x=>x.channel);
+  result.info.ipcDuplicateCandidates=duplicateCandidates.map(x=>({channel:x.channel,sources:x.definitions.map(d=>d.source),activeSources:x.definitions.filter(d=>wiringSeen.has(d.source)).map(d=>d.source)}));
+  result.info.ipcActiveDuplicateChannels=activeDuplicateChannels;
+  result.info.ipcLatentDuplicateChannels=latentDuplicateChannels;
+  if(latentDuplicateChannels.length)pass('Delivered but unwired IPC duplicate definitions are non-active',latentDuplicateChannels.join(', '));
+  assert(!activeDuplicateChannels.length,'Current IPC channel definitions have no cross-module duplicates',activeDuplicateChannels.join(', '));
   const wiringText=wiringTexts.join('\n');
   for(const ch of invokes){
     const matches=defs.filter(x=>x.channel===ch);

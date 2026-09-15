@@ -4,11 +4,11 @@
 
 ## Active distribution
 
-- Active updater: **v0.15.135**
-- Manifest message: v0.15.135 · PATCH NOTES SEMANTIC SHELL SWEEP
-- Manifest commit: `a0a9e9fb0dff5650aae811c6a416e00465f092ee`
-- Package: `update/v0.15.135/package.json` → **v0.15.135**
-- Electron entry: `main-v015135.js` → `update/v0.15.135/main-v015135.js`
+- Active updater: **v0.16.0**
+- Manifest message: v0.16.0 · CLEAN BASELINE
+- Manifest commit: `ce9643f6dfc2b25b9535b2f51cfa0d6a6db63239`
+- Package: `update/v0.16.0/package.json` → **v0.16.0**
+- Electron entry: `main-v0160.js` → `update/v0.16.0/main-v0160.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
 
 ## Active ownership — do not create competing owners
