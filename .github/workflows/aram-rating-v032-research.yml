@@ -15,6 +15,7 @@ on:
       - 'tools/research/aram-rating-v032-b4-cold-start-diagnostic-audit.js'
       - 'tools/research/aram-rating-v032-b5-preview-audit.js'
       - 'tools/research/aram-rating-v032-b51-preview-audit.js'
+      - 'tools/research/aram-rating-v032-b51-runner-audit.js'
       - '.github/workflows/aram-rating-v032-research.yml'
   workflow_dispatch:
 
@@ -50,6 +51,8 @@ jobs:
         run: node tools/research/aram-rating-v032-b5-preview-audit.js
       - name: Run B5.1 match-level closed preview audit
         run: node tools/research/aram-rating-v032-b51-preview-audit.js
+      - name: Run B5.1 evidence-first manual runner safety audit
+        run: node tools/research/aram-rating-v032-b51-runner-audit.js
       - name: Upload aggregate/synthetic audits only
         uses: actions/upload-artifact@v4
         with:
@@ -65,4 +68,5 @@ jobs:
             audit-output/aram-rating-v032-b4-cold-start-diagnostic-audit.json
             audit-output/aram-rating-v032-b5-preview-audit.json
             audit-output/aram-rating-v032-b51-preview-audit.json
+            audit-output/aram-rating-v032-b51-runner-audit.json
           if-no-files-found: error
