@@ -9,4 +9,5 @@ const teamSurvival=require('./team-survival');
 const candidatePreview=require('./candidate-preview');
 const renderCore=require('./render-core');
 const owner=require('./owner');
-module.exports={contract,dna,selection,top5,teamScoreAdapter,teamScore,teamSurvival,candidatePreview,renderCore,owner,production_active:false,score_logic_changed:false,random_scoring_changed:false};
+const productionAdapter=require('./production-adapter');
+module.exports={contract,dna,selection,top5,teamScoreAdapter,teamScore,teamSurvival,candidatePreview,renderCore,owner,productionAdapter,production_active:true,owner_status:'production',implementation_mode:'production-adapter',score_logic_changed:false,random_scoring_changed:false,legacy_removal_authorized:false};
