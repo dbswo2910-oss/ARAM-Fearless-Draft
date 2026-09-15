@@ -2,7 +2,8 @@ name: v0.16.0 Production Candidate Gate
 
 on:
   push:
-    branches: [ release/v0160-production-candidate ]
+    branches:
+      - release/v0160-production-candidate
   workflow_dispatch:
 
 permissions:
@@ -18,7 +19,8 @@ jobs:
         with:
           node-version: '20'
       - name: Verify explicit final approval metadata
-        run: node -e "const x=require('./release/v0.16.0-final-approval.json'); if(!x.approval?.final_production_release_approved) process.exit(1); console.log('FINAL APPROVAL: PRESENT')"
+        run: |
+          node -e "const x=require('./release/v0.16.0-final-approval.json'); if(!x.approval?.final_production_release_approved) process.exit(1); console.log('FINAL APPROVAL PRESENT')"
       - name: Enforce real canonical production runtime integration
         run: node tools/stability/production-runtime-integration-audit.js
       - name: Upload production integration report
