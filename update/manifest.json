@@ -1,6 +1,6 @@
 {
-  "version": "0.15.135",
-  "message": "v0.15.135 · PATCH NOTES SEMANTIC SHELL SWEEP",
+  "version": "0.16.0",
+  "message": "v0.16.0 · CLEAN BASELINE",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -817,8 +817,8 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.15.135/package.json",
-      "sha256": "763b579137953daa19881e34c36743fcc4730a29904ce8f334166159ef913341"
+      "source": "update/v0.16.0/package.json",
+      "sha256": "9a517cfa5b71fca6dd54dcf052a35200159615bbeb56293cd9efb556fdf20db1"
     },
     {
       "path": "rating-engine-v01.js",
@@ -976,6 +976,441 @@
       "path": "cold-start-promotion-v015135.js",
       "source": "update/v0.15.135/cold-start-promotion-v015135.js",
       "sha256": "b67afbb9828c6cf62bf4987802b8a1602509b114e2e7f36b8e19e73ca9ad85a1"
+    },
+    {
+      "path": "main-v0160.js",
+      "source": "update/v0.16.0/main-v0160.js",
+      "sha256": "3c600cc9d9f1b3085295b5aab1ab57c58bdc0da10d58dfd73bdab4bc9f1a8d71"
+    },
+    {
+      "path": "successor-route-v0160.js",
+      "source": "update/v0.16.0/successor-route-v0160.js",
+      "sha256": "6a34b7772984dbd918adbd52d93f714424eb0133285b3e3b4b58c451975b350c"
+    },
+    {
+      "path": "cold-start-promotion-v0160.js",
+      "source": "update/v0.16.0/cold-start-promotion-v0160.js",
+      "sha256": "44237c626ab3778b4e16cac9d40d72f3e64dbe409d9bc71d3d40bc6b54dcb868"
+    },
+    {
+      "path": "canonical-owner-bundler-v0160.js",
+      "source": "update/v0.16.0/canonical-owner-bundler-v0160.js",
+      "sha256": "e08eefd404a24eadaf5fe53ef69dc4ed4d95cb772f89264a942d8b8a53efb7d3"
+    },
+    {
+      "path": "canonical-renderer-bundle.js",
+      "source": "update/v0.16.0/canonical-renderer-bundle.js",
+      "sha256": "9fdef3cba7a8c48a1c53a61ace8950ed89141432086c43dd71bc351c4e9a1bba"
+    },
+    {
+      "path": "canonical/src/autosync/concurrency.js",
+      "source": "src/autosync/concurrency.js",
+      "sha256": "6f70ef94311b3d4f206130bd62bbba64c23bca7f53f4a930a71d3bf5d5ff99f4"
+    },
+    {
+      "path": "canonical/src/autosync/contract.js",
+      "source": "src/autosync/contract.js",
+      "sha256": "dc1cc4198a48cd567ef464e4369ba803b3362589f6c796e1ab30d301f47c3138"
+    },
+    {
+      "path": "canonical/src/autosync/index.js",
+      "source": "src/autosync/index.js",
+      "sha256": "49a9df826adcd936ed0e189bdd2b9ae6b92bb06f1da852b0319de6f735c0da76"
+    },
+    {
+      "path": "canonical/src/core/lifecycle/index.js",
+      "source": "src/core/lifecycle/index.js",
+      "sha256": "471ee872d109afc2173fdba3933ab429958b41a851155d6d0907ac83b1c420e2"
+    },
+    {
+      "path": "canonical/src/core/owner-registry.js",
+      "source": "src/core/owner-registry.js",
+      "sha256": "d45e6345b182305e4201458bb350344f2b05c4f2ec729c56ef0ad14c6790c4bc"
+    },
+    {
+      "path": "canonical/src/data/contract.js",
+      "source": "src/data/contract.js",
+      "sha256": "19d53e9fd29891a43045d689e933b6c4e417d9e2b46cfe4f28cf26487b1f1ef4"
+    },
+    {
+      "path": "canonical/src/data/index.js",
+      "source": "src/data/index.js",
+      "sha256": "cb966ec7527e7890a0c99f36e4281770ce3babbb0d6a233d449174fa85b82690"
+    },
+    {
+      "path": "canonical/src/data/mode-controller.js",
+      "source": "src/data/mode-controller.js",
+      "sha256": "43ff4f504a15ca7d832a33edd24f4db8a314d86147f15893bdb878f1f217489e"
+    },
+    {
+      "path": "canonical/src/data/navigation.js",
+      "source": "src/data/navigation.js",
+      "sha256": "77683b426b084924cbe44ab4d342fe950e39c7cd7f4cd581eaa4eaf362a97a7e"
+    },
+    {
+      "path": "canonical/src/data/owner.js",
+      "source": "src/data/owner.js",
+      "sha256": "03996d25c613631137fbfc2872bb1673b15db3c9f7e13d7dbad88fb638d30d91"
+    },
+    {
+      "path": "canonical/src/data/patch-mode-shell.js",
+      "source": "src/data/patch-mode-shell.js",
+      "sha256": "e0e707ffc78e17a46c33a25871039582db593d7903c4d82a17a8ab058e7be5ed"
+    },
+    {
+      "path": "canonical/src/data/patch-notes-render.js",
+      "source": "src/data/patch-notes-render.js",
+      "sha256": "1170efe46f591f047eca28ee780ed8f5c48758fd056fd441ba1b15358811ab40"
+    },
+    {
+      "path": "canonical/src/data/production-adapter.js",
+      "source": "src/data/production-adapter.js",
+      "sha256": "1a0905d8928ce0bafa5c103ca2515ded6e718771b6c3f834cf8fd8e6760c971c"
+    },
+    {
+      "path": "canonical/src/data/workspace.js",
+      "source": "src/data/workspace.js",
+      "sha256": "bb4a285cbd383e8e8904b4dc2245379dc916d97aee5422ae1a4980a1c19e1246"
+    },
+    {
+      "path": "canonical/src/diagnostics/contract.js",
+      "source": "src/diagnostics/contract.js",
+      "sha256": "fef255eaebca414930689a401b316b7de0a49d14a5ecea8b5c157f113f37615c"
+    },
+    {
+      "path": "canonical/src/diagnostics/index.js",
+      "source": "src/diagnostics/index.js",
+      "sha256": "0d12515bc3bd2a655373de47aca7b288f76ecd3367a0fd66c7aa94641276199f"
+    },
+    {
+      "path": "canonical/src/diagnostics/owner.js",
+      "source": "src/diagnostics/owner.js",
+      "sha256": "7890a3a0ae88b44b42471d48143a2a631bdd4894d378c786f118abec1a5415f1"
+    },
+    {
+      "path": "canonical/src/diagnostics/panel.js",
+      "source": "src/diagnostics/panel.js",
+      "sha256": "f50e1e470652a88c76a8101071a8e58bf5c708f7a373737393eaedce376b1f0d"
+    },
+    {
+      "path": "canonical/src/draft/contract.js",
+      "source": "src/draft/contract.js",
+      "sha256": "847b03cefe963772444785d2830dfbe072bb778503807a9713fae3021adce179"
+    },
+    {
+      "path": "canonical/src/draft/index.js",
+      "source": "src/draft/index.js",
+      "sha256": "034f9581413f88e6b287eeb404f5815bf975773069f63e20588ef13a96183a28"
+    },
+    {
+      "path": "canonical/src/draft/production-adapter.js",
+      "source": "src/draft/production-adapter.js",
+      "sha256": "f8e5b5fc7374d918e347f4b24cbefaa514508b0d4a362ea2bd6b950da931527b"
+    },
+    {
+      "path": "canonical/src/draft/risk-engine.js",
+      "source": "src/draft/risk-engine.js",
+      "sha256": "fca23c3f4583a9f66e2dfb3a16dfd6732bd0bce95c7f0e6fd92002d37999490e"
+    },
+    {
+      "path": "canonical/src/items/art-resolver.js",
+      "source": "src/items/art-resolver.js",
+      "sha256": "cfba089e89f3b3e1469b52e571cea1dae9ebfede45d2020b791d4595ed602516"
+    },
+    {
+      "path": "canonical/src/items/art-runtime.js",
+      "source": "src/items/art-runtime.js",
+      "sha256": "1dc51039bfdabe9d85aee519cdef0fdb06d3e2a9665dd069d858de12b5bbae72"
+    },
+    {
+      "path": "canonical/src/items/catalog-contract.js",
+      "source": "src/items/catalog-contract.js",
+      "sha256": "291313eab972cf48b593f677f64a5c79eeb26ef4383cadd9142d0fa195a1df63"
+    },
+    {
+      "path": "canonical/src/items/catalog-service.js",
+      "source": "src/items/catalog-service.js",
+      "sha256": "9c3153412289982818d4d8ee0b281f43790057696abe7c7d55da672ad9707175"
+    },
+    {
+      "path": "canonical/src/items/contract.js",
+      "source": "src/items/contract.js",
+      "sha256": "3d237cff2667b1303c304ddfef17d8e22b6f9a0d7a2d7584110bacb86b09ec08"
+    },
+    {
+      "path": "canonical/src/items/identity.js",
+      "source": "src/items/identity.js",
+      "sha256": "c4e3ecbceb7de8a81a7f6b4c86e3d65ecaa4d54eaf6e25a14fe5ceee5f6f1b54"
+    },
+    {
+      "path": "canonical/src/items/index.js",
+      "source": "src/items/index.js",
+      "sha256": "c1f9d5430b1ebbda28f03524df95025e5de6d1d2e1c065aed17396da73b75061"
+    },
+    {
+      "path": "canonical/src/items/recommendation.js",
+      "source": "src/items/recommendation.js",
+      "sha256": "c410f54564e724257795e2646d05a686d99ecb67d735933104b6ace365b98a03"
+    },
+    {
+      "path": "canonical/src/main/bootstrap.js",
+      "source": "src/main/bootstrap.js",
+      "sha256": "ea1c7b7fbee064c6443e2814ca9c590c62be7e5fbb693bf4d91670da79513716"
+    },
+    {
+      "path": "canonical/src/main/contract.js",
+      "source": "src/main/contract.js",
+      "sha256": "409d98ffd528fad49d6178aee6080a1ddc93219f6ade47180e889998a6002285"
+    },
+    {
+      "path": "canonical/src/preload/contract.js",
+      "source": "src/preload/contract.js",
+      "sha256": "2b139865b228a34146459b539ea4812c9d38b32c857818783678c5ca3881ab25"
+    },
+    {
+      "path": "canonical/src/preload/ipc-contract.js",
+      "source": "src/preload/ipc-contract.js",
+      "sha256": "ca11afbf8e2005afb96d2bcda6ff695f87d982706af30fa1324857fddd2930a3"
+    },
+    {
+      "path": "canonical/src/profile/contract.js",
+      "source": "src/profile/contract.js",
+      "sha256": "6f729e651a5f80d35cb72c07ec00fb2ef6507e77b50ef223747ba211ad3d88e2"
+    },
+    {
+      "path": "canonical/src/profile/history-service.js",
+      "source": "src/profile/history-service.js",
+      "sha256": "ef6c9307a49ef6141d0ade85dc9d56fd0b0b7068a068bf2846cf32c220514edb"
+    },
+    {
+      "path": "canonical/src/profile/index.js",
+      "source": "src/profile/index.js",
+      "sha256": "ce2f2433aa47eec660b8a7484fea81741b5f69be7d274e00d0ce5c6e04474054"
+    },
+    {
+      "path": "canonical/src/profile/metrics.js",
+      "source": "src/profile/metrics.js",
+      "sha256": "fb2dc3ec0a2267a6b203541d90f6cb7f0bf1f4e5e79a61f1834c64110dbdf5d5"
+    },
+    {
+      "path": "canonical/src/profile/owner.js",
+      "source": "src/profile/owner.js",
+      "sha256": "01e3988dc483c2bb40bfe8a6d17703b5f2c04606389bb8ed3449c854ad770720"
+    },
+    {
+      "path": "canonical/src/profile/profile-render.js",
+      "source": "src/profile/profile-render.js",
+      "sha256": "5c0d4fd641afe0b82d32302dc7eeef113011913b1730c45b68643dd1bbe4c7d4"
+    },
+    {
+      "path": "canonical/src/profile/results-normalizer.js",
+      "source": "src/profile/results-normalizer.js",
+      "sha256": "98867b0640cf8a5f4d4d8a88c2168b23ce6745478d20c9fd1d1b236a924452e7"
+    },
+    {
+      "path": "canonical/src/profile/results-render.js",
+      "source": "src/profile/results-render.js",
+      "sha256": "8af8fca827e73c034b91228e1e2b3d6c147e7c8e3d28e77ae90cd0773f600c20"
+    },
+    {
+      "path": "canonical/src/profile/riot-grade-link.js",
+      "source": "src/profile/riot-grade-link.js",
+      "sha256": "cf878b7e3c3803084ef8666e3787f0c48c1b18f9690d928f4df9aff4ab087a08"
+    },
+    {
+      "path": "canonical/src/random/ingame/coach-render.js",
+      "source": "src/random/ingame/coach-render.js",
+      "sha256": "1d0ba0032ccfd3317b1fdc50da737eea236361143a41abecd2ca45241286eb2a"
+    },
+    {
+      "path": "canonical/src/random/ingame/contract.js",
+      "source": "src/random/ingame/contract.js",
+      "sha256": "b43f130bd6c84d15df0df22b40132535739360eb0fb1f3df44f2c70a7bdf13ed"
+    },
+    {
+      "path": "canonical/src/random/ingame/coordinator.js",
+      "source": "src/random/ingame/coordinator.js",
+      "sha256": "52643a8aa0c3212f112c94a0b93d2eb7bdd3d2434d9a64635d584e24b56ca6a6"
+    },
+    {
+      "path": "canonical/src/random/ingame/index.js",
+      "source": "src/random/ingame/index.js",
+      "sha256": "c9c5ebb7f2ca553f724ba043c2d11518c33c1e9f442207b9d4c3fc24ad3c39c7"
+    },
+    {
+      "path": "canonical/src/random/ingame/scheduler.js",
+      "source": "src/random/ingame/scheduler.js",
+      "sha256": "a13534e3f6c4dace79aa7bd938bb75119dc5cbb7d7ebcf5f690da20791a1526a"
+    },
+    {
+      "path": "canonical/src/random/ingame/semantic-signature.js",
+      "source": "src/random/ingame/semantic-signature.js",
+      "sha256": "dc26765f16399dcce86c5f5539887a41067f1366600ba14c7bafdd70334bb7e3"
+    },
+    {
+      "path": "canonical/src/random/ingame/shop-pipeline.js",
+      "source": "src/random/ingame/shop-pipeline.js",
+      "sha256": "d9dcda219ffc89d22fd44adafd9d48b1657b6b6dc2a226182e97159ddfcec0b5"
+    },
+    {
+      "path": "canonical/src/random/ingame/volatile-hud.js",
+      "source": "src/random/ingame/volatile-hud.js",
+      "sha256": "7d7ef873178dfda2f544064438481b79487e6662b838bd681d651d7be57d08d6"
+    },
+    {
+      "path": "canonical/src/random/pick/candidate-preview.js",
+      "source": "src/random/pick/candidate-preview.js",
+      "sha256": "9b097424d4fed49b5bd1ffb31f2846e5ce24f2aa6e95beba6d64c696c092e50b"
+    },
+    {
+      "path": "canonical/src/random/pick/contract.js",
+      "source": "src/random/pick/contract.js",
+      "sha256": "685511d92416f4cb5ad48a3d0cbe303501046e774c2992226ddfaf8a9b4200a7"
+    },
+    {
+      "path": "canonical/src/random/pick/dna.js",
+      "source": "src/random/pick/dna.js",
+      "sha256": "42a7ff3d214f1f88f9b618f4de3612281ed017f8930a28f300b4deb468748a4a"
+    },
+    {
+      "path": "canonical/src/random/pick/index.js",
+      "source": "src/random/pick/index.js",
+      "sha256": "9bc875a96d6d610ce880701514f7e13c35f8fff8ac13404328f321e1abd405e8"
+    },
+    {
+      "path": "canonical/src/random/pick/owner.js",
+      "source": "src/random/pick/owner.js",
+      "sha256": "e2d58686aa0e73c3740c8043246cab089fc47fa776c509464e99a5d287b9062f"
+    },
+    {
+      "path": "canonical/src/random/pick/production-adapter.js",
+      "source": "src/random/pick/production-adapter.js",
+      "sha256": "c12b1b8dbcc7c3a010d9e7cb9f7cbdb28b4cd0490b62d3569d49b8c1ac258e7a"
+    },
+    {
+      "path": "canonical/src/random/pick/render-core.js",
+      "source": "src/random/pick/render-core.js",
+      "sha256": "a4953cb1cc87fba8874d640feb94da22de4f1e92d51b55d27429992d9a7e3b9f"
+    },
+    {
+      "path": "canonical/src/random/pick/selection-state.js",
+      "source": "src/random/pick/selection-state.js",
+      "sha256": "6e7a29694556c7594e1f006a49c545d6e759d8a6c4adfa04d170002b70f6173a"
+    },
+    {
+      "path": "canonical/src/random/pick/team-score-adapter.js",
+      "source": "src/random/pick/team-score-adapter.js",
+      "sha256": "fa04b085511a3ec686b1fcaf18e93e9ea5483d29aadb7bbdf7a90aa0510ed1dd"
+    },
+    {
+      "path": "canonical/src/random/pick/team-score.js",
+      "source": "src/random/pick/team-score.js",
+      "sha256": "d5259c09903a41085aba53e4a48693326dbe86bd2fd81263b5362c27928290af"
+    },
+    {
+      "path": "canonical/src/random/pick/team-survival.js",
+      "source": "src/random/pick/team-survival.js",
+      "sha256": "da2b7819f521da4c5f77ffa9af3074d7cc83ff394f4b922d9752ddb7ea5847f6"
+    },
+    {
+      "path": "canonical/src/random/pick/top5.js",
+      "source": "src/random/pick/top5.js",
+      "sha256": "fd1baedbd9afba71e55c8a0a944eda894088eca3ffdc9d0130aba6e6536e9a78"
+    },
+    {
+      "path": "canonical/src/rc/activation-plan.js",
+      "source": "src/rc/activation-plan.js",
+      "sha256": "07e00c2a73291eaf86fa89bddcb1a0b49969d97dd6d8a1c9463fffe2f3d4aa19"
+    },
+    {
+      "path": "canonical/src/rc/exercise-plan.js",
+      "source": "src/rc/exercise-plan.js",
+      "sha256": "5a90644f71a1852bcee302b175ccf705a9579072e856bae3b6a4bf2ed0c2cd55"
+    },
+    {
+      "path": "canonical/src/research/contract.js",
+      "source": "src/research/contract.js",
+      "sha256": "9c02ca9e511a490768e9062ccb635ede39026282a0332670fd8ebc7a5f9daf48"
+    },
+    {
+      "path": "canonical/src/research/index.js",
+      "source": "src/research/index.js",
+      "sha256": "1cd724b984a2f901065fa17cd01cb89d027aaed6ff09d8df63a285d13c8a7f10"
+    },
+    {
+      "path": "canonical/src/research/owner.js",
+      "source": "src/research/owner.js",
+      "sha256": "f22b29994e8c6697cec36b528fa7f5ed0a2ddc7f32d30c5db75937c68816c024"
+    },
+    {
+      "path": "canonical/src/research/rating-engine.js",
+      "source": "src/research/rating-engine.js",
+      "sha256": "76ad43a6e2072376997292fa44a3ec594b01eb28f4c473637391819937b64aa4"
+    },
+    {
+      "path": "canonical/src/research/sampling-v031.js",
+      "source": "src/research/sampling-v031.js",
+      "sha256": "2328e7f225a7920abeabd8aed2bfb95ed0ed49109e25bbab56d5f7080738eba5"
+    },
+    {
+      "path": "canonical/src/research/storage.js",
+      "source": "src/research/storage.js",
+      "sha256": "ed5b2d8e10303eb5c6eb020b39e4463121c263a4dafd208aeec3aaa9c1fe3053"
+    },
+    {
+      "path": "canonical/src/research/ui-core.js",
+      "source": "src/research/ui-core.js",
+      "sha256": "78129eba7a47dc142c98935b93da0ae64620a05bc71543933e8044875410b21b"
+    },
+    {
+      "path": "canonical/src/riot/contract.js",
+      "source": "src/riot/contract.js",
+      "sha256": "5764d4fdf4e2994c95f170de17c9e46ef7d060874d115726f2f3488ce669f156"
+    },
+    {
+      "path": "canonical/src/riot/grade.js",
+      "source": "src/riot/grade.js",
+      "sha256": "b8ed2db144fc468696dcc0942ebd1143b146d71b65df3364e9e69532b57e4596"
+    },
+    {
+      "path": "canonical/src/riot/index.js",
+      "source": "src/riot/index.js",
+      "sha256": "fd009bcec7db706acaea82b76befb74cd803263d128934ae144a4a56f471190c"
+    },
+    {
+      "path": "canonical/src/state/contract.js",
+      "source": "src/state/contract.js",
+      "sha256": "6bf3913fae98efb767b48bc00a2e7179cb5ebaebda6c2517e54a05d789f4e81b"
+    },
+    {
+      "path": "canonical/src/state/index.js",
+      "source": "src/state/index.js",
+      "sha256": "b45d80fe2c71586fa1de2e18f726b01573a7c53f2e0e9f2c73c5001d8c0e5967"
+    },
+    {
+      "path": "canonical/src/state/state-store.js",
+      "source": "src/state/state-store.js",
+      "sha256": "d11c47b9c1c71aa4bdf46b6d1010c372b49703fc2d722157f09767a88ca2ca34"
+    },
+    {
+      "path": "canonical/src/updater/boot-guard.js",
+      "source": "src/updater/boot-guard.js",
+      "sha256": "ffd4f6d23d6189a42ba386c70096c12284685fe1f41b763c3548de7cb4720914"
+    },
+    {
+      "path": "canonical/src/updater/contract.js",
+      "source": "src/updater/contract.js",
+      "sha256": "61dec2577b6157fef73eb17dff679706b8467e7a27b316c3c38caa43d1b268a8"
+    },
+    {
+      "path": "canonical/src/updater/index.js",
+      "source": "src/updater/index.js",
+      "sha256": "e3667db0abcf1e793c0723e23a0ea0cff8ad43cbad7059d19e947ace48cf7a59"
+    },
+    {
+      "path": "canonical/src/updater/transaction.js",
+      "source": "src/updater/transaction.js",
+      "sha256": "9e0bd270401d5dac3af0408c95f646d5eea3cf6a4df9183e15676a5641b37e12"
     }
   ],
   "delete": [
@@ -1010,5 +1445,20 @@
     "random-workspace-stability-v015112.js",
     "random-workspace-readable-v015113.js",
     "random-pick-integrity-v015114.js"
-  ]
+  ],
+  "release": {
+    "schema": 1,
+    "production": true,
+    "tested_candidate_commit": "e1c01b994adc09c262c16f1efbfad8530cef379f",
+    "tested_candidate_manifest_sha256": "4274f22596272514280d89c269f7d09060189f1a743efefce97c36502d050a88",
+    "post_activation_run_id": 34995131695,
+    "production_candidate_gate_run_id": 34995131586,
+    "physical_evidence_sha256": "34f782275d40ca023ccb88624f04286b8e5b2904ef0c0e76ad9c63153f2fa0ec",
+    "golden_rollback_target": "0.15.135",
+    "legacy_removal": false,
+    "owner_mode": "production-adapter",
+    "main_payload_carry_forward": [
+      "update/data/aram-builds/current.json"
+    ]
+  }
 }
