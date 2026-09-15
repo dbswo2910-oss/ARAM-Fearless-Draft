@@ -6,4 +6,5 @@ const modeController=require('./mode-controller');
 const navigation=require('./navigation');
 const patchNotesRender=require('./patch-notes-render');
 const owner=require('./owner');
-module.exports={contract,patchModeShell,workspace,modeController,navigation,patchNotesRender,owner,production_active:false,score_logic_changed:false,random_scoring_changed:false};
+const productionAdapter=require('./production-adapter');
+module.exports={contract,patchModeShell,workspace,modeController,navigation,patchNotesRender,owner,productionAdapter,production_active:true,owner_status:'production',implementation_mode:'production-adapter',score_logic_changed:false,random_scoring_changed:false,legacy_removal_authorized:false};
