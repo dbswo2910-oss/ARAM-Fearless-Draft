@@ -37,6 +37,12 @@ jobs:
         run: node tools/full-regression-audit.js
       - name: AI continuity
         run: node tools/ai-continuity-audit.js
+      - name: Upload deterministic v0.16 candidate app
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-candidate-app
+          path: audit-output/stability/post-activation/candidate-app
+          if-no-files-found: error
       - name: Upload core post-activation reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -57,12 +63,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Materialize actual v0.16 installed candidate
+      - name: Download exact deterministic v0.16 candidate app
+        uses: actions/download-artifact@v4
+        with:
+          name: v0160-candidate-app
+          path: ${{ runner.temp }}/aram-v0160-candidate
+      - name: Verify downloaded candidate package and syntax
         shell: pwsh
         run: |
           $candidate = Join-Path $env:RUNNER_TEMP 'aram-v0160-candidate'
-          node tools/stability/materialize-v0160-candidate.js --out "$candidate"
-          if ($LASTEXITCODE -ne 0) { throw 'v0.16 candidate materialization failed' }
+          $pkgPath = Join-Path $candidate 'package.json'
+          if (!(Test-Path $pkgPath)) { throw "candidate package missing: $pkgPath" }
+          $pkg = Get-Content $pkgPath -Raw | ConvertFrom-Json
+          if ($pkg.name -ne 'aram-fearless-draft' -or $pkg.version -ne '0.16.0') { throw "candidate identity/version mismatch: $($pkg.name) $($pkg.version)" }
+          if (!(Test-Path (Join-Path $candidate $pkg.main))) { throw "candidate main missing: $($pkg.main)" }
+          if (!(Test-Path (Join-Path $candidate 'canonical\src\core\owner-registry.js'))) { throw 'canonical owner registry missing from downloaded candidate' }
           Get-ChildItem $candidate -Recurse -Filter *.js | ForEach-Object {
             node --check $_.FullName
             if ($LASTEXITCODE -ne 0) { throw "candidate JS syntax failed: $($_.FullName)" }
@@ -148,7 +163,7 @@ jobs:
             real_league_client_tested=$false
             real_research_159_retest=$false
             physical_evidence_reused_as_prior_release_evidence=$true
-            scope='GitHub-hosted Windows candidate cold-start + restart persistence; physical League/LCU and exact Research 159 evidence remains the separately validated user-PC gate.'
+            scope='GitHub-hosted Windows exact candidate artifact cold-start + restart persistence; physical League/LCU and exact Research 159 evidence remains the separately validated user-PC gate.'
           }
           $report | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $outDir 'windows-installed-report.json') -Encoding utf8
           if (-not $success) { throw "v0.16 Windows installed acceptance failed: $($report | ConvertTo-Json -Compress -Depth 6)" }
