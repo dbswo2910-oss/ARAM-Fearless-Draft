@@ -23,6 +23,8 @@ jobs:
           node -e "const x=require('./release/v0.16.0-final-approval.json'); if(!x.approval?.final_production_release_approved) process.exit(1); console.log('FINAL APPROVAL PRESENT')"
       - name: Build isolated v0.16 candidate manifest
         run: node tools/stability/v0160-candidate-manifest.js
+      - name: Exercise canonical production owner layer
+        run: node tools/stability/canonical-production-owner-audit.js
       - name: Enforce real canonical production runtime integration
         run: node tools/stability/production-runtime-integration-audit.js
       - name: Upload production integration reports
@@ -32,5 +34,6 @@ jobs:
           name: v0160-production-runtime-integration
           path: |
             audit-output/stability/v0160-candidate-manifest.json
+            audit-output/stability/canonical-production-owner-report.json
             audit-output/stability/production-runtime-integration-report.json
           if-no-files-found: warn
