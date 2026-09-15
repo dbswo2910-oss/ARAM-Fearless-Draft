@@ -56,33 +56,50 @@ jobs:
 
   candidate-windows-installed:
     runs-on: windows-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     needs: candidate-core-regression
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Download exact deterministic v0.16 candidate app
+      - name: Download exact deterministic v0.16 candidate delta
         uses: actions/download-artifact@v4
         with:
           name: v0160-candidate-app
-          path: ${{ runner.temp }}/aram-v0160-candidate
-      - name: Verify downloaded candidate package and syntax
+          path: ${{ runner.temp }}/aram-v0160-delta
+      - name: Verify downloaded candidate delta package and syntax
         shell: pwsh
         run: |
-          $candidate = Join-Path $env:RUNNER_TEMP 'aram-v0160-candidate'
-          $pkgPath = Join-Path $candidate 'package.json'
+          $delta = Join-Path $env:RUNNER_TEMP 'aram-v0160-delta'
+          $pkgPath = Join-Path $delta 'package.json'
           if (!(Test-Path $pkgPath)) { throw "candidate package missing: $pkgPath" }
           $pkg = Get-Content $pkgPath -Raw | ConvertFrom-Json
           if ($pkg.name -ne 'aram-fearless-draft' -or $pkg.version -ne '0.16.0') { throw "candidate identity/version mismatch: $($pkg.name) $($pkg.version)" }
-          if (!(Test-Path (Join-Path $candidate $pkg.main))) { throw "candidate main missing: $($pkg.main)" }
-          if (!(Test-Path (Join-Path $candidate 'canonical\src\core\owner-registry.js'))) { throw 'canonical owner registry missing from downloaded candidate' }
-          Get-ChildItem $candidate -Recurse -Filter *.js | ForEach-Object {
+          if (!(Test-Path (Join-Path $delta $pkg.main))) { throw "candidate main missing: $($pkg.main)" }
+          if (!(Test-Path (Join-Path $delta 'canonical\src\core\owner-registry.js'))) { throw 'canonical owner registry missing from downloaded candidate' }
+          Get-ChildItem $delta -Recurse -Filter *.js | ForEach-Object {
             node --check $_.FullName
             if ($LASTEXITCODE -ne 0) { throw "candidate JS syntax failed: $($_.FullName)" }
           }
-          "V0160_CANDIDATE_APP=$candidate" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "V0160_CANDIDATE_DELTA=$delta" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Reconstruct validated installed baseline and apply exact v0.16 delta
+        shell: pwsh
+        run: |
+          $base = Join-Path $env:RUNNER_TEMP 'aram-v01549-base'
+          $installed = Join-Path $env:RUNNER_TEMP 'aram-v0160-installed'
+          ./tools/stability/prepare-v01549-base.ps1 -OutputDir "$base"
+          node tools/stability/materialize-installed-app.js --base "$base" --out "$installed"
+          if ($LASTEXITCODE -ne 0) { throw 'Golden v0.15.135 installed materialization failed' }
+          Copy-Item (Join-Path $env:V0160_CANDIDATE_DELTA '*') -Destination $installed -Recurse -Force
+          $pkg = Get-Content (Join-Path $installed 'package.json') -Raw | ConvertFrom-Json
+          if ($pkg.version -ne '0.16.0') { throw "installed candidate package version mismatch: $($pkg.version)" }
+          if (!(Test-Path (Join-Path $installed 'index.html'))) { throw 'installed candidate lost inherited index.html' }
+          if (!(Test-Path (Join-Path $installed $pkg.main))) { throw "installed candidate main missing: $($pkg.main)" }
+          if (!(Test-Path (Join-Path $installed 'canonical\src\core\owner-registry.js'))) { throw 'installed candidate canonical registry missing' }
+          "V0160_CANDIDATE_APP=$installed" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Download and verify pinned Electron runtime
         shell: pwsh
         run: |
@@ -120,5 +137,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: v0160-post-activation-windows
-          path: audit-output/stability/post-activation/windows
+          path: |
+            audit-output/stability/post-activation/windows
+            audit-output/stability/installed-windows/materialization.json
           if-no-files-found: warn
