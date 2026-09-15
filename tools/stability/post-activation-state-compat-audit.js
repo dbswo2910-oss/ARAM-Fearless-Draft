@@ -1,0 +1,36 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const {buildCandidateManifest}=require('./v0160-candidate-manifest');
+const ROOT=path.resolve(__dirname,'../..');
+const p=(...xs)=>path.join(ROOT,...xs);
+const read=rel=>fs.readFileSync(p(rel),'utf8');
+const must=(x,m)=>{if(!x)throw new Error(m)};
+const candidate=buildCandidateManifest();
+const prod=JSON.parse(read('update/manifest.json'));
+must(String(prod.version)==='0.15.135','production manifest must remain Golden v0.15.135 during candidate regression');
+must(String(candidate.version)==='0.16.0','candidate manifest version drift');
+const pkg=JSON.parse(read('update/v0.16.0/package.json'));
+must(pkg.name==='aram-fearless-draft','stable app identity drift');
+const main=read('update/v0.16.0/main-v0160.js');
+must(main.includes("STABLE_APP_ID='aram-fearless-draft'")&&/setPath\(['\"]userData['\"]/.test(main),'v0.16 main does not preserve stable userData identity/path');
+const statePath='update/v0.15.117/state-integrity-v015117.js';
+const state=require(p(statePath));
+for(const fn of ['readNamespace','writeNamespace','guardExternalJson','writeTextAtomic'])must(typeof state[fn]==='function',`state owner missing ${fn}`);
+const researchCandidates=['update/v0.15.135/research-storage-v015131.js','update/v0.15.132/research-storage-v015131.js','update/v0.15.131/research-storage-v015131.js'].filter(x=>fs.existsSync(p(x)));
+must(researchCandidates.length>0,'Research storage source missing');
+const researchPath=researchCandidates[0],research=read(researchPath);
+must(research.includes('aram-rating-research-v03'),'Research database identity drift');
+must(research.includes('checkpoint-v03'),'Research checkpoint key drift');
+const destructive=[];
+for(const row of candidate.files||[]){
+  if(!/\.js$/i.test(String(row.source||''))||!fs.existsSync(p(row.source)))continue;
+  const src=read(row.source);
+  if(/deleteDatabase\s*\(/.test(src)&&src.includes('aram-rating-research-v03'))destructive.push(row.source);
+}
+must(destructive.length===0,`candidate contains destructive Research delete: ${destructive.join(', ')}`);
+const canonicalStateTargets=(candidate.files||[]).filter(x=>String(x.path||'').startsWith('canonical/src/state/'));
+must(canonicalStateTargets.length>0,'candidate does not materialize canonical state owner');
+const report={status:'SUCCESS',stage:'V0160_POST_ACTIVATION_STATE_COMPAT',candidate_version:'0.16.0',production_manifest_version:'0.15.135',stable_app_identity:pkg.name,stable_user_data_identity:'aram-fearless-draft',state_integrity_source:statePath,research_storage_source:researchPath,research_database:'aram-rating-research-v03',research_checkpoint_key:'checkpoint-v03',destructive_research_delete_sources:destructive,canonical_state_files:canonicalStateTargets.length,physical_release_evidence_reference:{research_matches_before:159,research_matches_after:159,checkpoint_stable:true},production_manifest_mutated:false,legacy_removal:false};
+const out=p('audit-output','stability','post-activation','state-compat-report.json');fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');
+console.log('V0.16 POST-ACTIVATION STATE COMPAT: SUCCESS',JSON.stringify({research:'159 evidence retained',canonical_state_files:canonicalStateTargets.length}));

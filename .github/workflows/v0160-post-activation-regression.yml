@@ -1,0 +1,143 @@
+name: v0.16.0 Post-Activation Regression
+
+on:
+  push:
+    branches:
+      - release/v0160-production-candidate
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-core-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Confirm production remains Golden
+        run: node -e "const m=require('./update/manifest.json'); if(m.version!=='0.15.135') throw new Error('production manifest drift '+m.version); console.log('PRODUCTION GOLDEN UNCHANGED',m.version)"
+      - name: Reconfirm canonical production owner integration
+        run: |
+          node tools/stability/v0160-candidate-manifest.js
+          node tools/stability/canonical-production-owner-audit.js
+          node tools/stability/production-runtime-integration-audit.js
+      - name: Materialize and syntax-check actual v0.16 candidate
+        run: node tools/stability/materialize-v0160-candidate.js --out audit-output/stability/post-activation/candidate-app
+      - name: Candidate State and Research compatibility
+        run: node tools/stability/post-activation-state-compat-audit.js
+      - name: Behavioral differential against Golden
+        run: node tools/stability/behavioral-differential-audit.js
+      - name: AutoSync updater lifecycle soak
+        run: node tools/stability/autosync-updater-lifecycle-soak-audit.js
+      - name: Existing full regression core
+        run: node tools/full-regression-audit.js
+      - name: AI continuity
+        run: node tools/ai-continuity-audit.js
+      - name: Upload deterministic v0.16 candidate app
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-candidate-app
+          path: audit-output/stability/post-activation/candidate-app
+          if-no-files-found: error
+      - name: Upload core post-activation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-post-activation-core
+          path: |
+            audit-output/stability
+            audit-output/full-regression-report.json
+            audit-output/ai-continuity-report.json
+          if-no-files-found: warn
+
+  candidate-windows-installed:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    needs: candidate-core-regression
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Download exact deterministic v0.16 candidate delta
+        uses: actions/download-artifact@v4
+        with:
+          name: v0160-candidate-app
+          path: ${{ runner.temp }}/aram-v0160-delta
+      - name: Verify downloaded candidate delta package and syntax
+        shell: pwsh
+        run: |
+          $delta = Join-Path $env:RUNNER_TEMP 'aram-v0160-delta'
+          $pkgPath = Join-Path $delta 'package.json'
+          if (!(Test-Path $pkgPath)) { throw "candidate package missing: $pkgPath" }
+          $pkg = Get-Content $pkgPath -Raw | ConvertFrom-Json
+          if ($pkg.name -ne 'aram-fearless-draft' -or $pkg.version -ne '0.16.0') { throw "candidate identity/version mismatch: $($pkg.name) $($pkg.version)" }
+          if (!(Test-Path (Join-Path $delta $pkg.main))) { throw "candidate main missing: $($pkg.main)" }
+          if (!(Test-Path (Join-Path $delta 'canonical\src\core\owner-registry.js'))) { throw 'canonical owner registry missing from downloaded candidate' }
+          Get-ChildItem $delta -Recurse -Filter *.js | ForEach-Object {
+            node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { throw "candidate JS syntax failed: $($_.FullName)" }
+          }
+          "V0160_CANDIDATE_DELTA=$delta" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Reconstruct validated installed baseline and apply exact v0.16 delta
+        shell: pwsh
+        run: |
+          $base = Join-Path $env:RUNNER_TEMP 'aram-v01549-base'
+          $installed = Join-Path $env:RUNNER_TEMP 'aram-v0160-installed'
+          ./tools/stability/prepare-v01549-base.ps1 -OutputDir "$base"
+          node tools/stability/materialize-installed-app.js --base "$base" --out "$installed"
+          if ($LASTEXITCODE -ne 0) { throw 'Golden v0.15.135 installed materialization failed' }
+          Copy-Item (Join-Path $env:V0160_CANDIDATE_DELTA '*') -Destination $installed -Recurse -Force
+          $pkg = Get-Content (Join-Path $installed 'package.json') -Raw | ConvertFrom-Json
+          if ($pkg.version -ne '0.16.0') { throw "installed candidate package version mismatch: $($pkg.version)" }
+          if (!(Test-Path (Join-Path $installed 'index.html'))) { throw 'installed candidate lost inherited index.html' }
+          if (!(Test-Path (Join-Path $installed $pkg.main))) { throw "installed candidate main missing: $($pkg.main)" }
+          if (!(Test-Path (Join-Path $installed 'canonical\src\core\owner-registry.js'))) { throw 'installed candidate canonical registry missing' }
+          "V0160_CANDIDATE_APP=$installed" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Download and verify pinned Electron runtime
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64.zip'
+          $runtime = Join-Path $env:RUNNER_TEMP 'electron-v38.7.2-win32-x64'
+          $uri = 'https://github.com/electron/electron/releases/download/v38.7.2/electron-v38.7.2-win32-x64.zip'
+          $expected = '0401b898a8d83523694bd0afa6dc3035a54c57404a914725baa621c3378b5885'
+          $ok = $false
+          for ($attempt=1; $attempt -le 3; $attempt++) {
+            try {
+              Remove-Item $zip -Force -ErrorAction SilentlyContinue
+              Invoke-WebRequest -Uri $uri -OutFile $zip
+              $hash=(Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($hash -ne $expected) { throw "Electron ZIP hash mismatch: $hash" }
+              $ok=$true; break
+            } catch {
+              Write-Warning "Electron download attempt $attempt failed: $($_.Exception.Message)"
+              if ($attempt -lt 3) { Start-Sleep -Seconds (8*$attempt) }
+            }
+          }
+          if (-not $ok) { throw 'Pinned Electron download failed' }
+          if (Test-Path $runtime) { Remove-Item $runtime -Recurse -Force }
+          Expand-Archive $zip $runtime -Force
+          $exe=Join-Path $runtime 'electron.exe'
+          if (!(Test-Path $exe)) { throw 'Electron executable missing' }
+          if (((& $exe --version | Out-String).Trim()) -ne 'v38.7.2') { throw 'Electron version mismatch' }
+          "PINNED_ELECTRON_EXE=$exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "PINNED_ELECTRON_SHA256=$expected" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Two-cycle installed Windows cold-start and persistence
+        shell: pwsh
+        run: |
+          ./tools/stability/windows-post-activation-v0160.ps1 -AppDir "$env:V0160_CANDIDATE_APP" -ElectronExe "$env:PINNED_ELECTRON_EXE" -ElectronSha256 "$env:PINNED_ELECTRON_SHA256"
+      - name: Upload Windows post-activation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0160-post-activation-windows
+          path: |
+            audit-output/stability/post-activation/windows
+            audit-output/stability/installed-windows/materialization.json
+          if-no-files-found: warn
