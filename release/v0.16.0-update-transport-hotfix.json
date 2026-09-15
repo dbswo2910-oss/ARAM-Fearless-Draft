@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "stage": "V0160_UPDATE_TRANSPORT_COMPAT_HOTFIX",
+  "release": "0.16.0",
+  "reason": "v0.15.135 secure updater requires every manifest source to remain under update/",
+  "original_production_commit": "feb7cb0e62a3f862a484f521b7f3914561410990",
+  "original_production_manifest_sha256": "d7636e64663ea667da4b74bfd1d31649564f3656f5e8a048ca4293596b013bbe",
+  "current_transport_manifest_sha256": "f59bd03b9482643c879985265830d8b1a0158de7faf9bbf5bde75a35827cbdd8",
+  "semantic_runtime_payload_sha256": "5422d37d237f96087859a33a4f4912f36f9bcd3656425687b010a196e175a76b",
+  "canonical_sources_repackaged": 82,
+  "runtime_targets_or_sha_changed": false,
+  "updater_security_relaxed": false,
+  "legacy_removal": false,
+  "rating_logic_changed": false,
+  "research_checkpoint_changed": false
+}

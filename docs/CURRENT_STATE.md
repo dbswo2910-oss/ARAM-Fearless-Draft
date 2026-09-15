@@ -6,7 +6,7 @@
 
 - Active updater: **v0.16.0**
 - Manifest message: v0.16.0 · CLEAN BASELINE
-- Manifest commit: `ce9643f6dfc2b25b9535b2f51cfa0d6a6db63239`
+- Manifest commit: `574053c5d02cd386c438c94c36bfd416e37ceab3`
 - Package: `update/v0.16.0/package.json` → **v0.16.0**
 - Electron entry: `main-v0160.js` → `update/v0.16.0/main-v0160.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
