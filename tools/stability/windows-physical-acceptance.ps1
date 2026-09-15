@@ -13,6 +13,33 @@ $reportPath = Join-Path $ReportDir 'physical-acceptance-report.json'
 $probe = Join-Path $PSScriptRoot 'windows-real-state-probe.js'
 
 function Save-Report($obj) { $obj | ConvertTo-Json -Depth 8 | Set-Content -Path $reportPath -Encoding UTF8 }
+
+function Quote-ProcessArg([string]$value) {
+  if ($null -eq $value) { return '""' }
+  return '"' + $value.Replace('"','\"') + '"'
+}
+
+function Get-ElectronPidsForExe([string]$electron) {
+  $target = ''
+  try { $target = [IO.Path]::GetFullPath($electron) } catch { return @() }
+  $rows = @()
+  try { $rows = @(Get-CimInstance Win32_Process -Filter "Name='electron.exe'" -ErrorAction SilentlyContinue) } catch { return @() }
+  $ids = @()
+  foreach ($row in $rows) {
+    if (-not $row.ExecutablePath) { continue }
+    try {
+      $candidate = [IO.Path]::GetFullPath([string]$row.ExecutablePath)
+      if ([string]::Equals($candidate,$target,[StringComparison]::OrdinalIgnoreCase)) { $ids += [int]$row.ProcessId }
+    } catch {}
+  }
+  return @($ids | Sort-Object -Unique)
+}
+function Stop-ElectronPids([int[]]$ids) {
+  foreach ($id in @($ids | Sort-Object -Unique)) {
+    try { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue } catch {}
+  }
+}
+
 function Read-PackageVersion([string]$dir) { try { return [string]((Get-Content (Join-Path $dir 'package.json') -Raw | ConvertFrom-Json).version) } catch { return '' } }
 function Find-AppDir {
   $roots = @(
@@ -83,7 +110,8 @@ function Test-Lcu([string]$lockfile) {
 }
 function Run-StateProbe([string]$tag,[string]$app,[string]$electron,[string]$userData) {
   $out=Join-Path $ReportDir "state-$tag.json"; $stdout=Join-Path $ReportDir "state-$tag-stdout.log"; $stderr=Join-Path $ReportDir "state-$tag-stderr.log"
-  $p=Start-Process -FilePath $electron -ArgumentList @($probe,'--app-dir',$app,'--user-data',$userData,'--report',$out) -RedirectStandardOutput $stdout -RedirectStandardError $stderr -Wait -PassThru
+  $argLine = ('{0} --app-dir {1} --user-data {2} --report {3}' -f (Quote-ProcessArg $probe),(Quote-ProcessArg $app),(Quote-ProcessArg $userData),(Quote-ProcessArg $out))
+  $p=Start-Process -FilePath $electron -ArgumentList $argLine -RedirectStandardOutput $stdout -RedirectStandardError $stderr -Wait -PassThru
   if ($p.ExitCode -ne 0 -or -not (Test-Path $out)) { throw "state probe $tag failed; exit=$($p.ExitCode)" }
   return (Get-Content $out -Raw | ConvertFrom-Json)
 }
@@ -107,14 +135,36 @@ if (-not (Test-Path $userData)) { throw 'stable userData aram-fearless-draft is 
 $lockfile=Find-LeagueLockfile; $lcu=Test-Lcu $lockfile
 $pre=Run-StateProbe 'before' $AppDir $ElectronExe $userData
 $stdout=Join-Path $ReportDir 'app-stdout.log'; $stderr=Join-Path $ReportDir 'app-stderr.log'
-$p=Start-Process -FilePath $ElectronExe -ArgumentList @($AppDir,'--aram-launcher-cold-start') -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+
+# A previous acceptance attempt can leave a detached Electron child alive even when the
+# Start-Process parent has exited. Clean only processes using this exact pinned Electron
+# executable so the cold-start observation begins from a known-zero state.
+$leftoverElectronPids = @(Get-ElectronPidsForExe $ElectronExe)
+if ($leftoverElectronPids.Count -gt 0) {
+  Write-Host "Closing $($leftoverElectronPids.Count) leftover ARAM acceptance Electron process(es)..." -ForegroundColor Yellow
+  Stop-ElectronPids $leftoverElectronPids
+  Start-Sleep -Seconds 2
+}
+$baselineElectronPids = @(Get-ElectronPidsForExe $ElectronExe)
+if ($baselineElectronPids.Count -ne 0) { throw 'could not establish zero-process Electron baseline for physical acceptance' }
+
+$appArgLine = ('{0} --aram-launcher-cold-start' -f (Quote-ProcessArg $AppDir))
+$p=Start-Process -FilePath $ElectronExe -ArgumentList $appArgLine -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
 Start-Sleep -Seconds 18
-$alive=-not $p.HasExited; $exitCode=if($p.HasExited){$p.ExitCode}else{$null}
-$stdoutText=if(Test-Path $stdout){Get-Content $stdout -Raw}else{''}; $stderrText=if(Test-Path $stderr){Get-Content $stderr -Raw}else{''}
-$storageIdentityLogged=($stdoutText -match '\[v0\.15\.135 storage-root\]') -and ($stdoutText -match 'aram-fearless-draft')
-$fatal=($stderrText -match 'App threw an error|index contract mismatch|UnhandledPromiseRejection')
-$autosyncSignal=($stdoutText -match '(?i)autosync|league|lcu') -or ($stderrText -match '(?i)autosync|league|lcu')
-if ($alive) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+$rootAlive = -not [bool]$p.HasExited
+$exitCode = if($p.HasExited){ try { [int]$p.ExitCode } catch { $null } } else { $null }
+$afterElectronPids = @(Get-ElectronPidsForExe $ElectronExe)
+$newElectronPids = @($afterElectronPids | Where-Object { $baselineElectronPids -notcontains $_ })
+$alive = [bool]($rootAlive -or ($newElectronPids.Count -gt 0))
+$stdoutText=if(Test-Path $stdout){[string](Get-Content $stdout -Raw)}else{''}; $stderrText=if(Test-Path $stderr){[string](Get-Content $stderr -Raw)}else{''}
+$storageIdentityLogged=[bool](($stdoutText -match '\[v0\.15\.135 storage-root\]') -and ($stdoutText -match 'aram-fearless-draft'))
+$fatal=[bool]($stderrText -match 'App threw an error|index contract mismatch|UnhandledPromiseRejection')
+$autosyncSignal=[bool](($stdoutText -match '(?i)autosync|league|lcu') -or ($stderrText -match '(?i)autosync|league|lcu'))
+
+# Stop only Electron processes that appeared during this acceptance launch. This avoids
+# killing unrelated Electron applications while still cleaning a detached child tree.
+Stop-ElectronPids $newElectronPids
+if ($rootAlive) { try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch {} }
 Start-Sleep -Seconds 2
 $post=Run-StateProbe 'after' $AppDir $ElectronExe $userData
 $checkpointStable=($pre.research_checkpoint_sha256 -and $pre.research_checkpoint_sha256 -eq $post.research_checkpoint_sha256)
@@ -122,7 +172,7 @@ $countStable=([int]$pre.research_checkpoint_matches -eq $ExpectedResearchMatches
 $success=$alive -and $storageIdentityLogged -and (-not $fatal) -and $canonicalPresent -and $lcu.connected -and $lcu.puuid_present -and $checkpointStable -and $countStable
 $report=[ordered]@{
   status=if($success){'SUCCESS'}else{'FAILURE'}; stage='PHYSICAL_WINDOWS_LEAGUE_ACCEPTANCE'; privacy_safe=$true; raw_personal_data_in_report=$false; candidate_version=$version; canonical_shadow_payload_present=$canonicalPresent; production_cutover=$false; legacy_removal=$false;
-  app_alive_after_18s=$alive; app_exit_code=$exitCode; stable_user_data_identity='aram-fearless-draft'; storage_identity_logged=$storageIdentityLogged; fatal_load_error=$fatal; autosync_or_lcu_log_signal=$autosyncSignal;
+  app_alive_after_18s=$alive; root_process_alive_after_18s=$rootAlive; new_electron_process_count_after_18s=[int]$newElectronPids.Count; app_exit_code=$exitCode; stable_user_data_identity='aram-fearless-draft'; storage_identity_logged=$storageIdentityLogged; fatal_load_error=$fatal; autosync_or_lcu_log_signal=$autosyncSignal;
   league=[ordered]@{lockfile_found=$lcu.lockfile_found;lcu_connected=$lcu.connected;http_status=$lcu.http_status;puuid_present=$lcu.puuid_present;credentials_in_report=$false};
   research=[ordered]@{database='aram-rating-research-v03';checkpoint='checkpoint-v03';expected_matches=$ExpectedResearchMatches;before_matches=[int]$pre.research_checkpoint_matches;after_matches=[int]$post.research_checkpoint_matches;checkpoint_stable=$checkpointStable;checkpoint_digest_before=$pre.research_checkpoint_sha256;checkpoint_digest_after=$post.research_checkpoint_sha256};
   acceptance_scope='Physical Windows PC + real League Client/LCU + stable userData continuity for the isolated RC candidate. Canonical owners remain non-production/shadow; this report does not authorize production cutover.'
