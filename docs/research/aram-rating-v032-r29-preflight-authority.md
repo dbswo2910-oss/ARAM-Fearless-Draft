@@ -1,1 +1,0 @@
-Authoritative R29 preflight artifacts are the canonical preflight document, the next-step matrix, and executable self-checks. Other marker notes are non-authoritative and may be removed during cleanup.
