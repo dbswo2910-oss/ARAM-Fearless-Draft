@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -10,12 +11,12 @@ const cmp=(a,b)=>{const A=verParts(a),B=verParts(b),L=Math.max(A.length,B.length
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const uiPath=byPath.get('random-ingame-coach-v01550.js');
-const mainPath=byPath.get('main.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m);
 const pkgPath=byPath.get('package.json');
 const ref='reference/installed-v0.15.49/random-practice-ingame-fragment.html';
 ok(cmp(m.version,'0.15.50')>=0,'Manifest is v0.15.50 or newer',m.version);
 ok(!!uiPath&&/v0\.15\.50\/random-ingame-coach-v01550\.js$/.test(uiPath)&&exists(uiPath),'In-game coach runtime delivered',uiPath||'missing');
-ok(!!mainPath&&/^update\/v\d+\.\d+\.\d+\/main(?:-v\d+)?\.js$/.test(mainPath)&&exists(mainPath),'Current main runtime delivered',mainPath||'missing');
+ok(!!mainPath&&/^update\/v\d+\.\d+\.\d+\/(?:legacy-runtime-v\d+|main(?:-v\d+)?)\.js$/.test(mainPath)&&exists(mainPath),'Current effective main runtime delivered',mainPath||'missing');
 ok(!!pkgPath&&/^update\/v\d+\.\d+\.\d+\/package\.json$/.test(pkgPath)&&exists(pkgPath),'Current package metadata delivered',pkgPath||'missing');
 ok(exists(ref),'Exact installed in-game DOM reference is preserved',ref);
 const s=uiPath&&exists(uiPath)?read(uiPath):'';
@@ -23,7 +24,7 @@ const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
 const dom=exists(ref)?read(ref):'';
 try{new Function(s);ok(true,'v0.15.50 in-game coach runtime parses as JavaScript')}catch(e){ok(false,'v0.15.50 in-game coach runtime parses as JavaScript',e.message)}
-try{new Function(main);ok(true,'Current main runtime parses as JavaScript')}catch(e){ok(false,'Current main runtime parses as JavaScript',e.message)}
+try{new Function(main);ok(true,'Current effective main runtime parses as JavaScript')}catch(e){ok(false,'Current effective main runtime parses as JavaScript',e.message)}
 ok(/__ARAM_RANDOM_INGAME_COACH_V01550__\s*=\s*true/.test(s),'v0.15.50 readiness marker exists');
 for(const id of ['#random','#randomIngameShell','.randomModeNav'])ok(s.includes(id),`Exact installed selector used: ${id}`);
 for(const id of ['randomIngameShell','randomLiveTopbar','randomIngameSubnav','randomLiveSummary','randomLiveBuildAdvice','randomThreatList','randomFightGuide','randomTimingPanel','randomPowerCurve'])ok(dom.includes(`id="${id}"`),`Installed in-game DOM contract contains #${id}`);
@@ -42,12 +43,12 @@ ok(/setInterval\(\(\)=>render\(\),700\)/.test(s),'Coach HUD refresh loop is pres
 const p49=main.indexOf("'random-practice-focus-v01549.js'");
 const p50=main.indexOf("'random-ingame-coach-v01550.js'");
 const pRole=main.indexOf("'role-metric-detail-v01518.js'");
-ok(p49>=0&&p50>p49&&pRole>p50,'Main keeps v0.15.50 coach after random-practice patch and before role metric');
-ok(main.includes('__ARAM_RANDOM_INGAME_COACH_V01550__'),'Main readiness guard covers v0.15.50 coach runtime');
+ok(p49>=0&&p50>p49&&pRole>p50,'Effective runtime keeps v0.15.50 coach after random-practice patch and before role metric');
+ok(main.includes('__ARAM_RANDOM_INGAME_COACH_V01550__'),'Effective runtime readiness guard covers v0.15.50 coach runtime');
 const mv=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
-ok(cmp(mv,'0.15.50')>=0,'Main VERSION is v0.15.50 or newer',mv);
+ok(cmp(mv,'0.15.50')>=0,'Effective runtime VERSION is v0.15.50 or newer',mv);
 ok(cmp(pkg.version,'0.15.50')>=0,'package.json VERSION is v0.15.50 or newer',pkg.version);
-report.info={scope:'UI-only Phase 1 contract retained under newer updater versions',scoreLogicChanged:false,externalLiveLolPsFetch:false,statSource:'embedded champion DB cross-validation metadata',forwardCompatible:true,manualVerification:['Windows Electron visual spacing/DPI','real in-game death→build auto switch','respawn<=7s→LIVE auto return','preview controls from Random Practice without a live game']};
+report.info={scope:'UI-only Phase 1 contract retained under newer updater versions',scoreLogicChanged:false,externalLiveLolPsFetch:false,statSource:'embedded champion DB cross-validation metadata',forwardCompatible:true,effectiveRuntime:mainPath,manualVerification:['Windows Electron visual spacing/DPI','real in-game death→build auto switch','respawn<=7s→LIVE auto return','preview controls from Random Practice without a live game']};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-ingame-v01550-report.json'),JSON.stringify(report,null,2));
