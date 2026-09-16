@@ -1,1 +1,0 @@
-Redundant R29 preflight notes should be consolidated; executable checks and canonical documentation are preferred over duplicate marker files.
