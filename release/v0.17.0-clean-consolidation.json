@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "stage": "V0170_CLEAN_CONSOLIDATION",
+  "release": "0.17.0",
+  "baseline": "0.16.3",
+  "baseline_commit": "99e65c90d930d2bd2e0b9297518d0657b6c8e399",
+  "scope": "behavior-preserving runtime flattening; no feature or rating-model changes",
+  "architecture": {
+    "package_main": "main.js",
+    "preload": "preload.js",
+    "runtime_successor_wrappers": false,
+    "runtime_module_compile_chain": false,
+    "runtime_version_string_patching": false,
+    "legacy_runtime_materialized_at_build_time": true,
+    "future_release_rule": "modify canonical src/app runtime and snapshot it into update/<version>; never wrap the previous version runtime"
+  },
+  "safety": {
+    "production_rating_active": false,
+    "automatic_rating_promotion": false,
+    "universal_rating_shadow": true,
+    "rating_network_owner": false,
+    "stable_user_data_identity": "aram-fearless-draft",
+    "v0163_golden_behavior_must_be_preserved": true
+  },
+  "release_gate": "merge only after clean-runtime audit, full regression, foundation, updater, Windows cold-start and persistence restart gates are green"
+}
