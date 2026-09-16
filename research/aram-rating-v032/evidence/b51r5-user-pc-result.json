@@ -1,0 +1,27 @@
+{
+  "schema": "aram-rating-b51-live-evidence-v1",
+  "version": "v0.3.2",
+  "phase": "B5.1-R5",
+  "classification": "SEQUENCE_TWO_ACCEPTED",
+  "sequence": [
+    {
+      "anchor": 1,
+      "request_shape": "limit20/scan100/standard/background/target.puuid",
+      "accepted": true
+    },
+    {
+      "anchor": 2,
+      "request_shape": "limit20/scan100/standard/background/target.puuid",
+      "accepted": true
+    }
+  ],
+  "requests_used": 2,
+  "checkpoint_integrity": true,
+  "checkpoint_written": false,
+  "storage_mutation": false,
+  "privacy": {
+    "contains_raw_puuid": false,
+    "contains_riot_id": false
+  },
+  "conclusion": "The first two distinct queue anchors also succeed sequentially in the same session. The old B5.1 bulk failure is not reproduced by a two-request sequence, so the remaining likely causes are a later request index/anchor, retry behavior, or a transient prior LCU/downstream state."
+}
