@@ -34,7 +34,8 @@ assert.strictEqual(pkg.main,'src/app/main.js');
 const main=text('src/app/main.js');
 const safety=text('src/app/legacy-safety-bootstrap.js');
 const core=text('legacy-runtime-core.js');
-const preload=text('src/app/preload.js');
+const preload=text('preload.js');
+assert.ok(!fs.existsSync(path.join(ROOT,'src','app','preload.js')),'duplicate canonical preload remains under src/app');
 for(const [name,src] of [['main',main],['core',core],['preload',preload]]){
   assert.ok(!/module\._compile\s*\(/.test(src),`${name} still uses runtime module._compile`);
 }
@@ -44,6 +45,8 @@ assert.ok(!/readFileSync\([^\n]*main-v/.test(main),'clean main reads predecessor
 assert.ok(!/main-v0?1[56]/.test(core),'legacy core references predecessor main wrapper');
 assert.ok(!/patchPreloadSource/.test(preload),'clean preload still performs runtime source patching');
 assert.ok(/const VERSION=String\(require\('\.\/package\.json'\)\.version\);/.test(core),'legacy core does not use package version source');
+assert.ok(/ARAM-Fearless-Draft-InApp-Updater\/\$\{VERSION\}/.test(core),'updater identity does not follow package VERSION');
+assert.ok(!core.includes('0.16.3'),'legacy core still embeds predecessor release version');
 assert.ok(/const VERSION=String\(require\(path\.join\(APP_ROOT,'package\.json'\)\)\.version/.test(main),'clean main does not use package version source');
 
 const order=[
@@ -90,12 +93,13 @@ assert.strictEqual(text('update/v0.17.0/legacy-runtime-core.js'),core,'release l
 
 const build=json('audit-output/consolidation/v0170-clean-runtime-build.json');
 assert.strictEqual(build.status,'SUCCESS');
+assert.strictEqual(build.canonicalPreload,'preload.js');
 assert.strictEqual(build.runtimeSuccessorWrappers,0);
 assert.strictEqual(build.runtimeModuleCompileRewrites,0);
 assert.strictEqual(build.runtimeVersionStringPatching,0);
 assert.strictEqual(build.hashes.baselineEffectivePreload,build.hashes.cleanPreload,'preload behavior snapshot drifted');
 
-const report={status:'SUCCESS',stage:'V0170_CLEAN_CONSOLIDATION_AUDIT',release:'0.17.0',base:'0.16.3',activeMain:pkg.main,runtimeSuccessorWrappers:0,runtimeModuleCompileRewrites:0,runtimeVersionStringPatching:0,preservedBaselineEntries:preserved,compatibilityBoundary:'legacy-runtime-core.js',productionRatingActive:false,automaticRatingPromotion:false};
+const report={status:'SUCCESS',stage:'V0170_CLEAN_CONSOLIDATION_AUDIT',release:'0.17.0',base:'0.16.3',activeMain:pkg.main,canonicalPreload:'preload.js',runtimeSuccessorWrappers:0,runtimeModuleCompileRewrites:0,runtimeVersionStringPatching:0,preservedBaselineEntries:preserved,compatibilityBoundary:'legacy-runtime-core.js',productionRatingActive:false,automaticRatingPromotion:false};
 fs.mkdirSync(path.join(ROOT,'audit-output','consolidation'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','consolidation','v0170-clean-audit.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));
