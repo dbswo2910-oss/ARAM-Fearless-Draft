@@ -166,12 +166,12 @@ jobs:
             $exitCode = if ($p.HasExited) { $p.ExitCode } else { $null }
             $stdoutText = if (Test-Path $stdout) { Get-Content $stdout -Raw } else { '' }
             $stderrText = if (Test-Path $stderr) { Get-Content $stderr -Raw } else { '' }
-            $storageIdentityLogged = ($stdoutText -match '\[v0\.15\.135 storage-root\]') -and ($stdoutText -match 'aram-fearless-draft')
+            $legacyStorageMarkerObserved = ($stdoutText -match '\[v0\.15\.135 storage-root\]') -and ($stdoutText -match 'aram-fearless-draft')
             $fatal = ($stderrText -match 'App threw an error') -or ($stderrText -match 'index contract mismatch') -or ($stderrText -match 'UnhandledPromiseRejection')
+            [ordered]@{cycle=$cycle;alive=$alive;exit_code=$exitCode;legacy_storage_marker_observed=$legacyStorageMarkerObserved;fatal=$fatal} | ConvertTo-Json | Set-Content -Path (Join-Path $outDir "active-cycle-$cycle-status.json") -Encoding utf8
             if ($alive) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
             Get-Process electron -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
             if (-not $alive) { throw "Active cycle $cycle exited early; code=$exitCode" }
-            if (-not $storageIdentityLogged) { throw "Active cycle $cycle did not log stable storage identity" }
             if ($fatal) { throw "Active cycle $cycle reported a fatal load error" }
             Start-Sleep -Seconds 2
           }
@@ -210,6 +210,8 @@ jobs:
             active_version=$env:ACTIVE_VERSION
             electron_version='38.7.2'
             electron_runtime_sha256=$env:PINNED_ELECTRON_SHA256
+            storage_identity_verification='post-boot persistence probe + state-integrity mirror'
+            legacy_storage_marker_required=$false
             local_storage_preserved=$true
             state_integrity_mirror_preserved=$true
             state_integrity_mirror_path=$mirror
