@@ -16,10 +16,19 @@ $InnerReportDir=Join-Path $ReportDir 'r19-inner'
 
 function Save-Json([string]$Path,$Object){$Object|ConvertTo-Json -Depth 16|Set-Content -Path $Path -Encoding UTF8}
 function Read-Version([string]$Dir){try{return [string]((Get-Content (Join-Path $Dir 'package.json') -Raw|ConvertFrom-Json).version)}catch{return ''}}
-function Find-AppDir{
+function Candidate-AppDirs{
   $roots=@((Join-Path $env:LOCALAPPDATA 'ARAM Fearless Draft AutoUpdate\appfiles'),(Join-Path $env:LOCALAPPDATA 'ARAM Fearless Draft AutoUpdater\appfiles'))
   Get-ChildItem $env:LOCALAPPDATA -Directory -ErrorAction SilentlyContinue|Where-Object{$_.Name -like 'ARAM Fearless Draft AutoUpdate*'}|ForEach-Object{$roots+=(Join-Path $_.FullName 'appfiles')}
-  $c=@();foreach($r in ($roots|Select-Object -Unique)){if((Test-Path (Join-Path $r 'package.json')) -and (Test-Path (Join-Path $r 'index.html'))){try{$v=[version](Read-Version $r);$c+=[pscustomobject]@{Dir=$r;Version=$v}}catch{}}}
+  $rows=@();foreach($r in ($roots|Select-Object -Unique)){
+    if(-not(Test-Path (Join-Path $r 'package.json'))){continue}
+    $v=Read-Version $r
+    $pkg=Get-Item (Join-Path $r 'package.json') -ErrorAction SilentlyContinue
+    $rows+=[pscustomobject]@{dir=[IO.Path]::GetFullPath($r);version=$v;has_index=[bool](Test-Path (Join-Path $r 'index.html'));package_last_write_utc=if($pkg){$pkg.LastWriteTimeUtc.ToString('o')}else{''}}
+  }
+  return @($rows)
+}
+function Find-AppDir{
+  $c=@();foreach($r in (Candidate-AppDirs)){if(-not $r.has_index){continue};try{$v=[version]$r.version;$c+=[pscustomobject]@{Dir=$r.dir;Version=$v}}catch{}}
   $hit=$c|Sort-Object Version -Descending|Select-Object -First 1;if($hit){return [string]$hit.Dir};return ''
 }
 function File-Snapshot([string]$Path){
@@ -36,13 +45,29 @@ function Changed-Files($Before,$After){
     if(([string]$b.sha256 -ne [string]$a.sha256) -or ([bool]$b.exists -ne [bool]$a.exists)){$rows+=[pscustomobject]@{file=$n;before_sha256=$b.sha256;after_sha256=$a.sha256;before_length=$b.length;after_length=$a.length;before_last_write_utc=$b.last_write_utc;after_last_write_utc=$a.last_write_utc}}
   };return @($rows)
 }
+function Read-JsonSafe([string]$Path){try{if(Test-Path $Path){return Get-Content $Path -Raw|ConvertFrom-Json}}catch{};return $null}
 
 if(-not(Test-Path $R19)){throw 'R19 physical harness missing'}
-if($DryRun){Save-Json $FinalReport ([ordered]@{status='SUCCESS';stage='R20_PRODUCTION_MUTATION_FORENSIC_DRY_RUN';physical_user_pc_execution_required=$true;reruns_r19_once=$true;max_history_requests=1;production_files_observed=@('package.json','main-v0160.js','preload.js','index.html');production_files_written_by_r20=$false});Write-Host "R20 FORENSIC DRY RUN: SUCCESS -> $FinalReport";exit 0}
+if($DryRun){Save-Json $FinalReport ([ordered]@{status='SUCCESS';stage='R20_PRODUCTION_MUTATION_FORENSIC_DRY_RUN';physical_user_pc_execution_required=$true;reruns_r19_once=$true;max_history_requests=1;production_files_observed=@('package.json','main-v0160.js','preload.js','index.html');production_files_written_by_r20=$false;version_drift_diagnostic=$true});Write-Host "R20 FORENSIC DRY RUN: SUCCESS -> $FinalReport";exit 0}
 if($env:OS -ne 'Windows_NT'){throw 'R20 physical forensic must run on Windows'}
+$candidates=@(Candidate-AppDirs)
 if(-not $AppDir){$AppDir=Find-AppDir}
 if(-not $AppDir -or -not(Test-Path (Join-Path $AppDir 'package.json'))){throw 'could not auto-detect installed ARAM appfiles; pass -AppDir'}
-if((Read-Version $AppDir) -ne '0.16.0'){throw "R20 expects installed v0.16.0, found $(Read-Version $AppDir)"}
+$currentVersion=Read-Version $AppDir
+
+if($currentVersion -ne '0.16.0'){
+  $promotion=Read-JsonSafe (Join-Path $env:LOCALAPPDATA 'ARAM Fearless Draft AutoUpdate\promotion-v0160.json')
+  $report=[ordered]@{
+    status='INSTALLED_VERSION_DRIFT_DETECTED';stage='R20_PRE_RERUN_VERSION_FORENSIC';observed_at=(Get-Date).ToUniversalTime().ToString('o');
+    expected_version='0.16.0';detected_version=$currentVersion;selected_app_dir=$AppDir;candidate_app_dirs=$candidates;
+    production_files_written_by_r20=$false;r19_rerun_performed=$false;history_requests=0;
+    promotion_state=$promotion;
+    interpretation='R19 previously validated a v0.16.0 install, but before R20 rerun the auto-detected installed appfiles no longer report v0.16.0. This is direct evidence of version drift/rollback or appfiles replacement between runs. Do not rerun R19 against the wrong version; inspect updater/promotion state first.'
+  }
+  Save-Json $FinalReport $report
+  Write-Host "R20 VERSION DRIFT FORENSIC: $($report.status) -> $FinalReport"
+  exit 2
+}
 
 $before=Snapshot-Production $AppDir
 $started=(Get-Date).ToUniversalTime().ToString('o')
