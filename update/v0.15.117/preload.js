@@ -4,9 +4,17 @@ const fs=require('fs'),path=require('path');
 const stateIntegrity=require('./state-integrity-v015117');
 try{
   const root=process.env.APPDATA||path.join(process.env.USERPROFILE||'', 'AppData','Roaming');
-  const dir=path.join(root,'ARAM Fearless Draft','diagnostics');fs.mkdirSync(dir,{recursive:true});
-  const stable=path.join(dir,'heartbeat-renderer.json'),legacy=path.join(dir,'heartbeat-renderer-v01578.json');
-  const write=()=>{const body=JSON.stringify({at:Date.now(),pid:process.pid,version:'0.15.117'});fs.writeFile(stable,body,()=>{});fs.writeFile(legacy,body,()=>{})};
+  const stableDir=path.join(root,'aram-fearless-draft','diagnostics');
+  const legacyDir=path.join(root,'ARAM Fearless Draft','diagnostics');
+  fs.mkdirSync(stableDir,{recursive:true});
+  fs.mkdirSync(legacyDir,{recursive:true});
+  const targets=[
+    path.join(stableDir,'heartbeat-renderer.json'),
+    path.join(stableDir,'heartbeat-renderer-v01578.json'),
+    path.join(legacyDir,'heartbeat-renderer.json'),
+    path.join(legacyDir,'heartbeat-renderer-v01578.json')
+  ];
+  const write=()=>{const body=JSON.stringify({at:Date.now(),pid:process.pid,version:'0.15.117'});for(const file of targets)fs.writeFile(file,body,()=>{})};
   write();setInterval(write,500);
 }catch{}
 function stateRead(namespace){
