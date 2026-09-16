@@ -102,11 +102,33 @@ function Snapshot-ProductionFiles([string]$Dir) {
   foreach ($name in $names) { $out[$name] = Sha256 (Join-Path $Dir $name) }
   return $out
 }
+function Snapshot-SafetyFiles([string]$UserData) {
+  $root = Join-Path $UserData 'update-safety-v01579'
+  $names = @('pending-update.json','safety-failure.json','last-known-good.json','last-rollback.json','safety-history.ndjson')
+  $out = [ordered]@{}
+  foreach ($name in $names) { $out[$name] = Sha256 (Join-Path $root $name) }
+  return $out
+}
 function Same-Hashes($Before,$After) {
   foreach ($p in $Before.PSObject.Properties.Name) {
     if ([string]$Before.$p -ne [string]$After.$p) { return $false }
   }
   return $true
+}
+function Patch-TempSafetyIsolation([string]$TempApp) {
+  $p = Join-Path $TempApp 'update-safety-v01579.js'
+  if (-not (Test-Path $p)) { throw 'temp update-safety-v01579.js missing' }
+  $src = Get-Content $p -Raw
+  if ($src -match 'ARAM_R19_SAFETY_ROOT') { return }
+  $needle = @'
+function defaultRoot(){try{const {app}=require('electron');return path.join(app.getPath('userData'),'update-safety-v01579')}catch{return path.join(process.cwd(),'.update-safety-v01579')}}
+'@
+  $replacement = @'
+function defaultRoot(){const override=String(process.env.ARAM_R19_SAFETY_ROOT||'').trim();if(override)return path.resolve(override);try{const {app}=require('electron');return path.join(app.getPath('userData'),'update-safety-v01579')}catch{return path.join(process.cwd(),'.update-safety-v01579')}}
+'@
+  if (-not $src.Contains($needle.Trim())) { throw 'temp safety root patch contract mismatch' }
+  $src = $src.Replace($needle.Trim(),$replacement.Trim())
+  Set-Content -Path $p -Value $src -Encoding UTF8 -NoNewline
 }
 
 if (-not (Test-Path $Builder)) { throw 'R18 kit builder missing' }
@@ -126,7 +148,8 @@ if ($DryRun) {
     kit_mode=$kit.mode; production_install_mutated=$false; production_manifest_mutated=$false;
     temp_copy_required=$true; max_history_requests_per_run=1; recurring_polling=$false;
     canonical_database='aram-rating-research-v03'; shadow_evidence_database='aram-rating-shadow-evidence-v1';
-    physical_user_pc_execution_required=$true
+    updater_safety_isolated=$true; cold_start_promotion_disabled=$true; graceful_shadow_exit=$true;
+    production_safety_state_observed=$true; physical_user_pc_execution_required=$true
   }
   Save-Json $FinalReport $report
   Write-Host "R19 PHYSICAL SHADOW RC DRY RUN: SUCCESS -> $FinalReport"
@@ -143,10 +166,13 @@ if (-not $ElectronExe -or -not (Test-Path $ElectronExe)) { throw 'could not auto
 $userData = Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::ApplicationData)) 'aram-fearless-draft'
 if (-not (Test-Path $userData)) { throw 'stable userData aram-fearless-draft is missing' }
 $productionBefore = Snapshot-ProductionFiles $AppDir
+$safetyBefore = Snapshot-SafetyFiles $userData
 $tempRoot = Join-Path $env:TEMP ("aram-r19-shadow-rc-$PID")
 $tempApp = Join-Path $tempRoot 'appfiles'
+$isolatedSafetyRoot = Join-Path $tempRoot 'isolated-update-safety'
 if (Test-Path $tempRoot) { Remove-Item $tempRoot -Recurse -Force }
 Copy-Tree $AppDir $tempApp
+Patch-TempSafetyIsolation $tempApp
 Copy-Item (Join-Path $KitDir 'r17-shadow-renderer.js') $tempApp -Force
 Copy-Item (Join-Path $KitDir 'main-r17-shadow-rc.js') $tempApp -Force
 $pkgPath = Join-Path $tempApp 'package.json'
@@ -161,15 +187,24 @@ $baselinePids = @(Get-ElectronPidsForExe $ElectronExe)
 $stdout = Join-Path $ReportDir 'r17-app-stdout.log'
 $stderr = Join-Path $ReportDir 'r17-app-stderr.log'
 $oldReportEnv = $env:ARAM_R17_SHADOW_RC_REPORT
+$oldSafetyEnv = $env:ARAM_R19_SAFETY_ROOT
+$oldPromotionEnv = $env:ARAM_R19_DISABLE_COLD_START_PROMOTION
 $p = $null
 try {
   $env:ARAM_R17_SHADOW_RC_REPORT = $shadowReportPath
+  $env:ARAM_R19_SAFETY_ROOT = $isolatedSafetyRoot
+  $env:ARAM_R19_DISABLE_COLD_START_PROMOTION = '1'
   $p = Start-Process -FilePath $ElectronExe -ArgumentList (Quote-Arg $tempApp) -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
   $deadline = (Get-Date).AddSeconds(90)
   while ((Get-Date) -lt $deadline -and -not (Test-Path $shadowReportPath)) { Start-Sleep -Milliseconds 500 }
+  if (Test-Path $shadowReportPath) {
+    $quitDeadline = (Get-Date).AddSeconds(6)
+    while ($p -and -not $p.HasExited -and (Get-Date) -lt $quitDeadline) { Start-Sleep -Milliseconds 250 }
+  }
 } finally {
-  if ($null -eq $oldReportEnv) { Remove-Item Env:ARAM_R17_SHADOW_RC_REPORT -ErrorAction SilentlyContinue }
-  else { $env:ARAM_R17_SHADOW_RC_REPORT = $oldReportEnv }
+  if ($null -eq $oldReportEnv) { Remove-Item Env:ARAM_R17_SHADOW_RC_REPORT -ErrorAction SilentlyContinue } else { $env:ARAM_R17_SHADOW_RC_REPORT = $oldReportEnv }
+  if ($null -eq $oldSafetyEnv) { Remove-Item Env:ARAM_R19_SAFETY_ROOT -ErrorAction SilentlyContinue } else { $env:ARAM_R19_SAFETY_ROOT = $oldSafetyEnv }
+  if ($null -eq $oldPromotionEnv) { Remove-Item Env:ARAM_R19_DISABLE_COLD_START_PROMOTION -ErrorAction SilentlyContinue } else { $env:ARAM_R19_DISABLE_COLD_START_PROMOTION = $oldPromotionEnv }
 }
 $afterPids = @(Get-ElectronPidsForExe $ElectronExe)
 $newPids = @($afterPids | Where-Object { $baselinePids -notcontains $_ })
@@ -181,17 +216,20 @@ $post = Run-StateProbe 'after' $tempApp $ElectronExe $userData
 $shadowEnvelope = Get-Content $shadowReportPath -Raw | ConvertFrom-Json
 $r = $shadowEnvelope.result
 $productionAfter = Snapshot-ProductionFiles $AppDir
+$safetyAfter = Snapshot-SafetyFiles $userData
 $productionStable = Same-Hashes ([pscustomobject]$productionBefore) ([pscustomobject]$productionAfter)
+$safetyStable = Same-Hashes ([pscustomobject]$safetyBefore) ([pscustomobject]$safetyAfter)
 $checkpointStable = ([string]$pre.research_checkpoint_sha256 -eq [string]$post.research_checkpoint_sha256)
 $countStable = ([int]$pre.research_checkpoint_matches -eq [int]$post.research_checkpoint_matches)
 $privacySafe = (-not [bool]$r.privacy.raw_puuid_returned) -and (-not [bool]$r.privacy.raw_match_id_returned) -and (-not [bool]$r.privacy.identity_mapping_returned)
 $bridgeHealthy = ([int]$r.history_requests -eq 1) -and ([string]$r.history_error -eq '') -and ([int]$r.history_valid_matches -gt 0)
 $shadowSafe = (-not [bool]$r.production_active) -and (-not [bool]$r.production_score_changed) -and (-not [bool]$r.ui_changed) -and (-not [bool]$r.canonical_checkpoint_written) -and (-not [bool]$r.production_activation_authorized)
-$success = ($shadowEnvelope.status -eq 'SUCCESS') -and ($r.state -eq 'available') -and $productionStable -and $checkpointStable -and $countStable -and $privacySafe -and $bridgeHealthy -and $shadowSafe
+$success = ($shadowEnvelope.status -eq 'SUCCESS') -and ($r.state -eq 'available') -and $productionStable -and $safetyStable -and $checkpointStable -and $countStable -and $privacySafe -and $bridgeHealthy -and $shadowSafe
 
 $report = [ordered]@{
   status=if($success){'SUCCESS'}else{'FAILURE'}; stage='R19_PHYSICAL_INSTALLED_SHADOW_RC'; privacy_safe=$privacySafe;
   production_version='0.16.0'; production_install_mutated=(-not $productionStable); temp_copy_used=$true; temp_copy_removed=$false;
+  updater_safety_isolated=$true; cold_start_promotion_disabled=$true; graceful_shadow_exit=$true; production_safety_state_stable=$safetyStable;
   canonical_checkpoint_stable=$checkpointStable; canonical_match_count_stable=$countStable;
   before_matches=[int]$pre.research_checkpoint_matches; after_matches=[int]$post.research_checkpoint_matches;
   production_file_hashes_stable=$productionStable;
