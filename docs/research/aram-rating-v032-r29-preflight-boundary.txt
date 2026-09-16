@@ -1,1 +1,0 @@
-R29 preflight boundary: GitHub CI can validate code paths and safety policy, but cannot replace the user's installed-state R29 evidence. Production activation remains OFF; automatic promotion remains OFF.
