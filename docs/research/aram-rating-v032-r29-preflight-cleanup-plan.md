@@ -1,1 +1,0 @@
-This file intentionally documents that redundant preflight notes are being consolidated. Keep only the canonical preflight, next-step matrix, and executable self-check.
