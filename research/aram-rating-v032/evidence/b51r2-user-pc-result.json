@@ -1,0 +1,32 @@
+{
+  "schema": "aram-rating-v032-live-diagnostic-evidence-v1",
+  "phase": "B5.1-R2",
+  "source": "user_pc_devtools_screenshot",
+  "privacy": {
+    "contains_raw_puuid": false,
+    "contains_riot_id": false,
+    "contains_credentials": false
+  },
+  "request": {
+    "limit": 1,
+    "scan": 20,
+    "queueMode": "standard",
+    "priority": "interactive",
+    "target_identity": "puuid",
+    "requests_used": 1
+  },
+  "result": {
+    "classification": "ONE_SHOT_ACCEPTED",
+    "ok": true,
+    "refused": false,
+    "connected": true,
+    "matches": 1,
+    "checkpoint_integrity": true,
+    "checkpoint_written": false,
+    "storage_mutation": false,
+    "error": null
+  },
+  "conclusion": "The first valid B5.1 queue anchor is accepted through the real renderer -> IPC -> main -> concurrency-wrapper -> installed base match-history path with target.puuid under the reduced R2 shape. This rules out a generic target.puuid/bridge rejection and justifies a one-shot exact legacy-shape replay before any further collection.",
+  "legacy_b51_status": "BLOCKED_DO_NOT_RERUN",
+  "production_changed": false
+}
