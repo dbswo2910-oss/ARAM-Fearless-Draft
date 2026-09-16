@@ -10,9 +10,6 @@
   "checkpoint_integrity": true,
   "checkpoint_written": false,
   "storage_mutation": false,
-  "privacy": {
-    "contains_raw_puuid": false,
-    "contains_riot_id": false
-  },
-  "conclusion": "Two exact legacy-shape requests succeed sequentially. The next diagnostic is read-only checkpoint forensics, not more live traffic."
+  "privacy": {"contains_raw_puuid": false, "contains_riot_id": false},
+  "conclusion": "Two exact legacy-shape requests succeed sequentially. Inspect preserved legacy checkpoint logs before spending more live requests."
 }
