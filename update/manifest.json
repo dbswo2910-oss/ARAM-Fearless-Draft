@@ -1486,7 +1486,7 @@
     {
       "path": "src/profile/shadow-rating-diagnostics-renderer.js",
       "source": "update/v0.16.2/src/profile/shadow-rating-diagnostics-renderer.js",
-      "sha256": "a568ffb8f99c456576630b0f4eea9cc3d47cfc68e5a246104776f5e3355f211a"
+      "sha256": "63235760090063a04362c4430ccc889a78b3a9e0a4afdfff01c4acc93aeb19f2"
     }
   ],
   "delete": [
