@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -8,12 +9,12 @@ const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').
 const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json'),ownerPath=byPath.get('runtime-random-ingame-v01570.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m),pkgPath=byPath.get('package.json'),ownerPath=byPath.get('runtime-random-ingame-v01570.js');
 const main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},owner=ownerPath&&exists(ownerPath)?read(ownerPath):'';
 for(const [name,src] of [['main',main],['v0.15.70 random in-game owner',owner]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
 ok('manifest is v0.15.70 or newer',ge(m.version,'0.15.70'),m.version);
 ok('package is v0.15.70 or newer',ge(pkg.version,'0.15.70'),pkg.version);
-ok('current main is delivered from a versioned update path',!!mainPath&&/^update\/v\d+\.\d+\.\d+\/main\.js$/.test(mainPath)&&exists(mainPath),mainPath||'missing');
+ok('current main is delivered from a versioned update path',!!mainPath&&/^update\/v\d+\.\d+\.\d+\/(?:legacy-runtime-v\d+|main)\.js$/.test(mainPath)&&exists(mainPath),mainPath||'missing');
 const currentVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';ok('current main is v0.15.70 or newer',ge(currentVersion,'0.15.70'),currentVersion);
 ok('current package is delivered from a versioned update path',!!pkgPath&&/^update\/v\d+\.\d+\.\d+\/package\.json$/.test(pkgPath)&&exists(pkgPath),pkgPath||'missing');
 ok('manifest maps v0.15.70 random in-game owner',ownerPath==='update/v0.15.70/runtime-random-ingame-v01570.js',ownerPath||'missing');
