@@ -7,4 +7,5 @@ const riotGradeLink=require('./riot-grade-link');
 const profileRender=require('./profile-render');
 const resultsRender=require('./results-render');
 const owner=require('./owner');
-module.exports={contract,results,metrics,history,riotGradeLink,profileRender,resultsRender,owner,production_active:false,score_logic_changed:false,random_scoring_changed:false,profile_scoring_changed:false};
+const universalRating=require('./universal-rating-adapter');
+module.exports={contract,results,metrics,history,riotGradeLink,profileRender,resultsRender,owner,universalRating,production_active:false,score_logic_changed:false,random_scoring_changed:false,profile_scoring_changed:false,rating_production_active:false};
