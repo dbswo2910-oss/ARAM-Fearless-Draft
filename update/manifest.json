@@ -1425,52 +1425,52 @@
     },
     {
       "path": "src/main/universal-rating-ipc.js",
-      "source": "src/main/universal-rating-ipc.js",
+      "source": "update/v0.16.1/src/main/universal-rating-ipc.js",
       "sha256": "85f87f80cf812f2b2bf34b8ddd30458ed974f66c1d64565e0149cb20850502fa"
     },
     {
       "path": "src/preload/universal-rating-history-hook.js",
-      "source": "src/preload/universal-rating-history-hook.js",
+      "source": "update/v0.16.1/src/preload/universal-rating-history-hook.js",
       "sha256": "6afb51897735cdd9b0649fc321b99a8c6853bdb0be1f592d2863be4d030dba66"
     },
     {
       "path": "src/rating/universal/contracts.js",
-      "source": "src/rating/universal/contracts.js",
+      "source": "update/v0.16.1/src/rating/universal/contracts.js",
       "sha256": "62537c496d7a7b305f44cf47caf9f74119287ea3741a71b2025c0d29b7f3165a"
     },
     {
       "path": "src/rating/universal/normalizer.js",
-      "source": "src/rating/universal/normalizer.js",
+      "source": "update/v0.16.1/src/rating/universal/normalizer.js",
       "sha256": "94cab3db59af9f47baf3933f64337bc9360bb8cb44a4fab319b7b5356e63f20a"
     },
     {
       "path": "src/rating/universal/confidence.js",
-      "source": "src/rating/universal/confidence.js",
+      "source": "update/v0.16.1/src/rating/universal/confidence.js",
       "sha256": "572332b619568b8fe1357c5549b9c9fab881ce544c821b94224da0b8622c8506"
     },
     {
       "path": "src/rating/universal/estimator.js",
-      "source": "src/rating/universal/estimator.js",
+      "source": "update/v0.16.1/src/rating/universal/estimator.js",
       "sha256": "43accc147bd866c25510de454d85153e3c6d2cf437b7ab1d5278ee5120632d83"
     },
     {
       "path": "src/rating/universal/store.js",
-      "source": "src/rating/universal/store.js",
+      "source": "update/v0.16.1/src/rating/universal/store.js",
       "sha256": "18f6f4a7fdb96c13461a5412535de67dc84651ac56d12dfe5d6fb3649a842398"
     },
     {
       "path": "src/rating/universal/service.js",
-      "source": "src/rating/universal/service.js",
+      "source": "update/v0.16.1/src/rating/universal/service.js",
       "sha256": "8eeeeb70ac1e4e04bd73b303edd2926116ac69cf2c22fc9f07ec6f04628d5816"
     },
     {
       "path": "src/rating/universal/runtime.js",
-      "source": "src/rating/universal/runtime.js",
+      "source": "update/v0.16.1/src/rating/universal/runtime.js",
       "sha256": "faf01fc330bf49fc2f6aec1ed99789a6908a184d17e18981c13e62de81010b9d"
     },
     {
       "path": "src/rating/universal/index.js",
-      "source": "src/rating/universal/index.js",
+      "source": "update/v0.16.1/src/rating/universal/index.js",
       "sha256": "6dd85c54f6d8f86c34b97295203347175be88336057b7d4accc23c2ee86dfb18"
     },
     {
