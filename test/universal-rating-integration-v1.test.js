@@ -5,8 +5,11 @@ const fs=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
 const {MemoryRatingStore,JsonRatingStore,UniversalRatingService,normalizeMatch,fingerprint,createEstimator}=require('../src/rating/universal');
+const {createUniversalRatingRuntime}=require('../src/rating/universal/runtime');
 const {createHistoryService}=require('../src/profile/history-service');
 const {createUniversalRatingProfileAdapter}=require('../src/profile/universal-rating-adapter');
+const {CHANNEL,MAX_MATCHES_PER_REQUEST,sanitizePayload,installUniversalRatingIpc}=require('../src/main/universal-rating-ipc');
+const {createUniversalRatingBridge}=require('../src/preload/universal-rating-bridge');
 
 function raw(id,t,target='A',win=true){
   const a=[target,`${id}a1`,`${id}a2`,`${id}a3`,`${id}a4`],b=[`${id}b1`,`${id}b2`,`${id}b3`,`${id}b4`,`${id}b5`];
@@ -32,12 +35,14 @@ test('resolved history rates an unrelated searched player with zero rating-netwo
   assert.equal(store.getAllMatches().length,2);
 });
 
-test('resolved history refuses unrelated detailed matches instead of contaminating the graph',async()=>{
+test('resolved history refuses unrelated detailed matches and preserves null for insufficient rating',async()=>{
   const store=new MemoryRatingStore(),service=new UniversalRatingService({store,estimator:fakeEstimator()});
   const r=await service.rateResolved({player:{puuid:'target'},matches:[raw('x1',1000,'other')]});
   assert.equal(r.targetMismatchMatches,1);
   assert.equal(r.targetMatches,0);
   assert.equal(r.status,'INSUFFICIENT_DATA');
+  assert.equal(r.rating,null);
+  assert.equal(r.uncertainty,null);
   assert.equal(store.getAllMatches().length,0);
 });
 
@@ -99,6 +104,44 @@ test('persistent rating DB survives app restarts without install-version couplin
   assert.equal(s.getAllMatches().length,1);
   assert.equal(s.getRating('m1','A').rating,1550);
   fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('dual-shadow runtime stores Elo and Glicko separately and exposes no production rating',async()=>{
+  const runtime=createUniversalRatingRuntime({store:new MemoryRatingStore()});
+  const rows=[];for(let i=0;i<8;i++)rows.push(raw(`r${i}`,1000+i,'A',i%2===0));
+  const r=await runtime.rateResolved({player:{puuid:'A'},matches:rows});
+  assert.equal(r.mode,'DUAL_SHADOW');
+  assert.equal(r.modelSelection,'no_clear_winner');
+  assert.equal(r.productionRating,null);
+  assert.equal(r.productionActive,false);
+  assert.equal(r.networkRequests,0);
+  assert.ok(r.candidates.elo);
+  assert.ok(r.candidates.glicko);
+  assert.equal(r.candidates.elo.targetMatches,8);
+  assert.equal(r.candidates.glicko.targetMatches,8);
+  assert.equal(runtime.store.getAllMatches().length,8);
+  assert.ok(runtime.store.getRating('research-v032-elo-shadow','A'));
+  assert.ok(runtime.store.getRating('research-v032-glicko-shadow','A'));
+});
+
+test('main IPC is bounded and preload bridge invokes only the rating channel',async()=>{
+  const handlers=new Map();
+  const ipcMain={handle:(channel,fn)=>handlers.set(channel,fn),removeHandler:channel=>handlers.delete(channel)};
+  const runtime={rateResolved:async payload=>({ok:true,count:payload.matches.length,puuid:payload.player.puuid})};
+  const installed=installUniversalRatingIpc({ipcMain,runtime});
+  assert.equal(installed.channel,CHANNEL);
+  const many=Array.from({length:MAX_MATCHES_PER_REQUEST+5},(_,i)=>({id:i}));
+  const payload=sanitizePayload({player:{puuid:'P'},matches:many});
+  assert.equal(payload.matches.length,MAX_MATCHES_PER_REQUEST);
+  const result=await handlers.get(CHANNEL)(null,payload);
+  assert.deepEqual(result,{ok:true,count:MAX_MATCHES_PER_REQUEST,puuid:'P'});
+  let invoked=null;
+  const bridge=createUniversalRatingBridge({invoke:(channel,value)=>{invoked={channel,value};return Promise.resolve({ok:true})}});
+  await bridge.rateUniversalResolvedHistory({player:{puuid:'P'},matches:[]});
+  assert.equal(invoked.channel,CHANNEL);
+  assert.equal(invoked.value.player.puuid,'P');
+  installed.dispose();
+  assert.equal(handlers.has(CHANNEL),false);
 });
 
 test('research candidate estimator remains shadow-only',async()=>{
