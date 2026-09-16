@@ -3,19 +3,10 @@
   "version": "v0.3.2",
   "phase": "B5.1-R5",
   "classification": "SEQUENCE_TWO_ACCEPTED",
-  "sequence": [
-    {
-      "anchor": 1,
-      "request_shape": "limit20/scan100/standard/background/target.puuid",
-      "accepted": true
-    },
-    {
-      "anchor": 2,
-      "request_shape": "limit20/scan100/standard/background/target.puuid",
-      "accepted": true
-    }
-  ],
   "requests_used": 2,
+  "first_anchor_accepted": true,
+  "second_anchor_accepted": true,
+  "request_shape": "limit20/scan100/standard/background/target.puuid",
   "checkpoint_integrity": true,
   "checkpoint_written": false,
   "storage_mutation": false,
@@ -23,5 +14,5 @@
     "contains_raw_puuid": false,
     "contains_riot_id": false
   },
-  "conclusion": "The first two distinct queue anchors succeed sequentially in the same session. The old B5.1 bulk failure is not reproduced by a two-request sequence; inspect preserved legacy checkpoint logs before spending more live requests."
+  "conclusion": "Two exact legacy-shape requests succeed sequentially. The next diagnostic is read-only checkpoint forensics, not more live traffic."
 }
