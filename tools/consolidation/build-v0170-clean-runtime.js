@@ -28,9 +28,9 @@ function materializeBaseline(){
     if(!target||!source)continue;
     write(path.join(APP_DIR,...target.split('/')),gitShow(source));
   }
-  // index.html is part of the installed base, not the updater manifest. The capture
-  // harness stubs the historical index mutators, so a deterministic placeholder is
-  // sufficient to let the old safety layer traverse without touching real UI state.
+  // index.html belongs to the installed base rather than the updater manifest.
+  // Historical index mutators are side-effect-stubbed during source capture, so a
+  // deterministic placeholder is enough to traverse that old bootstrap safely.
   const indexPath=path.join(APP_DIR,'index.html');
   if(!fs.existsSync(indexPath))write(indexPath,'<!doctype html><html><body></body></html>\n');
   return manifest;
@@ -53,7 +53,11 @@ function normalizeLegacyCore(source){
   const versionRe=/const VERSION=['"]0\.16\.3['"];/;
   if(!versionRe.test(source))throw new Error('effective v0.16.3 main VERSION anchor missing');
   source=source.replace(versionRe,"const VERSION=String(require('./package.json').version);");
+  const oldAgent="'ARAM-Fearless-Draft-InApp-Updater/0.16.3'";
+  if(!source.includes(oldAgent))throw new Error('effective updater User-Agent version anchor missing');
+  source=source.replace(oldAgent,'`ARAM-Fearless-Draft-InApp-Updater/${VERSION}`');
   if(/module\._compile\s*\(/.test(source))throw new Error('captured legacy core still contains runtime module._compile');
+  if(source.includes('0.16.3'))throw new Error('captured legacy core still contains frozen predecessor version');
   return source;
 }
 
@@ -68,7 +72,8 @@ function buildStaticRuntime(){
   const preload=String(preloadCapture.source);
   if(/module\._compile\s*\(/.test(preload))throw new Error('captured preload still contains runtime module._compile');
   write(path.join(ROOT,'legacy-runtime-core.js'),legacyCore);
-  write(path.join(ROOT,'src','app','preload.js'),preload);
+  write(path.join(ROOT,'preload.js'),preload);
+  fs.rmSync(path.join(ROOT,'src','app','preload.js'),{force:true});
   return{
     baseManifest,
     basePkg,
@@ -90,7 +95,7 @@ function copyReleasePayload(){
   const copies=[
     ['src/app/main.js','src/app/main.js'],
     ['src/app/legacy-safety-bootstrap.js','src/app/legacy-safety-bootstrap.js'],
-    ['src/app/preload.js','preload.js'],
+    ['preload.js','preload.js'],
     ['legacy-runtime-core.js','legacy-runtime-core.js']
   ];
   for(const [from,to] of copies)write(path.join(RELEASE_DIR,...to.split('/')),read(path.join(ROOT,...from.split('/'))));
@@ -135,6 +140,7 @@ function main(){
   const report={
     status:'SUCCESS',stage:'V0170_CLEAN_RUNTIME_BUILD',release:RELEASE,baseRelease:'0.16.3',baseCommit:BASE_COMMIT,
     packageMain:release.pkg.main,
+    canonicalPreload:'preload.js',
     runtimeSuccessorWrappers:0,
     runtimeModuleCompileRewrites:0,
     runtimeVersionStringPatching:0,
