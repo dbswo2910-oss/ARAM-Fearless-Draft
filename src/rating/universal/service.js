@@ -2,6 +2,7 @@
 const {assertConnector,assertEstimator,assertStore}=require('./contracts');
 const {normalizeMatch,fingerprint}=require('./normalizer');
 const {confidence}=require('./confidence');
+const finiteOrNull=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
 
 class UniversalRatingService{
   constructor({connector=null,store,estimator,queueId=450}={}){
@@ -48,8 +49,8 @@ class UniversalRatingService{
       modelName:estimate.modelName||this.estimator.modelName||null,
       modelStatus:estimate.modelStatus||this.estimator.status||'SHADOW',
       status:estimate.status,
-      rating:Number.isFinite(Number(estimate.rating))?Number(estimate.rating):null,
-      uncertainty:Number.isFinite(Number(estimate.uncertainty))?Number(estimate.uncertainty):null,
+      rating:finiteOrNull(estimate.rating),
+      uncertainty:finiteOrNull(estimate.uncertainty),
       games:Number(estimate.games)||0,
       confidence:conf,
       evidenceFingerprint,
@@ -88,4 +89,4 @@ class UniversalRatingService{
   }
 }
 
-module.exports={UniversalRatingService,production_active:false,automatic_promotion:false,resolved_history_supported:true};
+module.exports={UniversalRatingService,finiteOrNull,production_active:false,automatic_promotion:false,resolved_history_supported:true};
