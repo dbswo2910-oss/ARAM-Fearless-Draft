@@ -1,0 +1,43 @@
+name: ARAM Rating R26 Shadow Evidence Dry Run
+
+on:
+  pull_request:
+    paths:
+      - 'src/research/shadow-evidence-store.js'
+      - 'src/research/shadow-promotion-gate.js'
+      - 'tools/research/aram-rating-v032-r26-build-shadow-evidence-inspector.js'
+      - 'tools/research/aram-rating-v032-r26-shadow-evidence-inspect.ps1'
+      - '.github/workflows/aram-rating-r26-shadow-evidence-dryrun.yml'
+  workflow_dispatch:
+
+jobs:
+  r26-dryrun:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check builder
+        shell: pwsh
+        run: |
+          node --check tools/research/aram-rating-v032-r26-build-shadow-evidence-inspector.js
+          if ($LASTEXITCODE -ne 0) { throw 'R26 builder syntax check failed' }
+      - name: Build inspector kit
+        shell: pwsh
+        run: |
+          node tools/research/aram-rating-v032-r26-build-shadow-evidence-inspector.js
+          if ($LASTEXITCODE -ne 0) { throw 'R26 kit build failed' }
+          if (!(Test-Path 'audit-output/r26-shadow-evidence-inspector-kit/r26-shadow-evidence-renderer.js')) { throw 'renderer missing' }
+          if (!(Test-Path 'audit-output/r26-shadow-evidence-inspector-kit/main-r26-shadow-evidence.js')) { throw 'main missing' }
+      - name: PowerShell dry run
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\research\aram-rating-v032-r26-shadow-evidence-inspect.ps1 -DryRun
+          if ($LASTEXITCODE -ne 0) { throw 'R26 dry run failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r26-shadow-evidence-dryrun
+          path: |
+            audit-output/r26-shadow-evidence-inspector-kit
+            audit-output/r26-shadow-evidence-inspect
