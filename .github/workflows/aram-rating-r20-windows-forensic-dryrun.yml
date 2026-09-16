@@ -1,0 +1,35 @@
+name: ARAM Rating R20 Windows Forensic Dry Run
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'tools/research/aram-rating-v032-r20-production-mutation-forensic.ps1'
+      - '.github/workflows/aram-rating-r20-windows-forensic-dryrun.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  r20-windows-dryrun:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse and dry-run R20 forensic wrapper
+        shell: powershell
+        run: |
+          $errors=$null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path '.\tools\research\aram-rating-v032-r20-production-mutation-forensic.ps1'),[ref]$null,[ref]$errors)|Out-Null
+          if($errors.Count -gt 0){$errors|ForEach-Object{Write-Error $_.Message};exit 1}
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\research\aram-rating-v032-r20-production-mutation-forensic.ps1 -DryRun
+      - name: Verify dry-run report contract
+        shell: powershell
+        run: |
+          $p='.\audit-output\r20-production-mutation-forensic\r20-production-mutation-forensic.json'
+          if(-not(Test-Path $p)){throw 'R20 dry-run report missing'}
+          $r=Get-Content $p -Raw|ConvertFrom-Json
+          if($r.status -ne 'SUCCESS' -or $r.stage -ne 'R20_PRODUCTION_MUTATION_FORENSIC_DRY_RUN'){throw 'R20 dry-run contract failed'}
+          if([bool]$r.production_files_written_by_r20){throw 'R20 must remain read-only toward production files'}
+          if([int]$r.max_history_requests -ne 1){throw 'R20 must preserve one-request R19 bound'}
