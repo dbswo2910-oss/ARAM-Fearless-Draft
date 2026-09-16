@@ -1,1 +1,0 @@
-STOP: no more duplicate preflight marker files should be added. Continue only with executable checks, CI cleanup, or consolidation.
