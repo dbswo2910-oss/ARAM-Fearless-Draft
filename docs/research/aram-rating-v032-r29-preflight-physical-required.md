@@ -1,1 +1,0 @@
-Physical R29 evidence is mandatory before final model-selection action. CI-only success is insufficient because the required checkpoint and shadow evidence live in the user's installed app state.
