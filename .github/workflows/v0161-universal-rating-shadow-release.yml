@@ -45,6 +45,16 @@ jobs:
           node --check src/rating/universal/service.js
           node --check src/rating/universal/runtime.js
           node --check src/rating/universal/index.js
+          node --check update/v0.16.1/src/main/universal-rating-ipc.js
+          node --check update/v0.16.1/src/preload/universal-rating-history-hook.js
+          node --check update/v0.16.1/src/rating/universal/contracts.js
+          node --check update/v0.16.1/src/rating/universal/normalizer.js
+          node --check update/v0.16.1/src/rating/universal/confidence.js
+          node --check update/v0.16.1/src/rating/universal/estimator.js
+          node --check update/v0.16.1/src/rating/universal/store.js
+          node --check update/v0.16.1/src/rating/universal/service.js
+          node --check update/v0.16.1/src/rating/universal/runtime.js
+          node --check update/v0.16.1/src/rating/universal/index.js
           node --check tools/release/build-v0161-universal-rating-shadow-manifest.js
           node --check tools/sync-current-state.js
       - name: Verify release payload matches physically validated research payload
@@ -69,7 +79,24 @@ jobs:
             git show "origin/research/aram-rating-v032-accuracy-first:$f" > /tmp/research-file
             cmp --silent "$f" /tmp/research-file || { echo "validated payload mismatch: $f"; exit 1; }
           done
-          echo "PHYSICAL-VALIDATION PAYLOAD MATCH: PASS"
+          mirrors=(
+            'update/v0.16.1/src/main/universal-rating-ipc.js|src/main/universal-rating-ipc.js'
+            'update/v0.16.1/src/preload/universal-rating-history-hook.js|src/preload/universal-rating-history-hook.js'
+            'update/v0.16.1/src/rating/universal/contracts.js|src/rating/universal/contracts.js'
+            'update/v0.16.1/src/rating/universal/normalizer.js|src/rating/universal/normalizer.js'
+            'update/v0.16.1/src/rating/universal/confidence.js|src/rating/universal/confidence.js'
+            'update/v0.16.1/src/rating/universal/estimator.js|src/rating/universal/estimator.js'
+            'update/v0.16.1/src/rating/universal/store.js|src/rating/universal/store.js'
+            'update/v0.16.1/src/rating/universal/service.js|src/rating/universal/service.js'
+            'update/v0.16.1/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
+            'update/v0.16.1/src/rating/universal/index.js|src/rating/universal/index.js'
+          )
+          for pair in "${mirrors[@]}"; do
+            release_file="${pair%%|*}"
+            validated_file="${pair#*|}"
+            cmp --silent "$release_file" "$validated_file" || { echo "updater mirror mismatch: $release_file != $validated_file"; exit 1; }
+          done
+          echo "PHYSICAL-VALIDATION + UPDATE-MIRROR PAYLOAD MATCH: PASS"
       - name: Universal runtime smoke test
         run: |
           node - <<'NODE'
@@ -101,10 +128,17 @@ jobs:
           const state=JSON.parse(fs.readFileSync('update/current-state.json','utf8'));
           if(m.version!=='0.16.1'||m.production_rating_active!==false||m.automatic_rating_promotion!==false||m.universal_rating_shadow!==true)process.exit(1);
           if(state.active?.version!=='0.16.1'||state.package?.version!=='0.16.1'||state.package?.main!=='main-v0161-shadow.js')throw new Error('continuity snapshot did not adopt v0.16.1');
+          for(const e of m.files||[])if(!String(e.source||'').startsWith('update/'))throw new Error(`unsafe updater source ${e.path} -> ${e.source}`);
           const required=['package.json','main-v0161-shadow.js','preload.js','preload-base-v015117.js','src/main/universal-rating-ipc.js','src/preload/universal-rating-history-hook.js','src/rating/universal/runtime.js','update/v0.15.129/rating-engine-v01.js'];
           const by=new Map(m.files.map(x=>[x.path,x]));
           for(const p of required){const e=by.get(p);if(!e||!/^[0-9a-f]{64}$/.test(String(e.sha256||'')))throw new Error(`missing verified release entry ${p}`)}
-          console.log('V0.16.1 AUTHORITATIVE MANIFEST + CONTINUITY AUDIT: PASS');
+          const expectedSources={
+            'src/main/universal-rating-ipc.js':'update/v0.16.1/src/main/universal-rating-ipc.js',
+            'src/preload/universal-rating-history-hook.js':'update/v0.16.1/src/preload/universal-rating-history-hook.js',
+            'src/rating/universal/runtime.js':'update/v0.16.1/src/rating/universal/runtime.js'
+          };
+          for(const [p,s] of Object.entries(expectedSources))if(by.get(p)?.source!==s)throw new Error(`release transport source mismatch ${p}: ${by.get(p)?.source||'missing'}`);
+          console.log('V0.16.1 AUTHORITATIVE MANIFEST + CONTINUITY + SECURE TRANSPORT AUDIT: PASS');
           NODE
           node tools/sync-current-state.js --check
       - name: Commit generated release metadata on release branch
