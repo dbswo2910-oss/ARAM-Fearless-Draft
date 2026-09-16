@@ -1,6 +1,6 @@
 {
-  "version": "0.16.3",
-  "message": "v0.16.3 · SHADOW RATING TRANSPARENCY",
+  "version": "0.17.0",
+  "message": "v0.17.0 · CLEAN CONSOLIDATION",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -257,8 +257,8 @@
     },
     {
       "path": "preload.js",
-      "source": "update/v0.16.2/preload-v0162-shadow-diagnostics.js",
-      "sha256": "c9d5ac3f10611027667b47b8f4d6eb19d13e6298c3a59f5b5244479b5f53ea45"
+      "source": "update/v0.17.0/preload.js",
+      "sha256": "24f590944229cc9afaba445f9cf03fed9d212292766cad32f590dd6dd20405d2"
     },
     {
       "path": "input-interaction-stability-v01539.js",
@@ -818,8 +818,8 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.16.3/package.json",
-      "sha256": "8efd499fa2f54c0487f8a0333fad4f67eaa6b1b414d450fc98313e8b544ed354"
+      "source": "update/v0.17.0/package.json",
+      "sha256": "5ebc97dbc4f5420c51a67068d0674ed4bebcf72c12682e68a2bfea70c0e08da3"
     },
     {
       "path": "rating-engine-v01.js",
@@ -1492,6 +1492,21 @@
       "path": "main-v0163-shadow-transparency.js",
       "source": "update/v0.16.3/main-v0163-shadow-transparency.js",
       "sha256": "5470d2feaddb48cea4559705d0c143b40c94190ca4d25d36ecd10d0a3c0b642a"
+    },
+    {
+      "path": "src/app/main.js",
+      "source": "update/v0.17.0/src/app/main.js",
+      "sha256": "f10ca021ec37b7c423d11fa4403a83e8d7c19276ab8a5beca4f07398aa5fa6bb"
+    },
+    {
+      "path": "src/app/legacy-safety-bootstrap.js",
+      "source": "update/v0.17.0/src/app/legacy-safety-bootstrap.js",
+      "sha256": "56788dc087c1798533927632e801372302226ef85792c6ffa968cd7cd750121f"
+    },
+    {
+      "path": "legacy-runtime-core.js",
+      "source": "update/v0.17.0/legacy-runtime-core.js",
+      "sha256": "457885735c5731d71ab3f2e5bf1845ac03ac90cc354a30b5736acb6e362b274d"
     }
   ],
   "delete": [
@@ -1546,5 +1561,7 @@
   "automatic_rating_promotion": false,
   "universal_rating_shadow": true,
   "universal_rating_shadow_diagnostics": true,
-  "universal_rating_shadow_transparency": true
+  "universal_rating_shadow_transparency": true,
+  "clean_consolidation": true,
+  "runtime_successor_wrappers": 0
 }
