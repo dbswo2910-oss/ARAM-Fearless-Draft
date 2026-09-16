@@ -108,11 +108,15 @@ jobs:
             base_dir=$base
           } | ConvertTo-Json | Set-Content -Path (Join-Path $outDir 'base-bundle.json') -Encoding utf8
 
-      - name: Materialize current Golden installed app plus canonical shadow payload
+      - name: Materialize active installed app plus canonical shadow payload
         shell: pwsh
         run: |
+          $manifest = Get-Content (Join-Path $PWD 'update\manifest.json') -Raw | ConvertFrom-Json
           node tools/stability/materialize-installed-app.js --base "$env:BASE_APP_DIR" --out "$env:INSTALLED_APP"
           if ($LASTEXITCODE -ne 0) { throw 'installed app materialization failed' }
+          $pkg = Get-Content (Join-Path $env:INSTALLED_APP 'package.json') -Raw | ConvertFrom-Json
+          if ([string]$pkg.version -ne [string]$manifest.version) { throw "installed package version mismatch: package=$($pkg.version) manifest=$($manifest.version)" }
+          "ACTIVE_VERSION=$($manifest.version)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           Get-ChildItem "$env:INSTALLED_APP\canonical-shadow\src" -Recurse -Filter *.js | ForEach-Object {
             node --check $_.FullName
             if ($LASTEXITCODE -ne 0) { throw "canonical Windows syntax failed: $($_.FullName)" }
@@ -130,7 +134,7 @@ jobs:
           $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'aram-localappdata'
           $env:APPDATA = Join-Path $env:RUNNER_TEMP 'aram-appdata'
           New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA,$env:APPDATA | Out-Null
-          & "$env:RUNNER_TEMP\ARAM_Fearless_Draft_Launcher_windows_x64.exe" --promote-only --app-dir "$env:INSTALLED_APP" --expected-version '0.15.135'
+          & "$env:RUNNER_TEMP\ARAM_Fearless_Draft_Launcher_windows_x64.exe" --promote-only --app-dir "$env:INSTALLED_APP" --expected-version "$env:ACTIVE_VERSION"
           if ($LASTEXITCODE -ne 0) { throw "launcher promote-only failed: $LASTEXITCODE" }
           "ISOLATED_LOCALAPPDATA=$env:LOCALAPPDATA" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "ISOLATED_APPDATA=$env:APPDATA" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -190,6 +194,7 @@ jobs:
           if ($p.HasExited) { $exitCode = $p.ExitCode }
           $stdoutText = if (Test-Path $stdout) { Get-Content $stdout -Raw } else { '' }
           $stderrText = if (Test-Path $stderr) { Get-Content $stderr -Raw } else { '' }
+          # v0.16.0 intentionally carries the validated v0.15.135 storage-root owner forward.
           $storageIdentityLogged = ($stdoutText -match '\[v0\.15\.135 storage-root\]') -and ($stdoutText -match 'aram-fearless-draft')
           $fatalLoadError = ($stderrText -match 'App threw an error') -or ($stderrText -match 'index contract mismatch')
           $userDataExists = Test-Path $stableUserData
@@ -197,7 +202,8 @@ jobs:
           $report = [ordered]@{
             status = if ($success) { 'SUCCESS' } else { 'FAILURE' }
             stage = 'INSTALLED_WINDOWS_COLD_START'
-            golden_version = '0.15.135'
+            active_version = $env:ACTIVE_VERSION
+            historical_golden_version = '0.15.135'
             restored_installed_baseline = '0.15.49'
             windows_runner = $true
             electron_version = '38.7.2'
@@ -213,13 +219,13 @@ jobs:
             canonical_shadow_payload_present = (Test-Path (Join-Path $env:INSTALLED_APP 'canonical-shadow\src'))
             production_manifest_unchanged = $true
             real_league_client_tested = $false
-            acceptance_scope = 'Windows GitHub-hosted runner; validated v0.15.49 installed baseline reconstructed from pinned v0.14.2 public bundle, Golden v0.15.135 manifest materialized, stable launcher promoted, and actual Electron cold-start executed. This is not a physical-user-PC or real League Client acceptance.'
+            acceptance_scope = 'Windows GitHub-hosted runner; validated v0.15.49 installed baseline reconstructed from pinned v0.14.2 public bundle, active updater manifest materialized, stable launcher promoted to the active version, and actual Electron cold-start executed. This is not a physical-user-PC or real League Client acceptance.'
           }
           $report | ConvertTo-Json -Depth 5 | Set-Content -Path (Join-Path $outDir 'installed-windows-report.json') -Encoding utf8
           if ($alive) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
           Get-Process electron -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
           if (-not $alive) { throw "installed Electron exited early; code=$exitCode" }
-          if (-not $storageIdentityLogged) { throw 'stable storage-root identity was not logged by the Golden runtime' }
+          if (-not $storageIdentityLogged) { throw 'stable storage-root identity was not logged by the active runtime' }
           if ($fatalLoadError) { throw 'installed Electron reported a fatal app-load/index contract error' }
           if (-not $userDataExists) { throw "stable userData root was not created: $stableUserData" }
 
