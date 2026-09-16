@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -10,16 +11,16 @@ const atLeast=(a,b)=>{const A=parts(a),B=parts(b),L=Math.max(A.length,B.length);
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const iconPath=byPath.get('random-item-icons-v01556.js');
-const mainPath=byPath.get('main.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m);
 const pkgPath=byPath.get('package.json');
 ok(atLeast(m.version,'0.15.56'),'Manifest is v0.15.56 or newer',m.version);
 ok(!!iconPath&&/random-item-icons-v01556\.js$/.test(iconPath)&&exists(iconPath),'v0.15.56 item icon runtime contract remains delivered',iconPath||'missing');
-ok(!!mainPath&&exists(mainPath),'Current main delivered',mainPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current effective main delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package delivered',pkgPath||'missing');
 const s=iconPath&&exists(iconPath)?read(iconPath):'';
 const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
-for(const [code,name] of [[s,'item icon runtime'],[main,'main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
+for(const [code,name] of [[s,'item icon runtime'],[main,'effective main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
 ok(/__ARAM_RANDOM_ITEM_ICONS_V01556__\s*=\s*true/.test(s),'v0.15.56 readiness marker exists');
 ok(/getItemCatalog/.test(s)&&/catalog\?\.version/.test(s),'v0.15.56 reuses desktop item catalog and its Data Dragon version');
 ok(/ddragon\.leagueoflegends\.com\/cdn/.test(s)&&/img\/item/.test(s),'Official Data Dragon item icon path is used');
@@ -29,12 +30,12 @@ ok(/\.riBuildCard\.opt/.test(s)&&/riBuildMain/.test(s),'Current-match optimized 
 ok(/riTreeIconsV01556/.test(s)&&/treeMatches/.test(s),'Statistical base tree keeps compact icon strip');
 ok(/onerror=/.test(s)&&/style\.display='none'/.test(s),'Broken remote icon falls back to text-only UI');
 ok(/score_logic_changed:false/.test(s),'v0.15.56 remains score-neutral');
-ok(main.includes("'random-item-icons-v01556.js'"),'Current main preserves v0.15.56 icon layer');
-ok(main.includes('__ARAM_RANDOM_ITEM_ICONS_V01556__'),'Current main readiness guard covers v0.15.56 icon layer');
+ok(main.includes("'random-item-icons-v01556.js'"),'Effective runtime preserves v0.15.56 icon layer');
+ok(main.includes('__ARAM_RANDOM_ITEM_ICONS_V01556__'),'Effective runtime readiness guard covers v0.15.56 icon layer');
 const mainVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
-ok(atLeast(mainVersion,'0.15.56'),'Main VERSION is v0.15.56 or newer',mainVersion);
+ok(atLeast(mainVersion,'0.15.56'),'Effective runtime VERSION is v0.15.56 or newer',mainVersion);
 ok(atLeast(pkg.version,'0.15.56'),'package VERSION is v0.15.56 or newer',pkg.version);
-report.info={scope:'Forward-compatible regression contract for v0.15.56 Random Practice in-game item icons',scoreLogicChanged:false,fallback:'text remains visible when image loading fails'};
+report.info={scope:'Forward-compatible regression contract for v0.15.56 Random Practice in-game item icons',scoreLogicChanged:false,effectiveRuntime:mainPath,fallback:'text remains visible when image loading fails'};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-item-icons-v01556-report.json'),JSON.stringify(report,null,2));
