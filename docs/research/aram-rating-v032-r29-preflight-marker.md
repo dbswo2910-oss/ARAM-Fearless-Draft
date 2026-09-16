@@ -1,0 +1,1 @@
+R29 preflight marker: physical installed-state execution remains pending; production activation is not authorized.
