@@ -28,6 +28,11 @@ function materializeBaseline(){
     if(!target||!source)continue;
     write(path.join(APP_DIR,...target.split('/')),gitShow(source));
   }
+  // index.html is part of the installed base, not the updater manifest. The capture
+  // harness stubs the historical index mutators, so a deterministic placeholder is
+  // sufficient to let the old safety layer traverse without touching real UI state.
+  const indexPath=path.join(APP_DIR,'index.html');
+  if(!fs.existsSync(indexPath))write(indexPath,'<!doctype html><html><body></body></html>\n');
   return manifest;
 }
 
