@@ -135,7 +135,7 @@ jobs:
           $installedPkg = Get-Content (Join-Path $env:INSTALLED_APP 'package.json') -Raw | ConvertFrom-Json
           if ([string]$installedPkg.version -ne $expectedVersion) { throw "installed package version $($installedPkg.version) != manifest $expectedVersion" }
           & "$env:RUNNER_TEMP\ARAM_Fearless_Draft_Launcher_windows_x64.exe" --promote-only --app-dir "$env:INSTALLED_APP" --expected-version $expectedVersion
-          if ($LASTEXITCODE -ne 0) { throw "launcher promote-only failed for v$expectedVersion: $LASTEXITCODE" }
+          if ($LASTEXITCODE -ne 0) { throw "launcher promote-only failed for v${expectedVersion}: $LASTEXITCODE" }
           "EXPECTED_APP_VERSION=$expectedVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "ISOLATED_LOCALAPPDATA=$env:LOCALAPPDATA" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "ISOLATED_APPDATA=$env:APPDATA" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
