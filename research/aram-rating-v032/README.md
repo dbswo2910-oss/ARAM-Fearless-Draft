@@ -16,7 +16,7 @@ Accuracy-first research branch for ARAM player rating. Production activation rem
 - R16 added a manual-review-only promotion gate.
 - R17 added a passive installed-shadow RC core with a separate privacy-safe local evidence store.
 - R18 builds a temporary-copy-only installed RC overlay kit without changing the production install or manifest.
-- R19 adds a guarded Windows physical-acceptance harness; its Windows CI dry run is green, but real user-PC execution remains the final physical gate.
+- R19 adds a guarded Windows physical-acceptance harness. Windows CI dry run #1 (`35068242078`) completed SUCCESS; real user-PC execution remains the final physical gate.
 
 ## R11 result
 
@@ -113,6 +113,8 @@ The kit deliberately:
 
 The intended physical path is `installed v0.16.0 -> temporary app copy -> R18 overlay -> stable userData`, so the installed production tree remains untouched.
 
+R18 build/audit passed in the Research workflow before the physical harness was exposed.
+
 ## R19 guarded Windows physical gate
 
 `tools/research/aram-rating-v032-r19-physical-shadow-rc.ps1` is the real-PC acceptance harness. Before asking for a user-PC run it is parsed and exercised in `ARAM Rating R19 Windows Dry Run` on `windows-latest`.
@@ -131,7 +133,7 @@ The harness:
 - requires privacy-safe output with no raw identity export
 - removes the temporary app copy after the run
 
-A green Windows dry run proves the harness syntax and safety contract on Windows CI. It does **not** substitute for the one remaining physical user-PC + real League/LCU acceptance run.
+Windows dry run #1 / `35068242078` completed SUCCESS: R18 kit build, R18 kit audit, PowerShell parse/dry-run, dry-run contract verification, and safety-artifact upload all passed. This proves the harness syntax and safety contract on a Windows GitHub runner. It does **not** substitute for the one remaining physical user-PC + real League/LCU acceptance run.
 
 ## Safety
 
