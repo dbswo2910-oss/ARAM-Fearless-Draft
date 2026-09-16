@@ -1,0 +1,26 @@
+{
+  "phase": "B5.1-R9",
+  "observed_at": "2026-09-16",
+  "source": "user_pc_devtools",
+  "classification": "R9_ONE_ANCHOR_RECOVERY_ACCEPTED",
+  "ok": true,
+  "riot_lcu_requests_performed": 1,
+  "returned_valid_matches": 20,
+  "target_hits": 20,
+  "duplicates": 18,
+  "new_unique_matches": 2,
+  "checkpoint_matches_before": 1982,
+  "checkpoint_matches_after": 1984,
+  "completed_after": 1,
+  "remaining_after": 14,
+  "checkpoint_written": true,
+  "rolled_back": false,
+  "match_count_integrity": true,
+  "completion_integrity": true,
+  "existing_match_integrity": true,
+  "production_changed": false,
+  "privacy": {
+    "contains_raw_puuid": false,
+    "contains_riot_id": false
+  }
+}
