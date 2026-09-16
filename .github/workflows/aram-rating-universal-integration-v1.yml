@@ -9,6 +9,8 @@ on:
       - 'src/profile/universal-rating-adapter.js'
       - 'src/profile/index.js'
       - 'src/profile/history-service.js'
+      - 'src/main/universal-rating-ipc.js'
+      - 'src/preload/universal-rating-bridge.js'
       - 'test/universal-rating-integration-v1.test.js'
       - '.github/workflows/aram-rating-universal-integration-v1.yml'
       - 'update/v0.15.129/rating-engine-v01.js'
@@ -18,6 +20,8 @@ on:
       - 'src/profile/universal-rating-adapter.js'
       - 'src/profile/index.js'
       - 'src/profile/history-service.js'
+      - 'src/main/universal-rating-ipc.js'
+      - 'src/preload/universal-rating-bridge.js'
       - 'test/universal-rating-integration-v1.test.js'
       - '.github/workflows/aram-rating-universal-integration-v1.yml'
       - 'update/v0.15.129/rating-engine-v01.js'
@@ -39,9 +43,12 @@ jobs:
           node --check src/rating/universal/confidence.js
           node --check src/rating/universal/estimator.js
           node --check src/rating/universal/service.js
+          node --check src/rating/universal/runtime.js
           node --check src/rating/universal/index.js
           node --check src/profile/universal-rating-adapter.js
           node --check src/profile/index.js
+          node --check src/main/universal-rating-ipc.js
+          node --check src/preload/universal-rating-bridge.js
           node --check test/universal-rating-integration-v1.test.js
       - name: Universal integration invariant tests
         run: node --test test/universal-rating-integration-v1.test.js
@@ -49,8 +56,14 @@ jobs:
         run: |
           node - <<'NODE'
           const rating=require('./src/rating/universal');
+          const runtime=require('./src/rating/universal/runtime');
           const adapter=require('./src/profile/universal-rating-adapter');
+          const mainIpc=require('./src/main/universal-rating-ipc');
+          const preload=require('./src/preload/universal-rating-bridge');
           if(rating.production_active!==false||rating.automatic_promotion!==false)process.exit(1);
+          if(runtime.production_active!==false||runtime.automatic_promotion!==false)process.exit(1);
           if(adapter.production_active!==false||adapter.automatic_promotion!==false||adapter.network_owner!==false)process.exit(1);
+          if(mainIpc.production_active!==false||mainIpc.automatic_promotion!==false||mainIpc.network_owner!==false)process.exit(1);
+          if(preload.production_active!==false||preload.automatic_promotion!==false||preload.network_owner!==false)process.exit(1);
           console.log('UNIVERSAL RATING INTEGRATION SAFETY PASS');
           NODE
