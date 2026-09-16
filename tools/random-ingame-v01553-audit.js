@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -11,18 +12,18 @@ const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const shopPath=byPath.get('random-ingame-shop-v01553.js');
 const catalogPath=byPath.get('item-catalog-v01527.js');
-const mainPath=byPath.get('main.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m);
 const pkgPath=byPath.get('package.json');
 ok(atLeast(m.version,'0.15.53'),'Manifest is v0.15.53 or newer',m.version);
 ok(!!shopPath&&/v0\.15\.53\/random-ingame-shop-v01553\.js$/.test(shopPath)&&exists(shopPath),'v0.15.53 shop planner runtime remains delivered',shopPath||'missing');
 ok(!!catalogPath&&/update\/v0\.15\.(?:53|[6-9]\d)\/item-catalog-v01527\.js$/.test(catalogPath)&&exists(catalogPath),'Recipe-aware item catalog remains delivered through the stable installed filename',catalogPath||'missing');
-ok(!!mainPath&&exists(mainPath),'Current main delivered',mainPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current effective main delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package delivered',pkgPath||'missing');
 const s=shopPath&&exists(shopPath)?read(shopPath):'';
 const cat=catalogPath&&exists(catalogPath)?read(catalogPath):'';
 const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
-for(const [code,name] of [[s,'shop planner'],[cat,'item catalog'],[main,'main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
+for(const [code,name] of [[s,'shop planner'],[cat,'item catalog'],[main,'effective main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
 ok(/__ARAM_RANDOM_INGAME_SHOP_V01553__\s*=\s*true/.test(s),'Shop planner readiness marker exists');
 ok(/getItemCatalog/.test(s)&&/loadCatalog/.test(s),'Shop planner loads catalog through desktop bridge');
 ok(/collectOwnedIds/.test(s)&&/중복 구매 방지/.test(s),'Owned components are detected and planner suppresses unsafe duplicate-buy advice when unknown');
@@ -34,12 +35,12 @@ ok(/score_logic_changed:false/.test(s),'Shop planner is explicitly score-neutral
 ok(/ko_KR/.test(cat)&&/recipeAware:true/.test(cat),'Catalog prefers Korean Data Dragon data and marks recipe capability');
 ok(/from,into/.test(cat)&&/base:/.test(cat),'Catalog includes recipe links and combine/base gold');
 ok(/gold\.purchasable/.test(cat)&&/maps\?\.\['12'\]/.test(cat),'Catalog retains purchase and ARAM map availability metadata');
-ok(main.includes("'random-ingame-ux-v01552.js','random-ingame-shop-v01553.js'"),'Current main keeps shop planner after HUD polish');
-ok(main.includes('__ARAM_RANDOM_INGAME_SHOP_V01553__'),'Current main readiness guard covers shop planner');
+ok(main.includes("'random-ingame-ux-v01552.js','random-ingame-shop-v01553.js'"),'Effective runtime keeps shop planner after HUD polish');
+ok(main.includes('__ARAM_RANDOM_INGAME_SHOP_V01553__'),'Effective runtime readiness guard covers shop planner');
 const mainVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
-ok(atLeast(mainVersion,'0.15.53'),'Main VERSION is v0.15.53 or newer',mainVersion);
+ok(atLeast(mainVersion,'0.15.53'),'Effective runtime VERSION is v0.15.53 or newer',mainVersion);
 ok(atLeast(pkg.version,'0.15.53'),'package VERSION is v0.15.53 or newer',pkg.version);
-report.info={scope:'Forward-compatible death-time shop planner contract',scoreLogicChanged:false,catalog:'Data Dragon ko_KR recipe metadata under stable installed filename; newer visual metadata may be layered without changing recipe math',safety:'hide exact buy advice if real owned-component state cannot be confirmed'};
+report.info={scope:'Forward-compatible death-time shop planner contract',scoreLogicChanged:false,effectiveRuntime:mainPath,catalog:'Data Dragon ko_KR recipe metadata under stable installed filename; newer visual metadata may be layered without changing recipe math',safety:'hide exact buy advice if real owned-component state cannot be confirmed'};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-ingame-v01553-report.json'),JSON.stringify(report,null,2));
