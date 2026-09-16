@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -11,18 +12,18 @@ const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const polishPath=byPath.get('random-ingame-shop-polish-v01554.js');
 const shopPath=byPath.get('random-ingame-shop-v01553.js');
-const mainPath=byPath.get('main.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m);
 const pkgPath=byPath.get('package.json');
 ok(atLeast(m.version,'0.15.54'),'Manifest is v0.15.54 or newer',m.version);
 ok(!!shopPath&&exists(shopPath),'v0.15.53 shop planner remains delivered',shopPath||'missing');
 ok(!!polishPath&&/v0\.15\.54\/random-ingame-shop-polish-v01554\.js$/.test(polishPath)&&exists(polishPath),'v0.15.54 screenshot polish runtime remains delivered',polishPath||'missing');
-ok(!!mainPath&&exists(mainPath),'Current main runtime delivered',mainPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current effective main runtime delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package delivered',pkgPath||'missing');
 const s=polishPath&&exists(polishPath)?read(polishPath):'';
 const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
 try{new Function(s);ok(true,'v0.15.54 polish runtime parses')}catch(e){ok(false,'v0.15.54 polish runtime parses',e.message)}
-try{new Function(main);ok(true,'Current main parses')}catch(e){ok(false,'Current main parses',e.message)}
+try{new Function(main);ok(true,'Current effective main parses')}catch(e){ok(false,'Current effective main parses',e.message)}
 ok(/__ARAM_RANDOM_INGAME_SHOP_POLISH_V01554__\s*=\s*true/.test(s),'v0.15.54 readiness marker exists');
 ok(/INGAME COACH · v0\.15\.54/.test(s),'v0.15.54 layer keeps its historical coach eyebrow copy');
 ok(/body\.riRandomIngameV01552 \.footer/.test(s),'In-game source footer selector covers nested footer seen in Windows screenshot');
@@ -31,12 +32,12 @@ ok(/지금 살 것/.test(s),'Immediate purchase label is shortened');
 ok(/보유템 없음 가정/.test(s),'Preview assumption copy is shortened');
 ok(/score_logic_changed:false/.test(s),'v0.15.54 remains score-neutral');
 const p53=main.indexOf("'random-ingame-shop-v01553.js'"),p54=main.indexOf("'random-ingame-shop-polish-v01554.js'"),pRole=main.indexOf("'role-metric-detail-v01518.js'");
-ok(p53>=0&&p54>p53&&pRole>p54,'Current main preserves v0.15.53 -> v0.15.54 order even with newer layers between');
-ok(main.includes('__ARAM_RANDOM_INGAME_SHOP_POLISH_V01554__'),'Current main readiness guard covers v0.15.54 polish');
+ok(p53>=0&&p54>p53&&pRole>p54,'Effective runtime preserves v0.15.53 -> v0.15.54 order even with newer layers between');
+ok(main.includes('__ARAM_RANDOM_INGAME_SHOP_POLISH_V01554__'),'Effective runtime readiness guard covers v0.15.54 polish');
 const mainVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
-ok(atLeast(mainVersion,'0.15.54'),'Main VERSION is v0.15.54 or newer',mainVersion);
+ok(atLeast(mainVersion,'0.15.54'),'Effective runtime VERSION is v0.15.54 or newer',mainVersion);
 ok(atLeast(pkg.version,'0.15.54'),'package VERSION is v0.15.54 or newer',pkg.version);
-report.info={scope:'Forward-compatible regression contract for v0.15.54 Windows screenshot shop polish',scoreLogicChanged:false,logicChange:false};
+report.info={scope:'Forward-compatible regression contract for v0.15.54 Windows screenshot shop polish',scoreLogicChanged:false,logicChange:false,effectiveRuntime:mainPath};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-ingame-v01554-report.json'),JSON.stringify(report,null,2));
