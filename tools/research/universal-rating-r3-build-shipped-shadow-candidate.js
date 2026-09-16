@@ -9,7 +9,8 @@ const ACTIVE_MANIFEST=path.join(ROOT,'update','manifest.json');
 const CHANGES=Object.freeze([
   ['package.json','update/v0.16.1/package.json'],
   ['main-v0161-shadow.js','update/v0.16.1/main-v0161-shadow.js'],
-  ['preload-v0161-shadow.js','update/v0.16.1/preload-v0161-shadow.js'],
+  ['preload.js','update/v0.16.1/preload-v0161-shadow.js'],
+  ['preload-base-v015117.js','update/v0.15.117/preload.js'],
   ['src/main/universal-rating-ipc.js','src/main/universal-rating-ipc.js'],
   ['src/preload/universal-rating-history-hook.js','src/preload/universal-rating-history-hook.js'],
   ['src/rating/universal/contracts.js','src/rating/universal/contracts.js'],
@@ -48,6 +49,7 @@ function build(){
   }
   const pkg=JSON.parse(sourceBytes('update/v0.16.1/package.json').toString('utf8'));
   if(pkg.version!=='0.16.1'||pkg.main!=='main-v0161-shadow.js')throw new Error('candidate package contract invalid');
+  if(!changed.some(x=>x.path==='preload.js')||!changed.some(x=>x.path==='preload-base-v015117.js'))throw new Error('candidate preload successor files missing');
   const manifestPath=path.join(OUT,'manifest-candidate.json');
   fs.writeFileSync(manifestPath,JSON.stringify(candidate,null,2)+'\n','utf8');
   const report={
@@ -55,10 +57,11 @@ function build(){
     status:'BUILT',base_version:'0.16.0',candidate_version:'0.16.1',candidate_only:true,
     active_manifest_mutated:false,production_rating_active:false,automatic_rating_promotion:false,
     history_network_owner:'existing_match_history_only',rating_network_owner:false,
+    preload_route_changed:false,preload_successor_target:'preload.js',preload_base_copy:'preload-base-v015117.js',
     overlay_files:changed.length,changed,manifest_sha256:sha(fs.readFileSync(manifestPath))
   };
   fs.writeFileSync(path.join(OUT,'candidate-kit.json'),JSON.stringify(report,null,2)+'\n','utf8');
   return report;
 }
-if(require.main===module){const r=build();console.log('UNIVERSAL RATING R3 SHIPPED SHADOW CANDIDATE: BUILT',JSON.stringify({candidate:r.candidate_version,overlay_files:r.overlay_files,active_manifest_mutated:false}))}
+if(require.main===module){const r=build();console.log('UNIVERSAL RATING R3 SHIPPED SHADOW CANDIDATE: BUILT',JSON.stringify({candidate:r.candidate_version,overlay_files:r.overlay_files,active_manifest_mutated:false,preload_route_changed:false}))}
 module.exports={ROOT,OUT,OVERLAY,CHANGES,build};
