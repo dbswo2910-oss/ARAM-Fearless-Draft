@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -7,23 +8,37 @@ const report={version:'0.15.72-historical',generated_at:new Date().toISOString()
 const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json')),byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
+const clean=m.clean_runtime_consolidated===true;
 const get=target=>{const p=byPath.get(target);return p&&exists(p)?read(p):''};
-const runtime=get('runtime-random-practice-v01572.js'),pkg=JSON.parse(get('package.json')||'{}'),entryTarget=String(pkg.main||'main.js'),entry=get(entryTarget),v79Entry=get('main-v01579.js');
+const pkg=JSON.parse(get('package.json')||'{}'),entryPath=byPath.get('main.js'),entry=get('main.js'),runtimeMainPath=resolveCurrentRuntimeSource(ROOT,m),runtimeMain=read(runtimeMainPath);
+const runtime=get('runtime-random-practice-v01572.js'),v79Entry=get('main-v01579.js');
 const historicalEntry=exists('update/v0.15.72/main-v01572.js')?read('update/v0.15.72/main-v01572.js'):'';
 const focus=get('random-practice-focus-v01549.js'),density=get('random-pick-density-v01555.js'),party=get('random-party-picks-v01558.js'),perf=get('runtime-performance-v01568.js');
 const updater=get('in-app-updater-ui-v01523.js'),sticky=get('player-profile-data-sticky-v01521.js'),live=get('runtime-live-autosync-v01571.js');
-function collectMainChain(startTarget){const out=[],seen=new Set();let target=startTarget;while(target&&byPath.has(target)&&!seen.has(target)&&out.length<96){seen.add(target);const text=get(target);out.push(target);const refs=[...text.matchAll(/['"](main-v\d+(?:-[A-Za-z0-9-]+)?\.js)['"]/g)].map(x=>x[1]);target=refs.find(x=>byPath.has(x)&&!seen.has(x))||''}return out}
-const entryChain=collectMainChain(entryTarget);
-for(const [n,s] of [['runtime',runtime],['current entry',entry],['v0.15.79 safety successor base',v79Entry],['historical v0.15.72 entry',historicalEntry],['focus',focus],['density',density],['party',party],['perf',perf],['updater',updater],['sticky',sticky],['live',live]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
+for(const [n,s] of [['runtime',runtime],['current entry',entry],['effective runtime',runtimeMain],['v0.15.79 safety lineage',v79Entry],['historical v0.15.72 entry',historicalEntry],['focus',focus],['density',density],['party',party],['perf',perf],['updater',updater],['sticky',sticky],['live',live]]){try{new Function(s);ok(`${n} parses`,true)}catch(e){ok(`${n} parses`,false,e.message)}}
 ok('manifest is v0.15.72 or newer',ge(m.version,'0.15.72'),m.version);
 ok('package is v0.15.72 or newer',ge(pkg.version,'0.15.72'),pkg.version);
-ok('current package entry delivered',!!byPath.get(entryTarget)&&!!entry,`${entryTarget} -> ${byPath.get(entryTarget)||'missing'}`);
+ok('current canonical entry delivered',!!entryPath&&exists(entryPath),entryPath||'missing');
+ok('effective runtime delivered',!!runtimeMainPath&&exists(runtimeMainPath),runtimeMainPath||'missing');
 ok('historical v0.15.72 entry remains available',!!historicalEntry);
 ok('runtime delivered',byPath.get('runtime-random-practice-v01572.js')==='update/v0.15.72/runtime-random-practice-v01572.js');
-ok('current entry inherits v0.15.79 safety successor',entryChain.includes('main-v01579.js'),entryChain.join(' -> '));
-ok('successor chain preserves Random v0.15.72 injection',v79Entry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js'"));
-ok('successor chain readiness includes v0.15.72 runtime',v79Entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
-ok('v0.15.71 core governor preserved through successor base',v79Entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
+ok('v0.15.79 safety lineage remains preserved',!!v79Entry);
+if(clean){
+  ok('clean package uses canonical main.js',pkg.main==='main.js',pkg.main||'missing');
+  ok('clean entry records flattened no-wrapper lineage',entry.includes("legacySafetyRoot:'main-v01579.js'")&&entry.includes('flattened:true')&&entry.includes('runtimeSuccessorWrappers:false'));
+  ok('clean entry directly preserves v0.15.71 core governor',entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
+  ok('flattened runtime directly injects Random v0.15.72 after party pool labels',runtimeMain.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js','item-art-hotfix-v01563.js'"));
+  ok('flattened runtime readiness directly includes v0.15.72 runtime',runtimeMain.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
+  ok('flattened runtime directly injects v0.15.71 renderer governor',runtimeMain.includes("'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'"));
+  ok('clean runtime version is current manifest version',runtimeMain.includes(`const VERSION='${m.version}'`),m.version);
+  ok('clean entry/runtime do not compile successor source',!entry.includes('module._compile(')&&!runtimeMain.includes('module._compile('));
+}else{
+  ok('historical v0.15.72 entry injects Random owner',historicalEntry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js','item-art-hotfix-v01563.js'"));
+  ok('historical v0.15.72 readiness includes runtime',historicalEntry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
+}
+ok('historical v0.15.79 lineage preserves Random v0.15.72 injection',v79Entry.includes("'random-party-pool-labels-v01562.js','runtime-random-practice-v01572.js'"));
+ok('historical v0.15.79 lineage readiness includes v0.15.72 runtime',v79Entry.includes('__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__'));
+ok('historical v0.15.79 lineage preserves v0.15.71 core governor',v79Entry.includes("require('./autosync-live-runtime-v01571').patch(autosyncCore)"));
 
 ok('v49 recurring subtree observer removed',!focus.includes('new MutationObserver('));
 ok('v55 observer removed',!density.includes('new MutationObserver('));
