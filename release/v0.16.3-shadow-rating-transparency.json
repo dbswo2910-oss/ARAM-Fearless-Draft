@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "stage": "V0163_SHADOW_RATING_TRANSPARENCY",
+  "release": "0.16.3",
+  "base": "0.16.2",
+  "scope": "read-only Shadow Rating ingest, graph and stability transparency",
+  "safety": {
+    "production_rating_active": false,
+    "automatic_rating_promotion": false,
+    "universal_rating_shadow": true,
+    "diagnostics_only": true,
+    "rating_network_owner": false,
+    "raw_puuid_exposed_to_renderer": false,
+    "predictive_accuracy_claimed": false
+  },
+  "ui": {
+    "shows": [
+      "received_matches",
+      "new_matches",
+      "duplicate_matches",
+      "rejected_matches",
+      "target_mismatch_matches",
+      "target_match_count",
+      "database_unique_matches",
+      "match_graph_player_count",
+      "searched_player_count",
+      "elo_glicko_gap",
+      "stability_progress",
+      "stability_not_accuracy_notice"
+    ],
+    "label": "RESEARCH ONLY · 계산 안정도는 예측 정확도가 아님"
+  },
+  "release_gate": "merge only after v0.16.3 transparency CI and all existing main PR regression / Windows / persistence / stability / continuity gates are green"
+}

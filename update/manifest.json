@@ -1,6 +1,6 @@
 {
-  "version": "0.16.2",
-  "message": "v0.16.2 · SHADOW RATING DIAGNOSTICS",
+  "version": "0.16.3",
+  "message": "v0.16.3 · SHADOW RATING TRANSPARENCY",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -818,8 +818,8 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.16.2/package.json",
-      "sha256": "3ebbabc4008cb53d7fd1f3605e658ea000a5ac41f0d20cd6d7d072cc4dc81bd4"
+      "source": "update/v0.16.3/package.json",
+      "sha256": "8efd499fa2f54c0487f8a0333fad4f67eaa6b1b414d450fc98313e8b544ed354"
     },
     {
       "path": "rating-engine-v01.js",
@@ -1445,8 +1445,8 @@
     },
     {
       "path": "src/rating/universal/confidence.js",
-      "source": "update/v0.16.1/src/rating/universal/confidence.js",
-      "sha256": "572332b619568b8fe1357c5549b9c9fab881ce544c821b94224da0b8622c8506"
+      "source": "update/v0.16.3/src/rating/universal/confidence.js",
+      "sha256": "92e2b39ee62635ff5a4fb6b58fc4bf98b5ecd893fb77f0a9959660cff74774a4"
     },
     {
       "path": "src/rating/universal/estimator.js",
@@ -1465,8 +1465,8 @@
     },
     {
       "path": "src/rating/universal/runtime.js",
-      "source": "update/v0.16.2/src/rating/universal/runtime.js",
-      "sha256": "6d170467722c3870e0d119ba4052d8ebe994a3af0d7792892d90b3758ad11083"
+      "source": "update/v0.16.3/src/rating/universal/runtime.js",
+      "sha256": "4c9305bd3b756dbb8c01d78336e95bbb4b0ed73050ac1062e0cf7bd1d56edfaa"
     },
     {
       "path": "src/rating/universal/index.js",
@@ -1485,8 +1485,13 @@
     },
     {
       "path": "src/profile/shadow-rating-diagnostics-renderer.js",
-      "source": "update/v0.16.2/src/profile/shadow-rating-diagnostics-renderer.js",
-      "sha256": "63235760090063a04362c4430ccc889a78b3a9e0a4afdfff01c4acc93aeb19f2"
+      "source": "update/v0.16.3/src/profile/shadow-rating-diagnostics-renderer.js",
+      "sha256": "ddaba18895b0a4555ca828e62138334c8083c1784dc6db7e7532ff571d4367f1"
+    },
+    {
+      "path": "main-v0163-shadow-transparency.js",
+      "source": "update/v0.16.3/main-v0163-shadow-transparency.js",
+      "sha256": "5470d2feaddb48cea4559705d0c143b40c94190ca4d25d36ecd10d0a3c0b642a"
     }
   ],
   "delete": [
@@ -1540,5 +1545,6 @@
   "production_rating_active": false,
   "automatic_rating_promotion": false,
   "universal_rating_shadow": true,
-  "universal_rating_shadow_diagnostics": true
+  "universal_rating_shadow_diagnostics": true,
+  "universal_rating_shadow_transparency": true
 }

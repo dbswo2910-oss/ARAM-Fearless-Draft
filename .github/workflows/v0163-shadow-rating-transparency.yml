@@ -1,0 +1,103 @@
+name: v0.16.3 Shadow Rating Transparency
+
+on:
+  push:
+    branches:
+      - 'feature/v0.16.3-shadow-rating-transparency'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'update/v0.16.3/**'
+      - 'src/rating/universal/confidence.js'
+      - 'src/rating/universal/runtime.js'
+      - 'src/profile/shadow-rating-diagnostics-renderer.js'
+      - 'test/universal-rating-shadow-transparency-v1.test.js'
+      - 'tools/release/build-v0163-shadow-rating-transparency-manifest.js'
+      - 'tools/stability/v0163-shadow-transparency-successor-cutover-audit.js'
+      - 'release/v0.16.3-shadow-rating-transparency.json'
+      - 'update/manifest.json'
+      - 'update/current-state.json'
+      - 'docs/CURRENT_STATE.md'
+      - '.github/workflows/v0163-shadow-rating-transparency.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  transparency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build authoritative v0.16.3 payload and continuity metadata
+        run: |
+          node tools/release/build-v0163-shadow-rating-transparency-manifest.js
+          node tools/sync-current-state.js
+      - name: Syntax check transparency payload
+        run: |
+          node --check src/rating/universal/confidence.js
+          node --check src/rating/universal/runtime.js
+          node --check src/profile/shadow-rating-diagnostics-renderer.js
+          node --check update/v0.16.3/main-v0163-shadow-transparency.js
+          node --check update/v0.16.3/src/rating/universal/confidence.js
+          node --check update/v0.16.3/src/rating/universal/runtime.js
+          node --check update/v0.16.3/src/profile/shadow-rating-diagnostics-renderer.js
+          node --check test/universal-rating-shadow-diagnostics-v1.test.js
+          node --check test/universal-rating-shadow-transparency-v1.test.js
+          node --check tools/release/build-v0163-shadow-rating-transparency-manifest.js
+          node --check tools/stability/v0163-shadow-transparency-successor-cutover-audit.js
+      - name: Shadow transparency invariant tests
+        run: |
+          node test/universal-rating-shadow-diagnostics-v1.test.js
+          node test/universal-rating-shadow-transparency-v1.test.js
+      - name: Verify updater mirrors match canonical sources byte-for-byte
+        shell: bash
+        run: |
+          set -euo pipefail
+          mirrors=(
+            'update/v0.16.3/src/rating/universal/confidence.js|src/rating/universal/confidence.js'
+            'update/v0.16.3/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
+            'update/v0.16.3/src/profile/shadow-rating-diagnostics-renderer.js|src/profile/shadow-rating-diagnostics-renderer.js'
+          )
+          for pair in "${mirrors[@]}"; do
+            release_file="${pair%%|*}"
+            source_file="${pair#*|}"
+            cmp --silent "$release_file" "$source_file" || { echo "updater mirror mismatch: $release_file != $source_file"; exit 1; }
+          done
+          echo 'V0.16.3 UPDATE MIRROR BYTE MATCH: PASS'
+      - name: Strict v0.16.2 to v0.16.3 successor audit
+        run: node tools/stability/v0163-shadow-transparency-successor-cutover-audit.js
+      - name: Continuity snapshot is authoritative
+        run: node tools/sync-current-state.js --check
+      - name: Require checked-in PR distribution to be authoritative
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: git diff --exit-code -- update/v0.16.3 update/manifest.json update/current-state.json docs/CURRENT_STATE.md
+      - name: Commit generated distribution metadata and mirrors on feature branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/v0.16.3-shadow-rating-transparency'
+        shell: bash
+        run: |
+          if git diff --quiet -- update/v0.16.3 update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
+            echo 'v0.16.3 distribution already authoritative; no commit needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/v0.16.3 update/manifest.json update/current-state.json docs/CURRENT_STATE.md
+          git commit -m 'release: sync authoritative v0.16.3 transparency distribution'
+          git push origin HEAD:feature/v0.16.3-shadow-rating-transparency
+      - name: Safety remains read-only Shadow diagnostics
+        run: |
+          node - <<'NODE'
+          const rt=require('./src/rating/universal/runtime');
+          const conf=require('./src/rating/universal/confidence');
+          const view=require('./src/profile/shadow-rating-diagnostics-renderer');
+          if(rt.production_active!==false||rt.automatic_promotion!==false)throw new Error('Rating runtime activated');
+          if(conf.production_active!==false)throw new Error('confidence module activated');
+          if(view.production_active!==false||view.automatic_promotion!==false||view.network_owner!==false)throw new Error('diagnostics safety flags drifted');
+          console.log('V0.16.3 SHADOW TRANSPARENCY SAFETY: PASS');
+          NODE

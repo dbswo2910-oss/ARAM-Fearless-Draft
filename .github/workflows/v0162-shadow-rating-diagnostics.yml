@@ -32,67 +32,53 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Syntax check diagnostics payload
+      - name: Syntax check frozen v0.16.2 payload and current diagnostics source
         run: |
-          node --check src/rating/universal/runtime.js
-          node --check src/main/universal-rating-ipc.js
-          node --check src/preload/universal-rating-history-hook.js
-          node --check src/profile/shadow-rating-diagnostics-renderer.js
           node --check update/v0.16.2/main-v0162-shadow-diagnostics.js
           node --check update/v0.16.2/preload-v0162-shadow-diagnostics.js
           node --check update/v0.16.2/src/rating/universal/runtime.js
           node --check update/v0.16.2/src/main/universal-rating-ipc.js
           node --check update/v0.16.2/src/preload/universal-rating-history-hook.js
           node --check update/v0.16.2/src/profile/shadow-rating-diagnostics-renderer.js
+          node --check src/rating/universal/runtime.js
+          node --check src/main/universal-rating-ipc.js
+          node --check src/preload/universal-rating-history-hook.js
+          node --check src/profile/shadow-rating-diagnostics-renderer.js
           node --check test/universal-rating-shadow-diagnostics-v1.test.js
-          node --check tools/release/build-v0162-shadow-rating-diagnostics-manifest.js
-      - name: Shadow diagnostics invariant tests
-        run: node test/universal-rating-shadow-diagnostics-v1.test.js
-      - name: Verify updater mirrors match source payload byte-for-byte
+      - name: Verify exact v0.16.2 release or frozen baseline preservation
+        shell: bash
         run: |
           set -euo pipefail
-          mirrors=(
-            'update/v0.16.2/src/main/universal-rating-ipc.js|src/main/universal-rating-ipc.js'
-            'update/v0.16.2/src/preload/universal-rating-history-hook.js|src/preload/universal-rating-history-hook.js'
-            'update/v0.16.2/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
-            'update/v0.16.2/src/profile/shadow-rating-diagnostics-renderer.js|src/profile/shadow-rating-diagnostics-renderer.js'
-          )
-          for pair in "${mirrors[@]}"; do
-            release_file="${pair%%|*}"
-            source_file="${pair#*|}"
-            cmp --silent "$release_file" "$source_file" || { echo "updater mirror mismatch: $release_file != $source_file"; exit 1; }
-          done
-          echo 'V0.16.2 UPDATE MIRROR BYTE MATCH: PASS'
-      - name: Build authoritative v0.16.2 manifest and continuity snapshot
-        run: |
-          node tools/release/build-v0162-shadow-rating-diagnostics-manifest.js
-          node tools/sync-current-state.js
-          node - <<'NODE'
-          const fs=require('fs');
-          const m=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
-          const state=JSON.parse(fs.readFileSync('update/current-state.json','utf8'));
-          if(m.version!=='0.16.2')throw new Error(`manifest version ${m.version}`);
-          if(m.production_rating_active!==false||m.automatic_rating_promotion!==false||m.universal_rating_shadow!==true||m.universal_rating_shadow_diagnostics!==true)throw new Error('shadow diagnostics safety metadata invalid');
-          if(state.active?.version!=='0.16.2'||state.package?.version!=='0.16.2'||state.package?.main!=='main-v0162-shadow-diagnostics.js')throw new Error('continuity snapshot did not adopt v0.16.2');
-          for(const e of m.files||[])if(!String(e.source||'').startsWith('update/'))throw new Error(`unsafe updater source ${e.path} -> ${e.source}`);
-          const by=new Map((m.files||[]).map(x=>[x.path,x]));
-          const expected={
-            'package.json':'update/v0.16.2/package.json',
-            'main-v0162-shadow-diagnostics.js':'update/v0.16.2/main-v0162-shadow-diagnostics.js',
-            'preload.js':'update/v0.16.2/preload-v0162-shadow-diagnostics.js',
-            'src/main/universal-rating-ipc.js':'update/v0.16.2/src/main/universal-rating-ipc.js',
-            'src/preload/universal-rating-history-hook.js':'update/v0.16.2/src/preload/universal-rating-history-hook.js',
-            'src/rating/universal/runtime.js':'update/v0.16.2/src/rating/universal/runtime.js',
-            'src/profile/shadow-rating-diagnostics-renderer.js':'update/v0.16.2/src/profile/shadow-rating-diagnostics-renderer.js'
-          };
-          for(const [p,s] of Object.entries(expected)){
-            const e=by.get(p);
-            if(!e||e.source!==s||!/^[0-9a-f]{64}$/.test(String(e.sha256||'')))throw new Error(`missing verified v0.16.2 release entry ${p}`);
-          }
-          console.log('V0.16.2 MANIFEST + CONTINUITY + SECURE TRANSPORT: PASS');
-          NODE
-          node tools/sync-current-state.js --check
-      - name: Commit generated distribution metadata on feature branch
+          version="$(node -p "require('./update/manifest.json').version")"
+          if [ "$version" = "0.16.2" ]; then
+            mirrors=(
+              'update/v0.16.2/src/main/universal-rating-ipc.js|src/main/universal-rating-ipc.js'
+              'update/v0.16.2/src/preload/universal-rating-history-hook.js|src/preload/universal-rating-history-hook.js'
+              'update/v0.16.2/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
+              'update/v0.16.2/src/profile/shadow-rating-diagnostics-renderer.js|src/profile/shadow-rating-diagnostics-renderer.js'
+            )
+            for pair in "${mirrors[@]}"; do
+              release_file="${pair%%|*}"
+              source_file="${pair#*|}"
+              cmp --silent "$release_file" "$source_file" || { echo "v0.16.2 exact-release mirror mismatch: $release_file != $source_file"; exit 1; }
+            done
+            node tools/release/build-v0162-shadow-rating-diagnostics-manifest.js
+            node tools/sync-current-state.js
+            node tools/sync-current-state.js --check
+            echo 'V0.16.2 EXACT DIAGNOSTICS RELEASE: PASS'
+          else
+            case "$version" in 0.16.*) ;; *) echo "unsupported diagnostics successor version: $version"; exit 1;; esac
+            base='021a145e002566af8930c66ba25a950e2384807b'
+            while IFS= read -r f; do
+              git show "$base:$f" > /tmp/v0162-base-file
+              cmp --silent "$f" /tmp/v0162-base-file || { echo "frozen v0.16.2 diagnostics payload drifted in successor: $f"; exit 1; }
+            done < <(git ls-tree -r --name-only "$base" -- update/v0.16.2)
+            node tools/sync-current-state.js --check
+            echo "V0.16.2 FROZEN DIAGNOSTICS PAYLOAD PRESERVED IN SUCCESSOR $version: PASS"
+          fi
+      - name: Current diagnostics invariant test remains valid
+        run: node test/universal-rating-shadow-diagnostics-v1.test.js
+      - name: Commit generated distribution metadata on exact v0.16.2 feature branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/feature/v0.16.2-shadow-rating-diagnostics'
         run: |
           if git diff --quiet -- update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
@@ -114,5 +100,5 @@ jobs:
           for(const x of [rt,ipc,hook,view])if(x.production_active!==false)throw new Error('production flag activated');
           if(rt.automatic_promotion!==false||ipc.automatic_promotion!==false||hook.automatic_promotion!==false||view.automatic_promotion!==false)throw new Error('automatic promotion activated');
           if(ipc.network_owner!==false||hook.network_owner!==false||view.network_owner!==false)throw new Error('diagnostics acquired network ownership');
-          console.log('V0.16.2 SHADOW DIAGNOSTICS SAFETY: PASS');
+          console.log('V0.16.2 BASELINE / SUCCESSOR SHADOW SAFETY: PASS');
           NODE

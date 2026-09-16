@@ -94,7 +94,9 @@ jobs:
         shell: bash
         run: |
           version="$(node -p "require('./update/manifest.json').version")"
-          if [ "$version" = "0.16.2" ]; then
+          if [ "$version" = "0.16.3" ]; then
+            node tools/stability/v0163-shadow-transparency-successor-cutover-audit.js
+          elif [ "$version" = "0.16.2" ]; then
             node tools/stability/v0162-shadow-diagnostics-successor-cutover-audit.js
           elif [ "$version" = "0.16.1" ]; then
             node tools/stability/v0161-shadow-successor-cutover-audit.js
@@ -119,6 +121,7 @@ jobs:
             audit-output/stability/v0160-update-transport-cutover-report.json
             audit-output/stability/v0161-shadow-successor-cutover-report.json
             audit-output/stability/v0162-shadow-diagnostics-successor-cutover-report.json
+            audit-output/stability/v0163-shadow-transparency-successor-cutover-report.json
             audit-output/full-regression-report.json
             audit-output/ai-continuity-report.json
           if-no-files-found: warn
