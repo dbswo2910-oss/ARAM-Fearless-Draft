@@ -21,7 +21,7 @@
   function renderContent(data){
     if(!data||data.status==='NO_TARGET')return`<div class="srdEmpty"><b>전적을 먼저 검색해 주세요</b>검색이 끝나면 그 플레이어의 Elo/Glicko Shadow 결과를 여기서 확인할 수 있어요.</div>`;
     if(data.status==='READ_FAILED')return`<div class="srdEmpty"><b>Shadow DB를 읽지 못했어요</b>프로그램을 한 번 다시 열고 전적검색 후 재시도해 주세요.</div>`;
-    const rows=modelRows(data),games=Math.max(0,Number(data.targetMatches)||...rows.map(x=>Number(x.row?.games)||0));
+    const rows=modelRows(data),games=Math.max(0,Number(data.targetMatches)||0,...rows.map(x=>Number(x.row?.games)||0));
     return`<div class="srdNotice"><span class="srdTag"><i class="srdDot"></i> RESEARCH ONLY</span><div style="margin-top:7px"><b>정식 Rating이 아닙니다.</b> Elo와 Glicko를 병렬 비교하는 Shadow 진단값이며, 모델 선택·Production 승격은 별도 검증 게이트를 통과하기 전까지 비활성 상태입니다.</div></div><div class="srdPlayer"><div><div class="srdPlayerName">${esc(playerLabel(data.player))}</div><div class="srdSub">Dual Shadow · 최근 검색 대상</div></div><div class="srdMeta">누적 대상 경기 ${games}<br>최종 갱신 ${esc(dateLabel(data.updatedAt))}</div></div><div class="srdGrid">${rows.map(x=>renderCard(x.key,x.row)).join('')}</div><div class="srdFoot"><span>Network requests: ${Number(data.networkRequests)||0} · Production Rating: OFF · Auto promotion: OFF</span><span>Model selection: ${esc(data.modelSelection||'no_clear_winner')}</span></div>`;
   }
   function install({window,document}={}){
