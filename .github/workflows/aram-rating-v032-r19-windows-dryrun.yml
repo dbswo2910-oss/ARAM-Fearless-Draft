@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'src/research/**'
+      - 'update/v0.15.121/runtime-loader-v01579.js'
       - 'update/v0.16.0/main-v0160.js'
       - 'tools/research/aram-rating-v032-r18-build-installed-shadow-rc-kit.js'
       - 'tools/research/aram-rating-v032-r18-installed-shadow-rc-kit-audit.js'
