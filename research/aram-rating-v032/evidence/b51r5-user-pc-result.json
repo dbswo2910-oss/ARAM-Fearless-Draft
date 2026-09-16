@@ -23,5 +23,5 @@
     "contains_raw_puuid": false,
     "contains_riot_id": false
   },
-  "conclusion": "The first two distinct queue anchors also succeed sequentially in the same session. The old B5.1 bulk failure is not reproduced by a two-request sequence, so the remaining likely causes are a later request index/anchor, retry behavior, or a transient prior LCU/downstream state."
+  "conclusion": "The first two distinct queue anchors succeed sequentially in the same session. The old B5.1 bulk failure is not reproduced by a two-request sequence; inspect preserved legacy checkpoint logs before spending more live requests."
 }
