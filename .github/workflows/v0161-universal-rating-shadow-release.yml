@@ -12,6 +12,8 @@ on:
       - 'src/preload/universal-rating-history-hook.js'
       - 'tools/release/build-v0161-universal-rating-shadow-manifest.js'
       - 'update/manifest.json'
+      - 'update/current-state.json'
+      - 'docs/CURRENT_STATE.md'
       - '.github/workflows/v0161-universal-rating-shadow-release.yml'
 
 permissions:
@@ -44,6 +46,7 @@ jobs:
           node --check src/rating/universal/runtime.js
           node --check src/rating/universal/index.js
           node --check tools/release/build-v0161-universal-rating-shadow-manifest.js
+          node --check tools/sync-current-state.js
       - name: Verify release payload matches physically validated research payload
         run: |
           set -euo pipefail
@@ -88,29 +91,33 @@ jobs:
             console.log('UNIVERSAL RELEASE RUNTIME SMOKE: PASS');
           }).catch(e=>{console.error(e);process.exit(1)});
           NODE
-      - name: Build and validate authoritative v0.16.1 manifest
+      - name: Build authoritative v0.16.1 manifest and continuity snapshot
         run: |
           node tools/release/build-v0161-universal-rating-shadow-manifest.js
+          node tools/sync-current-state.js
           node - <<'NODE'
           const fs=require('fs');
           const m=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
+          const state=JSON.parse(fs.readFileSync('update/current-state.json','utf8'));
           if(m.version!=='0.16.1'||m.production_rating_active!==false||m.automatic_rating_promotion!==false||m.universal_rating_shadow!==true)process.exit(1);
+          if(state.active?.version!=='0.16.1'||state.package?.version!=='0.16.1'||state.package?.main!=='main-v0161-shadow.js')throw new Error('continuity snapshot did not adopt v0.16.1');
           const required=['package.json','main-v0161-shadow.js','preload.js','preload-base-v015117.js','src/main/universal-rating-ipc.js','src/preload/universal-rating-history-hook.js','src/rating/universal/runtime.js','update/v0.15.129/rating-engine-v01.js'];
           const by=new Map(m.files.map(x=>[x.path,x]));
           for(const p of required){const e=by.get(p);if(!e||!/^[0-9a-f]{64}$/.test(String(e.sha256||'')))throw new Error(`missing verified release entry ${p}`)}
-          console.log('V0.16.1 AUTHORITATIVE MANIFEST AUDIT: PASS');
+          console.log('V0.16.1 AUTHORITATIVE MANIFEST + CONTINUITY AUDIT: PASS');
           NODE
-      - name: Commit generated manifest on release branch
+          node tools/sync-current-state.js --check
+      - name: Commit generated release metadata on release branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/release/v0.16.1-universal-rating-shadow'
         run: |
-          if git diff --quiet -- update/manifest.json; then
-            echo 'Manifest already authoritative; no commit needed.'
+          if git diff --quiet -- update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
+            echo 'Release metadata already authoritative; no commit needed.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add update/manifest.json
-          git commit -m 'release: generate authoritative v0.16.1 shadow manifest'
+          git add update/manifest.json update/current-state.json docs/CURRENT_STATE.md
+          git commit -m 'release: sync authoritative v0.16.1 distribution metadata'
           git push origin HEAD:release/v0.16.1-universal-rating-shadow
       - name: Safety flags remain shadow-only
         run: |
