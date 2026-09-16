@@ -2,6 +2,7 @@
 const IMPLEMENTATION_VERSION='0.16-universal-rating-shadow-v1';
 
 const text=v=>String(v??'').trim();
+const finiteOrNull=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
 function resolvePlayerFromState(state){
   const s=state||{};
   const searched=s.targetMode==='searched';
@@ -34,8 +35,8 @@ function safeView(result,player){
     modelName:result.modelName||null,
     modelStatus:result.modelStatus||'SHADOW',
     status:result.status||'UNKNOWN',
-    rating:Number.isFinite(Number(result.rating))?Number(result.rating):null,
-    uncertainty:Number.isFinite(Number(result.uncertainty))?Number(result.uncertainty):null,
+    rating:finiteOrNull(result.rating),
+    uncertainty:finiteOrNull(result.uncertainty),
     games:Number(result.games)||0,
     confidence:result.confidence||null,
     evidenceMatches:Number(result.evidenceMatches)||0,
@@ -72,4 +73,4 @@ function createUniversalRatingProfileAdapter({ratingService,getState,onResult=((
   return{rateLoadedHistory,getLastResult,resolvePlayer:()=>resolvePlayerFromState(getState())};
 }
 
-module.exports={IMPLEMENTATION_VERSION,resolvePlayerFromState,safeView,createUniversalRatingProfileAdapter,production_active:false,automatic_promotion:false,network_owner:false,owner_status:'shadow'};
+module.exports={IMPLEMENTATION_VERSION,finiteOrNull,resolvePlayerFromState,safeView,createUniversalRatingProfileAdapter,production_active:false,automatic_promotion:false,network_owner:false,owner_status:'shadow'};
