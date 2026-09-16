@@ -1,0 +1,1 @@
+GitHub-side preflight is intentionally separate from the physical installed-state R29 run. Do not mark the physical evidence step complete from CI alone.
