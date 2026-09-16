@@ -1,0 +1,56 @@
+name: ARAM Rating Universal Integration V1
+
+on:
+  push:
+    branches:
+      - 'feature/universal-rating-integration-v1'
+    paths:
+      - 'src/rating/universal/**'
+      - 'src/profile/universal-rating-adapter.js'
+      - 'src/profile/index.js'
+      - 'src/profile/history-service.js'
+      - 'test/universal-rating-integration-v1.test.js'
+      - '.github/workflows/aram-rating-universal-integration-v1.yml'
+      - 'update/v0.15.129/rating-engine-v01.js'
+  pull_request:
+    paths:
+      - 'src/rating/universal/**'
+      - 'src/profile/universal-rating-adapter.js'
+      - 'src/profile/index.js'
+      - 'src/profile/history-service.js'
+      - 'test/universal-rating-integration-v1.test.js'
+      - '.github/workflows/aram-rating-universal-integration-v1.yml'
+      - 'update/v0.15.129/rating-engine-v01.js'
+  workflow_dispatch:
+
+jobs:
+  universal-rating-integration-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check
+        run: |
+          node --check src/rating/universal/contracts.js
+          node --check src/rating/universal/normalizer.js
+          node --check src/rating/universal/store.js
+          node --check src/rating/universal/confidence.js
+          node --check src/rating/universal/estimator.js
+          node --check src/rating/universal/service.js
+          node --check src/rating/universal/index.js
+          node --check src/profile/universal-rating-adapter.js
+          node --check src/profile/index.js
+          node --check test/universal-rating-integration-v1.test.js
+      - name: Universal integration invariant tests
+        run: node --test test/universal-rating-integration-v1.test.js
+      - name: Safety flags remain off
+        run: |
+          node - <<'NODE'
+          const rating=require('./src/rating/universal');
+          const adapter=require('./src/profile/universal-rating-adapter');
+          if(rating.production_active!==false||rating.automatic_promotion!==false)process.exit(1);
+          if(adapter.production_active!==false||adapter.automatic_promotion!==false||adapter.network_owner!==false)process.exit(1);
+          console.log('UNIVERSAL RATING INTEGRATION SAFETY PASS');
+          NODE
