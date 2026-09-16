@@ -6,7 +6,7 @@
 
 - Active updater: **v0.16.3**
 - Manifest message: v0.16.3 · SHADOW RATING TRANSPARENCY
-- Manifest commit: `2bce2dc0ec3d2c87aa6adf64653dbcd8d2fea99c`
+- Manifest commit: `9e30066031a7a556ebffbaa89a82fd3190a3281e`
 - Package: `update/v0.16.3/package.json` → **v0.16.3**
 - Electron entry: `main-v0163-shadow-transparency.js` → `update/v0.16.3/main-v0163-shadow-transparency.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`

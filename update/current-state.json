@@ -6,7 +6,7 @@
     "version": "0.16.3",
     "message": "v0.16.3 · SHADOW RATING TRANSPARENCY",
     "min_launcher": "2.0.2",
-    "manifest_commit": "2bce2dc0ec3d2c87aa6adf64653dbcd8d2fea99c"
+    "manifest_commit": "9e30066031a7a556ebffbaa89a82fd3190a3281e"
   },
   "package": {
     "source": "update/v0.16.3/package.json",
