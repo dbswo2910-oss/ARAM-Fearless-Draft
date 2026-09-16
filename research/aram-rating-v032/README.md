@@ -25,4 +25,4 @@ Accuracy-first research branch for ARAM rating calibration and match-network exp
 
 ## Next step
 
-Run R10 on the user PC, then evaluate the checkpoint growth and closed-network quality before widening recovery or activating any production rating path.
+Run R10 on the user PC, then evaluate checkpoint growth and closed-network quality before widening recovery or activating any production rating path.
