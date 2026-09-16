@@ -11,12 +11,16 @@ on:
       - 'tools/refactor/materialize-v0170-clean-runtime.js'
       - 'tools/release/build-v0170-clean-consolidation-manifest.js'
       - 'tools/stability/v0170-clean-consolidation-audit.js'
+      - 'tools/stability/clean-runtime-architecture-audit.js'
+      - 'tools/sync-current-state.js'
       - 'release/v0.17.0-clean-consolidation.json'
       - 'update/v0.17.0/**'
       - 'update/manifest.json'
       - 'update/current-state.json'
       - 'docs/CURRENT_STATE.md'
       - '.github/workflows/v0170-clean-consolidation.yml'
+      - '.github/workflows/clean-runtime-architecture.yml'
+      - '.github/workflows/v0160-final-production-cutover.yml'
 
 permissions:
   contents: write
@@ -47,8 +51,12 @@ jobs:
           node --check tools/refactor/materialize-v0170-clean-runtime.js
           node --check tools/release/build-v0170-clean-consolidation-manifest.js
           node --check tools/stability/v0170-clean-consolidation-audit.js
+          node --check tools/stability/clean-runtime-architecture-audit.js
+          node --check tools/sync-current-state.js
       - name: Prove runtime flattening and baseline preservation
         run: node tools/stability/v0170-clean-consolidation-audit.js
+      - name: Enforce permanent clean architecture contract
+        run: node tools/stability/clean-runtime-architecture-audit.js
       - name: No active runtime successor wrappers
         shell: bash
         run: |
@@ -73,6 +81,7 @@ jobs:
           const s=JSON.parse(fs.readFileSync('update/current-state.json','utf8'));
           if(m.version!=='0.17.0'||m.clean_runtime_consolidated!==true||m.runtime_successor_wrappers!==false)throw new Error('v0.17 clean-runtime manifest metadata invalid');
           if(s.active?.version!=='0.17.0'||s.package?.version!=='0.17.0'||s.package?.main!=='main.js')throw new Error('current-state did not adopt stable main.js entrypoint');
+          if(!/^[0-9a-f]{64}$/.test(String(s.active?.manifest_fingerprint||'')))throw new Error('content-stable manifest fingerprint missing');
           NODE
       - name: Require checked-in generated runtime on PR
         if: github.event_name == 'pull_request'
@@ -106,6 +115,7 @@ jobs:
           name: v0170-clean-consolidation
           path: |
             audit-output/stability/v0170-clean-consolidation-report.json
+            audit-output/stability/clean-runtime-architecture-report.json
             update/current-state.json
             docs/CURRENT_STATE.md
           if-no-files-found: warn
