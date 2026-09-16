@@ -1,6 +1,6 @@
 {
-  "version": "0.16.1",
-  "message": "v0.16.1 · UNIVERSAL RATING SHADOW",
+  "version": "0.16.2",
+  "message": "v0.16.2 · SHADOW RATING DIAGNOSTICS",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -257,8 +257,8 @@
     },
     {
       "path": "preload.js",
-      "source": "update/v0.16.1/preload-v0161-shadow.js",
-      "sha256": "9bb9497440e419a1d40b108df4c4f947552102db43a77721ae0a8bce862e3b86"
+      "source": "update/v0.16.2/preload-v0162-shadow-diagnostics.js",
+      "sha256": "c9d5ac3f10611027667b47b8f4d6eb19d13e6298c3a59f5b5244479b5f53ea45"
     },
     {
       "path": "input-interaction-stability-v01539.js",
@@ -818,8 +818,8 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.16.1/package.json",
-      "sha256": "fce7d65eb607a56e13afbe53c10e10beb9fa3cdd1f213a66ce45df0e9841b4a9"
+      "source": "update/v0.16.2/package.json",
+      "sha256": "3ebbabc4008cb53d7fd1f3605e658ea000a5ac41f0d20cd6d7d072cc4dc81bd4"
     },
     {
       "path": "rating-engine-v01.js",
@@ -1425,13 +1425,13 @@
     },
     {
       "path": "src/main/universal-rating-ipc.js",
-      "source": "update/v0.16.1/src/main/universal-rating-ipc.js",
-      "sha256": "85f87f80cf812f2b2bf34b8ddd30458ed974f66c1d64565e0149cb20850502fa"
+      "source": "update/v0.16.2/src/main/universal-rating-ipc.js",
+      "sha256": "60a615b0e83dbb63740dff0b04e46ca563bdb92d0459b018c3274f74d4c35128"
     },
     {
       "path": "src/preload/universal-rating-history-hook.js",
-      "source": "update/v0.16.1/src/preload/universal-rating-history-hook.js",
-      "sha256": "6afb51897735cdd9b0649fc321b99a8c6853bdb0be1f592d2863be4d030dba66"
+      "source": "update/v0.16.2/src/preload/universal-rating-history-hook.js",
+      "sha256": "e9263e76addade16b71620d6bb0b065f374e8b03fba1ce27a045b8d60b18a8e0"
     },
     {
       "path": "src/rating/universal/contracts.js",
@@ -1465,8 +1465,8 @@
     },
     {
       "path": "src/rating/universal/runtime.js",
-      "source": "update/v0.16.1/src/rating/universal/runtime.js",
-      "sha256": "faf01fc330bf49fc2f6aec1ed99789a6908a184d17e18981c13e62de81010b9d"
+      "source": "update/v0.16.2/src/rating/universal/runtime.js",
+      "sha256": "6d170467722c3870e0d119ba4052d8ebe994a3af0d7792892d90b3758ad11083"
     },
     {
       "path": "src/rating/universal/index.js",
@@ -1477,6 +1477,16 @@
       "path": "update/v0.15.129/rating-engine-v01.js",
       "source": "update/v0.15.129/rating-engine-v01.js",
       "sha256": "76ad43a6e2072376997292fa44a3ec594b01eb28f4c473637391819937b64aa4"
+    },
+    {
+      "path": "main-v0162-shadow-diagnostics.js",
+      "source": "update/v0.16.2/main-v0162-shadow-diagnostics.js",
+      "sha256": "9fe5f7a17ec4f6a33c6cc88c49a7b90790cd1bb2618817b3480c404ee3574d5c"
+    },
+    {
+      "path": "src/profile/shadow-rating-diagnostics-renderer.js",
+      "source": "update/v0.16.2/src/profile/shadow-rating-diagnostics-renderer.js",
+      "sha256": "63235760090063a04362c4430ccc889a78b3a9e0a4afdfff01c4acc93aeb19f2"
     }
   ],
   "delete": [
@@ -1529,5 +1539,6 @@
   },
   "production_rating_active": false,
   "automatic_rating_promotion": false,
-  "universal_rating_shadow": true
+  "universal_rating_shadow": true,
+  "universal_rating_shadow_diagnostics": true
 }

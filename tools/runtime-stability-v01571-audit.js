@@ -19,7 +19,9 @@ function collectMainChain(startTarget){
   // do not create a false regression merely by extending the explicit chain.
   while(target&&byPath.get(target)&&!seen.has(target)&&out.length<96){
     seen.add(target);const source=byPath.get(target);if(!source||!exists(source))break;const text=read(source);out.push({target,source,text});
-    const refs=[...text.matchAll(/['"](main-v\d+\.js)['"]/g)].map(x=>x[1]);target=refs.find(x=>byPath.has(x)&&!seen.has(x))||'';
+    // Successor entry names can carry semantic suffixes such as
+    // main-v0161-shadow.js or main-v0162-shadow-diagnostics.js.
+    const refs=[...text.matchAll(/['"](main-v\d+(?:-[A-Za-z0-9-]+)?\.js)['"]/g)].map(x=>x[1]);target=refs.find(x=>byPath.has(x)&&!seen.has(x))||'';
   }
   return out;
 }

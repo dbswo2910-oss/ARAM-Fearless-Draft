@@ -3,16 +3,16 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.16.1",
-    "message": "v0.16.1 · UNIVERSAL RATING SHADOW",
+    "version": "0.16.2",
+    "message": "v0.16.2 · SHADOW RATING DIAGNOSTICS",
     "min_launcher": "2.0.2",
-    "manifest_commit": "bb4f33960a86945b2f94a7643d7b6abfc3a985b2"
+    "manifest_commit": "2bce2dc0ec3d2c87aa6adf64653dbcd8d2fea99c"
   },
   "package": {
-    "source": "update/v0.16.1/package.json",
-    "version": "0.16.1",
-    "main": "main-v0161-shadow.js",
-    "main_source": "update/v0.16.1/main-v0161-shadow.js"
+    "source": "update/v0.16.2/package.json",
+    "version": "0.16.2",
+    "main": "main-v0162-shadow-diagnostics.js",
+    "main_source": "update/v0.16.2/main-v0162-shadow-diagnostics.js"
   },
   "owners": {
     "random_pick": {
