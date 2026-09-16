@@ -11,5 +11,7 @@
 - Production rating: OFF
 - Automatic model promotion: OFF
 - Authoritative v0.16.1 release manifest generated from verified sources with SHA-256
+- `update/current-state.json` and `docs/CURRENT_STATE.md` regenerated from the v0.16.1 authoritative manifest
+- Final release HEAD must pass continuity, regression, release-payload, and shadow-safety checks before merge
 
-This checkpoint exists to trigger validation of the final release-branch HEAD after manifest generation.
+This checkpoint triggers validation of the final continuity-synced release-branch HEAD.
