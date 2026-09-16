@@ -29,8 +29,16 @@ ok(s.includes('NO Riot/LCU collection request has started'),'load is inert');
 ok(!/\brunB51\(\)\s*;/.test(s),'no automatic run');
 ok(!s.includes('deleteDatabase(')&&!s.includes('localStorage.clear('),'no destructive reset');
 ok(!s.includes('raw.githubusercontent.com')&&!s.includes('(0,eval)'),'no remote code fetch/eval');
+// R6 forensic repair contract: transient/downstream failures must stay retryable.
+ok(s.includes('repairLegacyHttp400Completions'),'legacy HTTP400 false-completion repair present');
+ok(s.includes('R6_HTTP400_FALSE_COMPLETION_REQUEUE'),'repair is explicitly versioned/auditable');
+ok(s.includes("cp.status='transient_failure_paused'"),'transient failures pause the runner');
+ok(s.includes('skipped_puuids_b51_v032'),'terminal target errors use separate skipped state');
+ok(s.includes('isTerminalTargetError'),'terminal vs transient failures are separated');
+ok((s.match(/completed_puuids_b51_v032\.push\(f\.puuid\)/g)||[]).length===1,'target completion occurs only on successful merge');
+ok(s.includes("errorClass(x?.error)==='HTTP_400'")&&s.includes('new_unique_matches||0'),'legacy requeue is limited to failed zero-yield HTTP400 logs');
 const manifest=JSON.parse(fs.readFileSync(path.join(ROOT,'update/manifest.json'),'utf8'));
 ok(manifest.version==='0.16.0','production version');
 ok(!(manifest.files||[]).some(x=>String(x.source||'').includes('phase-b51-v032-devtools')),'B5.1 runner not shipped');
-const report={status:'SUCCESS',passes:pass,phase:'B5.1',profile:'B51_MATCH_LEVEL_EVIDENCE_FIRST_CLOSED_2200',resume_min_matches:1900,target_matches:2200,min_evidence_tier:2,max_expanded_players:15,max_matches_per_player:20,max_requests:45,fixed_anchor_queue:true,dynamic_rerank:false,explicit_confirmation:true,automatic_run:false,automatic_collection:false,live_bridge:'manual_only',remote_eval:false,production_changed:false};
+const report={status:'SUCCESS',passes:pass,phase:'B5.1',profile:'B51_MATCH_LEVEL_EVIDENCE_FIRST_CLOSED_2200',resume_min_matches:1900,target_matches:2200,min_evidence_tier:2,max_expanded_players:15,max_matches_per_player:20,max_requests:45,fixed_anchor_queue:true,dynamic_rerank:false,explicit_confirmation:true,automatic_run:false,automatic_collection:false,live_bridge:'manual_only',legacy_http400_requeue:true,transient_failure_completion:false,terminal_failures_separate_skip_state:true,remote_eval:false,production_changed:false};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/aram-rating-v032-b51-runner-audit.json'),JSON.stringify(report,null,2)+'\n');console.log(`B5.1 EVIDENCE-FIRST RUNNER AUDIT: SUCCESS · ${pass} checks`);
