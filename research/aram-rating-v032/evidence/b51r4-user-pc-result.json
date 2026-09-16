@@ -1,25 +1,25 @@
 {
-  "schema": "aram-rating-v032-live-diagnostic-evidence-v1",
+  "schema": "aram-rating-b51-live-evidence-v1",
+  "version": "v0.3.2",
   "phase": "B5.1-R4",
-  "source": "real-user-pc-devtools",
   "classification": "SECOND_ANCHOR_ACCEPTED",
-  "ok": true,
-  "request": {
-    "anchor": "second-distinct-valid-b51-queue-anchor",
+  "request_shape": {
     "limit": 20,
     "scan": 100,
     "queueMode": "standard",
     "priority": "background",
     "target_identity": "puuid"
   },
-  "response": {
-    "connected": true,
-    "matches": 20,
-    "error": null
-  },
+  "target": "second distinct valid B5.1 queue anchor",
+  "connected": true,
+  "matches_returned": 20,
   "checkpoint_integrity": true,
   "checkpoint_written": false,
   "storage_mutation": false,
-  "raw_puuid_included": false,
-  "conclusion": "The exact legacy B5.1 request shape succeeded independently on both the first and second distinct queue anchors. The previous bulk failure is not explained by target.puuid, request shape, or either of the first two anchors in isolation. Next isolate sequential multi-request state without checkpoint writes or retries."
+  "error": null,
+  "privacy": {
+    "contains_raw_puuid": false,
+    "contains_riot_id": false
+  },
+  "conclusion": "The second distinct anchor independently accepts the exact legacy B5.1 request shape. Target identity, the request shape, and either of the first two anchors in isolation are not sufficient to reproduce the old bulk failure."
 }
