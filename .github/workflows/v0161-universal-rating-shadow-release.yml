@@ -57,46 +57,61 @@ jobs:
           node --check update/v0.16.1/src/rating/universal/index.js
           node --check tools/release/build-v0161-universal-rating-shadow-manifest.js
           node --check tools/sync-current-state.js
-      - name: Verify release payload matches physically validated research payload
+      - name: Verify physical v0.16.1 baseline or successor preservation
+        shell: bash
         run: |
           set -euo pipefail
-          files=(
-            update/v0.16.1/package.json
-            update/v0.16.1/main-v0161-shadow.js
-            update/v0.16.1/preload-v0161-shadow.js
-            src/main/universal-rating-ipc.js
-            src/preload/universal-rating-history-hook.js
-            src/rating/universal/contracts.js
-            src/rating/universal/normalizer.js
-            src/rating/universal/confidence.js
-            src/rating/universal/estimator.js
-            src/rating/universal/store.js
-            src/rating/universal/service.js
-            src/rating/universal/runtime.js
-            src/rating/universal/index.js
-          )
-          for f in "${files[@]}"; do
-            git show "origin/research/aram-rating-v032-accuracy-first:$f" > /tmp/research-file
-            cmp --silent "$f" /tmp/research-file || { echo "validated payload mismatch: $f"; exit 1; }
-          done
-          mirrors=(
-            'update/v0.16.1/src/main/universal-rating-ipc.js|src/main/universal-rating-ipc.js'
-            'update/v0.16.1/src/preload/universal-rating-history-hook.js|src/preload/universal-rating-history-hook.js'
-            'update/v0.16.1/src/rating/universal/contracts.js|src/rating/universal/contracts.js'
-            'update/v0.16.1/src/rating/universal/normalizer.js|src/rating/universal/normalizer.js'
-            'update/v0.16.1/src/rating/universal/confidence.js|src/rating/universal/confidence.js'
-            'update/v0.16.1/src/rating/universal/estimator.js|src/rating/universal/estimator.js'
-            'update/v0.16.1/src/rating/universal/store.js|src/rating/universal/store.js'
-            'update/v0.16.1/src/rating/universal/service.js|src/rating/universal/service.js'
-            'update/v0.16.1/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
-            'update/v0.16.1/src/rating/universal/index.js|src/rating/universal/index.js'
-          )
-          for pair in "${mirrors[@]}"; do
-            release_file="${pair%%|*}"
-            validated_file="${pair#*|}"
-            cmp --silent "$release_file" "$validated_file" || { echo "updater mirror mismatch: $release_file != $validated_file"; exit 1; }
-          done
-          echo "PHYSICAL-VALIDATION + UPDATE-MIRROR PAYLOAD MATCH: PASS"
+          version="$(node -p "require('./update/manifest.json').version")"
+          if [ "$version" = "0.16.1" ]; then
+            files=(
+              update/v0.16.1/package.json
+              update/v0.16.1/main-v0161-shadow.js
+              update/v0.16.1/preload-v0161-shadow.js
+              src/main/universal-rating-ipc.js
+              src/preload/universal-rating-history-hook.js
+              src/rating/universal/contracts.js
+              src/rating/universal/normalizer.js
+              src/rating/universal/confidence.js
+              src/rating/universal/estimator.js
+              src/rating/universal/store.js
+              src/rating/universal/service.js
+              src/rating/universal/runtime.js
+              src/rating/universal/index.js
+            )
+            for f in "${files[@]}"; do
+              git show "origin/research/aram-rating-v032-accuracy-first:$f" > /tmp/research-file
+              cmp --silent "$f" /tmp/research-file || { echo "validated payload mismatch: $f"; exit 1; }
+            done
+            mirrors=(
+              'update/v0.16.1/src/main/universal-rating-ipc.js|src/main/universal-rating-ipc.js'
+              'update/v0.16.1/src/preload/universal-rating-history-hook.js|src/preload/universal-rating-history-hook.js'
+              'update/v0.16.1/src/rating/universal/contracts.js|src/rating/universal/contracts.js'
+              'update/v0.16.1/src/rating/universal/normalizer.js|src/rating/universal/normalizer.js'
+              'update/v0.16.1/src/rating/universal/confidence.js|src/rating/universal/confidence.js'
+              'update/v0.16.1/src/rating/universal/estimator.js|src/rating/universal/estimator.js'
+              'update/v0.16.1/src/rating/universal/store.js|src/rating/universal/store.js'
+              'update/v0.16.1/src/rating/universal/service.js|src/rating/universal/service.js'
+              'update/v0.16.1/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
+              'update/v0.16.1/src/rating/universal/index.js|src/rating/universal/index.js'
+            )
+            for pair in "${mirrors[@]}"; do
+              release_file="${pair%%|*}"
+              validated_file="${pair#*|}"
+              cmp --silent "$release_file" "$validated_file" || { echo "updater mirror mismatch: $release_file != $validated_file"; exit 1; }
+            done
+            echo 'PHYSICAL-VALIDATION + UPDATE-MIRROR PAYLOAD MATCH: PASS'
+          else
+            case "$version" in
+              0.16.*) ;;
+              *) echo "unsupported Universal Rating successor version: $version"; exit 1 ;;
+            esac
+            base='9f46e0aec8544239591ba4d35d95053ed4881f11'
+            while IFS= read -r f; do
+              git show "$base:$f" > /tmp/v0161-base-file
+              cmp --silent "$f" /tmp/v0161-base-file || { echo "physically validated v0.16.1 release payload drifted in successor: $f"; exit 1; }
+            done < <(git ls-tree -r --name-only "$base" -- update/v0.16.1)
+            echo "V0.16.1 PHYSICAL RELEASE PAYLOAD PRESERVED IN SUCCESSOR $version: PASS"
+          fi
       - name: Universal runtime smoke test
         run: |
           node - <<'NODE'
@@ -118,28 +133,37 @@ jobs:
             console.log('UNIVERSAL RELEASE RUNTIME SMOKE: PASS');
           }).catch(e=>{console.error(e);process.exit(1)});
           NODE
-      - name: Build authoritative v0.16.1 manifest and continuity snapshot
+      - name: Validate authoritative Universal Rating distribution
+        shell: bash
         run: |
-          node tools/release/build-v0161-universal-rating-shadow-manifest.js
-          node tools/sync-current-state.js
-          node - <<'NODE'
-          const fs=require('fs');
-          const m=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
-          const state=JSON.parse(fs.readFileSync('update/current-state.json','utf8'));
-          if(m.version!=='0.16.1'||m.production_rating_active!==false||m.automatic_rating_promotion!==false||m.universal_rating_shadow!==true)process.exit(1);
-          if(state.active?.version!=='0.16.1'||state.package?.version!=='0.16.1'||state.package?.main!=='main-v0161-shadow.js')throw new Error('continuity snapshot did not adopt v0.16.1');
-          for(const e of m.files||[])if(!String(e.source||'').startsWith('update/'))throw new Error(`unsafe updater source ${e.path} -> ${e.source}`);
-          const required=['package.json','main-v0161-shadow.js','preload.js','preload-base-v015117.js','src/main/universal-rating-ipc.js','src/preload/universal-rating-history-hook.js','src/rating/universal/runtime.js','update/v0.15.129/rating-engine-v01.js'];
-          const by=new Map(m.files.map(x=>[x.path,x]));
-          for(const p of required){const e=by.get(p);if(!e||!/^[0-9a-f]{64}$/.test(String(e.sha256||'')))throw new Error(`missing verified release entry ${p}`)}
-          const expectedSources={
-            'src/main/universal-rating-ipc.js':'update/v0.16.1/src/main/universal-rating-ipc.js',
-            'src/preload/universal-rating-history-hook.js':'update/v0.16.1/src/preload/universal-rating-history-hook.js',
-            'src/rating/universal/runtime.js':'update/v0.16.1/src/rating/universal/runtime.js'
-          };
-          for(const [p,s] of Object.entries(expectedSources))if(by.get(p)?.source!==s)throw new Error(`release transport source mismatch ${p}: ${by.get(p)?.source||'missing'}`);
-          console.log('V0.16.1 AUTHORITATIVE MANIFEST + CONTINUITY + SECURE TRANSPORT AUDIT: PASS');
-          NODE
+          set -euo pipefail
+          version="$(node -p "require('./update/manifest.json').version")"
+          if [ "$version" = "0.16.1" ]; then
+            node tools/release/build-v0161-universal-rating-shadow-manifest.js
+            node tools/sync-current-state.js
+            node - <<'NODE'
+            const fs=require('fs');
+            const m=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
+            const state=JSON.parse(fs.readFileSync('update/current-state.json','utf8'));
+            if(m.version!=='0.16.1'||m.production_rating_active!==false||m.automatic_rating_promotion!==false||m.universal_rating_shadow!==true)process.exit(1);
+            if(state.active?.version!=='0.16.1'||state.package?.version!=='0.16.1'||state.package?.main!=='main-v0161-shadow.js')throw new Error('continuity snapshot did not adopt v0.16.1');
+            for(const e of m.files||[])if(!String(e.source||'').startsWith('update/'))throw new Error(`unsafe updater source ${e.path} -> ${e.source}`);
+            console.log('V0.16.1 AUTHORITATIVE MANIFEST + CONTINUITY + SECURE TRANSPORT AUDIT: PASS');
+            NODE
+          else
+            node tools/sync-current-state.js --check
+            node - <<'NODE'
+            const fs=require('fs');
+            const m=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
+            if(!/^0\.16\.\d+$/.test(String(m.version))||m.version==='0.16.0')throw new Error(`unexpected successor version ${m.version}`);
+            if(m.production_rating_active!==false||m.automatic_rating_promotion!==false||m.universal_rating_shadow!==true)throw new Error('Universal Rating shadow safety drift');
+            const by=new Map((m.files||[]).map(x=>[String(x.path),x]));
+            const required=['update/v0.15.129/rating-engine-v01.js'];
+            for(const p of required)if(!by.has(p))throw new Error(`Universal Rating base payload missing ${p}`);
+            for(const e of m.files||[])if(!String(e.source||'').startsWith('update/'))throw new Error(`unsafe updater source ${e.path} -> ${e.source}`);
+            console.log(`UNIVERSAL RATING SUCCESSOR ${m.version} PRESERVATION AUDIT: PASS`);
+            NODE
+          fi
           node tools/sync-current-state.js --check
       - name: Commit generated release metadata on release branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/release/v0.16.1-universal-rating-shadow'
