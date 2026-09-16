@@ -1,0 +1,25 @@
+{
+  "schema": "aram-rating-v032-live-diagnostic-evidence-v1",
+  "phase": "B5.1-R4",
+  "source": "real-user-pc-devtools",
+  "classification": "SECOND_ANCHOR_ACCEPTED",
+  "ok": true,
+  "request": {
+    "anchor": "second-distinct-valid-b51-queue-anchor",
+    "limit": 20,
+    "scan": 100,
+    "queueMode": "standard",
+    "priority": "background",
+    "target_identity": "puuid"
+  },
+  "response": {
+    "connected": true,
+    "matches": 20,
+    "error": null
+  },
+  "checkpoint_integrity": true,
+  "checkpoint_written": false,
+  "storage_mutation": false,
+  "raw_puuid_included": false,
+  "conclusion": "The exact legacy B5.1 request shape succeeded independently on both the first and second distinct queue anchors. The previous bulk failure is not explained by target.puuid, request shape, or either of the first two anchors in isolation. Next isolate sequential multi-request state without checkpoint writes or retries."
+}
