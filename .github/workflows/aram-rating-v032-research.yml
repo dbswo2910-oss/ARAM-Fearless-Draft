@@ -33,6 +33,8 @@ on:
       - 'tools/research/aram-rating-v032-r15-dual-shadow-audit.js'
       - 'tools/research/aram-rating-v032-r16-shadow-promotion-gate-audit.js'
       - 'tools/research/aram-rating-v032-r17-installed-shadow-rc-audit.js'
+      - 'tools/research/aram-rating-v032-r18-build-installed-shadow-rc-kit.js'
+      - 'tools/research/aram-rating-v032-r18-installed-shadow-rc-kit-audit.js'
       - '.github/workflows/aram-rating-v032-research.yml'
   workflow_dispatch:
 
@@ -102,6 +104,10 @@ jobs:
         run: node tools/research/aram-rating-v032-r16-shadow-promotion-gate-audit.js
       - name: Run R17 passive installed shadow RC audit
         run: node tools/research/aram-rating-v032-r17-installed-shadow-rc-audit.js
+      - name: Build R18 installed shadow RC kit
+        run: node tools/research/aram-rating-v032-r18-build-installed-shadow-rc-kit.js
+      - name: Run R18 installed shadow RC kit audit
+        run: node tools/research/aram-rating-v032-r18-installed-shadow-rc-kit-audit.js
       - name: Upload aggregate/synthetic audits only
         uses: actions/upload-artifact@v4
         with:
@@ -134,4 +140,6 @@ jobs:
             audit-output/aram-rating-v032-r15-dual-shadow-audit.json
             audit-output/aram-rating-v032-r16-shadow-promotion-gate-audit.json
             audit-output/aram-rating-v032-r17-installed-shadow-rc-audit.json
+            audit-output/aram-rating-v032-r18-installed-shadow-rc-kit-audit.json
+            audit-output/r17-installed-shadow-rc-kit/**
           if-no-files-found: error
