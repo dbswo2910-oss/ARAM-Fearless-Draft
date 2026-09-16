@@ -24,6 +24,16 @@ function walk(dir,out=[]){
   for(const n of fs.readdirSync(abs)){const rel=path.join(dir,n).replace(/\\/g,'/'),a=path.join(ROOT,rel),st=fs.statSync(a);st.isDirectory()?walk(rel,out):out.push(rel)}return out;
 }
 function matchAll(re,s){return [...s.matchAll(re)].map(m=>m[1])}
+function channelDefinitions(body,source,target){
+  const defs=[];
+  const constants=new Map();
+  for(const m of body.matchAll(/const\s+([A-Z][A-Z0-9_]*)\s*=\s*['"]([^'"]+)['"]/g))constants.set(m[1],m[2]);
+  for(const ch of matchAll(/ipcMain\.handle\(['"]([^'"]+)['"]/g,body))defs.push({channel:ch,source,target});
+  for(const m of body.matchAll(/ipcMain\.handle\(\s*([A-Z][A-Z0-9_]*)\s*,/g)){
+    const ch=constants.get(m[1]);if(ch)defs.push({channel:ch,source,target});
+  }
+  return defs;
+}
 
 let manifest;
 try{manifest=JSON.parse(read('update/manifest.json'));pass('Manifest JSON parse')}catch(e){fail('Manifest JSON parse',e.message);finish()}
@@ -42,8 +52,6 @@ for(const f of files){
 }
 assert(new Set(deletes).size===deletes.length,'Delete list has no duplicates',deletes.join(', '));
 
-// Current app metadata consistency. The package.json `main` field is the actual Electron entry.
-// Since v0.15.71 it may be a narrow wrapper over a previously validated main.js runtime base.
 const pkgEntry=files.find(x=>x.path==='package.json');
 const mainEntry=files.find(x=>x.path==='main.js');
 const preloadEntry=files.find(x=>x.path==='preload.js');
@@ -78,12 +86,9 @@ if(mainEntry&&exists(mainEntry.source)){
 }
 if(preloadEntry&&exists(preloadEntry.source))nodeCheck(preloadEntry.source);
 
-// Syntax-check every JS that participates in current update payload.
 let currentJs=0;
 for(const f of files.filter(x=>x.source.endsWith('.js'))){if(exists(f.source)){currentJs++;nodeCheck(f.source)}}
 pass('Current manifest JS syntax sweep',`${currentJs} files checked`);
-
-// Syntax/JSON sweep across historical update sources to catch accidental breakage in referenced legacy files.
 let allJs=0,allJson=0;
 for(const rel of walk('update')){
   if(rel.endsWith('.js')){allJs++;nodeCheck(rel)}
@@ -92,10 +97,13 @@ for(const rel of walk('update')){
 pass('Repository update JS syntax sweep',`${allJs} JS files checked`);
 pass('Repository update JSON parse sweep',`${allJson} JSON files checked`);
 
-// Runtime injection chain integrity. A package entry wrapper may transform this validated base;
-// version-specific audits cover the wrapper's exact injected additions.
 if(main){
-  const scriptBlock=main.match(/const\s+scripts\s*=\s*\[([\s\S]*?)\];/);
+  const cleanRuntime=manifest.clean_runtime_consolidated===true&&manifest.runtime_successor_wrappers===false;
+  const legacyEntry=cleanRuntime?files.find(x=>/^legacy-runtime-v\d+\.js$/.test(String(x.path||''))):null;
+  const runtimeRoot=legacyEntry&&exists(legacyEntry.source)?read(legacyEntry.source):main;
+  result.info.cleanRuntime=cleanRuntime;
+  result.info.runtimeInspectionSource=legacyEntry?.source||mainEntry?.source||null;
+  const scriptBlock=runtimeRoot.match(/const\s+scripts\s*=\s*\[([\s\S]*?)\];/);
   const scripts=scriptBlock?matchAll(/['"]([^'"]+\.js)['"]/g,scriptBlock[1]):[];
   result.info.runtimeScripts=scripts;
   assert(scripts.length>0,'Runtime injection list detected',String(scripts.length));
@@ -104,7 +112,7 @@ if(main){
   const obsolete=['live-strength-v01510.js','live-strength-v01511.js','live-strength-v01512.js','time-power-v01524.js','time-power-fix-v01526.js','item-catalog-v01526.js'];
   for(const o of obsolete)assert(!scripts.includes(o),'Obsolete runtime not injected',o);
 
-  const markerExpr=(main.match(/executeJavaScript\('([^']*__ARAM_[^']*)',false\)/)||[])[1]||'';
+  const markerExpr=(runtimeRoot.match(/executeJavaScript\('([^']*__ARAM_[^']*)',false\)/)||[])[1]||'';
   const requiredMarkers=matchAll(/window\.(__ARAM_[A-Z0-9_]+__)/g,markerExpr);
   result.info.requiredMarkers=requiredMarkers;
   assert(requiredMarkers.length>0,'Runtime marker guard detected',String(requiredMarkers.length));
@@ -115,17 +123,10 @@ if(main){
     if(markers.length)assert(markers.some(m=>requiredMarkers.includes(m)),'Runtime marker included in main guard',`${s}: ${markers.join(',')}`);
   }
 
-  // IPC bridge contract. Some handlers are registered by current main-process modules (e.g. itemCatalog.register).
-  // Successor package wrappers may inherit those requires through multiple delivered versioned wrappers.
-  // Follow the delivered JS wrapper/reference chain recursively so the audit proves actual ancestry instead of
-  // assuming a fixed one-wrapper release shape.
   const preload=preloadEntry&&exists(preloadEntry.source)?read(preloadEntry.source):'';
   const invokes=matchAll(/ipcRenderer\.invoke\(['"]([^'"]+)['"]/g,preload);
   const defs=[];
-  for(const f of files.filter(x=>x.source.endsWith('.js')&&exists(x.source))){
-    const body=read(f.source);
-    for(const ch of matchAll(/ipcMain\.handle\(['"]([^'"]+)['"]/g,body))defs.push({channel:ch,source:f.source,target:f.path});
-  }
+  for(const f of files.filter(x=>x.source.endsWith('.js')&&exists(x.source)))defs.push(...channelDefinitions(read(f.source),f.source,f.path));
   const byChannel=new Map();
   for(const d of defs){const a=byChannel.get(d.channel)||[];a.push(d);byChannel.set(d.channel,a)}
   const duplicateCandidates=[...byChannel.entries()].filter(([,xs])=>new Set(xs.map(x=>x.source)).size>1).map(([channel,definitions])=>({channel,definitions}));
@@ -138,6 +139,10 @@ if(main){
       const source=targetMap.get(target);
       if(!source||!exists(source)||wiringSeen.has(source))continue;
       wiringSeen.add(source);const child=read(source);wiringTexts.push(child);wiringQueue.push(child);
+    }
+    for(const m of text.matchAll(/require\(\s*['"]\.\/([^'"]+)['"]\s*\)/g)){
+      const raw=m[1],targets=[raw,raw.endsWith('.js')?raw:`${raw}.js`];
+      for(const target of targets){const source=targetMap.get(target);if(!source||!exists(source)||wiringSeen.has(source))continue;wiringSeen.add(source);const child=read(source);wiringTexts.push(child);wiringQueue.push(child)}
     }
   }
   result.info.ipcWiringSources=[...wiringSeen];
@@ -153,52 +158,32 @@ if(main){
     const matches=defs.filter(x=>x.channel===ch);
     assert(matches.length>0,'Preload IPC has matching current handler',ch);
     if(matches.length&&matches.every(x=>x.source!==mainEntry.source)){
-      const moduleTargets=matches.map(x=>x.target.replace(/\.js$/,''));
-      const wired=moduleTargets.some(t=>wiringText.includes(`require('./${t}')`)||wiringText.includes(`require("./${t}")`));
+      const wired=matches.some(x=>wiringSeen.has(x.source));
       assert(wired,'Modular IPC handler module is required by current main',`${ch}: ${matches.map(x=>x.target).join(', ')}`);
     }
   }
 }
 
-// Product invariants that must never regress.
 const queueSources=files.filter(x=>/queue|autosync-queue/.test(x.path)).map(x=>x.source).filter(exists);
 const queueText=queueSources.map(read).join('\n');
 assert(/450/.test(queueText),'Standard ARAM queue 450 invariant present');
 assert(/2400/.test(queueText),'Mayhem queue 2400 invariant present');
-
 const gradeSources=files.filter(x=>/riot-grade/.test(x.path)).map(x=>x.source).filter(exists);
 const gradeText=gradeSources.map(read).join('\n');
 assert(/scoringUse\s*:\s*false|scoring_use\s*:\s*false/.test(gradeText),'Riot Grade scoring isolation flag present');
 assert(!/roleScore\s*\+=|score\s*\+=\s*.*grade|grade.*\+.*roleScore/i.test(gradeText),'No obvious Riot Grade direct score addition');
-
 const missionEntry=files.find(x=>x.path==='mission-death-fairness-v01529.js');
-if(missionEntry&&exists(missionEntry.source)){
-  const s=read(missionEntry.source);
-  assert(/refund|환급|penalty/i.test(s),'Mission/death fairness remains refund-oriented');
-}
-
-// Static hygiene.
+if(missionEntry&&exists(missionEntry.source)){const s=read(missionEntry.source);assert(/refund|환급|penalty/i.test(s),'Mission/death fairness remains refund-oriented')}
 for(const f of files.filter(x=>x.source.endsWith('.js')&&exists(x.source))){
-  const s=read(f.source);
-  assert(!/<<<<<<<|=======|>>>>>>>/.test(s),'No merge-conflict markers',f.source);
-  if(/\bNaN\b/.test(s))warn('Literal NaN usage found',f.source);
-  if(/\bInfinity\b/.test(s))warn('Literal Infinity usage found',f.source);
+  const s=read(f.source);assert(!/<<<<<<<|=======|>>>>>>>/.test(s),'No merge-conflict markers',f.source);if(/\bNaN\b/.test(s))warn('Literal NaN usage found',f.source);if(/\bInfinity\b/.test(s))warn('Literal Infinity usage found',f.source)
 }
-
-// Installed base UI/core are prerequisites but not stored in this update repository.
 const baseUiInRepo=exists('index.html')||walk('update').some(x=>/\/index\.html$/.test(x));
 const baseCoreInRepo=exists('autosync-core.js')||walk('update').some(x=>/\/autosync-core\.js$/.test(x));
 result.info.baseUiInRepo=baseUiInRepo;result.info.baseCoreInRepo=baseCoreInRepo;
 if(!baseUiInRepo)warn('Installed base UI cannot be fully menu-click tested from repository','index.html is not present in repository update sources');
 if(!baseCoreInRepo)warn('Installed autosync-core cannot be fully source-audited from repository','autosync-core.js is required by main but not present in repository update sources');
-
 finish();
 function finish(){
   result.summary={pass:result.pass.length,warn:result.warn.length,fail:result.fail.length,status:result.fail.length?'FAIL':'PASS_WITH_LIMITATIONS'};
-  fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
-  fs.writeFileSync(path.join(ROOT,'audit-output','full-regression-report.json'),JSON.stringify(result,null,2));
-  console.log(JSON.stringify(result.summary));
-  for(const x of result.fail)console.error('FAIL',x.name,x.detail||'');
-  for(const x of result.warn)console.warn('WARN',x.name,x.detail||'');
-  process.exitCode=result.fail.length?1:0;
+  fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output','full-regression-report.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result.summary));for(const x of result.fail)console.error('FAIL',x.name,x.detail||'');for(const x of result.warn)console.warn('WARN',x.name,x.detail||'');process.exitCode=result.fail.length?1:0;
 }
