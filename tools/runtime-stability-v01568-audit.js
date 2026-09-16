@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -8,7 +9,7 @@ const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json'),perfPath=byPath.get('runtime-performance-v01568.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m),pkgPath=byPath.get('package.json'),perfPath=byPath.get('runtime-performance-v01568.js');
 const main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)): {},perf=perfPath&&exists(perfPath)?read(perfPath):'';
 for(const [name,src] of [['main',main],['runtime-performance',perf]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
 ok('manifest is v0.15.68 or newer',ge(m.version,'0.15.68'),m.version);
