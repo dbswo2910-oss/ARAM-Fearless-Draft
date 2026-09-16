@@ -33,6 +33,7 @@ test('v0.16.1 candidate inherits v0.16.0 and only routes preload plus rating IPC
   assert.match(main,/main-v0160\.js/);
   assert.match(main,/installUniversalRatingIpc/);
   assert.match(main,/ARAM_UNIVERSAL_RATING_DB_ROOT/);
+  assert.match(main,/ARAM_UNIVERSAL_SHADOW_USER_DATA_ROOT/);
   assert.match(main,/preload-v0161-shadow\.js/);
   assert.match(preload,/preload\.js/);
   assert.match(preload,/patchPreloadSource/);
