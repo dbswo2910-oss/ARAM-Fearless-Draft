@@ -8,21 +8,33 @@ Accuracy-first research branch for ARAM player rating. Production activation rem
 - B5.1 legacy collector failure was diagnosed and repaired without destructive migration.
 - R8 repaired 15 false HTTP400 completion entries while preserving the 1982-match checkpoint.
 - R9 resumed collection safely: 1 request, 20 valid returned, 2 new unique matches, checkpoint 1982 -> 1984.
-- R10 expanded the recovery to 3 more anchors: all 3 accepted, 60 valid matches returned in aggregate, **0 new unique matches**, checkpoint remained 1984. This is a strong marginal-yield saturation signal for the current fixed queue.
+- R10 expanded the recovery to 3 more anchors: all 3 accepted, 60 valid matches returned in aggregate, **0 new unique matches**, checkpoint remained 1984.
+- R9+R10 combined: 4 requests / 80 valid returned / 2 new unique = **2.5% unique-yield ratio**, a strong fixed-queue saturation signal.
 
-## R11
+## R11 result
 
-`phase-b51r11-v032-evaluate-devtools.js` is the next read-only step. It requires the exact post-R10 state (1984 matches / 4 completed / 11 remaining), performs **zero Riot/LCU requests** and **zero checkpoint writes**, and evaluates:
+The post-R10 read-only evaluation completed on the user PC with:
 
-- Elo / Glicko / TrueSkill-family frozen and walk-forward metrics
-- primary metric: log loss
-- secondary metrics: Brier, ECE, accuracy
-- cold-start exposure
-- candidate selection gate / paired bootstrap signal from the pinned reference engine
-- current network coverage
-- R9+R10 marginal collection efficiency
+- classification: `R11_NO_CLEAR_WINNER_BULK_COLLECTION_SATURATED`
+- selection status: `no_clear_winner`
+- observed leader: Elo
+- observed runner-up: Glicko
+- dataset: 1984 matches / 10478 players / 1587 train / 397 test
+- next step: `TARGETED_INFORMATION_GAIN_COLLECTION_ONLY`
 
-If the candidate gate passes while marginal yield is saturated, the next technical step is production-shadow validation rather than bulk collection. If no model clears the gate, further collection should be targeted by information gain rather than by blindly exhausting the remaining queue.
+Elo is currently the observed leader, but the full candidate gate has not established a clear research winner. Since the remaining fixed queue is already producing very low marginal unique-match yield, blind queue exhaustion is no longer justified.
+
+## R12
+
+`phase-b51r12-v032-targeted-plan-devtools.js` is a read-only targeted information-gain planner. It requires the exact post-R10 checkpoint and the `no_clear_winner` selection state, performs **zero Riot/LCU requests** and **zero checkpoint writes**, and ranks only the 11 remaining anchors using:
+
+- Elo / Glicko / TrueSkill-family rating disagreement
+- current model uncertainty
+- low-observation potential
+- held-out closed-network evidence
+- prior B5.1 evidence-first priority
+
+Only anchor rank and aggregate score components are returned; raw PUUID and identity mapping are not exported. The intended follow-up is to collect the highest-ranked anchor one at a time and re-evaluate after each successful addition.
 
 ## Safety
 
