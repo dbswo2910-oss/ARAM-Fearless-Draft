@@ -3,16 +3,16 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.16.3",
-    "message": "v0.16.3 · SHADOW RATING TRANSPARENCY",
+    "version": "0.17.0",
+    "message": "v0.17.0 · CLEAN CONSOLIDATED RUNTIME",
     "min_launcher": "2.0.2",
     "manifest_commit": "9e30066031a7a556ebffbaa89a82fd3190a3281e"
   },
   "package": {
-    "source": "update/v0.16.3/package.json",
-    "version": "0.16.3",
-    "main": "main-v0163-shadow-transparency.js",
-    "main_source": "update/v0.16.3/main-v0163-shadow-transparency.js"
+    "source": "update/v0.17.0/package.json",
+    "version": "0.17.0",
+    "main": "main.js",
+    "main_source": "update/v0.17.0/main.js"
   },
   "owners": {
     "random_pick": {

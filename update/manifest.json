@@ -1,6 +1,6 @@
 {
-  "version": "0.16.3",
-  "message": "v0.16.3 · SHADOW RATING TRANSPARENCY",
+  "version": "0.17.0",
+  "message": "v0.17.0 · CLEAN CONSOLIDATED RUNTIME",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -257,8 +257,8 @@
     },
     {
       "path": "preload.js",
-      "source": "update/v0.16.2/preload-v0162-shadow-diagnostics.js",
-      "sha256": "c9d5ac3f10611027667b47b8f4d6eb19d13e6298c3a59f5b5244479b5f53ea45"
+      "source": "update/v0.17.0/preload.js",
+      "sha256": "24f590944229cc9afaba445f9cf03fed9d212292766cad32f590dd6dd20405d2"
     },
     {
       "path": "input-interaction-stability-v01539.js",
@@ -294,7 +294,8 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.15.70/main.js"
+      "source": "update/v0.17.0/main.js",
+      "sha256": "7c48d2bbb91ff2f8ad22c512866b0f128c77837167dab4f7df79bbd81dff376b"
     },
     {
       "path": "ingame-transition-patch-v01575.js",
@@ -818,8 +819,8 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.16.3/package.json",
-      "sha256": "8efd499fa2f54c0487f8a0333fad4f67eaa6b1b414d450fc98313e8b544ed354"
+      "source": "update/v0.17.0/package.json",
+      "sha256": "3168c66521785a3d32e59c47c11f2a81a2717b475b46a0a797d4d6eca087f982"
     },
     {
       "path": "rating-engine-v01.js",
@@ -1492,6 +1493,11 @@
       "path": "main-v0163-shadow-transparency.js",
       "source": "update/v0.16.3/main-v0163-shadow-transparency.js",
       "sha256": "5470d2feaddb48cea4559705d0c143b40c94190ca4d25d36ecd10d0a3c0b642a"
+    },
+    {
+      "path": "legacy-runtime-v0170.js",
+      "source": "update/v0.17.0/legacy-runtime-v0170.js",
+      "sha256": "608c89db69f8a0c84713fceaa53934db651fa1242355a53767fab5d5447c22cc"
     }
   ],
   "delete": [
@@ -1546,5 +1552,7 @@
   "automatic_rating_promotion": false,
   "universal_rating_shadow": true,
   "universal_rating_shadow_diagnostics": true,
-  "universal_rating_shadow_transparency": true
+  "universal_rating_shadow_transparency": true,
+  "clean_runtime_consolidated": true,
+  "runtime_successor_wrappers": false
 }
