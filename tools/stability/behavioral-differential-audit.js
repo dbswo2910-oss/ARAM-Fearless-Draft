@@ -4,14 +4,14 @@ const ROOT=path.resolve(__dirname,'../..');
 const OUT=path.join(ROOT,'audit-output/stability/behavioral-differential-report.json');
 const GOLDEN=JSON.parse(fs.readFileSync(path.join(ROOT,'stability/contracts/behavioral-golden.v1.json'),'utf8'));
 const suite=[
-  {domain:'draft-contract',legacy:'tools/draft-v01546-audit.js'},
+  {domain:'draft-contract',legacy:'tools/draft-v01546-audit.js',successor:'tools/stability/draft-canonical-differential-audit.js'},
   {domain:'random-candidate-dna',legacy:'tools/random-pick-candidate-dna-v01594-audit.js',successor:'tools/stability/random-dna-canonical-differential-audit.js'},
   {domain:'random-top5',legacy:'tools/random-pick-preview-lock-v015100-audit.js',successor:'tools/stability/random-top5-canonical-differential-audit.js'},
-  {domain:'item-recommendation',legacy:'tools/item-recommendation-v01581-audit.js'},
+  {domain:'item-recommendation',legacy:'tools/item-recommendation-v01581-audit.js',successor:'tools/stability/item-canonical-differential-audit.js'},
   {domain:'match-history-parser',legacy:'tools/ingame-results-parser-v01597-audit.js',successor:'tools/stability/profile-results-canonical-differential-audit.js'},
   {domain:'state-integrity',legacy:'tools/v015117-state-integrity-audit.js',successor:'tools/stability/state-canonical-differential-audit.js'},
-  {domain:'autosync-concurrency',legacy:'tools/v015119-autosync-concurrency-audit.js'},
-  {domain:'riot-grade-linking',legacy:'tools/v015122-riot-grade-accuracy-audit.js'}
+  {domain:'autosync-concurrency',legacy:'tools/v015119-autosync-concurrency-audit.js',successor:'tools/stability/autosync-canonical-differential-audit.js'},
+  {domain:'riot-grade-linking',legacy:'tools/v015122-riot-grade-accuracy-audit.js',successor:'tools/stability/riot-canonical-differential-audit.js'}
 ];
 function clean(s){return String(s||'').replace(/\x1b\[[0-9;]*m/g,'').replaceAll(ROOT,'<ROOT>').replace(/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z/g,'<ISO>').replace(/\\/g,'/').trim()}
 function hash(s){return crypto.createHash('sha256').update(s).digest('hex')}
@@ -30,4 +30,4 @@ for(const entry of suite){
   const executionOk=legacyRun.exit_code===0;
   results.push({domain,status:executionOk&&historicalGoldenMatch?'PASS':'FAIL',gate_mode:'historical-normalized-golden-output',exit_code:legacyRun.exit_code,stdout_sha256:legacyRun.stdout_sha256,stderr_sha256:legacyRun.stderr_sha256,historical_golden_match:historicalGoldenMatch,stdout:(legacyRun.stdout||'').slice(0,4000),stderr:(legacyRun.stderr||'').slice(0,4000)});
 }
-const failed=results.filter(x=>x.status!=='PASS'),report={schema:2,status:failed.length?'FAIL':'PASS',golden_version:GOLDEN.golden_version,golden_commit:GOLDEN.golden_commit,mode:'historical-golden-for-legacy-owners+canonical-semantic-successor-gates-for-migrated-domains',note:'Unmigrated legacy domains remain hard-gated to v0.15.135 normalized golden hashes. Migrated domains are gated by their dedicated canonical semantic differential audits; historical legacy hashes are retained as diagnostics and are no longer authoritative after the active v0.16 adapter cutover.',covered_domains:results.map(x=>x.domain),results};fs.mkdirSync(path.dirname(OUT),{recursive:true});fs.writeFileSync(OUT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,covered:results.length,failed:failed.map(x=>x.domain),successor_gated:results.filter(x=>x.gate_mode==='canonical-successor-semantic-differential').map(x=>x.domain)}));if(failed.length)process.exit(1);
+const failed=results.filter(x=>x.status!=='PASS'),report={schema:3,status:failed.length?'FAIL':'PASS',golden_version:GOLDEN.golden_version,golden_commit:GOLDEN.golden_commit,mode:'historical-golden-diagnostics+canonical-semantic-successor-gates-after-v0.16-cutover',note:'After the v0.16 production-adapter cutover, all covered domains are authoritatively gated by their dedicated canonical semantic differential audits. Historical v0.15.135 normalized hashes remain recorded as diagnostics only and are expected to drift when current manifest/package pointers advance.',covered_domains:results.map(x=>x.domain),results};fs.mkdirSync(path.dirname(OUT),{recursive:true});fs.writeFileSync(OUT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,covered:results.length,failed:failed.map(x=>x.domain),successor_gated:results.filter(x=>x.gate_mode==='canonical-successor-semantic-differential').map(x=>x.domain)}));if(failed.length)process.exit(1);
