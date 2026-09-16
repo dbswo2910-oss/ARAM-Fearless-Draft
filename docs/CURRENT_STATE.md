@@ -6,7 +6,7 @@
 
 - Active updater: **v0.17.0**
 - Manifest message: v0.17.0 · CLEAN CONSOLIDATED RUNTIME
-- Manifest commit: `9e30066031a7a556ebffbaa89a82fd3190a3281e`
+- Manifest commit: `36519f4bc1d65486708cf27291d4f87e35f81d0c`
 - Package: `update/v0.17.0/package.json` → **v0.17.0**
 - Electron entry: `main.js` → `update/v0.17.0/main.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
