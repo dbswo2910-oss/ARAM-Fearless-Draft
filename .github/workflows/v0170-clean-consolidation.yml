@@ -1,0 +1,30 @@
+name: v0.17.0 Clean Consolidation
+
+on:
+  push:
+    branches:
+      - 'refactor/v0170-clean-consolidation'
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  consolidation-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Inventory current runtime successor chain
+        run: node tools/consolidation/v0170-successor-inventory.js
+      - name: Upload consolidation inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0170-successor-inventory
+          path: audit-output/consolidation/v0170-successor-inventory.json
