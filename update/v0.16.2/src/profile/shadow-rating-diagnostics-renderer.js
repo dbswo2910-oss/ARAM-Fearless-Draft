@@ -27,15 +27,17 @@
   function install({window,document}={}){
     if(!window||!document)return{status:'no-dom'};
     if(document.getElementById(IDS.button))return{status:'active',reused:true};
-    let disposed=false,observer=null;
+    let disposed=false,retryTimer=null,retryCount=0;
+    const MAX_LAUNCH_RETRIES=20,LAUNCH_RETRY_MS=250;
     function style(){if(document.getElementById(IDS.style))return;const el=document.createElement('style');el.id=IDS.style;el.textContent=STYLE;(document.head||document.body).appendChild(el)}
     function overlay(){let o=document.getElementById(IDS.overlay);if(o)return o;o=document.createElement('div');o.id=IDS.overlay;o.className='srdOverlay';o.innerHTML=`<div class="srdModal"><div class="srdHead"><div><div class="srdTitle">SHADOW RATING · 진단</div><div class="srdSub">Universal Rating Dual Shadow</div></div><button class="srdClose" type="button" data-srd-close>×</button></div><div class="srdBody"><div id="${IDS.content}" class="srdEmpty"><b>불러오는 중…</b></div><div style="padding:0 14px 14px;text-align:right"><button type="button" class="srdRefresh" data-srd-refresh>↻ 새로고침</button></div></div></div>`;o.addEventListener('click',e=>{if(e.target===o||e.target?.closest?.('[data-srd-close]'))o.classList.remove('open');if(e.target?.closest?.('[data-srd-refresh]'))void refresh()});document.body.appendChild(o);return o}
     async function read(){const api=window.aramDesktop;if(!api||typeof api.getUniversalRatingShadowDiagnostics!=='function')return{status:'READ_FAILED'};return api.getUniversalRatingShadowDiagnostics()}
     async function refresh(){const host=document.getElementById(IDS.content);if(host)host.innerHTML='<div class="srdEmpty"><b>Shadow DB 읽는 중…</b>추가 네트워크 요청 없이 로컬 데이터만 확인합니다.</div>';let data=null;try{data=await read()}catch{data={status:'READ_FAILED'}}if(host)host.innerHTML=renderContent(data);return data}
     async function open(){overlay().classList.add('open');return refresh()}
-    function launcher(){if(disposed||document.getElementById(IDS.button))return;const anchor=document.getElementById('historyQueueSwitch')||document.getElementById('historyListHint');if(!anchor)return;const wrap=document.createElement('div'),button=document.createElement('button');wrap.id=IDS.wrap;button.id=IDS.button;button.type='button';button.innerHTML='◈ SHADOW RATING <span style="opacity:.62">· 진단</span>';button.addEventListener('click',()=>void open());wrap.appendChild(button);if(anchor.insertAdjacentElement)anchor.insertAdjacentElement('afterend',wrap);else anchor.parentElement?.appendChild(wrap)}
-    style();overlay();launcher();observer=new MutationObserver(()=>launcher());observer.observe(document.documentElement||document.body,{childList:true,subtree:true});
-    return{status:'active',open,refresh,dispose(){disposed=true;observer?.disconnect?.();document.getElementById(IDS.wrap)?.remove?.();document.getElementById(IDS.overlay)?.remove?.();document.getElementById(IDS.style)?.remove?.()}};
+    function launcher(){if(disposed||document.getElementById(IDS.button))return true;const anchor=document.getElementById('historyQueueSwitch')||document.getElementById('historyListHint');if(!anchor)return false;const wrap=document.createElement('div'),button=document.createElement('button');wrap.id=IDS.wrap;button.id=IDS.button;button.type='button';button.innerHTML='◈ SHADOW RATING <span style="opacity:.62">· 진단</span>';button.addEventListener('click',()=>void open());wrap.appendChild(button);if(anchor.insertAdjacentElement)anchor.insertAdjacentElement('afterend',wrap);else anchor.parentElement?.appendChild(wrap);return true}
+    function scheduleLauncher(){if(disposed||launcher())return;if(retryCount>=MAX_LAUNCH_RETRIES)return;retryCount++;retryTimer=setTimeout(scheduleLauncher,LAUNCH_RETRY_MS)}
+    style();overlay();scheduleLauncher();
+    return{status:'active',open,refresh,dispose(){disposed=true;if(retryTimer!==null)clearTimeout(retryTimer);document.getElementById(IDS.wrap)?.remove?.();document.getElementById(IDS.overlay)?.remove?.();document.getElementById(IDS.style)?.remove?.()}};
   }
   return{IDS,STYLE,renderContent,renderCard,playerLabel,install,production_active:false,automatic_promotion:false,network_owner:false,owner_status:'shadow-diagnostics'};
 });
