@@ -3,8 +3,10 @@ name: ARAM Rating R29 One-Shot Evidence Refresh
 on:
   pull_request:
     paths:
+      - 'src/research/final-evidence-plan.js'
       - 'tools/research/aram-rating-v032-r29-finalize-evidence.js'
       - 'tools/research/aram-rating-v032-r29-one-shot-evidence-refresh.ps1'
+      - 'tools/research/aram-rating-v032-r29-preflight-selfcheck.js'
       - '.github/workflows/aram-rating-r29-one-shot-evidence-refresh.yml'
   workflow_dispatch:
 
@@ -18,8 +20,12 @@ jobs:
           node-version: '20'
       - name: Syntax check finalizer
         run: node --check tools/research/aram-rating-v032-r29-finalize-evidence.js
+      - name: Syntax check preflight self-check
+        run: node --check tools/research/aram-rating-v032-r29-preflight-selfcheck.js
       - name: Finalizer self-test
         run: node tools/research/aram-rating-v032-r29-finalize-evidence.js --self-test
+      - name: R29 preflight self-check
+        run: node tools/research/aram-rating-v032-r29-preflight-selfcheck.js
       - name: Parse PowerShell orchestrator
         shell: pwsh
         run: |
