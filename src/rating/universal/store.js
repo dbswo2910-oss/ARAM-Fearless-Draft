@@ -10,8 +10,10 @@ class MemoryRatingStore{
   getPlayer(puuid){return this.state.players[String(puuid)]||null}
   putPlayer(player){if(!player?.puuid)throw new Error('player.puuid required');this.state.players[player.puuid]={...(this.state.players[player.puuid]||{}),...player,updatedAt:Date.now()};this.flush();return this.state.players[player.puuid]}
   getMatch(id){return this.state.matches[String(id)]||null}
-  putMatch(match){if(!match?.matchId)throw new Error('match.matchId required');this.state.matches[match.matchId]=match;this.flush();return match}
-  getMatchesForPlayer(puuid){const id=String(puuid);return Object.values(this.state.matches).filter(m=>m?.teamA?.includes(id)||m?.teamB?.includes(id)).sort((a,b)=>a.timestamp-b.timestamp||a.matchId.localeCompare(b.matchId))}
+  getAllMatches(){return Object.values(this.state.matches).sort((a,b)=>a.timestamp-b.timestamp||a.matchId.localeCompare(b.matchId))}
+  putMatch(match){return this.putMatches([match])[0]}
+  putMatches(matches){const out=[];for(const match of Array.isArray(matches)?matches:[]){if(!match?.matchId)throw new Error('match.matchId required');this.state.matches[match.matchId]=match;out.push(match)}if(out.length)this.flush();return out}
+  getMatchesForPlayer(puuid){const id=String(puuid);return this.getAllMatches().filter(m=>m?.teamA?.includes(id)||m?.teamB?.includes(id))}
   getRating(modelVersion,puuid){return this.state.ratings[ratingKey(modelVersion,puuid)]||null}
   putRating(record){if(!record?.modelVersion||!record?.puuid)throw new Error('rating modelVersion and puuid required');const k=ratingKey(record.modelVersion,record.puuid);this.state.ratings[k]=record;this.flush();return record}
   appendAudit(row){this.state.audits.push({...row,at:row?.at||Date.now()});if(this.state.audits.length>2000)this.state.audits=this.state.audits.slice(-2000);this.flush();return row}
