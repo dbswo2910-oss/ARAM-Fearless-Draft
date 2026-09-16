@@ -1,0 +1,22 @@
+{
+  "schema": "aram-rating-b51-live-evidence-v1",
+  "version": "v0.3.2",
+  "phase": "B5.1-R8",
+  "classification": "R8_REPAIRED_15_FALSE_COMPLETIONS",
+  "ok": true,
+  "checkpoint_changed": true,
+  "checkpoint_matches": 1982,
+  "completed_before": 15,
+  "completed_after": 0,
+  "requeued": 15,
+  "remaining_after_repair": 15,
+  "riot_lcu_requests_performed": 0,
+  "match_data_integrity": true,
+  "completion_repair_integrity": true,
+  "rolled_back": false,
+  "privacy": {
+    "contains_raw_puuid": false,
+    "contains_riot_id": false
+  },
+  "conclusion": "The guarded repair removed the 15 legacy HTTP400 false-completions from B5.1 completion state while preserving all 1982 Research matches. The checkpoint is ready for bounded recovery collection."
+}
