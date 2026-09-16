@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -10,17 +11,17 @@ const atLeast=(a,b)=>{const A=parts(a),B=parts(b),L=Math.max(A.length,B.length);
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const uiPath=byPath.get('random-ingame-ux-v01552.js');
-const mainPath=byPath.get('main.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m);
 const pkgPath=byPath.get('package.json');
 ok(atLeast(m.version,'0.15.52'),'Manifest is v0.15.52 or newer',m.version);
 ok(!!uiPath&&/v0\.15\.52\/random-ingame-ux-v01552\.js$/.test(uiPath)&&exists(uiPath),'v0.15.52 HUD polish runtime remains delivered',uiPath||'missing');
-ok(!!mainPath&&exists(mainPath),'Current main delivered',mainPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current effective main delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package delivered',pkgPath||'missing');
 const s=uiPath&&exists(uiPath)?read(uiPath):'';
 const main=mainPath&&exists(mainPath)?read(mainPath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
 try{new Function(s);ok(true,'v0.15.52 HUD polish parses')}catch(e){ok(false,'v0.15.52 HUD polish parses',e.message)}
-try{new Function(main);ok(true,'Current main parses')}catch(e){ok(false,'Current main parses',e.message)}
+try{new Function(main);ok(true,'Current effective main parses')}catch(e){ok(false,'Current effective main parses',e.message)}
 ok(/__ARAM_RANDOM_INGAME_UX_V01552__\s*=\s*true/.test(s),'v0.15.52 readiness marker exists');
 ok(/INGAME COACH · v\$\{V\}/.test(s),'Coach eyebrow version follows patch constant');
 ok(/data-ri51="role"\] small/.test(s)&&/data-ri51="buy"\] small/.test(s),'Non-action helper captions are hidden from LIVE cards');
@@ -29,12 +30,12 @@ ok(/title\.textContent='사망 분석'/.test(s),'Death header removes duplicated
 ok(/ri52Dead \.riRespawnStrip span\{display:none!important\}/.test(s),'Death strip removes duplicated explanatory middle copy');
 ok(/body\.riRandomIngameV01552 > \.footer\{display:none!important\}/.test(s),'Global source footer is hidden only while Random Practice in-game mode is active');
 ok(/score_logic_changed:false/.test(s),'HUD polish is explicitly score-neutral');
-ok(main.includes("'random-ingame-coach-v01550.js','random-ingame-ux-v01551.js','random-ingame-ux-v01552.js'"),'Main keeps coach -> v0.15.51 -> v0.15.52 injection order');
-ok(main.includes('__ARAM_RANDOM_INGAME_UX_V01552__'),'Main readiness guard covers v0.15.52');
+ok(main.includes("'random-ingame-coach-v01550.js','random-ingame-ux-v01551.js','random-ingame-ux-v01552.js'"),'Effective runtime keeps coach -> v0.15.51 -> v0.15.52 injection order');
+ok(main.includes('__ARAM_RANDOM_INGAME_UX_V01552__'),'Effective runtime readiness guard covers v0.15.52');
 const mainVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
-ok(atLeast(mainVersion,'0.15.52'),'Main VERSION is v0.15.52 or newer',mainVersion);
+ok(atLeast(mainVersion,'0.15.52'),'Effective runtime VERSION is v0.15.52 or newer',mainVersion);
 ok(atLeast(pkg.version,'0.15.52'),'package VERSION is v0.15.52 or newer',pkg.version);
-report.info={scope:'Forward-compatible regression contract for v0.15.52 micro-polish',scoreLogicChanged:false,nextPhase:'current-gold immediate purchase / component planning'};
+report.info={scope:'Forward-compatible regression contract for v0.15.52 micro-polish',scoreLogicChanged:false,effectiveRuntime:mainPath,nextPhase:'current-gold immediate purchase / component planning'};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','random-ingame-v01552-report.json'),JSON.stringify(report,null,2));
