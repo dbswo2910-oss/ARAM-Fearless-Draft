@@ -6,7 +6,8 @@
     "version": "0.17.0",
     "message": "v0.17.0 · CLEAN CONSOLIDATED RUNTIME",
     "min_launcher": "2.0.2",
-    "manifest_commit": "36519f4bc1d65486708cf27291d4f87e35f81d0c"
+    "manifest_fingerprint": "d9f45a409d7ab00847e8df99fb7b699071ef6e162ee76b84ccedf21a38b360f6",
+    "manifest_commit": "d9f45a409d7ab00847e8df99fb7b699071ef6e162ee76b84ccedf21a38b360f6"
   },
   "package": {
     "source": "update/v0.17.0/package.json",
