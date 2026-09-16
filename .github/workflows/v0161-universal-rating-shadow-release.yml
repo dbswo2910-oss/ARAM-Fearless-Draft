@@ -64,6 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           version="$(node -p "require('./update/manifest.json').version")"
+          clean="$(node -p "require('./update/manifest.json').clean_runtime_consolidated===true?'1':'0'")"
           if [ "$version" = "0.16.1" ]; then
             files=(
               update/v0.16.1/package.json
@@ -103,10 +104,10 @@ jobs:
             done
             echo 'PHYSICAL-VALIDATION + UPDATE-MIRROR PAYLOAD MATCH: PASS'
           else
-            case "$version" in
-              0.16.*) ;;
-              *) echo "unsupported Universal Rating successor version: $version"; exit 1 ;;
-            esac
+            if [[ "$version" != 0.16.* && "$clean" != "1" ]]; then
+              echo "unsupported Universal Rating successor version: $version"
+              exit 1
+            fi
             base='9f46e0aec8544239591ba4d35d95053ed4881f11'
             while IFS= read -r f; do
               git show "$base:$f" > /tmp/v0161-base-file
