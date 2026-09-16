@@ -1,0 +1,120 @@
+name: ARAM Rating Universal Integration V1
+
+on:
+  push:
+    branches:
+      - 'feature/universal-rating-integration-v1'
+    paths:
+      - 'src/rating/universal/**'
+      - 'src/profile/universal-rating-adapter.js'
+      - 'src/profile/index.js'
+      - 'src/profile/history-service.js'
+      - 'src/main/universal-rating-ipc.js'
+      - 'src/preload/universal-rating-bridge.js'
+      - 'src/preload/universal-rating-history-hook.js'
+      - 'update/v0.16.1/**'
+      - 'test/universal-rating-integration-v1.test.js'
+      - 'test/universal-rating-null-safety-v1.test.js'
+      - 'test/universal-rating-shipped-shadow-v0161.test.js'
+      - 'tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js'
+      - 'tools/research/universal-rating-r2-physical-shadow-rc.ps1'
+      - 'tools/research/universal-rating-r3-build-shipped-shadow-candidate.js'
+      - 'tools/research/universal-rating-r4-build-shipped-shadow-physical-harness.js'
+      - 'tools/research/universal-rating-r5-shipped-shadow-physical.ps1'
+      - '.github/workflows/aram-rating-universal-integration-v1.yml'
+      - 'update/v0.15.129/rating-engine-v01.js'
+  pull_request:
+    paths:
+      - 'src/rating/universal/**'
+      - 'src/profile/universal-rating-adapter.js'
+      - 'src/profile/index.js'
+      - 'src/profile/history-service.js'
+      - 'src/main/universal-rating-ipc.js'
+      - 'src/preload/universal-rating-bridge.js'
+      - 'src/preload/universal-rating-history-hook.js'
+      - 'update/v0.16.1/**'
+      - 'test/universal-rating-integration-v1.test.js'
+      - 'test/universal-rating-null-safety-v1.test.js'
+      - 'test/universal-rating-shipped-shadow-v0161.test.js'
+      - 'tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js'
+      - 'tools/research/universal-rating-r2-physical-shadow-rc.ps1'
+      - 'tools/research/universal-rating-r3-build-shipped-shadow-candidate.js'
+      - 'tools/research/universal-rating-r4-build-shipped-shadow-physical-harness.js'
+      - 'tools/research/universal-rating-r5-shipped-shadow-physical.ps1'
+      - '.github/workflows/aram-rating-universal-integration-v1.yml'
+      - 'update/v0.15.129/rating-engine-v01.js'
+  workflow_dispatch:
+
+jobs:
+  universal-rating-integration-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check
+        run: |
+          node --check src/rating/universal/contracts.js
+          node --check src/rating/universal/normalizer.js
+          node --check src/rating/universal/store.js
+          node --check src/rating/universal/confidence.js
+          node --check src/rating/universal/estimator.js
+          node --check src/rating/universal/service.js
+          node --check src/rating/universal/runtime.js
+          node --check src/rating/universal/index.js
+          node --check src/profile/universal-rating-adapter.js
+          node --check src/profile/index.js
+          node --check src/main/universal-rating-ipc.js
+          node --check src/preload/universal-rating-bridge.js
+          node --check src/preload/universal-rating-history-hook.js
+          node --check update/v0.16.1/main-v0161-shadow.js
+          node --check update/v0.16.1/preload-v0161-shadow.js
+          node --check test/universal-rating-integration-v1.test.js
+          node --check test/universal-rating-null-safety-v1.test.js
+          node --check test/universal-rating-shipped-shadow-v0161.test.js
+          node --check tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js
+          node --check tools/research/universal-rating-r3-build-shipped-shadow-candidate.js
+          node --check tools/research/universal-rating-r4-build-shipped-shadow-physical-harness.js
+      - name: Universal integration invariant tests
+        run: node --test test/universal-rating-integration-v1.test.js test/universal-rating-null-safety-v1.test.js test/universal-rating-shipped-shadow-v0161.test.js
+      - name: Build physical shadow RC kit
+        run: node tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js
+      - name: Physical shadow RC dry run
+        shell: pwsh
+        run: ./tools/research/universal-rating-r2-physical-shadow-rc.ps1 -DryRun
+      - name: Build shipped shadow candidate
+        run: |
+          node tools/research/universal-rating-r3-build-shipped-shadow-candidate.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const active=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
+          const c=JSON.parse(fs.readFileSync('audit-output/universal-rating-r3-shipped-shadow-candidate/manifest-candidate.json','utf8'));
+          const kit=JSON.parse(fs.readFileSync('audit-output/universal-rating-r3-shipped-shadow-candidate/candidate-kit.json','utf8'));
+          if(active.version!=='0.16.0')process.exit(1);
+          if(c.version!=='0.16.1'||c.candidate_only!==true||c.production_rating_active!==false||c.automatic_rating_promotion!==false)process.exit(1);
+          if(kit.active_manifest_mutated!==false||kit.history_network_owner!=='existing_match_history_only'||kit.rating_network_owner!==false)process.exit(1);
+          console.log('V0.16.1 SHIPPED SHADOW CANDIDATE PASS');
+          NODE
+      - name: Build shipped shadow physical harness
+        run: node tools/research/universal-rating-r4-build-shipped-shadow-physical-harness.js
+      - name: Shipped shadow physical dry run
+        shell: pwsh
+        run: ./tools/research/universal-rating-r5-shipped-shadow-physical.ps1 -DryRun
+      - name: Safety flags remain off
+        run: |
+          node - <<'NODE'
+          const rating=require('./src/rating/universal');
+          const runtime=require('./src/rating/universal/runtime');
+          const adapter=require('./src/profile/universal-rating-adapter');
+          const mainIpc=require('./src/main/universal-rating-ipc');
+          const preload=require('./src/preload/universal-rating-bridge');
+          const hook=require('./src/preload/universal-rating-history-hook');
+          if(rating.production_active!==false||rating.automatic_promotion!==false)process.exit(1);
+          if(runtime.production_active!==false||runtime.automatic_promotion!==false)process.exit(1);
+          if(adapter.production_active!==false||adapter.automatic_promotion!==false||adapter.network_owner!==false)process.exit(1);
+          if(mainIpc.production_active!==false||mainIpc.automatic_promotion!==false||mainIpc.network_owner!==false)process.exit(1);
+          if(preload.production_active!==false||preload.automatic_promotion!==false||preload.network_owner!==false)process.exit(1);
+          if(hook.production_active!==false||hook.automatic_promotion!==false||hook.network_owner!==false)process.exit(1);
+          console.log('UNIVERSAL RATING INTEGRATION SAFETY PASS');
+          NODE

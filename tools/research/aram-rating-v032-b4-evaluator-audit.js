@@ -1,0 +1,15 @@
+'use strict';
+const fs=require('fs'),path=require('path');
+const ROOT=path.resolve(__dirname,'../..'),R=path.join(ROOT,'research/aram-rating-v032');
+let pass=0;const ok=(c,m)=>{if(!c)throw new Error('B4 EVALUATOR AUDIT: '+m);pass++};
+const p=path.join(R,'phase-b4-v032-evaluate-devtools.js'),s=fs.readFileSync(p,'utf8');new Function(s);
+for(const needle of["DB='aram-rating-research-v03'","CP_KEY='checkpoint-v03'","MIN_MATCHES=1900","B4_MATURE_NETWORK_AGGREGATE","phase:'B4'","buildLatestRun","b4_1900_required_current_","raw_puuid_returned:false","identity_mapping_returned:false","checkpoint_written:false","riot_lcu_requests:0","READ ONLY"])ok(s.includes(needle),'missing contract '+needle);
+ok(!s.includes('getAramMatchHistory'),'evaluator must not request Riot/LCU history');
+ok(!s.includes("transaction(STORE,'readwrite')")&&!s.includes('.put(')&&!s.includes('deleteDatabase(')&&!s.includes('localStorage.clear('),'evaluator must be read-only');
+ok(!s.includes('raw.githubusercontent.com')&&!s.includes('(0,eval)'),'evaluator must not fetch/eval remote code');
+const manifest=JSON.parse(fs.readFileSync(path.join(ROOT,'update/manifest.json'),'utf8'));
+ok(manifest.version==='0.16.0','production version drift');
+ok(!(manifest.files||[]).some(x=>String(x.source||'').includes('phase-b4-v032-evaluate-devtools')),'B4 evaluator shipped in production');
+const report={status:'SUCCESS',passes:pass,phase:'B4',requires_matches:1900,read_only:true,reference_engine_preloaded:true,riot_lcu_requests:0,checkpoint_writes:0,remote_eval:false,production_changed:false};
+fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/aram-rating-v032-b4-evaluator-audit.json'),JSON.stringify(report,null,2)+'\n');
+console.log(`B4 EVALUATOR AUDIT: SUCCESS · ${pass} checks`);

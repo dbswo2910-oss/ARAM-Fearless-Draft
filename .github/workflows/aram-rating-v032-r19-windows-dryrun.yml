@@ -1,0 +1,63 @@
+name: ARAM Rating R19 Windows Dry Run
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/research/**'
+      - 'update/v0.15.121/runtime-loader-v01579.js'
+      - 'update/v0.16.0/main-v0160.js'
+      - 'tools/research/aram-rating-v032-r18-build-installed-shadow-rc-kit.js'
+      - 'tools/research/aram-rating-v032-r18-installed-shadow-rc-kit-audit.js'
+      - 'tools/research/aram-rating-v032-r19-physical-shadow-rc.ps1'
+      - 'tools/research/aram-rating-v032-r22-probation-r19-isolation-audit.js'
+      - '.github/workflows/aram-rating-v032-r19-windows-dryrun.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  r19-windows-dryrun:
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit probation debounce and physical-harness isolation
+        shell: pwsh
+        run: node tools/research/aram-rating-v032-r22-probation-r19-isolation-audit.js
+      - name: Build temporary-copy shadow RC kit
+        shell: pwsh
+        run: node tools/research/aram-rating-v032-r18-build-installed-shadow-rc-kit.js
+      - name: Run R18 kit audit
+        shell: pwsh
+        run: node tools/research/aram-rating-v032-r18-installed-shadow-rc-kit-audit.js
+      - name: Parse and dry-run R19 physical harness
+        shell: pwsh
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tools/research/aram-rating-v032-r19-physical-shadow-rc.ps1 -DryRun -ReportDir audit-output/r19-ci-dryrun
+      - name: Verify dry-run report contract
+        shell: pwsh
+        run: |
+          $r = Get-Content audit-output/r19-ci-dryrun/r19-physical-shadow-rc.json -Raw | ConvertFrom-Json
+          if ($r.status -ne 'SUCCESS') { throw 'R19 dry-run status is not SUCCESS' }
+          if ($r.stage -ne 'R19_PHYSICAL_SHADOW_RC_DRY_RUN') { throw 'R19 dry-run stage drift' }
+          if ($r.production_install_mutated -or $r.production_manifest_mutated) { throw 'R19 dry-run mutation contract violated' }
+          if (-not $r.temp_copy_required -or $r.max_history_requests_per_run -ne 1) { throw 'R19 bounded temp-copy contract drift' }
+          if ($r.canonical_database -eq $r.shadow_evidence_database) { throw 'R19 DB isolation drift' }
+          if (-not $r.updater_safety_isolated) { throw 'R19 updater safety isolation missing' }
+          if (-not $r.cold_start_promotion_disabled) { throw 'R19 cold-start promotion must be disabled in temp RC' }
+          if (-not $r.graceful_shadow_exit) { throw 'R19 graceful shadow exit contract missing' }
+          if (-not $r.production_safety_state_observed) { throw 'R19 must observe production safety state stability' }
+      - name: Upload R18/R19/R22 safety evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: aram-rating-r19-windows-dryrun
+          path: |
+            audit-output/aram-rating-v032-r18-installed-shadow-rc-kit-audit.json
+            audit-output/aram-rating-v032-r22-probation-r19-isolation-audit.json
+            audit-output/r17-installed-shadow-rc-kit/**
+            audit-output/r19-ci-dryrun/r19-physical-shadow-rc.json
+          if-no-files-found: error

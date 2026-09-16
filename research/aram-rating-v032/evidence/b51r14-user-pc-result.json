@@ -1,0 +1,21 @@
+{
+  "phase": "B5.1-R14",
+  "version": "v0.3.2",
+  "captured_at": "2026-09-16",
+  "classification": "R14_NO_CLEAR_WINNER_TARGETED_SIGNAL_REMAINS",
+  "selection_status": "no_clear_winner",
+  "observed_leader": "elo",
+  "observed_runner_up": "glicko",
+  "next_step": "BUILD_ELO_GLICKO_DUAL_SHADOW_AND_STOP_BLIND_COLLECTION",
+  "side_effects": {
+    "checkpoint_written": false,
+    "riot_lcu_requests": 0,
+    "production_changed": false
+  },
+  "privacy": {
+    "raw_puuid": false,
+    "riot_id": false,
+    "raw_matches": false
+  },
+  "note": "User-PC R14 read-only evaluation completed after R13 bounded targeted collection. Elo remained observed leader, but the candidate gate remained no_clear_winner, so the clean next step is an isolated Elo/Glicko dual shadow rather than further blind collection or production score replacement."
+}

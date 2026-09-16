@@ -1,0 +1,27 @@
+{
+  "phase": "R19_WINDOWS_DRY_RUN",
+  "captured_at": "2026-09-16",
+  "workflow": "ARAM Rating R19 Windows Dry Run",
+  "run_number": 1,
+  "run_id": 35068242078,
+  "conclusion": "success",
+  "head_sha": "8e18f20fb4c12db78fbef7d3cd076eb8ee29e3d0",
+  "checks": {
+    "r18_kit_build": "success",
+    "r18_kit_audit": "success",
+    "powershell_parse_and_dry_run": "success",
+    "dry_run_contract_verification": "success",
+    "safety_artifact_upload": "success"
+  },
+  "safety": {
+    "production_install_mutated": false,
+    "production_manifest_mutated": false,
+    "temporary_copy_required": true,
+    "max_history_requests_per_run": 1,
+    "recurring_polling": false,
+    "canonical_database": "aram-rating-research-v03",
+    "shadow_evidence_database": "aram-rating-shadow-evidence-v1"
+  },
+  "next_step": "ONE_USER_PC_PHYSICAL_RUN_WITH_REAL_INSTALLED_V0160_AND_REAL_MATCH_HISTORY_BRIDGE",
+  "note": "Windows CI proves harness syntax and safety-contract behavior only. It is not a substitute for the one remaining physical user-PC acceptance run."
+}

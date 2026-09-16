@@ -8,92 +8,96 @@ const json=f=>JSON.parse(fs.readFileSync(p(f),'utf8').replace(/^\uFEFF/,''));
 const text=f=>fs.readFileSync(p(f),'utf8');
 const manifest=json('update/manifest.json');
 const owners=require(p('src/core/owner-registry.js'));
-const approval=json('release/v0.16.0-cutover-preparation.json');
-const stateAudit=text('tools/stability/state-compat-audit.js');
+const preparation=json('release/v0.16.0-cutover-preparation.json');
+const finalApproval=json('release/v0.16.0-final-approval.json');
+const cutover=json('release/v0.16.0-production-cutover.json');
+const currentState=json('update/current-state.json');
 const persistenceWorkflow=text('.github/workflows/v0160-installed-persistence-acceptance.yml');
 const windowsWorkflow=text('.github/workflows/v0160-installed-windows-acceptance.yml');
 
-assert.strictEqual(manifest.version,'0.15.135','production manifest must remain Golden until the final production release step');
-assert.strictEqual(owners.production_active,false,'canonical registry must remain production-inactive before final production release authorization');
+assert.strictEqual(manifest.version,'0.16.0','active production manifest must remain v0.16.0');
+assert.strictEqual(String(currentState.active?.version||''),'0.16.0','current-state active version drift');
+assert.strictEqual(owners.production_active,true,'canonical registry must remain production-active after v0.16 cutover');
+assert.strictEqual(owners.legacy_removal_authorized,false,'legacy removal must remain separately gated');
 const registry=owners.owners||owners.registry||owners.subsystems||owners;
 const ownerRows=[];
 for(const [name,value] of Object.entries(registry)){
-  if(name==='production_active')continue;
+  if(name==='production_active'||name==='legacy_removal_authorized')continue;
   const status=typeof value==='string'?value:value?.status;
-  if(status)ownerRows.push({owner:name,status,production_active:!!value?.production_active});
+  if(status)ownerRows.push({owner:name,status,mode:value?.mode||null,production_active:!!value?.production_active});
 }
 assert.strictEqual(ownerRows.length,15,'expected 15 canonical owners');
-assert.ok(ownerRows.every(x=>x.status==='shadow'),'all canonical subsystem owners must remain shadow during cutover preparation');
-assert.ok(ownerRows.every(x=>x.production_active===false),'no subsystem owner may be production-active during cutover preparation');
-assert.ok(stateAudit.includes('VERIFIED_V01549_TO_V015135_IN_PLACE_TWO_RESTARTS'),'installed persistence evidence not promoted into state audit');
-for(const needle of ['research_checkpoint_matches=159','Run-Golden 1','Run-Golden 2','state-integrity-v015117'])assert.ok(persistenceWorkflow.includes(needle),`persistence gate missing ${needle}`);
-for(const needle of ['electron_version','aram-fearless-draft','0.15.135'])assert.ok(windowsWorkflow.includes(needle)||windowsWorkflow.includes(needle.replace('_','-')),`installed Windows gate missing ${needle}`);
+assert.ok(ownerRows.every(x=>x.status==='production'),'all canonical subsystem owners must remain production-owned after cutover');
+assert.ok(ownerRows.every(x=>/production-adapter$/.test(String(x.mode||''))),'all canonical owners must remain production-adapter owned while legacy removal is blocked');
 
-assert.strictEqual(approval?.physical_acceptance?.status,'SUCCESS','real physical Windows acceptance must be recorded as SUCCESS');
-assert.match(String(approval?.physical_acceptance?.evidence_sha256||''),/^[a-f0-9]{64}$/,'real physical evidence hash missing');
-assert.strictEqual(Number(approval?.physical_acceptance?.real_lcu_http_status),200,'real League/LCU acceptance must record HTTP 200');
-assert.strictEqual(Number(approval?.physical_acceptance?.research_matches_before),159,'real Research before count mismatch');
-assert.strictEqual(Number(approval?.physical_acceptance?.research_matches_after),159,'real Research after count mismatch');
-assert.strictEqual(approval?.approval?.cutover_preparation_approved,true,'cutover preparation approval missing');
-assert.strictEqual(approval?.approval?.final_production_release_approved,false,'final production release must still be unapproved');
+assert.strictEqual(preparation?.physical_acceptance?.status,'SUCCESS','historical physical Windows acceptance must remain recorded');
+assert.match(String(preparation?.physical_acceptance?.evidence_sha256||''),/^[a-f0-9]{64}$/,'historical physical evidence hash missing');
+assert.strictEqual(Number(preparation?.physical_acceptance?.real_lcu_http_status),200,'historical real League/LCU acceptance must record HTTP 200');
+assert.strictEqual(finalApproval?.approval?.final_production_release_approved,true,'v0.16 final production release approval missing');
+assert.strictEqual(finalApproval?.approval?.legacy_removal_authorized,false,'legacy removal must remain unapproved in final approval');
+assert.strictEqual(cutover?.stage,'V0160_PRODUCTION_CUTOVER','production cutover receipt missing');
+assert.strictEqual(cutover?.production_candidate_gate?.status,'SUCCESS','production candidate gate receipt is not green');
+assert.strictEqual(cutover?.post_activation_regression?.status,'SUCCESS','post-activation regression receipt is not green');
+assert.strictEqual(cutover?.physical_acceptance?.status,'SUCCESS','physical cutover acceptance receipt is not green');
+assert.strictEqual(cutover?.safety?.legacy_removal_authorized,false,'cutover receipt must keep legacy removal blocked');
+
+for(const needle of ['Apply active manifest in place','Verify-State 1','Verify-State 2','state-integrity-v015117','legacy_storage_marker_required=$false'])assert.ok(persistenceWorkflow.includes(needle),`persistence gate missing ${needle}`);
+for(const needle of ['Materialize active installed app plus canonical shadow payload','--expected-version \"$env:ACTIVE_VERSION\"','stable_user_data_identity','legacy_storage_marker_required = $false'])assert.ok(windowsWorkflow.includes(needle),`installed Windows gate missing ${needle}`);
 
 const files=Array.isArray(manifest.files)?manifest.files:[];
-const legacyRuntimeDependencies=files.map((entry,index)=>({
+assert.ok(files.length>0,'active manifest file list missing');
+const runtimeDependencies=files.map((entry,index)=>({
   index,
   target:String(entry.path||entry.target||entry.dest||entry.destination||''),
   source:String(entry.source||''),
   sha256:String(entry.sha256||entry.hash||''),
-  classification:String(entry.source||'').startsWith('update/v0.15.')?'legacy-versioned-runtime-source':'other-manifest-source'
+  classification:String(entry.source||'').startsWith('update/v0.15.')?'legacy-versioned-runtime-source':String(entry.source||'').startsWith('update/v0.16.0/')?'v0160-runtime-source':'other-manifest-source'
 }));
-assert.ok(legacyRuntimeDependencies.length>0,'Golden manifest file list missing');
-const versioned=legacyRuntimeDependencies.filter(x=>x.classification==='legacy-versioned-runtime-source');
+const legacyVersioned=runtimeDependencies.filter(x=>x.classification==='legacy-versioned-runtime-source');
 const fallbackDependencies=[
-  {id:'golden-state-preload-fallback',path:'%APPDATA%\\ARAM Fearless Draft',status:'legacy-preserved',reason:'v0.15.117 state-integrity preload fallback when electron.app is unavailable; keep through cutover probation'},
-  {id:'stable-userData',path:'%APPDATA%\\aram-fearless-draft',status:'must-preserve',reason:'physical Windows acceptance verified this stable Chromium userData identity'},
-  {id:'research-db',path:'IndexedDB aram-rating-research-v03 / checkpoint-v03',status:'must-preserve',reason:'physical acceptance verified 159 matches and unchanged checkpoint digest'},
-  {id:'transaction-safety',path:'update-safety-v01579 / v0.15.116 probation contract',status:'must-preserve-until-canonical-updater-probation',reason:'rollback and probation safety stays until canonical updater passes production-active probation'}
+  {id:'historical-golden',path:'update/v0.15.135',status:'preserve',reason:'Golden rollback/reference lineage remains preserved'},
+  {id:'stable-userData',path:'%APPDATA%\\aram-fearless-draft',status:'must-preserve',reason:'stable Chromium userData identity'},
+  {id:'research-db',path:'IndexedDB aram-rating-research-v03 / checkpoint-v03',status:'must-preserve',reason:'research checkpoint identity must not be mutated by stability cutover'},
+  {id:'transaction-safety',path:'update-safety-v01579',status:'must-preserve',reason:'rollback/probation safety remains active while legacy removal is unauthorized'}
 ];
-
 const remainingReleaseGates=[
-  'Explicit final production-release authorization before manifest/main mutation',
-  'Production-active candidate full regression after canonical owner activation',
-  'Post-switch probation before legacy runtime removal'
+  'Keep post-cutover regression and installed Windows/persistence gates green',
+  'Keep historical Golden rollback/reference lineage intact',
+  'Require separate explicit authorization before legacy runtime removal',
+  'Keep ARAM Rating production activation governed by its independent research evidence gates'
 ];
 
 const report={
-  status:'READY_FOR_CUTOVER_PREPARATION',
-  stage:'V0160_CUTOVER_READINESS_MATRIX',
+  status:'POST_CUTOVER_GUARDS_VERIFIED',
+  stage:'V0160_POST_CUTOVER_READINESS_MATRIX',
   production_manifest_version:manifest.version,
+  current_active_version:currentState.active?.version||null,
   canonical_owner_count:ownerRows.length,
   canonical_owners:ownerRows,
-  canonical_all_shadow:true,
-  canonical_production_active:false,
+  canonical_all_production:true,
+  canonical_production_active:true,
+  production_adapter_mode:true,
   installed_windows_gate_present:true,
   installed_persistence_gate_present:true,
   installed_persistence_two_restart_contract:true,
-  physical_windows_acceptance:'SUCCESS',
-  real_league_lcu_acceptance:'SUCCESS',
-  physical_evidence_sha256:approval.physical_acceptance.evidence_sha256,
-  cutover_preparation_approved:true,
-  final_production_release_approved:false,
-  legacy_manifest_dependency_count:legacyRuntimeDependencies.length,
-  legacy_versioned_runtime_source_count:versioned.length,
-  legacy_runtime_dependencies:legacyRuntimeDependencies,
+  historical_physical_windows_acceptance:'SUCCESS',
+  historical_real_league_lcu_acceptance:'SUCCESS',
+  physical_evidence_sha256:preparation.physical_acceptance.evidence_sha256,
+  final_production_release_approved:true,
+  production_cutover_receipt:'SUCCESS',
+  post_activation_regression:'SUCCESS',
+  manifest_dependency_count:runtimeDependencies.length,
+  legacy_versioned_runtime_source_count:legacyVersioned.length,
+  runtime_dependencies:runtimeDependencies,
   fallback_dependencies:fallbackDependencies,
-  automated_cutover_prerequisites:{
-    canonical_parity:true,
-    windows_installed_cold_start:true,
-    installed_persistence:true,
-    physical_windows_real_lcu:true,
-    synthetic_soak:'green at RC automated checkpoint'
-  },
   remaining_release_gates:remainingReleaseGates,
-  cutover_plan_ready:true,
+  production_cutover_eligible:true,
+  production_cutover_authorized:true,
+  production_manifest_unchanged:false,
   legacy_runtime_removal_eligible:false,
-  reason_not_yet_removal_eligible:'legacy runtime remains Last Known Good until canonical production activation passes the full post-activation suite and probation',
-  production_cutover_eligible:false,
-  production_cutover_authorized:false,
-  production_manifest_unchanged:true,
+  legacy_removal_authorized:false,
+  reason_not_yet_removal_eligible:'legacy removal remains separately gated even though v0.16 production adapter cutover is active',
+  rating_production_activation_authorized:false,
   score_logic_changed:false,
   random_scoring_changed:false
 };
@@ -101,10 +105,11 @@ const report={
 const out=p('audit-output','stability','cutover-readiness-report.json');
 fs.mkdirSync(path.dirname(out),{recursive:true});
 fs.writeFileSync(out,JSON.stringify(report,null,2),'utf8');
-console.log('V0.16 CUTOVER READINESS: READY_FOR_CUTOVER_PREPARATION',JSON.stringify({
+console.log('V0.16 CUTOVER READINESS: POST_CUTOVER_GUARDS_VERIFIED',JSON.stringify({
   owners:ownerRows.length,
+  activeVersion:manifest.version,
   physicalWindows:'SUCCESS',
   realLcu:'SUCCESS',
-  remainingReleaseGates:remainingReleaseGates.length,
-  productionCutoverAuthorized:false
+  legacyRemovalAuthorized:false,
+  ratingProductionActivationAuthorized:false
 }));

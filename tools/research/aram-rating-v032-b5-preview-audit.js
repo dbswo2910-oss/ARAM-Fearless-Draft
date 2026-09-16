@@ -1,0 +1,17 @@
+'use strict';
+const fs=require('fs'),path=require('path');
+const ROOT=path.resolve(__dirname,'../..'),R=path.join(ROOT,'research/aram-rating-v032');
+let pass=0;const ok=(c,m)=>{if(!c)throw new Error('B5 PREVIEW AUDIT: '+m);pass++};
+const corePath=path.join(R,'b5-closed-network-core.js'),previewPath=path.join(R,'phase-b5-v032-preview-devtools.js');
+const coreSrc=fs.readFileSync(corePath,'utf8'),previewSrc=fs.readFileSync(previewPath,'utf8');new Function(coreSrc);new Function(previewSrc);
+const B5=require(corePath);
+ok(B5.policy_version==='v0.3.2-b5-closed-network-preview','policy version');ok(B5.automatic_collection===false&&B5.live_requests===false,'collection must be off');
+const shared={current_observation_count:12,train_observation_count:10,already_observed_recent_matches:12,history_limit:50,existing_network_overlap:.8,expected_known_player_reappearances:30,uncertainty:.3,network_connectivity_gain:.8,request_cost:1,expected_new_players:4,density_gain_per_request:30,cold_start_reduction_per_request:.5,repeat_density_ratio:.8,single_neighbor_recovery_ratio:0,mature_neighbor_ratio:.6,ten_plus_neighbor_ratio:.3};
+const closed=B5.closedScoreCandidate({...shared,train_seen_neighbor_ratio:.95,train_5plus_neighbor_ratio:.75,train_10plus_neighbor_ratio:.5,historical_closed_match_ratio:.7,historical_closed_5plus_match_ratio:.3,closed_network_new_player_penalty:.05},{history_limit:50});
+const open=B5.closedScoreCandidate({...shared,train_seen_neighbor_ratio:.4,train_5plus_neighbor_ratio:.15,train_10plus_neighbor_ratio:.05,historical_closed_match_ratio:.05,historical_closed_5plus_match_ratio:0,closed_network_new_player_penalty:.6},{history_limit:50});
+ok(closed.b5_priority>open.b5_priority,'closed-network candidate must outrank open candidate');ok(closed.no_cold_yield_proxy>open.no_cold_yield_proxy,'closed candidate no-cold yield proxy');
+for(const needle of['B5_CLOSED_NETWORK_PREVIEW','PREVIEW_ONLY','min_train_observations:5','b5_requires_existing_checkpoint_1900_plus_matches_current_','current_no_cold_coverage','historical_closed_match_ratio','no_cold_yield_proxy','checkpoint_written:false','riot_lcu_collection_requests_performed:0','READ ONLY'])ok(previewSrc.includes(needle),'missing preview contract '+needle);
+ok(!previewSrc.includes('getAramMatchHistory'),'preview must not request Riot/LCU history');ok(!previewSrc.includes("transaction(STORE,'readwrite')")&&!previewSrc.includes('.put(')&&!previewSrc.includes('deleteDatabase('),'preview must be read-only');
+const manifest=JSON.parse(fs.readFileSync(path.join(ROOT,'update/manifest.json'),'utf8'));ok(manifest.version==='0.16.0','production version drift');ok(!(manifest.files||[]).some(x=>String(x.source||'').includes('phase-b5-v032-preview-devtools')),'B5 preview shipped in production');
+const report={status:'SUCCESS',passes:pass,phase:'B5',mode:'closed-network-preview',min_checkpoint_matches:1900,min_train_observations:5,read_only:true,riot_lcu_requests:0,checkpoint_writes:0,automatic_collection:false,production_changed:false};
+fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/aram-rating-v032-b5-preview-audit.json'),JSON.stringify(report,null,2)+'\n');console.log(`B5 CLOSED-NETWORK PREVIEW AUDIT: SUCCESS · ${pass} checks`);

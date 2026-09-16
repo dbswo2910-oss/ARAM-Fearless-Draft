@@ -1,0 +1,22 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const assert=require('assert');
+const root=path.resolve(__dirname,'../..');
+const file=path.join(root,'research/aram-rating-v032/phase-b51r6-v032-devtools.js');
+const src=fs.readFileSync(file,'utf8');
+const checks=[];
+function check(name,fn){try{fn();checks.push({name,status:'PASS'})}catch(e){checks.push({name,status:'FAIL',error:e.message});throw e}}
+check('phase marker',()=>assert(src.includes("PHASE='B5.1-R6'")));
+check('zero Riot/LCU bridge calls',()=>assert(!src.includes('getAramMatchHistory')));
+check('readonly transaction only',()=>{assert(src.includes("transaction(STORE,'readonly')"));assert(!src.includes("'readwrite'"))});
+check('no checkpoint put',()=>assert(!/\.put\s*\(/.test(src)));
+check('no write helper',()=>assert(!/function\s+writeCp|async\s+function\s+writeCp/.test(src)));
+check('raw puuid not emitted in rows',()=>{assert(src.includes("contains_raw_puuid:false"));assert(!/rows\.push\([^\n]*puuid/.test(src))});
+check('legacy 15x3 detector',()=>assert(src.includes('LEGACY_ALL_15_FAILED_THREE_ATTEMPTS')));
+check('failed-completed repair signal',()=>assert(src.includes('legacy_runner_should_not_mark_transient_failures_completed')));
+check('checkpoint fingerprint',()=>{assert(src.includes('checkpoint_integrity'));assert(src.includes('fingerprint'))});
+const out={schema:'aram-rating-v032-b51r6-forensic-audit-v1',file:path.relative(root,file),passed:checks.length,failed:0,checks};
+fs.mkdirSync(path.join(root,'audit-output'),{recursive:true});
+fs.writeFileSync(path.join(root,'audit-output/aram-rating-v032-b51r6-forensic-audit.json'),JSON.stringify(out,null,2));
+console.log(`B5.1 R6 forensic audit: ${checks.length}/${checks.length} PASS`);

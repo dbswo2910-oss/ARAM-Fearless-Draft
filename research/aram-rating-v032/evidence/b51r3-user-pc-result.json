@@ -1,0 +1,23 @@
+{
+  "phase": "B5.1-R3",
+  "version": "v0.3.2",
+  "source": "real_user_pc_manual_one_shot",
+  "classification": "LEGACY_SHAPE_ACCEPTED_SAME_ANCHOR",
+  "ok": true,
+  "request": {
+    "limit": 20,
+    "scan": 100,
+    "queueMode": "standard",
+    "priority": "background",
+    "target": "checkpoint_first_valid_puuid"
+  },
+  "response": {
+    "connected": true,
+    "matches": 20
+  },
+  "checkpoint_integrity": true,
+  "checkpoint_written": false,
+  "storage_mutation": false,
+  "raw_puuid_stored": false,
+  "interpretation": "The exact original B5.1 request shape was accepted on the same first valid anchor. This rules out target.puuid and the legacy limit20/scan100/background shape alone as the cause of the old bulk-run failure. The next diagnostic should isolate a later/different queue anchor from repeated-request sequencing."
+}

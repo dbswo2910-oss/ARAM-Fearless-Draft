@@ -1,0 +1,35 @@
+name: ARAM Rating R29 One-Shot Evidence Refresh
+
+on:
+  pull_request:
+    paths:
+      - 'src/research/final-evidence-plan.js'
+      - 'tools/research/aram-rating-v032-r29-finalize-evidence.js'
+      - 'tools/research/aram-rating-v032-r29-one-shot-evidence-refresh.ps1'
+      - 'tools/research/aram-rating-v032-r29-preflight-selfcheck.js'
+      - '.github/workflows/aram-rating-r29-one-shot-evidence-refresh.yml'
+  workflow_dispatch:
+
+jobs:
+  r29-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check finalizer
+        run: node --check tools/research/aram-rating-v032-r29-finalize-evidence.js
+      - name: Syntax check preflight self-check
+        run: node --check tools/research/aram-rating-v032-r29-preflight-selfcheck.js
+      - name: Finalizer self-test
+        run: node tools/research/aram-rating-v032-r29-finalize-evidence.js --self-test
+      - name: R29 preflight self-check
+        run: node tools/research/aram-rating-v032-r29-preflight-selfcheck.js
+      - name: Parse PowerShell orchestrator
+        shell: pwsh
+        run: |
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'tools/research/aram-rating-v032-r29-one-shot-evidence-refresh.ps1'), [ref]$null, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | ForEach-Object { Write-Error $_.Message }; exit 1 }
+          Write-Host 'R29 POWERSHELL PARSE: SUCCESS'

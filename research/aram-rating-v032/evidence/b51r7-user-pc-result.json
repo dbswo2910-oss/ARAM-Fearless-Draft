@@ -1,0 +1,16 @@
+{
+  "schema": "aram-rating-b51-live-evidence-v1",
+  "version": "v0.3.2",
+  "phase": "B5.1-R7",
+  "classification": "REPAIR_PREVIEW_15_HTTP400_FALSE_COMPLETIONS",
+  "riot_lcu_requests_performed": 0,
+  "checkpoint_written": false,
+  "storage_mutation": false,
+  "would_requeue": 15,
+  "would_change_matches": false,
+  "privacy": {
+    "contains_raw_puuid": false,
+    "contains_riot_id": false
+  },
+  "conclusion": "The preserved checkpoint still contains exactly 15 legacy HTTP400 zero-yield false-completions eligible for safe completion-state requeue."
+}

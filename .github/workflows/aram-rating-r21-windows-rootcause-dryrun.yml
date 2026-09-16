@@ -1,0 +1,28 @@
+name: ARAM Rating R21 Windows Rootcause Dry Run
+
+on:
+  pull_request:
+    paths:
+      - 'tools/research/aram-rating-v032-r21-version-drift-rootcause.ps1'
+      - '.github/workflows/aram-rating-r21-windows-rootcause-dryrun.yml'
+  workflow_dispatch:
+
+jobs:
+  r21-windows-dryrun:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse and dry-run R21 root-cause forensic
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\research\aram-rating-v032-r21-version-drift-rootcause.ps1 -DryRun
+      - name: Verify dry-run report contract
+        shell: powershell
+        run: |
+          $p = '.\audit-output\r21-version-drift-rootcause\r21-version-drift-rootcause.json'
+          if (-not (Test-Path $p)) { throw 'R21 dry-run report missing' }
+          $j = Get-Content $p -Raw | ConvertFrom-Json
+          if ($j.status -ne 'SUCCESS') { throw "R21 dry-run status=$($j.status)" }
+          if (-not $j.read_only) { throw 'R21 must be read-only' }
+          if ([int]$j.history_requests -ne 0) { throw 'R21 must perform zero history requests' }
+          if ($j.production_files_written) { throw 'R21 must not write production files' }

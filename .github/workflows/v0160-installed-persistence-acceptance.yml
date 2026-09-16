@@ -125,7 +125,7 @@ jobs:
           "PINNED_ELECTRON_EXE=$electron" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "PINNED_ELECTRON_SHA256=$expected" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Seed synthetic installed user state before Golden update
+      - name: Seed synthetic installed user state before active-manifest update
         shell: pwsh
         run: |
           $report = Join-Path $PWD 'audit-output\stability\installed-persistence\probe-seed.json'
@@ -137,40 +137,42 @@ jobs:
           $r = Get-Content $report -Raw | ConvertFrom-Json
           if ($p.ExitCode -ne 0 -or $r.status -ne 'SUCCESS' -or $r.research_checkpoint_matches -ne 159 -or -not $r.local_storage_exact -or -not $r.research_checkpoint_exact -or -not $r.research_latest_run_exact) { throw "pre-upgrade persistence seed verification failed; exit=$($p.ExitCode); status=$($r.status)" }
 
-      - name: Apply Golden v0.15.135 manifest in place
+      - name: Apply active manifest in place
         shell: pwsh
         run: |
+          $manifest = Get-Content (Join-Path $PWD 'update\manifest.json') -Raw | ConvertFrom-Json
           node tools/stability/materialize-installed-app.js --base "$env:INSTALLED_APP" --out "$env:INSTALLED_APP" --in-place
-          if ($LASTEXITCODE -ne 0) { throw 'in-place Golden materialization failed' }
+          if ($LASTEXITCODE -ne 0) { throw 'in-place active-manifest materialization failed' }
           $pkg = Get-Content (Join-Path $env:INSTALLED_APP 'package.json') -Raw | ConvertFrom-Json
-          if ($pkg.version -ne '0.15.135') { throw "installed package version mismatch after update: $($pkg.version)" }
+          if ([string]$pkg.version -ne [string]$manifest.version) { throw "installed package version mismatch after update: package=$($pkg.version) manifest=$($manifest.version)" }
+          "ACTIVE_VERSION=$($manifest.version)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           Get-ChildItem "$env:INSTALLED_APP\canonical-shadow\src" -Recurse -Filter *.js | ForEach-Object {
             node --check $_.FullName
             if ($LASTEXITCODE -ne 0) { throw "canonical Windows syntax failed: $($_.FullName)" }
           }
 
-      - name: Boot Golden twice and prove user state survives each restart
+      - name: Boot active app twice and prove user state survives each restart
         shell: pwsh
         run: |
           $electron = $env:PINNED_ELECTRON_EXE
           $outDir = Join-Path $PWD 'audit-output\stability\installed-persistence'
           $probe = Join-Path $PWD 'tools\stability\windows-persistence-probe.js'
-          function Run-Golden([int]$cycle) {
-            $stdout = Join-Path $outDir "golden-cycle-$cycle-stdout.log"
-            $stderr = Join-Path $outDir "golden-cycle-$cycle-stderr.log"
+          function Run-Active([int]$cycle) {
+            $stdout = Join-Path $outDir "active-cycle-$cycle-stdout.log"
+            $stderr = Join-Path $outDir "active-cycle-$cycle-stderr.log"
             $p = Start-Process -FilePath $electron -ArgumentList @("$env:INSTALLED_APP", '--aram-launcher-cold-start') -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
             Start-Sleep -Seconds 12
             $alive = -not $p.HasExited
             $exitCode = if ($p.HasExited) { $p.ExitCode } else { $null }
             $stdoutText = if (Test-Path $stdout) { Get-Content $stdout -Raw } else { '' }
             $stderrText = if (Test-Path $stderr) { Get-Content $stderr -Raw } else { '' }
-            $storageIdentityLogged = ($stdoutText -match '\[v0\.15\.135 storage-root\]') -and ($stdoutText -match 'aram-fearless-draft')
+            $legacyStorageMarkerObserved = ($stdoutText -match '\[v0\.15\.135 storage-root\]') -and ($stdoutText -match 'aram-fearless-draft')
             $fatal = ($stderrText -match 'App threw an error') -or ($stderrText -match 'index contract mismatch') -or ($stderrText -match 'UnhandledPromiseRejection')
+            [ordered]@{cycle=$cycle;alive=$alive;exit_code=$exitCode;legacy_storage_marker_observed=$legacyStorageMarkerObserved;fatal=$fatal} | ConvertTo-Json | Set-Content -Path (Join-Path $outDir "active-cycle-$cycle-status.json") -Encoding utf8
             if ($alive) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
             Get-Process electron -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-            if (-not $alive) { throw "Golden cycle $cycle exited early; code=$exitCode" }
-            if (-not $storageIdentityLogged) { throw "Golden cycle $cycle did not log stable storage identity" }
-            if ($fatal) { throw "Golden cycle $cycle reported a fatal load error" }
+            if (-not $alive) { throw "Active cycle $cycle exited early; code=$exitCode" }
+            if ($fatal) { throw "Active cycle $cycle reported a fatal load error" }
             Start-Sleep -Seconds 2
           }
           function Verify-State([int]$cycle) {
@@ -182,17 +184,17 @@ jobs:
             $r = Get-Content $report -Raw | ConvertFrom-Json
             if ($p.ExitCode -ne 0 -or $r.status -ne 'SUCCESS' -or $r.research_checkpoint_matches -ne 159 -or -not $r.local_storage_exact -or -not $r.research_checkpoint_exact -or -not $r.research_latest_run_exact) { throw "persistence verify cycle $cycle mismatch; exit=$($p.ExitCode); status=$($r.status)" }
           }
-          Run-Golden 1
+          Run-Active 1
           Verify-State 1
-          Run-Golden 2
+          Run-Active 2
           Verify-State 2
 
           $roaming = [Environment]::GetFolderPath([Environment+SpecialFolder]::ApplicationData)
           $stableMirror = Join-Path $env:STABLE_USER_DATA 'state-integrity-v015117\mirrors\renderer-local-storage.json'
-          $goldenFallbackMirror = Join-Path $roaming 'ARAM Fearless Draft\state-integrity-v015117\mirrors\renderer-local-storage.json'
-          $mirror = @($stableMirror,$goldenFallbackMirror) | Where-Object { Test-Path $_ } | Select-Object -First 1
-          if (-not $mirror) { throw "renderer localStorage mirror missing after Golden boots; checked stable=$stableMirror fallback=$goldenFallbackMirror" }
-          $mirrorLocation = if ([IO.Path]::GetFullPath($mirror).StartsWith([IO.Path]::GetFullPath($env:STABLE_USER_DATA),[StringComparison]::OrdinalIgnoreCase)) { 'stable-userData' } else { 'golden-preload-fallback' }
+          $legacyFallbackMirror = Join-Path $roaming 'ARAM Fearless Draft\state-integrity-v015117\mirrors\renderer-local-storage.json'
+          $mirror = @($stableMirror,$legacyFallbackMirror) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $mirror) { throw "renderer localStorage mirror missing after active boots; checked stable=$stableMirror fallback=$legacyFallbackMirror" }
+          $mirrorLocation = if ([IO.Path]::GetFullPath($mirror).StartsWith([IO.Path]::GetFullPath($env:STABLE_USER_DATA),[StringComparison]::OrdinalIgnoreCase)) { 'stable-userData' } else { 'legacy-preload-fallback' }
           $m = Get-Content $mirror -Raw | ConvertFrom-Json
           $fixtureEntry = $m.payload.entries.'aram_v0160_persistence_fixture_v1'
           $favoritesEntry = $m.payload.entries.'aram_match_lab_favorites_v1'
@@ -204,9 +206,12 @@ jobs:
             status='SUCCESS'
             stage='INSTALLED_WINDOWS_PERSISTENCE_AFTER_TWO_RESTARTS'
             baseline='0.15.49'
-            golden='0.15.135'
+            historical_golden='0.15.135'
+            active_version=$env:ACTIVE_VERSION
             electron_version='38.7.2'
             electron_runtime_sha256=$env:PINNED_ELECTRON_SHA256
+            storage_identity_verification='post-boot persistence probe + state-integrity mirror'
+            legacy_storage_marker_required=$false
             local_storage_preserved=$true
             state_integrity_mirror_preserved=$true
             state_integrity_mirror_path=$mirror

@@ -1,0 +1,15 @@
+'use strict';
+/* B3 preview is read-only. It never starts Riot/LCU collection and never writes the checkpoint. */
+(()=>{
+  const VERSION='v0.3.2',DB='aram-rating-research-v03',STORE='kv',KEY='checkpoint-v03';
+  function core(){const c=globalThis.ARAMRatingB3ManualCoreV032;if(!c)throw new Error('ARAMRatingB3ManualCoreV032_required');return c}
+  function openExisting(){return new Promise((res,rej)=>{const q=indexedDB.open(DB);let upgrading=false;q.onupgradeneeded=()=>{upgrading=true;try{q.transaction.abort()}catch{};rej(new Error('research_db_missing_refusing_to_create'))};q.onsuccess=()=>{if(upgrading)return;const db=q.result;if(!db.objectStoreNames.contains(STORE)){db.close();return rej(new Error('research_store_missing'))}res(db)};q.onerror=()=>{if(!upgrading)rej(q.error||new Error('research_db_open_failed'))}})}
+  async function checkpoint(){const db=await openExisting();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(KEY);r.onsuccess=()=>{db.close();res(r.result??null)};r.onerror=()=>{db.close();rej(r.error)}})}
+  async function preview(){
+    const C=core(),cp=await checkpoint();if(!cp||cp.schema!=='aram-rating-phase-b-checkpoint-v03')throw new Error('checkpoint_v03_required');const current=C.kpis(cp.matches||[]);if(current.matches<500)throw new Error(`b3_requires_existing_checkpoint_500_plus_matches_current_${current.matches}`);
+    const cfg={history_limit:20,skip_headroom_lte:2,skip_duplicate_ratio_gte:.9,min_candidate_observations:2};const candidates=C.buildCandidatePool(cp,cfg).slice(0,50);
+    const out={status:'PREVIEW_ONLY',sampling_profile:'B3_DENSITY_FIRST_1000',riot_lcu_collection_requests_performed:0,checkpoint_written:false,checkpoint_matches:current.matches,target_checkpoint_matches:1000,selected_count:candidates.length,density_first:true,network:{players:current.players,average_observations:current.average_observations,median_observations:current.median_observations,single_match_fraction:current.single_match_fraction,players_2_plus:current.players_2_plus,players_5_plus:current.players_5_plus,players_10_plus:current.players_10_plus,connected_components:current.connected_components,giant_component_ratio:current.giant_component_ratio},candidates:candidates.map((x,i)=>({candidate:`Candidate ${String(i+1).padStart(2,'0')}`,source_pool:x.source_pool,observations:x.current_observation_count,expected_headroom:x.expected_new_headroom,expected_duplicate_ratio:x.expected_duplicate_ratio,network_overlap:x.existing_network_overlap,repeat_density_ratio:x.repeat_density_ratio,single_neighbor_recovery_ratio:x.single_neighbor_recovery_ratio,new_player_explosion_penalty:x.new_player_explosion_penalty,density_priority:x.b3_priority}))};
+    console.table(out.candidates);console.log('[ARAM Rating v0.3.2] B3 PREVIEW ONLY · density-first · no Riot/LCU collection request started',out);return out;
+  }
+  window.aramRatingB3PreviewV032={version:VERSION,preview};console.log('[ARAM Rating v0.3.2] B3 density-first preview ready. READ ONLY · no Riot/LCU collection.');
+})();

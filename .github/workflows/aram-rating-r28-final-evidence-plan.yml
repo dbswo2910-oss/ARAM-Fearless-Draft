@@ -1,0 +1,24 @@
+name: ARAM Rating R28 Final Evidence Plan
+
+on:
+  pull_request:
+    paths:
+      - 'src/research/final-evidence-plan.js'
+      - 'tools/research/aram-rating-v032-r28-final-evidence-plan-audit.js'
+      - '.github/workflows/aram-rating-r28-final-evidence-plan.yml'
+  workflow_dispatch:
+
+jobs:
+  r28-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check
+        run: |
+          node --check src/research/final-evidence-plan.js
+          node --check tools/research/aram-rating-v032-r28-final-evidence-plan-audit.js
+      - name: Run R28 planner audit
+        run: node tools/research/aram-rating-v032-r28-final-evidence-plan-audit.js

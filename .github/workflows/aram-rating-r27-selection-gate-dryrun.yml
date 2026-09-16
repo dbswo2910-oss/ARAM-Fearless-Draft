@@ -1,0 +1,42 @@
+name: ARAM Rating R27 Selection Gate Dry Run
+
+on:
+  pull_request:
+    paths:
+      - 'tools/research/aram-rating-v032-r27-build-selection-gate-inspector.js'
+      - 'tools/research/aram-rating-v032-r27-selection-gate-inspect.ps1'
+      - '.github/workflows/aram-rating-r27-selection-gate-dryrun.yml'
+      - 'src/research/storage.js'
+      - 'src/research/rating-engine.js'
+      - 'src/research/shadow-evidence-store.js'
+  workflow_dispatch:
+
+jobs:
+  r27-dryrun:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check builder
+        shell: pwsh
+        run: |
+          node --check tools/research/aram-rating-v032-r27-build-selection-gate-inspector.js
+          if ($LASTEXITCODE -ne 0) { throw 'R27 builder syntax check failed' }
+      - name: Build inspector kit
+        shell: pwsh
+        run: |
+          node tools/research/aram-rating-v032-r27-build-selection-gate-inspector.js
+          if ($LASTEXITCODE -ne 0) { throw 'R27 kit build failed' }
+          if (!(Test-Path 'audit-output/r27-selection-gate-inspector-kit/r27-selection-gate-renderer.js')) { throw 'renderer missing' }
+          if (!(Test-Path 'audit-output/r27-selection-gate-inspector-kit/main-r27-selection-gate.js')) { throw 'main missing' }
+      - name: PowerShell dry run
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\research\aram-rating-v032-r27-selection-gate-inspect.ps1 -DryRun
+          if ($LASTEXITCODE -ne 0) { throw 'R27 dry run failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r27-selection-gate-dryrun
+          path: audit-output/r27-selection-gate-inspect/r27-selection-gate-inspect.json

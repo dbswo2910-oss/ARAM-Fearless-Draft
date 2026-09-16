@@ -1,0 +1,28 @@
+{
+  "phase": "B5.1-R11",
+  "date": "2026-09-16",
+  "source": "user-pc-console-screenshot",
+  "privacy_safe": true,
+  "classification": "R11_NO_CLEAR_WINNER_BULK_COLLECTION_SATURATED",
+  "next_step": "TARGETED_INFORMATION_GAIN_COLLECTION_ONLY",
+  "selection_status": "no_clear_winner",
+  "observed_leader": "elo",
+  "observed_runner_up": "glicko",
+  "dataset": {
+    "matches": 1984,
+    "players": 10478,
+    "train": 1587,
+    "test": 397
+  },
+  "recovery_efficiency": {
+    "rows": 4,
+    "requests": 4,
+    "returned_valid_matches": 80,
+    "new_unique_matches": 2,
+    "duplicate_equivalent": 78,
+    "unique_yield_ratio": 0.025,
+    "new_unique_per_request": 0.5,
+    "marginal_yield_low": true
+  },
+  "interpretation": "Bulk fixed-queue recovery is saturated: transport is healthy, but marginal unique-match yield is low and the model-selection gate still reports no clear winner. Continue only with targeted information-gain collection rather than blind queue exhaustion."
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "aram-rating-b51-live-evidence-v1",
+  "version": "v0.3.2",
+  "phase": "B5.1-R6",
+  "classification": "LEGACY_ALL_15_FAILED_THREE_ATTEMPTS",
+  "checkpoint_integrity": true,
+  "riot_lcu_requests": 0,
+  "queue": {
+    "selected": 15,
+    "legacy_failed_targets": 15
+  },
+  "logs": {
+    "count": 15,
+    "requests_per_failed_target": 3,
+    "total_requests_logged": 45,
+    "new_unique_matches_total": 0,
+    "all_failed": true,
+    "all_failed_targets_marked_completed": true,
+    "dominant_error_class": "HTTP_400"
+  },
+  "privacy": {
+    "contains_raw_puuid": false,
+    "contains_riot_id": false
+  },
+  "conclusion": "The preserved legacy B5.1 checkpoint confirms all 15 queue anchors failed three attempts each (45 requests total), produced zero new matches, and were nevertheless marked completed. Combined with R2-R5 live acceptance, this indicates the old run hit a transient/downstream HTTP 400 condition and the runner then corrupted completion semantics by permanently completing failed anchors."
+}
