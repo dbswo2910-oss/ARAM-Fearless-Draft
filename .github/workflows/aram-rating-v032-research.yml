@@ -19,6 +19,7 @@ on:
       - 'tools/research/aram-rating-v032-b51r2-preflight-audit.js'
       - 'tools/research/aram-rating-v032-b51r3-preflight-audit.js'
       - 'tools/research/aram-rating-v032-b51r4-preflight-audit.js'
+      - 'tools/research/aram-rating-v032-b51r5-preflight-audit.js'
       - '.github/workflows/aram-rating-v032-research.yml'
   workflow_dispatch:
 
@@ -62,6 +63,8 @@ jobs:
         run: node tools/research/aram-rating-v032-b51r3-preflight-audit.js
       - name: Run B5.1 R4 second-anchor preflight safety audit
         run: node tools/research/aram-rating-v032-b51r4-preflight-audit.js
+      - name: Run B5.1 R5 two-request sequence preflight safety audit
+        run: node tools/research/aram-rating-v032-b51r5-preflight-audit.js
       - name: Upload aggregate/synthetic audits only
         uses: actions/upload-artifact@v4
         with:
@@ -81,4 +84,5 @@ jobs:
             audit-output/aram-rating-v032-b51r2-preflight-audit.json
             audit-output/aram-rating-v032-b51r3-preflight-audit.json
             audit-output/aram-rating-v032-b51r4-preflight-audit.json
+            audit-output/aram-rating-v032-b51r5-preflight-audit.json
           if-no-files-found: error
