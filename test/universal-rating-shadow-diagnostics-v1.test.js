@@ -1,5 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 const {MemoryRatingStore}=require('../src/rating/universal/store');
 const {createUniversalRatingRuntime}=require('../src/rating/universal/runtime');
 const ipc=require('../src/main/universal-rating-ipc');
@@ -60,6 +62,13 @@ const view=require('../src/profile/shadow-rating-diagnostics-renderer');
   assert.equal(view.production_active,false);
   assert.equal(view.automatic_promotion,false);
   assert.equal(view.network_owner,false);
+
+  const rendererSource=fs.readFileSync(path.join(__dirname,'../src/profile/shadow-rating-diagnostics-renderer.js'),'utf8');
+  assert.equal(rendererSource.includes('MutationObserver'),false,'diagnostics renderer must not install a document-wide observer');
+  assert.match(rendererSource,/MAX_LAUNCH_RETRIES=20/);
+  assert.match(rendererSource,/LAUNCH_RETRY_MS=250/);
+  assert.match(rendererSource,/setTimeout\(scheduleLauncher,LAUNCH_RETRY_MS\)/);
+  assert.match(rendererSource,/clearTimeout\(retryTimer\)/);
 
   console.log('UNIVERSAL RATING SHADOW DIAGNOSTICS V1: PASS');
 })().catch(e=>{console.error(e);process.exit(1)});
