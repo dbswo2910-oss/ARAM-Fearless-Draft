@@ -4,11 +4,11 @@
 
 ## Active distribution
 
-- Active updater: **v0.16.1**
-- Manifest message: v0.16.1 · UNIVERSAL RATING SHADOW
+- Active updater: **v0.16.2**
+- Manifest message: v0.16.2 · SHADOW RATING DIAGNOSTICS
 - Manifest commit: `bb4f33960a86945b2f94a7643d7b6abfc3a985b2`
-- Package: `update/v0.16.1/package.json` → **v0.16.1**
-- Electron entry: `main-v0161-shadow.js` → `update/v0.16.1/main-v0161-shadow.js`
+- Package: `update/v0.16.2/package.json` → **v0.16.2**
+- Electron entry: `main-v0162-shadow-diagnostics.js` → `update/v0.16.2/main-v0162-shadow-diagnostics.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
 
 ## Active ownership — do not create competing owners
