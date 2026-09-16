@@ -9,7 +9,8 @@ const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const pickPath=byPath.get('random-pick-density-v01555.js');
-const mainPath=byPath.get('main.js');
+const cleanLegacy=m.clean_runtime_consolidated===true?[...(m.files||[])].find(x=>/^legacy-runtime-v\d+\.js$/.test(String(x.path||'')))?.source:null;
+const mainPath=cleanLegacy&&exists(cleanLegacy)?cleanLegacy:byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.55'),'Manifest is v0.15.55 or newer',m.version);
 ok(!!pickPath&&exists(pickPath),'v0.15.55 pick density runtime remains delivered',pickPath||'missing');
