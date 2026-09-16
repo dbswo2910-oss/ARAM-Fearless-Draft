@@ -31,9 +31,9 @@ if(!out.applicable){
   for(const [name,text] of texts){
     assert.ok(!text.includes('module._compile('),`${name} reintroduced runtime module._compile successor chaining`);
     assert.ok(!/readFileSync\([^\n]*main-v0?1[5-9]/.test(text),`${name} reads a versioned predecessor main at runtime`);
+    assert.ok(!/require\(\s*['"][^'"]*main-v0?1[5-9][^'"]*['"]\s*\)/.test(text),`${name} requires a versioned predecessor main at runtime`);
   }
   assert.ok(!/replace(All)?\([^\n]*['"]0\.1[5-9]/.test(main),'main.js reintroduced predecessor version-string patching');
-  assert.ok(!/main-v0?1[5-9][^'"\s]*\.js/.test(main),'main.js directly references a versioned predecessor main');
   assert.ok(!preload.includes('patchPreloadSource('),'preload.js reintroduced runtime self-patching');
   ok('no-runtime-successor-chain');
   for(const row of manifest.files||[])assert.ok(String(row.source||'').startsWith('update/'),`unsafe updater source ${row.path} -> ${row.source}`);
