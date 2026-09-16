@@ -1,0 +1,1 @@
+Canonical R29 preflight artifacts: `aram-rating-v032-r29-preflight.md`, `aram-rating-v032-r29-next-step-matrix.md`, and `tools/research/aram-rating-v032-r29-preflight-selfcheck.js`. Redundant marker notes should not be treated as authoritative.
