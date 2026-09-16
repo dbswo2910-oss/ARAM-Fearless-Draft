@@ -21,5 +21,5 @@
     "contains_raw_puuid": false,
     "contains_riot_id": false
   },
-  "conclusion": "The second distinct anchor independently accepts the exact legacy B5.1 request shape. Target identity, the request shape, and either of the first two anchors in isolation are not sufficient to reproduce the old bulk failure."
+  "conclusion": "The second distinct anchor accepts the exact legacy B5.1 request shape independently."
 }
