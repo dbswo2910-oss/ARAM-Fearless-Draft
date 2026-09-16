@@ -130,6 +130,17 @@ function defaultRoot(){const override=String(process.env.ARAM_R19_SAFETY_ROOT||'
   $src = $src.Replace($needle.Trim(),$replacement.Trim())
   Set-Content -Path $p -Value $src -Encoding UTF8 -NoNewline
 }
+function Patch-TempColdStartPromotion([string]$TempApp) {
+  $p = Join-Path $TempApp 'main-v0160.js'
+  if (-not (Test-Path $p)) { throw 'temp main-v0160.js missing' }
+  $src = Get-Content $p -Raw
+  if ($src -match 'ARAM_R19_DISABLE_COLD_START_PROMOTION') { return }
+  $old = "try{require('./cold-start-promotion-v0160').install({appDir:__dirname,version:VERSION})}catch(e){try{console.warn('[v0.16.0 cold-start promotion] install failed:',e?.message||String(e))}catch{}}"
+  $new = "if(process.env.ARAM_R19_DISABLE_COLD_START_PROMOTION!=='1'){try{require('./cold-start-promotion-v0160').install({appDir:__dirname,version:VERSION})}catch(e){try{console.warn('[v0.16.0 cold-start promotion] install failed:',e?.message||String(e))}catch{}}}"
+  if (-not $src.Contains($old)) { throw 'temp cold-start promotion patch contract mismatch' }
+  $src = $src.Replace($old,$new)
+  Set-Content -Path $p -Value $src -Encoding UTF8 -NoNewline
+}
 
 if (-not (Test-Path $Builder)) { throw 'R18 kit builder missing' }
 if (-not (Test-Path $Probe)) { throw 'windows-real-state-probe.js missing' }
@@ -173,6 +184,7 @@ $isolatedSafetyRoot = Join-Path $tempRoot 'isolated-update-safety'
 if (Test-Path $tempRoot) { Remove-Item $tempRoot -Recurse -Force }
 Copy-Tree $AppDir $tempApp
 Patch-TempSafetyIsolation $tempApp
+Patch-TempColdStartPromotion $tempApp
 Copy-Item (Join-Path $KitDir 'r17-shadow-renderer.js') $tempApp -Force
 Copy-Item (Join-Path $KitDir 'main-r17-shadow-rc.js') $tempApp -Force
 $pkgPath = Join-Path $tempApp 'package.json'
