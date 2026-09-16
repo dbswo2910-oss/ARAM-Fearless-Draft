@@ -4,11 +4,11 @@
 
 ## Active distribution
 
-- Active updater: **v0.16.0**
-- Manifest message: v0.16.0 · CLEAN BASELINE
-- Manifest commit: `574053c5d02cd386c438c94c36bfd416e37ceab3`
-- Package: `update/v0.16.0/package.json` → **v0.16.0**
-- Electron entry: `main-v0160.js` → `update/v0.16.0/main-v0160.js`
+- Active updater: **v0.16.1**
+- Manifest message: v0.16.1 · UNIVERSAL RATING SHADOW
+- Manifest commit: `cabaede3a4e81af89747cce4b992d22660f74624`
+- Package: `update/v0.16.1/package.json` → **v0.16.1**
+- Electron entry: `main-v0161-shadow.js` → `update/v0.16.1/main-v0161-shadow.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
 
 ## Active ownership — do not create competing owners

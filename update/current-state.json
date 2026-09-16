@@ -3,16 +3,16 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.16.0",
-    "message": "v0.16.0 · CLEAN BASELINE",
+    "version": "0.16.1",
+    "message": "v0.16.1 · UNIVERSAL RATING SHADOW",
     "min_launcher": "2.0.2",
-    "manifest_commit": "574053c5d02cd386c438c94c36bfd416e37ceab3"
+    "manifest_commit": "cabaede3a4e81af89747cce4b992d22660f74624"
   },
   "package": {
-    "source": "update/v0.16.0/package.json",
-    "version": "0.16.0",
-    "main": "main-v0160.js",
-    "main_source": "update/v0.16.0/main-v0160.js"
+    "source": "update/v0.16.1/package.json",
+    "version": "0.16.1",
+    "main": "main-v0161-shadow.js",
+    "main_source": "update/v0.16.1/main-v0161-shadow.js"
   },
   "owners": {
     "random_pick": {
