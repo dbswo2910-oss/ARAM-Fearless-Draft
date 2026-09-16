@@ -22,6 +22,7 @@ on:
       - 'tools/research/aram-rating-v032-b51r5-preflight-audit.js'
       - 'tools/research/aram-rating-v032-b51r6-forensic-audit.js'
       - 'tools/research/aram-rating-v032-b51r7-repair-preview-audit.js'
+      - 'tools/research/aram-rating-v032-b51r8-repair-audit.js'
       - '.github/workflows/aram-rating-v032-research.yml'
   workflow_dispatch:
 
@@ -71,6 +72,8 @@ jobs:
         run: node tools/research/aram-rating-v032-b51r6-forensic-audit.js
       - name: Run B5.1 R7 repair preview audit
         run: node tools/research/aram-rating-v032-b51r7-repair-preview-audit.js
+      - name: Run B5.1 R8 guarded completion-state repair audit
+        run: node tools/research/aram-rating-v032-b51r8-repair-audit.js
       - name: Upload aggregate/synthetic audits only
         uses: actions/upload-artifact@v4
         with:
@@ -93,4 +96,5 @@ jobs:
             audit-output/aram-rating-v032-b51r5-preflight-audit.json
             audit-output/aram-rating-v032-b51r6-forensic-audit.json
             audit-output/aram-rating-v032-b51r7-repair-preview-audit.json
+            audit-output/aram-rating-v032-b51r8-repair-audit.json
           if-no-files-found: error
