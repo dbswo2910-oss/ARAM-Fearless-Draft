@@ -1,0 +1,1 @@
+Canonical R29 documentation should be limited to one preflight document, one blocker-driven next-step matrix, and executable self-checks. Duplicate marker notes are not authoritative.
