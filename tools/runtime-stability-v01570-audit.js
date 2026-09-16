@@ -10,7 +10,9 @@ const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const mainPath=resolveCurrentRuntimeSource(ROOT,m),pkgPath=byPath.get('package.json'),ownerPath=byPath.get('runtime-random-ingame-v01570.js');
+const loader77Path=byPath.get('runtime-loader-v01577.js'),loader79Path=byPath.get('runtime-loader-v01579.js');
 const main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},owner=ownerPath&&exists(ownerPath)?read(ownerPath):'';
+const loader77=loader77Path&&exists(loader77Path)?read(loader77Path):'',loader79=loader79Path&&exists(loader79Path)?read(loader79Path):'';
 for(const [name,src] of [['main',main],['v0.15.70 random in-game owner',owner]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
 ok('manifest is v0.15.70 or newer',ge(m.version,'0.15.70'),m.version);
 ok('package is v0.15.70 or newer',ge(pkg.version,'0.15.70'),pkg.version);
@@ -21,10 +23,17 @@ ok('manifest maps v0.15.70 random in-game owner',ownerPath==='update/v0.15.70/ru
 const ownerAt=main.indexOf("'runtime-random-ingame-v01570.js'"),coachAt=main.indexOf("'random-ingame-coach-v01550.js'"),globalIconAt=main.indexOf("'item-icons-global-v01557.js'"),itemArtAt=main.indexOf("'item-art-runtime-v01566.js'");
 ok('single-owner loads immediately before historical coach stack',ownerAt>=0&&coachAt>ownerAt,`${ownerAt}/${coachAt}`);
 ok('historical v0.15.50-v0.15.57 stack remains before item-art owner',globalIconAt>coachAt&&itemArtAt>globalIconAt,`${coachAt}/${globalIconAt}/${itemArtAt}`);
-const finishAt=main.indexOf("if(file==='item-icons-global-v01557.js')");
-ok('v0.15.70 bootstrap finishes immediately after v0.15.57 injection',finishAt>=0&&main.includes('aramRandomIngameRuntimeV01570?.finishBootstrap?.()'));
+const loaderOwned=ge(m.version,'0.15.77');
+if(loaderOwned){
+  ok('runtime loader preserves v0.15.70 finish boundary after v0.15.57',loader77.includes("if(file==='item-icons-global-v01557.js')")&&loader77.includes('aramRandomIngameRuntimeV01570?.finishBootstrap?.()'),loader77Path||'missing');
+  if(ge(m.version,'0.15.79'))ok('current runtime delegates injection through v0.15.79 safety loader',main.includes("require('./runtime-loader-v01579').injectRuntimeStack")&&loader79.includes("require('./runtime-loader-v01577')"),`${mainPath} / ${loader79Path||'missing'}`);
+  ok('runtime loader restores v0.15.68 timer hook after bootstrap finalization',loader77.includes('aramRandomIngameRuntimeV01570?.finishBootstrap?.(); window.aramRuntimePerformanceV01568?.restoreTimerHook?.();'),loader77Path||'missing');
+}else{
+  const finishAt=main.indexOf("if(file==='item-icons-global-v01557.js')");
+  ok('v0.15.70 bootstrap finishes immediately after v0.15.57 injection',finishAt>=0&&main.includes('aramRandomIngameRuntimeV01570?.finishBootstrap?.()'));
+  ok('v0.15.68 timer hook is restored only after v0.15.70 narrow bootstrap chain',main.indexOf('aramRuntimePerformanceV01568?.restoreTimerHook?.()')>finishAt);
+}
 ok('v0.15.70 readiness marker is guarded by main',main.includes('Boolean(window.__ARAM_RANDOM_INGAME_RUNTIME_V01570__)'));
-ok('v0.15.68 timer hook is restored only after v0.15.70 narrow bootstrap chain',main.indexOf('aramRuntimePerformanceV01568?.restoreTimerHook?.()')>finishAt);
 for(const p of ['random-ingame-coach-v01550.js','random-ingame-ux-v01551.js','random-ingame-ux-v01552.js','random-ingame-shop-v01553.js','random-ingame-shop-polish-v01554.js','random-item-icons-v01556.js','item-icons-global-v01557.js']){const src=byPath.get(p)||'';ok(`historical ${p} remains mapped to historical source`,!!src&&!src.includes('v0.15.70/'),src)}
 ok('owner suppresses historical interval registration only during bootstrap',owner.includes('window.setInterval=suppressedInterval')&&owner.includes('window.setInterval=upstreamSetInterval'));
 ok('owner suppresses historical MutationObserver registration only during bootstrap',owner.includes('AramSuppressedRandomIngameObserver')&&owner.includes('window.MutationObserver=NativeMutationObserver'));
