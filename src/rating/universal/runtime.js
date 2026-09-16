@@ -2,7 +2,7 @@
 const path=require('path');
 const {JsonRatingStore}=require('./store');
 const {createEstimator}=require('./estimator');
-const {UniversalRatingService}=require('./service');
+const {UniversalRatingService,finiteOrNull}=require('./service');
 
 const DEFAULT_MODELS=Object.freeze(['research-v032-elo-shadow','research-v032-glicko-shadow']);
 const DB_BASENAME='universal-rating-v1.json';
@@ -13,8 +13,8 @@ function publicCandidate(result){
     modelName:result?.modelName||null,
     modelStatus:result?.modelStatus||'SHADOW',
     status:result?.status||'UNKNOWN',
-    rating:Number.isFinite(Number(result?.rating))?Number(result.rating):null,
-    uncertainty:Number.isFinite(Number(result?.uncertainty))?Number(result.uncertainty):null,
+    rating:finiteOrNull(result?.rating),
+    uncertainty:finiteOrNull(result?.uncertainty),
     games:Number(result?.games)||0,
     confidence:result?.confidence||null,
     evidenceMatches:Number(result?.evidenceMatches)||0,
