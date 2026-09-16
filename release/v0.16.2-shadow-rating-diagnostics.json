@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "stage": "V0162_SHADOW_RATING_DIAGNOSTICS",
+  "release": "0.16.2",
+  "base": "0.16.1",
+  "scope": "read-only Universal Rating Shadow diagnostics UI",
+  "safety": {
+    "production_rating_active": false,
+    "automatic_rating_promotion": false,
+    "universal_rating_shadow": true,
+    "diagnostics_only": true,
+    "rating_network_owner": false,
+    "raw_puuid_exposed_to_renderer": false
+  },
+  "ui": {
+    "shows": [
+      "elo_shadow_rating",
+      "glicko_shadow_rating",
+      "target_match_count",
+      "confidence",
+      "95_percent_range",
+      "uncertainty",
+      "last_updated"
+    ],
+    "label": "RESEARCH ONLY · 정식 Rating 아님"
+  },
+  "release_gate": "merge only after diagnostics CI and existing main PR regression gates are green"
+}
