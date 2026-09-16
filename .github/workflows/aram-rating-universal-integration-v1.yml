@@ -12,6 +12,8 @@ on:
       - 'src/main/universal-rating-ipc.js'
       - 'src/preload/universal-rating-bridge.js'
       - 'test/universal-rating-integration-v1.test.js'
+      - 'tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js'
+      - 'tools/research/universal-rating-r2-physical-shadow-rc.ps1'
       - '.github/workflows/aram-rating-universal-integration-v1.yml'
       - 'update/v0.15.129/rating-engine-v01.js'
   pull_request:
@@ -23,6 +25,8 @@ on:
       - 'src/main/universal-rating-ipc.js'
       - 'src/preload/universal-rating-bridge.js'
       - 'test/universal-rating-integration-v1.test.js'
+      - 'tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js'
+      - 'tools/research/universal-rating-r2-physical-shadow-rc.ps1'
       - '.github/workflows/aram-rating-universal-integration-v1.yml'
       - 'update/v0.15.129/rating-engine-v01.js'
   workflow_dispatch:
@@ -50,8 +54,14 @@ jobs:
           node --check src/main/universal-rating-ipc.js
           node --check src/preload/universal-rating-bridge.js
           node --check test/universal-rating-integration-v1.test.js
+          node --check tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js
       - name: Universal integration invariant tests
         run: node --test test/universal-rating-integration-v1.test.js
+      - name: Build physical shadow RC kit
+        run: node tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js
+      - name: Physical shadow RC dry run
+        shell: pwsh
+        run: ./tools/research/universal-rating-r2-physical-shadow-rc.ps1 -DryRun
       - name: Safety flags remain off
         run: |
           node - <<'NODE'
