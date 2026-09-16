@@ -7,7 +7,7 @@ try{prior=require('../v0.15.120/runtime-loader-v01579')}catch{prior=require('./r
 const READINESS_EXPR=`(()=>{const required={
   randomPracticeRuntime:Boolean(window.__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__),
   randomPracticeRestore:Boolean(window.__ARAM_RANDOM_PRACTICE_RESTORE_V015121__),
-  randomPick:Boolean(window.__ARAM_RANDOM_PRACTICE_FOCUS_V01549__),
+  randomPick:Boolean(window.__ARAM_RANDOM_PRACTICE_FOCUS_V01549__||(window.aramUiStabilityV015115?.audit?.()?.ok===true&&window.aramUiStabilityV015115?.audit?.()?.owners?.random==='random-focus-v015100')),
   randomOwner:Boolean(window.__ARAM_UI_STABILITY_BASELINE_V015115__),
   resourceLifecycle:Boolean(window.__ARAM_RESOURCE_LIFECYCLE_V015118__),
   disposableEvents:Boolean(typeof window.aramRandomPracticeRuntimeV01572?.dispose==='function'),
