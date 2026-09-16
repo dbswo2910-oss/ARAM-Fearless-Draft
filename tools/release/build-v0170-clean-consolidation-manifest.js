@@ -3,7 +3,8 @@ const fs=require('fs');
 const path=require('path');
 const crypto=require('crypto');
 const cp=require('child_process');
-const {BASELINE_COMMIT,VERSION}=require('../refactor/materialize-v0170-clean-runtime');
+const materializer=require('../refactor/materialize-v0170-clean-runtime');
+const {BASELINE_COMMIT,VERSION}=materializer;
 const ROOT=path.resolve(__dirname,'../..');
 const manifestPath=path.join(ROOT,'update','manifest.json');
 const sha256=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
@@ -45,18 +46,11 @@ function validate(m){
   return true;
 }
 function main(){
-  require('../refactor/materialize-v0170-clean-runtime').main?.();
+  materializer.main();
   const base=gitShowJson('update/manifest.json');
   const out=apply(base);validate(out);
   fs.writeFileSync(manifestPath,JSON.stringify(out,null,2)+'\n','utf8');
   console.log('V0.17 CLEAN CONSOLIDATION MANIFEST: VALID',JSON.stringify({version:VERSION,baseline:BASELINE_COMMIT,changed_entries:CHANGES.length,clean_runtime_consolidated:true,runtime_successor_wrappers:false}));
 }
-if(require.main===module){
-  const materializer=require('../refactor/materialize-v0170-clean-runtime');
-  const original=materializer.main;
-  if(typeof original==='function')original();
-  const base=gitShowJson('update/manifest.json');
-  const out=apply(base);validate(out);fs.writeFileSync(manifestPath,JSON.stringify(out,null,2)+'\n','utf8');
-  console.log('V0.17 CLEAN CONSOLIDATION MANIFEST: VALID',JSON.stringify({version:VERSION,baseline:BASELINE_COMMIT,changed_entries:CHANGES.length,clean_runtime_consolidated:true,runtime_successor_wrappers:false}));
-}
-module.exports={CHANGES,apply,validate,entry};
+if(require.main===module)main();
+module.exports={CHANGES,apply,validate,entry,main};
