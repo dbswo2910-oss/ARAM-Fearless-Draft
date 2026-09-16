@@ -1,46 +1,28 @@
-# ARAM Rating v0.3.2 — Accuracy-First Research Foundation
+# ARAM Rating v0.3.2 Research
 
-This branch starts from the v0.16.0 CLEAN BASELINE. It is Research-only: it does not change the production manifest, does not automatically collect matches, and does not replace the production rating model.
+Accuracy-first research branch for ARAM rating calibration and match-network expansion.
 
-## Immutable continuity
-- IndexedDB: `aram-rating-research-v03`
-- checkpoint: `checkpoint-v03`
-- canonical identity: PUUID
-- the Research checkpoint is extended in place; no destructive reset is allowed.
+## Current B5.1 recovery status
 
-## Accuracy objective
-Primary model metric is future-match Log Loss. Brier score, calibration/ECE, accuracy, uncertainty, density and network connectivity are secondary diagnostics. A score is never shown for a zero-observation player.
+- R2: one-shot external target request accepted.
+- R3: original legacy request shape accepted on anchor 1.
+- R4: same shape accepted on anchor 2.
+- R5: anchors 1 -> 2 accepted sequentially in one session.
+- R6: preserved legacy checkpoint forensic proved 15/15 anchors failed 3 times each (45 HTTP 400 requests) and were incorrectly marked completed.
+- R7: read-only repair preview confirmed all 15 false completions should be requeued.
+- R8: guarded checkpoint repair requeued all 15 without changing the 1982 stored matches.
+- R9: guarded one-anchor recovery succeeded on the user PC; 20 valid target matches returned, 18 duplicates, 2 new unique matches accepted. Checkpoint advanced 1982 -> 1984, completed 0 -> 1, remaining 15 -> 14, with prior-match integrity preserved.
+- R10: guarded three-anchor bounded recovery prepared. Exact R9 state is required; maximum 3 requests, no retries, stop on first request/validation failure, and per-anchor rollback on postcondition failure.
 
-## v0.3.2 modules
-- `accuracy-first-contract.js`: scientific/safety contract and winner gate
-- `target-analysis-core.js`: arbitrary resolved-PUUID target state machine
-- `adaptive-sampling.js`: target-centric information-value ranking; no network calls
-- `global-network-metrics.js`: connected-components/density metrics
-- `confidence-framework.js`: uncertainty and user-facing confidence separation
-- `temporal-evaluator.js`: leakage-free frozen/walk-forward evaluation helpers
-- `b2-compatibility.js`: v0.3.1 continuity adapter
-- `baseline-reference.js`: aggregate B1 reference only
-- `b2-manual-core.js`: B2 manual sampling/accounting core
-- `b3-manual-core.js`: B3 density-first candidate ranking for the 500→1000 phase
+## Safety
 
-## Completed research checkpoints
-- B1 reference: 159 matches.
-- B2 manual accuracy-first expansion reached the hard cap at 500 matches without resetting the existing checkpoint.
-- B2 500-match evaluation currently reports `no_clear_winner`; TrueSkill-family is observed leader but is not promoted.
+- Research-only; not shipped in the production manifest.
+- Automatic collection remains disabled.
+- Production rating activation remains disabled.
+- Destructive reset/migration is forbidden.
+- Live collection requires explicit manual confirmation.
+- Privacy-safe evidence does not store raw PUUIDs or Riot IDs.
 
-## B3 — density-first 500→1000
-B3 is intentionally split into preview and execution stages. The current stage is **preview-only**:
-- requires an existing 500+ match checkpoint;
-- prioritizes already-observed 2+ players, repeat-network overlap, 5+/10+ threshold progress, and single-neighbor recovery;
-- applies a stronger new-player explosion penalty;
-- proposes at most 50 candidates toward a 1000-match target;
-- performs **zero Riot/LCU collection requests** and **zero checkpoint writes**.
+## Next step
 
-Preview files:
-- `b3-manual-core.js`
-- `phase-b3-v032-preview-devtools.js`
-
-The actual B3 live runner is not enabled by this stage. It must be separately reviewed/approved after preview output is inspected.
-
-## Still not enabled
-No automatic background sync, no mass crawler, no champion/patch correction activation, and no production model promotion.
+Run R10 on the user PC, then evaluate the checkpoint growth and closed-network quality before widening recovery or activating any production rating path.
