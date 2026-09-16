@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -8,58 +9,35 @@ const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const pkgPath=byPath.get('package.json'),baseMainPath=byPath.get('main.js'),nodePath=byPath.get('autosync-live-runtime-v01571.js'),rendererPath=byPath.get('runtime-live-autosync-v01571.js'),v70Path=byPath.get('runtime-random-ingame-v01570.js'),v79Path=byPath.get('main-v01579.js');
-const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},entryTarget=String(pkg.main||'main.js'),entryPath=byPath.get(entryTarget);
-const entry=entryPath&&exists(entryPath)?read(entryPath):'',baseMain=baseMainPath&&exists(baseMainPath)?read(baseMainPath):'',node=nodePath&&exists(nodePath)?read(nodePath):'',renderer=rendererPath&&exists(rendererPath)?read(rendererPath):'',v79Entry=v79Path&&exists(v79Path)?read(v79Path):'';
-function collectMainChain(startTarget){
-  const out=[],seen=new Set();let target=startTarget;
-  // The successor chain is intentionally long-lived. v0.15.114 already needs more
-  // than the historical 32-hop cap to reach the permanent v0.15.79 safety base.
-  // Keep cycle protection, but use a generous finite ceiling so future successors
-  // do not create a false regression merely by extending the explicit chain.
-  while(target&&byPath.get(target)&&!seen.has(target)&&out.length<96){
-    seen.add(target);const source=byPath.get(target);if(!source||!exists(source))break;const text=read(source);out.push({target,source,text});
-    // Successor entry names can carry semantic suffixes such as
-    // main-v0161-shadow.js or main-v0162-shadow-diagnostics.js.
-    const refs=[...text.matchAll(/['"](main-v\d+(?:-[A-Za-z0-9-]+)?\.js)['"]/g)].map(x=>x[1]);target=refs.find(x=>byPath.has(x)&&!seen.has(x))||'';
-  }
-  return out;
-}
-const entryChain=collectMainChain(entryTarget),entryChainTargets=entryChain.map(x=>x.target),entryChainText=entryChain.map(x=>x.text).join('\n');
-const versionEdges=[];
-function collectSemanticVersionEdges(text){
-  text=String(text||'');
-  for(const x of text.matchAll(/replaceAll\('([0-9.]+)','([0-9.]+)'\)/g))versionEdges.push([x[1],x[2]]);
-  // Newer recovery successors can keep their semantic route transform in a helper
-  // module instead of embedding escaped source strings in main-v*. Treat the
-  // declared OLD/NEW route fragment versions as an explicit runtime promotion.
-  const oldFrag=text.match(/OLD_ROUTE_FRAGMENT\s*=\s*["']'([0-9.]+)'\)\.replaceAll/);
-  const newFrag=text.match(/NEW_ROUTE_FRAGMENT\s*=\s*["']'([0-9.]+)'\)\.replaceAll/);
-  if(oldFrag&&newFrag)versionEdges.push([oldFrag[1],newFrag[1]]);
-}
-for(const row of entryChain)collectSemanticVersionEdges(row.text);
-for(const [target,source] of byPath){
-  if(!/^successor-route.*\.js$/.test(target)||!source||!exists(source))continue;
-  collectSemanticVersionEdges(read(source));
-}
-function versionReachable(from,to){const q=[String(from)],seen=new Set(q);while(q.length){const a=q.shift();if(a===String(to))return true;for(const [x,y] of versionEdges)if(x===a&&!seen.has(y)){seen.add(y);q.push(y)}}return false}
-report.entry_chain=entryChainTargets;report.version_edges=versionEdges;
-for(const [name,src] of [['current Electron entry',entry],['v0.15.79 safety successor base',v79Entry],['historical v0.15.70 main',baseMain],['main-process live runtime',node],['renderer live runtime',renderer]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
+const clean=m.clean_runtime_consolidated===true;
+const pkgPath=byPath.get('package.json'),entryPath=byPath.get('main.js'),runtimeMainPath=resolveCurrentRuntimeSource(ROOT,m);
+const nodePath=byPath.get('autosync-live-runtime-v01571.js'),rendererPath=byPath.get('runtime-live-autosync-v01571.js'),v70Path=byPath.get('runtime-random-ingame-v01570.js'),v79Path=byPath.get('main-v01579.js');
+const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},entry=entryPath&&exists(entryPath)?read(entryPath):'',runtimeMain=runtimeMainPath&&exists(runtimeMainPath)?read(runtimeMainPath):'',node=nodePath&&exists(nodePath)?read(nodePath):'',renderer=rendererPath&&exists(rendererPath)?read(rendererPath):'',v79Entry=v79Path&&exists(v79Path)?read(v79Path):'';
+const historical71=exists('update/v0.15.71/main-v01571.js')?read('update/v0.15.71/main-v01571.js'):'',historical70=exists('update/v0.15.70/main.js')?read('update/v0.15.70/main.js'):'';
+for(const [name,src] of [['current Electron entry',entry],['effective runtime main',runtimeMain],['historical v0.15.71 entry',historical71],['main-process live runtime',node],['renderer live runtime',renderer]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
 ok('manifest is v0.15.71 or newer',ge(m.version,'0.15.71'),m.version);
 ok('package is v0.15.71 or newer',ge(pkg.version,'0.15.71'),pkg.version);
-ok('package current entry is delivered',!!entryPath&&exists(entryPath),`${entryTarget} -> ${entryPath||'missing'}`);
-ok('historical v0.15.70 main remains immutable runtime base',baseMainPath==='update/v0.15.70/main.js',baseMainPath||'missing');
+ok('current main and effective runtime are delivered',!!entryPath&&exists(entryPath)&&!!runtimeMainPath&&exists(runtimeMainPath),`${entryPath||'missing'} -> ${runtimeMainPath||'missing'}`);
+ok('historical v0.15.71 entry remains preserved',!!historical71);
 ok('main-process live runtime is delivered',nodePath==='update/v0.15.71/autosync-live-runtime-v01571.js',nodePath||'missing');
 ok('renderer live runtime target is delivered',!!rendererPath&&exists(rendererPath),rendererPath||'missing');
 ok('v0.15.70 Random In-game owner remains active',v70Path==='update/v0.15.70/runtime-random-ingame-v01570.js',v70Path||'missing');
-ok('v0.15.79 safety successor base is delivered',!!v79Path&&exists(v79Path),v79Path||'missing');
-ok('current entry inherits v0.15.79 safety successor',entryChainTargets.includes('main-v01579.js'),entryChainTargets.join(' -> '));
-ok('inherited entry patches cached AutoSync Core before compiling historical main',v79Entry.indexOf("require('./autosync-live-runtime-v01571').patch(autosyncCore)")>=0&&v79Entry.indexOf('module._compile(src,__filename)')>v79Entry.indexOf("patch(autosyncCore)"));
-ok('inherited entry requires exact v0.15.70 base contract',v79Entry.includes("const VERSION='0.15.70'")&&v79Entry.includes('base main contract mismatch'));
-ok('successor chain promotes runtime version to current manifest',v79Entry.includes("replaceAll('0.15.70','0.15.79')")&&versionReachable('0.15.70',m.version),`${m.version} · ${versionEdges.map(x=>x.join('→')).join(', ')}`);
-ok('inherited entry injects renderer live governor after performance owner',v79Entry.includes("'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'"));
-ok('inherited entry preserves v0.15.71 renderer readiness marker',v79Entry.includes('__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__'));
-ok('historical base still contains v0.15.70 Random In-game owner',baseMain.includes("'runtime-random-ingame-v01570.js'")&&baseMain.includes('aramRandomIngameRuntimeV01570?.finishBootstrap'));
+ok('v0.15.79 safety lineage remains preserved',!!v79Path&&exists(v79Path),v79Path||'missing');
+ok('historical v0.15.71 wrapper patched core before compiling v0.15.70 base',historical71.indexOf("require('./autosync-live-runtime-v01571').patch(autosyncCore)")>=0&&historical71.indexOf('module._compile(src,__filename)')>historical71.indexOf('patch(autosyncCore)'));
+ok('historical v0.15.71 wrapper injected renderer governor after performance owner',historical71.includes("'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'"));
+ok('historical v0.15.71 readiness included renderer governor',historical71.includes('__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__'));
+if(clean){
+  ok('clean package uses canonical main.js entry',pkg.main==='main.js',pkg.main||'missing');
+  ok('clean entry declares flattened no-wrapper lineage',entry.includes("legacySafetyRoot:'main-v01579.js'")&&entry.includes('flattened:true')&&entry.includes('runtimeSuccessorWrappers:false'));
+  const patchAt=entry.indexOf("require('./autosync-live-runtime-v01571').patch(autosyncCore)"),legacyAt=entry.indexOf("require('./legacy-runtime-v0170.js')");
+  ok('clean entry patches v0.15.71 core governor before direct legacy runtime load',patchAt>=0&&legacyAt>patchAt,`${patchAt}/${legacyAt}`);
+  ok('flattened runtime directly injects v0.15.71 renderer governor after performance owner',runtimeMain.includes("'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'"));
+  ok('flattened runtime readiness directly includes v0.15.71 renderer governor',runtimeMain.includes('__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__'));
+  ok('clean active runtime is already promoted to manifest version',runtimeMain.includes(`const VERSION='${m.version}'`),m.version);
+  ok('clean active runtime has no successor compilation',!entry.includes('module._compile(')&&!runtimeMain.includes('module._compile('));
+}else{
+  ok('historical successor contract can still be reconstructed from v0.15.70',historical70.includes("'runtime-performance-v01568.js','live-strength-v01513.js'")&&historical71.includes("replaceAll('0.15.70','0.15.71')"));
+}
 ok('core cadence is reduced from 750ms to 1200ms',node.includes("setInterval(()=>this.tick().catch(()=>{}),1200)"));
 ok('identity/lobby refresh is throttled during live game',node.includes('t-last<15000')&&node.includes('__aramLiveIdentityAtV01571'));
 ok('credential and gameflow checks are throttled during live game',node.includes('t-last<3000')&&node.includes('__aramLiveCredsAtV01571')&&node.includes('__aramLiveFlowCacheV01571'));
@@ -75,9 +53,9 @@ ok('renderer live patch is score-neutral',renderer.includes('score_logic_changed
 try{
   const scriptsOld="'runtime-performance-v01568.js','live-strength-v01513.js'",scriptsNew="'runtime-performance-v01568.js','runtime-live-autosync-v01571.js','live-strength-v01513.js'";
   const readyOld='Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__) && Boolean(window.__ARAM_LIVE_STRENGTH_V01513__)',readyNew='Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__) && Boolean(window.__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__) && Boolean(window.__ARAM_LIVE_STRENGTH_V01513__)';
-  const current=baseMain.replace(scriptsOld,scriptsNew).replace(readyOld,readyNew).replaceAll('0.15.70',m.version);
-  new Function(current);ok('v0.15.71 live transform remains syntactically valid',current.includes(`const VERSION='${m.version}'`)&&current.includes("'runtime-live-autosync-v01571.js'"));
-}catch(e){ok('v0.15.71 live transform remains syntactically valid',false,e.message)}
+  const transformed=historical70.replace(scriptsOld,scriptsNew).replace(readyOld,readyNew).replaceAll('0.15.70','0.15.71');
+  new Function(transformed);ok('historical v0.15.71 transform remains syntactically valid',transformed.includes("const VERSION='0.15.71'")&&transformed.includes("'runtime-live-autosync-v01571.js'"));
+}catch(e){ok('historical v0.15.71 transform remains syntactically valid',false,e.message)}
 try{
   let intervalDelay=0;
   class Core{constructor(){this.state={phase:'in_game',gameflowPhase:'InProgress'};this.creds={};this.timer=null}tick(){return Promise.resolve()}captureIdentityAndParty(){return Promise.resolve()}refreshCreds(){return Promise.resolve(true)}gameflowInfo(){return Promise.resolve({phase:'InProgress',queueId:450,gameId:1})}liveGet(){return Promise.resolve({})}}
