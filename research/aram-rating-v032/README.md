@@ -11,6 +11,7 @@ Accuracy-first research branch for ARAM player rating. Production activation rem
 - R10 expanded the recovery to 3 more anchors: all 3 accepted, 60 valid matches returned in aggregate, **0 new unique matches**, checkpoint remained 1984.
 - R9+R10 combined: 4 requests / 80 valid returned / 2 new unique = **2.5% unique-yield ratio**, a strong fixed-queue saturation signal.
 - R13 replaced manual one-by-one iteration with bounded targeted collection and completed 3 information-gain-ranked anchors in one guarded run.
+- R14 confirmed Elo remains the observed leader but the model-selection gate remains `no_clear_winner` on the 2020-match checkpoint.
 
 ## R11 result
 
@@ -35,6 +36,7 @@ The final R14 user-PC read-only evaluation completed with:
 - selection status: `no_clear_winner`
 - observed leader: Elo
 - observed runner-up: Glicko
+- checkpoint: 2020 matches / 15 selected / 7 completed / 8 remaining
 - next step: `BUILD_ELO_GLICKO_DUAL_SHADOW_AND_STOP_BLIND_COLLECTION`
 
 This means Elo remains the strongest observed model, but the research gate still does not justify replacing the production score with a single winner.
@@ -58,12 +60,26 @@ The dual shadow:
 - does not export raw PUUID or identity mappings
 - is wired once into `src/research/owner.js`, not patched into Profile/Results/AutoSync individually
 
-The purpose is to accumulate clean side-by-side evidence behind one interface before any future production-model cutover.
+## R16 promotion gate
+
+`src/research/shadow-promotion-gate.js` prevents the shadow from becoming a production decision just because one evaluation favors a model.
+
+Before a model can even become **eligible for manual production review**, the gate requires:
+
+- at least 3 distinct dual-shadow dataset snapshots
+- at least 100 matches of dataset growth between the first and latest snapshot
+- the latest research selection gate to be `candidate_winner`
+- the same observed leader across all qualifying snapshots
+- a positive leader advantage in both frozen and walk-forward log loss
+
+Even after every condition passes, R16 returns only `eligible_for_manual_promotion_review`; it never authorizes or performs production activation automatically. The current R14 `no_clear_winner` evidence is explicitly classified as `hold_shadow`.
 
 ## Safety
 
 - production activation: OFF
 - automatic collection: OFF
+- automatic promotion: OFF
 - destructive reset/migration: forbidden
 - Research dual shadow does not replace the production rating
+- R16 requires separate manual release approval even after evidence matures
 - research diagnostics and dual-shadow source are not shipped in the production manifest
