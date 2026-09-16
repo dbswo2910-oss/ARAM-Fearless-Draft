@@ -1,5 +1,7 @@
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
+const {resolveCurrentLoaderLineage}=require('./current-loader-lineage');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -8,22 +10,37 @@ const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').
 const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json'),ownerPath=byPath.get('runtime-random-ingame-v01570.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m),pkgPath=byPath.get('package.json'),ownerPath=byPath.get('runtime-random-ingame-v01570.js');
+const loader77Path=byPath.get('runtime-loader-v01577.js');
 const main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{},owner=ownerPath&&exists(ownerPath)?read(ownerPath):'';
+const loader77=loader77Path&&exists(loader77Path)?read(loader77Path):'';
+let loaderLineage=[];try{if(ge(m.version,'0.15.79'))loaderLineage=resolveCurrentLoaderLineage(ROOT,m)}catch(e){ok('current loader lineage resolves',false,e.message)}
 for(const [name,src] of [['main',main],['v0.15.70 random in-game owner',owner]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
+for(const row of loaderLineage){try{new Function(row.text);ok(`loader lineage parses ${row.source}`,true)}catch(e){ok(`loader lineage parses ${row.source}`,false,e.message)}}
 ok('manifest is v0.15.70 or newer',ge(m.version,'0.15.70'),m.version);
 ok('package is v0.15.70 or newer',ge(pkg.version,'0.15.70'),pkg.version);
-ok('current main is delivered from a versioned update path',!!mainPath&&/^update\/v\d+\.\d+\.\d+\/main\.js$/.test(mainPath)&&exists(mainPath),mainPath||'missing');
+ok('current main is delivered from a versioned update path',!!mainPath&&/^update\/v\d+\.\d+\.\d+\/(?:legacy-runtime-v\d+|main)\.js$/.test(mainPath)&&exists(mainPath),mainPath||'missing');
 const currentVersion=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';ok('current main is v0.15.70 or newer',ge(currentVersion,'0.15.70'),currentVersion);
 ok('current package is delivered from a versioned update path',!!pkgPath&&/^update\/v\d+\.\d+\.\d+\/package\.json$/.test(pkgPath)&&exists(pkgPath),pkgPath||'missing');
 ok('manifest maps v0.15.70 random in-game owner',ownerPath==='update/v0.15.70/runtime-random-ingame-v01570.js',ownerPath||'missing');
 const ownerAt=main.indexOf("'runtime-random-ingame-v01570.js'"),coachAt=main.indexOf("'random-ingame-coach-v01550.js'"),globalIconAt=main.indexOf("'item-icons-global-v01557.js'"),itemArtAt=main.indexOf("'item-art-runtime-v01566.js'");
 ok('single-owner loads immediately before historical coach stack',ownerAt>=0&&coachAt>ownerAt,`${ownerAt}/${coachAt}`);
 ok('historical v0.15.50-v0.15.57 stack remains before item-art owner',globalIconAt>coachAt&&itemArtAt>globalIconAt,`${coachAt}/${globalIconAt}/${itemArtAt}`);
-const finishAt=main.indexOf("if(file==='item-icons-global-v01557.js')");
-ok('v0.15.70 bootstrap finishes immediately after v0.15.57 injection',finishAt>=0&&main.includes('aramRandomIngameRuntimeV01570?.finishBootstrap?.()'));
+const loaderOwned=ge(m.version,'0.15.77');
+if(loaderOwned){
+  ok('runtime loader preserves v0.15.70 finish boundary after v0.15.57',loader77.includes("if(file==='item-icons-global-v01557.js')")&&loader77.includes('aramRandomIngameRuntimeV01570?.finishBootstrap?.()'),loader77Path||'missing');
+  if(ge(m.version,'0.15.79')){
+    const sources=loaderLineage.map(x=>x.source);
+    ok('current runtime delegates injection through logical v0.15.79 safety loader',main.includes("require('./runtime-loader-v01579').injectRuntimeStack"),mainPath);
+    ok('physical current-loader lineage reaches v0.15.77 isolated injector',sources.some(x=>/\/v0\.15\.77\/runtime-loader-v01577\.js$/.test('/'+x)),sources.join(' -> '));
+  }
+  ok('runtime loader restores v0.15.68 timer hook after bootstrap finalization',loader77.includes('aramRandomIngameRuntimeV01570?.finishBootstrap?.(); window.aramRuntimePerformanceV01568?.restoreTimerHook?.();'),loader77Path||'missing');
+}else{
+  const finishAt=main.indexOf("if(file==='item-icons-global-v01557.js')");
+  ok('v0.15.70 bootstrap finishes immediately after v0.15.57 injection',finishAt>=0&&main.includes('aramRandomIngameRuntimeV01570?.finishBootstrap?.()'));
+  ok('v0.15.68 timer hook is restored only after v0.15.70 narrow bootstrap chain',main.indexOf('aramRuntimePerformanceV01568?.restoreTimerHook?.()')>finishAt);
+}
 ok('v0.15.70 readiness marker is guarded by main',main.includes('Boolean(window.__ARAM_RANDOM_INGAME_RUNTIME_V01570__)'));
-ok('v0.15.68 timer hook is restored only after v0.15.70 narrow bootstrap chain',main.indexOf('aramRuntimePerformanceV01568?.restoreTimerHook?.()')>finishAt);
 for(const p of ['random-ingame-coach-v01550.js','random-ingame-ux-v01551.js','random-ingame-ux-v01552.js','random-ingame-shop-v01553.js','random-ingame-shop-polish-v01554.js','random-item-icons-v01556.js','item-icons-global-v01557.js']){const src=byPath.get(p)||'';ok(`historical ${p} remains mapped to historical source`,!!src&&!src.includes('v0.15.70/'),src)}
 ok('owner suppresses historical interval registration only during bootstrap',owner.includes('window.setInterval=suppressedInterval')&&owner.includes('window.setInterval=upstreamSetInterval'));
 ok('owner suppresses historical MutationObserver registration only during bootstrap',owner.includes('AramSuppressedRandomIngameObserver')&&owner.includes('window.MutationObserver=NativeMutationObserver'));
@@ -42,4 +59,4 @@ ok('global v57 icon scan is skipped while Random in-game is active',owner.includ
 ok('runtime exposes diagnostic counters and timing maxima',owner.includes('getStats:()=>')&&owner.includes('maxLayerMs')&&owner.includes('maxTickMs'));
 ok('v0.15.70 remains scoring-neutral',owner.includes('score_logic_changed:false'));
 try{let realIntervals=0,detailCalls=0,analysisCalls=0;const queued=[];const realSetInterval=function(){realIntervals++;return 9000+realIntervals};const timers={setTimeout(fn){queued.push(fn);return queued.length},clearTimeout(){},setInterval:realSetInterval,clearInterval(){}};const listeners=[];const root={classList:{contains(){return false}},getAttribute(){return'pick'},querySelector(){return null},querySelectorAll(){return[]}};const document={visibilityState:'visible',querySelector(s){return s==='#random'?root:null},addEventListener(type,fn,opts){listeners.push([type,fn,opts])}};class NativeMO{constructor(){this.native=true}observe(){}disconnect(){}}const context={window:null,document,MutationObserver:NativeMO,performance:{now:()=>0},Date,JSON,Math,Number,String,Array,Object,Set,Map,WeakMap,console,...timers,randomViewMode:'ingame',renderRandomDetails(){detailCalls++},renderRandomAnalysis(){analysisCalls++},randomState:{ourModes:{},enemyModes:{}},lolAutoSync:{lastState:null}};context.window=context;context.addEventListener=function(type,fn,opts){listeners.push([`window:${type}`,fn,opts])};vm.runInNewContext(owner,context);context.setInterval(()=>{},320);new context.MutationObserver(()=>{});vm.runInNewContext("document.addEventListener('click',function(){return '#random,.randomModeNav'},true)",context);context.renderRandomDetails();context.renderRandomAnalysis();const before=context.aramRandomIngameRuntimeV01570.getStats();ok('VM bootstrap suppresses historical recurring interval',before.counters.bootstrapIntervalsSuppressed===1,JSON.stringify(before.counters));ok('VM bootstrap suppresses historical subtree observer',before.counters.bootstrapObserversSuppressed===1,JSON.stringify(before.counters));ok('VM bootstrap suppresses historical random-wide click scheduler',before.counters.bootstrapClicksSuppressed===1,JSON.stringify(before.counters));ok('VM wrappers suppress hidden legacy in-game detail/analysis renderers',detailCalls===0&&analysisCalls===0&&before.counters.legacyDetailRendersSuppressed===1&&before.counters.legacyAnalysisRendersSuppressed===1,`${detailCalls}/${analysisCalls}`);context.aramRandomIngameRuntimeV01570.finishBootstrap();const after=context.aramRandomIngameRuntimeV01570.getStats();ok('VM finish installs exactly one real owner interval',realIntervals===1&&after.timer===true,`realIntervals=${realIntervals}`);ok('VM restores native interval and observer constructors after bootstrap',context.setInterval===realSetInterval&&context.MutationObserver===NativeMO);context.randomViewMode='pick';context.renderRandomDetails();context.renderRandomAnalysis();ok('VM preserves legacy renderers outside in-game mode',detailCalls===1&&analysisCalls===1,`${detailCalls}/${analysisCalls}`)}catch(e){ok('v0.15.70 VM bootstrap simulation',false,e.stack||e.message)}
-report.pass=report.checks.every(x=>x.pass);fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01570-report.json'),JSON.stringify(report,null,2));for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1);
+report.pass=report.checks.every(x=>x.pass);report.info={loaderLineage:loaderLineage.map(x=>x.source)};fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output/runtime-stability-v01570-report.json'),JSON.stringify(report,null,2));for(const c of report.checks)console.log(`${c.pass?'PASS':'FAIL'} ${c.name}${c.detail?' · '+c.detail:''}`);if(!report.pass)process.exit(1);

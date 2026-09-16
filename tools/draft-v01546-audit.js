@@ -13,15 +13,17 @@ const riskPath=byPath.get('draft-risk-board-v01546.js');
 const layoutPath=byPath.get('draft-layout-v01545.js');
 const balancePath=byPath.get('draft-balance-alerts-v01543.js');
 const mainPath=byPath.get('main.js');
+const cleanLegacy=m.clean_runtime_consolidated===true?[...(m.files||[])].find(x=>/^legacy-runtime-v\d+\.js$/.test(String(x.path||'')))?.source:null;
+const runtimePath=cleanLegacy&&exists(cleanLegacy)?cleanLegacy:mainPath;
 const pkgPath=byPath.get('package.json');
 ok(gte(m.version,'0.15.46'),'Manifest retains v0.15.46+ risk runtime baseline',m.version);
 ok(!!riskPath&&exists(riskPath),'v0.15.46 risk runtime delivered',riskPath||'missing');
 ok(!!layoutPath&&/v0\.15\.45\/draft-layout-v01545\.js$/.test(layoutPath),'Stable v0.15.45 layout is retained',layoutPath||'missing');
 ok(!!balancePath&&/v0\.15\.45\/draft-balance-alerts-v01543-clean\.js$/.test(balancePath),'Clean no-layout balance runtime is retained',balancePath||'missing');
-ok(!!mainPath&&exists(mainPath),'Current main runtime delivered',mainPath||'missing');
+ok(!!runtimePath&&exists(runtimePath),'Current main runtime delivered',runtimePath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package metadata delivered',pkgPath||'missing');
 const s=riskPath&&exists(riskPath)?read(riskPath):'';
-const main=mainPath&&exists(mainPath)?read(mainPath):'';
+const main=runtimePath&&exists(runtimePath)?read(runtimePath):'';
 const pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
 try{new Function(s);ok(true,'Risk runtime parses as JavaScript')}catch(e){ok(false,'Risk runtime parses as JavaScript',e.message)}
 try{new Function(main);ok(true,'Main runtime parses as JavaScript')}catch(e){ok(false,'Main runtime parses as JavaScript',e.message)}

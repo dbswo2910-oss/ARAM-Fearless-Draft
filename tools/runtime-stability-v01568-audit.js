@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -8,8 +9,8 @@ const ok=(name,pass,detail='')=>report.checks.push({name,pass:!!pass,detail});
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json'),perfPath=byPath.get('runtime-performance-v01568.js');
-const main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)): {},perf=perfPath&&exists(perfPath)?read(perfPath):'';
+const mainPath=resolveCurrentRuntimeSource(ROOT,m),pkgPath=byPath.get('package.json'),perfPath=byPath.get('runtime-performance-v01568.js'),v79Path=byPath.get('main-v01579.js');
+const main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)): {},perf=perfPath&&exists(perfPath)?read(perfPath):'',v79=v79Path&&exists(v79Path)?read(v79Path):'';
 for(const [name,src] of [['main',main],['runtime-performance',perf]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}
 ok('manifest is v0.15.68 or newer',ge(m.version,'0.15.68'),m.version);
 ok('package is v0.15.68 or newer',ge(pkg.version,'0.15.68'),pkg.version);
@@ -22,8 +23,12 @@ ok('terminal moved/resized events are used',main.includes("mainWindow.on('moved'
 ok('will-move/will-resize enter native interaction once',main.includes("mainWindow.on('will-move'")&&main.includes("mainWindow.on('will-resize'")&&main.includes('nativeInteraction===busy'));
 ok('Windows DWM background material forced to none',main.includes("setBackgroundMaterial('none')"));
 const scriptsLine=(main.match(/const scripts=\[\s*\n\s*([^\n]+)/)||[])[1]||'';
-ok('performance runtime is first injected overlay',scriptsLine.trim().startsWith("'runtime-performance-v01568.js'"),scriptsLine.slice(0,120));
-ok('timer hook restored after overlay bootstrap',main.includes('aramRuntimePerformanceV01568?.restoreTimerHook?.()'));
+const safetySuccessor=ge(m.version,'0.15.79');
+const overlayOrderOk=safetySuccessor?scriptsLine.trim().startsWith("'runtime-blackbox-v01577.js','runtime-safety-net-v01579.js','runtime-performance-v01568.js'"):scriptsLine.trim().startsWith("'runtime-performance-v01568.js'");
+ok('performance runtime follows the active safety bootstrap order',overlayOrderOk,scriptsLine.slice(0,180));
+const legacyTimerRestore=main.includes('aramRuntimePerformanceV01568?.restoreTimerHook?.()');
+const v79IntentionallyRemovesRestore=safetySuccessor&&v79.includes('const finalOld="chain.then(()=>mainWindow.webContents.executeJavaScript(\'window.aramRuntimePerformanceV01568?.restoreTimerHook?.(); true\',false)).then(()=>mainWindow.webContents.executeJavaScript("')&&v79.includes('src=src.replace(finalOld,finalNew)')&&!legacyTimerRestore;
+ok('timer-hook lifecycle matches exact v0.15.68 or v0.15.79+ safety contract',safetySuccessor?v79IntentionallyRemovesRestore:legacyTimerRestore,safetySuccessor?'v0.15.79+ removes the global timer finalizer intentionally':'v0.15.68 restores timer hook after bootstrap');
 ok('runtime has no renderer resize listener',!perf.includes("window.addEventListener('resize'"));
 ok('runtime exposes native interaction gate',perf.includes('function setNativeInteraction(v)')&&perf.includes('setBusy:setNativeInteraction'));
 ok('governed sub-second intervals clamp to 900ms',perf.includes('requested<900?900:requested'));

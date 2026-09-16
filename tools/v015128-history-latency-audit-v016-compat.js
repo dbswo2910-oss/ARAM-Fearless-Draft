@@ -10,10 +10,12 @@ let src=fs.readFileSync(sourcePath,'utf8');
 
 const oldLine="    const activeRuntimePath=map.get(`runtime-source-stability-v${String(manifest.version).replace(/\\./g,'')}.js`);";
 const oldCompat="    const activeRuntimeKey=String(manifest.version)==='0.16.0'?'runtime-source-stability-v015135.js':`runtime-source-stability-v${String(manifest.version).replace(/\\./g,'')}.js`;\n    const activeRuntimePath=map.get(activeRuntimeKey);";
-const newCompat="    const activeRuntimeKey=/^0\\.16\\./.test(String(manifest.version))?'runtime-source-stability-v015135.js':`runtime-source-stability-v${String(manifest.version).replace(/\\./g,'')}.js`;\n    const activeRuntimePath=map.get(activeRuntimeKey);";
+const priorCompat="    const activeRuntimeKey=/^0\\.16\\./.test(String(manifest.version))?'runtime-source-stability-v015135.js':`runtime-source-stability-v${String(manifest.version).replace(/\\./g,'')}.js`;\n    const activeRuntimePath=map.get(activeRuntimeKey);";
+const newCompat="    const cleanSuccessor=String(manifest.version)==='0.17.0'&&manifest.clean_runtime_consolidated===true;\n    const activeRuntimeKey=(/^0\\.16\\./.test(String(manifest.version))||cleanSuccessor)?'runtime-source-stability-v015135.js':`runtime-source-stability-v${String(manifest.version).replace(/\\./g,'')}.js`;\n    const activeRuntimePath=map.get(activeRuntimeKey);";
 if(src.includes(oldLine))src=src.replace(oldLine,newCompat);
 else if(src.includes(oldCompat))src=src.replace(oldCompat,newCompat);
-else if(!src.includes("const activeRuntimeKey=/^0\\.16\\./.test(String(manifest.version))?'runtime-source-stability-v015135.js'"))throw new Error('v0.15.128 active successor runtime lookup contract drifted');
+else if(src.includes(priorCompat))src=src.replace(priorCompat,newCompat);
+else if(!src.includes("const cleanSuccessor=String(manifest.version)==='0.17.0'&&manifest.clean_runtime_consolidated===true"))throw new Error('v0.15.128 active successor runtime lookup contract drifted');
 
 fs.writeFileSync(tempPath,src,'utf8');
 try{

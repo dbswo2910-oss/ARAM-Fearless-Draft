@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -9,7 +10,7 @@ const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const histMainPath='update/v0.15.69/main.js',histPkgPath='update/v0.15.69/package.json';
 const histMain=exists(histMainPath)?read(histMainPath):'',histPkg=exists(histPkgPath)?JSON.parse(read(histPkgPath)):{};
-const currentMainPath=byPath.get('main.js'),currentPkgPath=byPath.get('package.json'),perfPath=byPath.get('runtime-performance-v01568.js');
+const currentMainPath=resolveCurrentRuntimeSource(ROOT,m),currentPkgPath=byPath.get('package.json'),perfPath=byPath.get('runtime-performance-v01568.js');
 const currentMain=currentMainPath&&exists(currentMainPath)?read(currentMainPath):'',currentPkg=currentPkgPath&&exists(currentPkgPath)?JSON.parse(read(currentPkgPath)):{};
 const perf=perfPath&&exists(perfPath)?read(perfPath):'';
 for(const [name,src] of [['historical v0.15.69 main',histMain],['current main',currentMain],['current v0.15.68 performance runtime',perf]]){try{new Function(src);ok(`${name} parses`,true)}catch(e){ok(`${name} parses`,false,e.message)}}

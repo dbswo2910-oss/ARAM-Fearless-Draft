@@ -8,7 +8,8 @@ const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const patchPath=byPath.get('draft-balance-alerts-v01543.js');
-const mainPath=byPath.get('main.js');
+const cleanLegacy=m.clean_runtime_consolidated===true?[...(m.files||[])].find(x=>/^legacy-runtime-v\d+\.js$/.test(String(x.path||'')))?.source:null;
+const mainPath=cleanLegacy&&exists(cleanLegacy)?cleanLegacy:byPath.get('main.js');
 const ver=String(m.version||'0').split('.').map(x=>Number(x)||0),atLeast1543=(ver[0]>0)||(ver[1]>15)||(ver[1]===15&&(ver[2]||0)>=43);
 ok(atLeast1543,'Manifest retains v0.15.43+ draft balance layer',m.version);
 ok(!!patchPath&&exists(patchPath),'v0.15.43 balance/alert runtime delivered',patchPath||'missing');

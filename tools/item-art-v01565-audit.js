@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -8,7 +9,7 @@ const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const stablePath=byPath.get('item-art-stable-v01565.js'),unifiedPath=byPath.get('item-art-unified-v01564.js'),mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json');
+const stablePath=byPath.get('item-art-stable-v01565.js'),unifiedPath=byPath.get('item-art-unified-v01564.js'),mainPath=resolveCurrentRuntimeSource(ROOT,m),pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.65'),'Manifest version is v0.15.65 or newer',m.version);
 ok(!!stablePath&&/v0\.15\.65\/item-art-stable-v01565\.js$/.test(stablePath)&&exists(stablePath),'v0.15.65 anti-flicker owner remains delivered',stablePath||'missing');
 ok(!!unifiedPath&&exists(unifiedPath),'v0.15.64 unified resolver remains available as compatibility layer',unifiedPath||'missing');

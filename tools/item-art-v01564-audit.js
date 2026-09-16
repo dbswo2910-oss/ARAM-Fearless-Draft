@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),https=require('https');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -9,7 +10,7 @@ const warn=(name,detail='')=>report.warn.push({name,detail});
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const resolverPath=byPath.get('item-art-unified-v01564.js'),catalogPath=byPath.get('item-catalog-v01527.js'),mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json');
+const resolverPath=byPath.get('item-art-unified-v01564.js'),catalogPath=byPath.get('item-catalog-v01527.js'),mainPath=resolveCurrentRuntimeSource(ROOT,m),pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.64'),'Manifest is v0.15.64 or newer',m.version);
 ok(!!resolverPath&&/v0\.15\.64\/item-art-unified-v01564\.js$/.test(resolverPath)&&exists(resolverPath),'Unified item-art resolver is delivered',resolverPath||'missing');
 ok(!!catalogPath&&/v0\.15\.64\/item-catalog-v01527\.js$/.test(catalogPath)&&exists(catalogPath),'Current item catalog is delivered from v0.15.64',catalogPath||'missing');

@@ -1,0 +1,32 @@
+name: Clean Runtime Architecture Guard
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-runtime-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enforce permanent no-wrapper runtime contract
+        run: node tools/stability/clean-runtime-architecture-audit.js
+      - name: Upload architecture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clean-runtime-architecture
+          path: audit-output/stability/clean-runtime-architecture-report.json
+          if-no-files-found: error

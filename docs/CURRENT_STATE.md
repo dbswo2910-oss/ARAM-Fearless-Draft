@@ -4,11 +4,11 @@
 
 ## Active distribution
 
-- Active updater: **v0.16.3**
-- Manifest message: v0.16.3 · SHADOW RATING TRANSPARENCY
-- Manifest commit: `9e30066031a7a556ebffbaa89a82fd3190a3281e`
-- Package: `update/v0.16.3/package.json` → **v0.16.3**
-- Electron entry: `main-v0163-shadow-transparency.js` → `update/v0.16.3/main-v0163-shadow-transparency.js`
+- Active updater: **v0.17.0**
+- Manifest message: v0.17.0 · CLEAN CONSOLIDATED RUNTIME
+- Manifest fingerprint: `d9f45a409d7ab00847e8df99fb7b699071ef6e162ee76b84ccedf21a38b360f6`
+- Package: `update/v0.17.0/package.json` → **v0.17.0**
+- Electron entry: `main.js` → `update/v0.17.0/main.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
 
 ## Active ownership — do not create competing owners

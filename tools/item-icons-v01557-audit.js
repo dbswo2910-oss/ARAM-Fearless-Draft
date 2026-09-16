@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -8,14 +9,14 @@ const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const iconPath=byPath.get('item-icons-global-v01557.js'),oldIconPath=byPath.get('random-item-icons-v01556.js'),mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json');
+const iconPath=byPath.get('item-icons-global-v01557.js'),oldIconPath=byPath.get('random-item-icons-v01556.js'),mainPath=resolveCurrentRuntimeSource(ROOT,m),pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.57'),'Manifest is v0.15.57 or newer',m.version);
 ok(!!iconPath&&/v0\.15\.57\/item-icons-global-v01557\.js$/.test(iconPath)&&exists(iconPath),'v0.15.57 global icon runtime remains delivered',iconPath||'missing');
 ok(!!oldIconPath&&/random-item-icons-v01556\.js$/.test(oldIconPath)&&exists(oldIconPath),'v0.15.56 coach icon contract remains delivered',oldIconPath||'missing');
-ok(!!mainPath&&exists(mainPath),'Current main is delivered',mainPath||'missing');
+ok(!!mainPath&&exists(mainPath),'Current effective main is delivered',mainPath||'missing');
 ok(!!pkgPath&&exists(pkgPath),'Current package is delivered',pkgPath||'missing');
 const s=iconPath&&exists(iconPath)?read(iconPath):'',main=mainPath&&exists(mainPath)?read(mainPath):'',pkg=pkgPath&&exists(pkgPath)?JSON.parse(read(pkgPath)):{};
-for(const [code,name] of [[s,'global item icon runtime'],[main,'main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
+for(const [code,name] of [[s,'global item icon runtime'],[main,'effective main']]){try{new Function(code);ok(true,`${name} parses as JavaScript`)}catch(e){ok(false,`${name} parses as JavaScript`,e.message)}}
 ok(/__ARAM_ITEM_ICONS_GLOBAL_V01557__\s*=\s*true/.test(s),'v0.15.57 readiness marker exists');
 ok(/getItemCatalog/.test(s)&&/aramRandomItemIconsV01556/.test(s),'Global layer reuses existing catalog when possible and desktop catalog otherwise');
 ok(/ddragon\.leagueoflegends\.com\/cdn/.test(s)&&/img\/item/.test(s),'Official Data Dragon item image path is used');
@@ -30,12 +31,12 @@ ok(/limit=6/.test(s)&&/out\.length>=limit/.test(s),'Icon strips have an explicit
 ok(!/querySelectorAll\([^)]*title/i.test(s)&&!/document\.body\.innerText/.test(s),'No broad title/body text UI discovery');
 ok(/score_logic_changed:false/.test(s),'v0.15.57 remains recommendation-score neutral');
 const oldAt=main.indexOf("'random-item-icons-v01556.js'"),globalAt=main.indexOf("'item-icons-global-v01557.js'"),roleAt=main.indexOf("'role-metric-detail-v01518.js'");
-ok(oldAt>=0&&globalAt>oldAt&&roleAt>globalAt,'Main preserves v0.15.56 -> v0.15.57 item-layer order');
-ok(main.includes('__ARAM_ITEM_ICONS_GLOBAL_V01557__'),'Main readiness guard covers v0.15.57');
+ok(oldAt>=0&&globalAt>oldAt&&roleAt>globalAt,'Effective runtime preserves v0.15.56 -> v0.15.57 item-layer order');
+ok(main.includes('__ARAM_ITEM_ICONS_GLOBAL_V01557__'),'Effective runtime readiness guard covers v0.15.57');
 const vm=(main.match(/const VERSION='([^']+)'/)||[])[1]||'';
-ok(ge(vm,'0.15.57'),'Current main VERSION is v0.15.57 or newer',vm);
+ok(ge(vm,'0.15.57'),'Current effective main VERSION is v0.15.57 or newer',vm);
 ok(ge(pkg.version,'0.15.57'),'Current package VERSION is v0.15.57 or newer',pkg.version);
-report.info={scope:'Audit every current item-bearing user-facing menu from the verified installed baseline: live draft builds/utilities, Random legacy/live item surfaces and observed inventory, champion DB build profiles, Match Lab build recommendation; existing Match Lab final-item artwork is preserved without duplicate icons.',scoreLogicChanged:false,visualRule:'official icon + existing text; capped icon strips; text-only fallback',forwardCompatible:true};
+report.info={scope:'Audit every current item-bearing user-facing menu from the verified installed baseline: live draft builds/utilities, Random legacy/live item surfaces and observed inventory, champion DB build profiles, Match Lab build recommendation; existing Match Lab final-item artwork is preserved without duplicate icons.',scoreLogicChanged:false,effectiveRuntime:mainPath,visualRule:'official icon + existing text; capped icon strips; text-only fallback',forwardCompatible:true};
 report.summary={pass:report.pass.length,fail:report.fail.length,status:report.fail.length?'FAIL':'PASS'};
 fs.mkdirSync(path.join(ROOT,'audit-output'),{recursive:true});fs.writeFileSync(path.join(ROOT,'audit-output','item-icons-v01557-report.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify(report.summary));for(const x of report.fail)console.error('FAIL',x.name,x.detail||'');process.exitCode=report.fail.length?1:0;

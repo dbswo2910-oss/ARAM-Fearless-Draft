@@ -8,7 +8,8 @@ const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const livePath=byPath.get('draft-live-context-v01542.js');
-const mainPath=byPath.get('main.js');
+const cleanLegacy=m.clean_runtime_consolidated===true?[...(m.files||[])].find(x=>/^legacy-runtime-v\d+\.js$/.test(String(x.path||'')))?.source:null;
+const mainPath=cleanLegacy&&exists(cleanLegacy)?cleanLegacy:byPath.get('main.js');
 const ver=String(m.version||'0').split('.').map(x=>Number(x)||0),atLeast1542=(ver[0]>0)||(ver[1]>15)||(ver[1]===15&&(ver[2]||0)>=42);
 ok(atLeast1542,'Manifest retains v0.15.42+ live-context layer',m.version);
 ok(!!livePath&&exists(livePath),'Partial-N draft context runtime delivered',livePath||'missing');

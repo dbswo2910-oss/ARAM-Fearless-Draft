@@ -33,11 +33,40 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Build authoritative v0.16.3 payload and continuity metadata
+      - name: Validate exact v0.16.3 release or frozen successor baseline
+        shell: bash
         run: |
-          node tools/release/build-v0163-shadow-rating-transparency-manifest.js
-          node tools/sync-current-state.js
-      - name: Syntax check transparency payload
+          set -euo pipefail
+          version="$(node -p "require('./update/manifest.json').version")"
+          clean="$(node -p "require('./update/manifest.json').clean_runtime_consolidated===true?'1':'0'")"
+          if [ "$version" = "0.16.3" ]; then
+            node tools/release/build-v0163-shadow-rating-transparency-manifest.js
+            node tools/sync-current-state.js
+            mirrors=(
+              'update/v0.16.3/src/rating/universal/confidence.js|src/rating/universal/confidence.js'
+              'update/v0.16.3/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
+              'update/v0.16.3/src/profile/shadow-rating-diagnostics-renderer.js|src/profile/shadow-rating-diagnostics-renderer.js'
+            )
+            for pair in "${mirrors[@]}"; do
+              release_file="${pair%%|*}"
+              source_file="${pair#*|}"
+              cmp --silent "$release_file" "$source_file" || { echo "v0.16.3 exact-release mirror mismatch: $release_file != $source_file"; exit 1; }
+            done
+            node tools/stability/v0163-shadow-transparency-successor-cutover-audit.js
+            echo 'V0.16.3 EXACT TRANSPARENCY RELEASE: PASS'
+          else
+            if [ "$clean" != "1" ]; then
+              echo "unsupported transparency successor version: $version"
+              exit 1
+            fi
+            base='99e65c90d930d2bd2e0b9297518d0657b6c8e399'
+            while IFS= read -r f; do
+              git show "$base:$f" > /tmp/v0163-base-file
+              cmp --silent "$f" /tmp/v0163-base-file || { echo "frozen v0.16.3 transparency payload drifted in clean successor: $f"; exit 1; }
+            done < <(git ls-tree -r --name-only "$base" -- update/v0.16.3)
+            echo "V0.16.3 FROZEN TRANSPARENCY PAYLOAD PRESERVED IN CLEAN SUCCESSOR $version: PASS"
+          fi
+      - name: Syntax check frozen payload and current transparency source
         run: |
           node --check src/rating/universal/confidence.js
           node --check src/rating/universal/runtime.js
@@ -54,30 +83,17 @@ jobs:
         run: |
           node test/universal-rating-shadow-diagnostics-v1.test.js
           node test/universal-rating-shadow-transparency-v1.test.js
-      - name: Verify updater mirrors match canonical sources byte-for-byte
-        shell: bash
-        run: |
-          set -euo pipefail
-          mirrors=(
-            'update/v0.16.3/src/rating/universal/confidence.js|src/rating/universal/confidence.js'
-            'update/v0.16.3/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
-            'update/v0.16.3/src/profile/shadow-rating-diagnostics-renderer.js|src/profile/shadow-rating-diagnostics-renderer.js'
-          )
-          for pair in "${mirrors[@]}"; do
-            release_file="${pair%%|*}"
-            source_file="${pair#*|}"
-            cmp --silent "$release_file" "$source_file" || { echo "updater mirror mismatch: $release_file != $source_file"; exit 1; }
-          done
-          echo 'V0.16.3 UPDATE MIRROR BYTE MATCH: PASS'
-      - name: Strict v0.16.2 to v0.16.3 successor audit
-        run: node tools/stability/v0163-shadow-transparency-successor-cutover-audit.js
       - name: Continuity snapshot is authoritative
         run: node tools/sync-current-state.js --check
-      - name: Require checked-in PR distribution to be authoritative
+      - name: Require exact v0.16.3 generated distribution to be authoritative
         if: github.event_name == 'pull_request'
         shell: bash
-        run: git diff --exit-code -- update/v0.16.3 update/manifest.json update/current-state.json docs/CURRENT_STATE.md
-      - name: Commit generated distribution metadata and mirrors on feature branch
+        run: |
+          version="$(node -p "require('./update/manifest.json').version")"
+          if [ "$version" = "0.16.3" ]; then
+            git diff --exit-code -- update/v0.16.3 update/manifest.json update/current-state.json docs/CURRENT_STATE.md
+          fi
+      - name: Commit generated distribution metadata and mirrors on exact feature branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/feature/v0.16.3-shadow-rating-transparency'
         shell: bash
         run: |
@@ -99,5 +115,5 @@ jobs:
           if(rt.production_active!==false||rt.automatic_promotion!==false)throw new Error('Rating runtime activated');
           if(conf.production_active!==false)throw new Error('confidence module activated');
           if(view.production_active!==false||view.automatic_promotion!==false||view.network_owner!==false)throw new Error('diagnostics safety flags drifted');
-          console.log('V0.16.3 SHADOW TRANSPARENCY SAFETY: PASS');
+          console.log('V0.16.3 BASELINE / CLEAN SUCCESSOR TRANSPARENCY SAFETY: PASS');
           NODE

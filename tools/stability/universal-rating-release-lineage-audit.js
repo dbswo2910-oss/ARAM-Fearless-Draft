@@ -7,8 +7,9 @@ const json=rel=>JSON.parse(fs.readFileSync(path.join(ROOT,rel),'utf8').replace(/
 const manifest=json('update/manifest.json');
 const state=json('update/current-state.json');
 const version=String(manifest.version||'');
-assert.match(version,/^0\.16\.\d+$/,'Universal Rating release lineage only supports v0.16.x');
-assert.notStrictEqual(version,'0.16.0','Universal Rating release lineage requires v0.16.1+');
+const cleanSuccessor=manifest.clean_runtime_consolidated===true&&manifest.runtime_successor_wrappers===false;
+const v016=/^0\.16\.\d+$/.test(version)&&version!=='0.16.0';
+assert.ok(v016||cleanSuccessor,`Universal Rating release lineage supports v0.16.1+ or clean-runtime successors, got ${version}`);
 assert.strictEqual(manifest.production_rating_active,false,'production Rating must remain disabled');
 assert.strictEqual(manifest.automatic_rating_promotion,false,'automatic Rating promotion must remain disabled');
 assert.strictEqual(manifest.universal_rating_shadow,true,'Universal Rating shadow flag must remain enabled');
@@ -32,11 +33,14 @@ const requiredTargets=[
 for(const target of requiredTargets)assert.ok(by.has(target),`Universal Rating base payload missing ${target}`);
 if(version==='0.16.1'){
   assert.strictEqual(state?.package?.main,'main-v0161-shadow.js','v0.16.1 package main mismatch');
+}else if(cleanSuccessor){
+  assert.strictEqual(state?.package?.main,'main.js','clean-runtime successor must use stable main.js');
+  assert.strictEqual(manifest.runtime_successor_wrappers,false,'clean-runtime successor re-enabled wrapper chain');
 }else{
   const minor=Number(version.split('.')[2]);
-  assert.ok(minor>=2,'successor patch version must be >= 2');
+  assert.ok(minor>=2,'v0.16 successor patch version must be >= 2');
 }
-const out={status:'SUCCESS',stage:'UNIVERSAL_RATING_RELEASE_LINEAGE',version,production_rating_active:false,automatic_rating_promotion:false,universal_rating_shadow:true,required_targets_verified:requiredTargets.length,all_sources_under_update:true,current_state_aligned:true};
+const out={status:'SUCCESS',stage:'UNIVERSAL_RATING_RELEASE_LINEAGE',version,clean_runtime_successor:cleanSuccessor,production_rating_active:false,automatic_rating_promotion:false,universal_rating_shadow:true,required_targets_verified:requiredTargets.length,all_sources_under_update:true,current_state_aligned:true};
 fs.mkdirSync(path.join(ROOT,'audit-output','stability'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'audit-output','stability','universal-rating-release-lineage-report.json'),JSON.stringify(out,null,2)+'\n','utf8');
 console.log(`UNIVERSAL RATING RELEASE LINEAGE ${version}: PASS`);

@@ -10,7 +10,8 @@ const cmp=(a,b)=>{const A=verParts(a),B=verParts(b),n=Math.max(A.length,B.length
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const uiPath=byPath.get('random-practice-focus-v01549.js');
-const mainPath=byPath.get('main.js');
+const cleanLegacy=m.clean_runtime_consolidated===true?[...(m.files||[])].find(x=>/^legacy-runtime-v\d+\.js$/.test(String(x.path||'')))?.source:null;
+const mainPath=cleanLegacy&&exists(cleanLegacy)?cleanLegacy:byPath.get('main.js');
 const pkgPath=byPath.get('package.json');
 ok(cmp(m.version,'0.15.49')>=0,'Manifest remains compatible with v0.15.49 exact-DOM baseline',m.version);
 ok(!!uiPath&&exists(uiPath),'Exact-DOM random practice runtime remains delivered',uiPath||'missing');

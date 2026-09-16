@@ -8,7 +8,9 @@ const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const uiPath=byPath.get('ui-refresh-v01560.js'),catalogPath=byPath.get('item-catalog-v01527.js'),mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json');
+const uiPath=byPath.get('ui-refresh-v01560.js'),catalogPath=byPath.get('item-catalog-v01527.js');
+const cleanLegacy=m.clean_runtime_consolidated===true?[...(m.files||[])].find(x=>/^legacy-runtime-v\d+\.js$/.test(String(x.path||'')))?.source:null;
+const mainPath=cleanLegacy&&exists(cleanLegacy)?cleanLegacy:byPath.get('main.js'),pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.60'),'Manifest is v0.15.60 or newer',m.version);
 ok(!!uiPath&&/v0\.15\.60\/ui-refresh-v01560\.js$/.test(uiPath)&&exists(uiPath),'v0.15.60 UI refresh runtime delivered',uiPath||'missing');
 ok(!!catalogPath&&/v0\.15\.(?:60|6[4-9]|[7-9]\d)\/item-catalog-v01527\.js$/.test(catalogPath)&&exists(catalogPath),'Stable item-catalog filename remains delivered, allowing newer art catalog revisions',catalogPath||'missing');

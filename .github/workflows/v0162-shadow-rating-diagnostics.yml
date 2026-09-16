@@ -50,6 +50,7 @@ jobs:
         run: |
           set -euo pipefail
           version="$(node -p "require('./update/manifest.json').version")"
+          clean="$(node -p "require('./update/manifest.json').clean_runtime_consolidated===true?'1':'0'")"
           if [ "$version" = "0.16.2" ]; then
             mirrors=(
               'update/v0.16.2/src/main/universal-rating-ipc.js|src/main/universal-rating-ipc.js'
@@ -67,7 +68,10 @@ jobs:
             node tools/sync-current-state.js --check
             echo 'V0.16.2 EXACT DIAGNOSTICS RELEASE: PASS'
           else
-            case "$version" in 0.16.*) ;; *) echo "unsupported diagnostics successor version: $version"; exit 1;; esac
+            if [[ "$version" != 0.16.* && "$clean" != "1" ]]; then
+              echo "unsupported diagnostics successor version: $version"
+              exit 1
+            fi
             base='021a145e002566af8930c66ba25a950e2384807b'
             while IFS= read -r f; do
               git show "$base:$f" > /tmp/v0162-base-file
