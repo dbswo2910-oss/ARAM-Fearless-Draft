@@ -8,7 +8,10 @@ const ok=(cond,name,detail='')=>(cond?report.pass:report.fail).push({name,detail
 const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').split('.').map(Number),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){if((A[i]||0)!==(B[i]||0))return(A[i]||0)>(B[i]||0)}return true};
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
-const p=byPath.get('random-party-labels-v01559.js'),mainPath=byPath.get('main.js'),pkgPath=byPath.get('package.json');
+const p=byPath.get('random-party-labels-v01559.js');
+const cleanLegacy=m.clean_runtime_consolidated===true?[...(m.files||[])].find(x=>/^legacy-runtime-v\d+\.js$/.test(String(x.path||'')))?.source:null;
+const mainPath=cleanLegacy&&exists(cleanLegacy)?cleanLegacy:byPath.get('main.js');
+const pkgPath=byPath.get('package.json');
 ok(ge(m.version,'0.15.59'),'Manifest is v0.15.59 or newer',m.version);
 ok(!!p&&/v0\.15\.59\/random-party-labels-v01559\.js$/.test(p)&&exists(p),'v0.15.59 party-label runtime delivered',p||'missing');
 ok(!!mainPath&&exists(mainPath),'Current main delivered',mainPath||'missing');
