@@ -1,0 +1,166 @@
+name: v0.16.1 Universal Rating Shadow Release
+
+on:
+  push:
+    branches:
+      - 'release/v0.16.1-universal-rating-shadow'
+  pull_request:
+    paths:
+      - 'update/v0.16.1/**'
+      - 'src/rating/universal/**'
+      - 'src/main/universal-rating-ipc.js'
+      - 'src/preload/universal-rating-history-hook.js'
+      - 'tools/release/build-v0161-universal-rating-shadow-manifest.js'
+      - 'update/manifest.json'
+      - 'update/current-state.json'
+      - 'docs/CURRENT_STATE.md'
+      - '.github/workflows/v0161-universal-rating-shadow-release.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  release-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch validated research baseline
+        run: git fetch origin research/aram-rating-v032-accuracy-first:refs/remotes/origin/research/aram-rating-v032-accuracy-first
+      - name: Syntax check release payload
+        run: |
+          node --check update/v0.16.1/main-v0161-shadow.js
+          node --check update/v0.16.1/preload-v0161-shadow.js
+          node --check src/main/universal-rating-ipc.js
+          node --check src/preload/universal-rating-history-hook.js
+          node --check src/rating/universal/contracts.js
+          node --check src/rating/universal/normalizer.js
+          node --check src/rating/universal/confidence.js
+          node --check src/rating/universal/estimator.js
+          node --check src/rating/universal/store.js
+          node --check src/rating/universal/service.js
+          node --check src/rating/universal/runtime.js
+          node --check src/rating/universal/index.js
+          node --check update/v0.16.1/src/main/universal-rating-ipc.js
+          node --check update/v0.16.1/src/preload/universal-rating-history-hook.js
+          node --check update/v0.16.1/src/rating/universal/contracts.js
+          node --check update/v0.16.1/src/rating/universal/normalizer.js
+          node --check update/v0.16.1/src/rating/universal/confidence.js
+          node --check update/v0.16.1/src/rating/universal/estimator.js
+          node --check update/v0.16.1/src/rating/universal/store.js
+          node --check update/v0.16.1/src/rating/universal/service.js
+          node --check update/v0.16.1/src/rating/universal/runtime.js
+          node --check update/v0.16.1/src/rating/universal/index.js
+          node --check tools/release/build-v0161-universal-rating-shadow-manifest.js
+          node --check tools/sync-current-state.js
+      - name: Verify release payload matches physically validated research payload
+        run: |
+          set -euo pipefail
+          files=(
+            update/v0.16.1/package.json
+            update/v0.16.1/main-v0161-shadow.js
+            update/v0.16.1/preload-v0161-shadow.js
+            src/main/universal-rating-ipc.js
+            src/preload/universal-rating-history-hook.js
+            src/rating/universal/contracts.js
+            src/rating/universal/normalizer.js
+            src/rating/universal/confidence.js
+            src/rating/universal/estimator.js
+            src/rating/universal/store.js
+            src/rating/universal/service.js
+            src/rating/universal/runtime.js
+            src/rating/universal/index.js
+          )
+          for f in "${files[@]}"; do
+            git show "origin/research/aram-rating-v032-accuracy-first:$f" > /tmp/research-file
+            cmp --silent "$f" /tmp/research-file || { echo "validated payload mismatch: $f"; exit 1; }
+          done
+          mirrors=(
+            'update/v0.16.1/src/main/universal-rating-ipc.js|src/main/universal-rating-ipc.js'
+            'update/v0.16.1/src/preload/universal-rating-history-hook.js|src/preload/universal-rating-history-hook.js'
+            'update/v0.16.1/src/rating/universal/contracts.js|src/rating/universal/contracts.js'
+            'update/v0.16.1/src/rating/universal/normalizer.js|src/rating/universal/normalizer.js'
+            'update/v0.16.1/src/rating/universal/confidence.js|src/rating/universal/confidence.js'
+            'update/v0.16.1/src/rating/universal/estimator.js|src/rating/universal/estimator.js'
+            'update/v0.16.1/src/rating/universal/store.js|src/rating/universal/store.js'
+            'update/v0.16.1/src/rating/universal/service.js|src/rating/universal/service.js'
+            'update/v0.16.1/src/rating/universal/runtime.js|src/rating/universal/runtime.js'
+            'update/v0.16.1/src/rating/universal/index.js|src/rating/universal/index.js'
+          )
+          for pair in "${mirrors[@]}"; do
+            release_file="${pair%%|*}"
+            validated_file="${pair#*|}"
+            cmp --silent "$release_file" "$validated_file" || { echo "updater mirror mismatch: $release_file != $validated_file"; exit 1; }
+          done
+          echo "PHYSICAL-VALIDATION + UPDATE-MIRROR PAYLOAD MATCH: PASS"
+      - name: Universal runtime smoke test
+        run: |
+          node - <<'NODE'
+          const assert=require('node:assert/strict');
+          const {MemoryRatingStore}=require('./src/rating/universal/store');
+          const {createUniversalRatingRuntime}=require('./src/rating/universal/runtime');
+          const store=new MemoryRatingStore();
+          const rt=createUniversalRatingRuntime({store});
+          const ids=Array.from({length:10},(_,i)=>`release-player-${i}`);
+          const raw={gameId:'release-smoke-1',gameEndTimestamp:1700000000000,gameVersion:'26.18.1',queueId:450,participants:ids.map((puuid,i)=>({puuid,teamId:i<5?100:200,win:i<5,championId:i+1,kills:1,deaths:1,assists:1}))};
+          rt.rateResolved({player:{puuid:ids[0],platformId:'KR'},matches:[raw],reason:'RELEASE_SMOKE'}).then(r=>{
+            assert.equal(r.mode,'DUAL_SHADOW');
+            assert.equal(r.productionActive,false);
+            assert.equal(r.automaticPromotion,false);
+            assert.equal(r.productionRating,null);
+            assert.equal(r.networkRequests,0);
+            assert.equal(r.candidates.elo.status,'ESTIMATED_SHADOW');
+            assert.equal(r.candidates.glicko.status,'ESTIMATED_SHADOW');
+            console.log('UNIVERSAL RELEASE RUNTIME SMOKE: PASS');
+          }).catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Build authoritative v0.16.1 manifest and continuity snapshot
+        run: |
+          node tools/release/build-v0161-universal-rating-shadow-manifest.js
+          node tools/sync-current-state.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
+          const state=JSON.parse(fs.readFileSync('update/current-state.json','utf8'));
+          if(m.version!=='0.16.1'||m.production_rating_active!==false||m.automatic_rating_promotion!==false||m.universal_rating_shadow!==true)process.exit(1);
+          if(state.active?.version!=='0.16.1'||state.package?.version!=='0.16.1'||state.package?.main!=='main-v0161-shadow.js')throw new Error('continuity snapshot did not adopt v0.16.1');
+          for(const e of m.files||[])if(!String(e.source||'').startsWith('update/'))throw new Error(`unsafe updater source ${e.path} -> ${e.source}`);
+          const required=['package.json','main-v0161-shadow.js','preload.js','preload-base-v015117.js','src/main/universal-rating-ipc.js','src/preload/universal-rating-history-hook.js','src/rating/universal/runtime.js','update/v0.15.129/rating-engine-v01.js'];
+          const by=new Map(m.files.map(x=>[x.path,x]));
+          for(const p of required){const e=by.get(p);if(!e||!/^[0-9a-f]{64}$/.test(String(e.sha256||'')))throw new Error(`missing verified release entry ${p}`)}
+          const expectedSources={
+            'src/main/universal-rating-ipc.js':'update/v0.16.1/src/main/universal-rating-ipc.js',
+            'src/preload/universal-rating-history-hook.js':'update/v0.16.1/src/preload/universal-rating-history-hook.js',
+            'src/rating/universal/runtime.js':'update/v0.16.1/src/rating/universal/runtime.js'
+          };
+          for(const [p,s] of Object.entries(expectedSources))if(by.get(p)?.source!==s)throw new Error(`release transport source mismatch ${p}: ${by.get(p)?.source||'missing'}`);
+          console.log('V0.16.1 AUTHORITATIVE MANIFEST + CONTINUITY + SECURE TRANSPORT AUDIT: PASS');
+          NODE
+          node tools/sync-current-state.js --check
+      - name: Commit generated release metadata on release branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release/v0.16.1-universal-rating-shadow'
+        run: |
+          if git diff --quiet -- update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
+            echo 'Release metadata already authoritative; no commit needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/manifest.json update/current-state.json docs/CURRENT_STATE.md
+          git commit -m 'release: sync authoritative v0.16.1 distribution metadata'
+          git push origin HEAD:release/v0.16.1-universal-rating-shadow
+      - name: Safety flags remain shadow-only
+        run: |
+          node - <<'NODE'
+          const rt=require('./src/rating/universal/runtime');
+          const ipc=require('./src/main/universal-rating-ipc');
+          const hook=require('./src/preload/universal-rating-history-hook');
+          if(rt.production_active!==false||rt.automatic_promotion!==false)process.exit(1);
+          if(ipc.production_active!==false||ipc.automatic_promotion!==false||ipc.network_owner!==false)process.exit(1);
+          if(hook.production_active!==false||hook.automatic_promotion!==false||hook.network_owner!==false)process.exit(1);
+          console.log('SHADOW-ONLY RELEASE SAFETY: PASS');
+          NODE

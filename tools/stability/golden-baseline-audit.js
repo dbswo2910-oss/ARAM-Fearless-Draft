@@ -1,13 +1,17 @@
 'use strict';
 const L=require('./lib');
 const GOLDEN='2048d56ceec2317b4cef225f284443521005994d';
+const GOLDEN_VERSION='0.15.135';
 const manifest=L.json('update/manifest.json');
 const state=L.json('update/current-state.json');
 const pkg=L.json('update/v0.15.135/package.json');
-L.must(manifest.version==='0.15.135',`golden manifest drifted: ${manifest.version}`);
-L.must(state.active?.version==='0.15.135',`current-state drifted: ${state.active?.version}`);
+const parts=v=>String(v||'0').split('.').map(x=>Number.parseInt(x,10)||0);
+const atLeast=(a,b)=>{const A=parts(a),B=parts(b),n=Math.max(A.length,B.length);for(let i=0;i<n;i++){const x=A[i]||0,y=B[i]||0;if(x!==y)return x>y}return true};
+const activeVersion=String(manifest.version||'');
+L.must(atLeast(activeVersion,GOLDEN_VERSION),`active manifest predates Golden baseline: ${activeVersion}`);
+L.must(String(state.active?.version||'')===activeVersion,`current-state/manifest version mismatch: ${state.active?.version} != ${activeVersion}`);
 L.must(pkg.name==='aram-fearless-draft','stable Electron app identity changed');
-L.must(pkg.version==='0.15.135'&&pkg.main==='main-v015135.js','golden package contract changed');
+L.must(pkg.version===GOLDEN_VERSION&&pkg.main==='main-v015135.js','golden package contract changed');
 L.must(L.exists('update/v0.15.135/main-v015135.js'),'golden main missing');
 L.must(L.exists('update/v0.15.135/runtime-source-stability-v015135.js'),'golden runtime source missing');
 const runtime=require(L.p('update/v0.15.135/runtime-source-stability-v015135.js'));
@@ -17,17 +21,27 @@ const ancestor=L.git(['merge-base','--is-ancestor',GOLDEN,'HEAD']);
 const head=L.git(['rev-parse','HEAD']);
 const goldenManifest=L.git(['show',`${GOLDEN}:update/manifest.json`]);
 L.must(goldenManifest.includes('"version": "0.15.135"'),'golden commit does not contain v0.15.135 manifest');
+const goldenPackage=L.git(['show',`${GOLDEN}:update/v0.15.135/package.json`]);
+const goldenMain=L.git(['show',`${GOLDEN}:update/v0.15.135/main-v015135.js`]);
+const goldenRuntime=L.git(['show',`${GOLDEN}:update/v0.15.135/runtime-source-stability-v015135.js`]);
+const normalized=s=>String(s||'').replace(/\r\n/g,'\n').replace(/\n$/,'');
+L.must(normalized(goldenPackage)===normalized(L.read('update/v0.15.135/package.json')),'Golden package content drifted in successor');
+L.must(normalized(goldenMain)===normalized(L.read('update/v0.15.135/main-v015135.js')),'Golden main content drifted in successor');
+L.must(normalized(goldenRuntime)===normalized(L.read('update/v0.15.135/runtime-source-stability-v015135.js')),'Golden runtime content drifted in successor');
 const report={
   status:'SUCCESS',
-  golden_version:'0.15.135',
+  golden_version:GOLDEN_VERSION,
+  active_version:activeVersion,
+  successor_active:activeVersion!==GOLDEN_VERSION,
   golden_commit:GOLDEN,
   current_head:head||null,
   golden_is_ancestor_of_head:ancestor==='',
   stable_app_identity:pkg.name,
-  manifest_sha256:L.shaFile('update/manifest.json'),
+  active_manifest_sha256:L.shaFile('update/manifest.json'),
   package_sha256:L.shaFile('update/v0.15.135/package.json'),
   main_sha256:L.shaFile('update/v0.15.135/main-v015135.js'),
   runtime_sha256:L.shaFile('update/v0.15.135/runtime-source-stability-v015135.js'),
+  golden_content_preserved:true,
   owners:state.owners,
   safety:state.safety,
   scoring_changed:false,
@@ -39,4 +53,4 @@ const report={
   }
 };
 L.write('audit-output/stability/golden-baseline-report.json',report);
-console.log('GOLDEN BASELINE AUDIT: SUCCESS',report.golden_version,report.golden_commit);
+console.log('GOLDEN BASELINE AUDIT: SUCCESS',report.golden_version,'-> active',report.active_version,report.golden_commit);

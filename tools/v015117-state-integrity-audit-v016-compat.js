@@ -22,6 +22,30 @@ for(const [from,to] of replacements){
   else if(!src.includes(to)) throw new Error(`v0.15.117 successor threshold contract drifted: ${from}`);
 }
 
+// v0.16+ may wrap the historical preload instead of mapping preload.js directly to v0.15.117.
+// Keep the historical base audit immutable and teach only this compatibility shim to verify the
+// effective successor chain: current preload wrapper -> frozen v0.15.117 preload base.
+const preloadLine="      'preload.js':'update/v0.15.117/preload.js',\n";
+const lastPreloadLine=src.lastIndexOf(preloadLine);
+if(lastPreloadLine<0)throw new Error('v0.15.117 successor preload expectation contract drifted');
+src=src.slice(0,lastPreloadLine)+src.slice(lastPreloadLine+preloadLine.length);
+
+const successorLoop="    for(const [p,s] of Object.entries(preserved))if(map.get(p)!==s)throw new Error(`v0.15.117 state baseline not preserved by successor ${p}: ${map.get(p)||'missing'}`);\n";
+const successorPreloadCheck=[
+  "    const successorPreloadSource=map.get('preload.js');",
+  "    if(successorPreloadSource!=='update/v0.15.117/preload.js'){",
+  "      const frozenBaseTarget='preload-base-v015117.js';",
+  "      const frozenBaseSource=map.get(frozenBaseTarget);",
+  "      if(frozenBaseSource!=='update/v0.15.117/preload.js')throw new Error(`v0.15.117 state baseline preload base missing: ${frozenBaseSource||'missing'}`);",
+  "      if(!successorPreloadSource||!exists(successorPreloadSource))throw new Error(`v0.15.117 successor preload source missing: ${successorPreloadSource||'missing'}`);",
+  "      const successorPreloadText=read(successorPreloadSource);",
+  "      if(!successorPreloadText.includes(frozenBaseTarget)||!successorPreloadText.includes('patchPreloadSource'))throw new Error(`v0.15.117 successor preload does not inherit frozen state bridge: ${successorPreloadSource}`);",
+  "    }",
+  "    ok('successor-preserves-v117-preload-lineage');"
+].join('\n')+'\n';
+if(src.includes(successorLoop))src=src.replace(successorLoop,successorLoop+successorPreloadCheck);
+else if(!src.includes("ok('successor-preserves-v117-preload-lineage')"))throw new Error('v0.15.117 successor preserved-loop contract drifted');
+
 fs.writeFileSync(tempPath,src,'utf8');
 try{
   const r=cp.spawnSync(process.execPath,[tempPath],{cwd:ROOT,stdio:'inherit',env:process.env});

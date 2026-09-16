@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const {patchPreloadSource}=require('./src/preload/universal-rating-history-hook');
+const basePath=path.join(__dirname,'preload-base-v015117.js');
+if(!fs.existsSync(basePath))throw new Error('v0.16.1 preload successor base missing');
+const src=fs.readFileSync(basePath,'utf8');
+const patched=patchPreloadSource(src);
+if(!patched.changed&&!patched.alreadyPatched)throw new Error('v0.16.1 preload shadow hook was not applied');
+module._compile(patched.source,__filename);
