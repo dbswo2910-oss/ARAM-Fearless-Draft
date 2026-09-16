@@ -1,25 +1,22 @@
 name: ARAM Rating Universal V1
 
 on:
-  push:
-    branches:
-      - feature/universal-player-rating-v1
   pull_request:
     paths:
       - 'src/rating/universal/**'
       - 'test/universal-rating-v1.test.js'
       - '.github/workflows/aram-rating-universal-v1.yml'
       - 'update/v0.15.129/rating-engine-v01.js'
+  workflow_dispatch:
 
 jobs:
-  verify:
+  universal-rating-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
       - name: Syntax check
         run: |
           node --check src/rating/universal/contracts.js
@@ -33,4 +30,4 @@ jobs:
       - name: Universal rating invariant tests
         run: node --test test/universal-rating-v1.test.js
       - name: Safety flags remain off
-        run: node -e "const x=require('./src/rating/universal');if(x.production_active!==false||x.automatic_promotion!==false)process.exit(1);console.log('UNIVERSAL RATING V1 SAFETY: PASS')"
+        run: node -e "const x=require('./src/rating/universal');if(x.production_active!==false||x.automatic_promotion!==false)process.exit(1);console.log('UNIVERSAL RATING V1 SAFETY PASS')"
