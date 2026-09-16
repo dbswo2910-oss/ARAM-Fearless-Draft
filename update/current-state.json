@@ -6,7 +6,7 @@
     "version": "0.16.2",
     "message": "v0.16.2 · SHADOW RATING DIAGNOSTICS",
     "min_launcher": "2.0.2",
-    "manifest_commit": "bb4f33960a86945b2f94a7643d7b6abfc3a985b2"
+    "manifest_commit": "c12a12029f7e52e1237cfa9bb3753af7fd96860d"
   },
   "package": {
     "source": "update/v0.16.2/package.json",

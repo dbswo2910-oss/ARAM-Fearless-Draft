@@ -6,7 +6,7 @@
 
 - Active updater: **v0.16.2**
 - Manifest message: v0.16.2 · SHADOW RATING DIAGNOSTICS
-- Manifest commit: `bb4f33960a86945b2f94a7643d7b6abfc3a985b2`
+- Manifest commit: `c12a12029f7e52e1237cfa9bb3753af7fd96860d`
 - Package: `update/v0.16.2/package.json` → **v0.16.2**
 - Electron entry: `main-v0162-shadow-diagnostics.js` → `update/v0.16.2/main-v0162-shadow-diagnostics.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
