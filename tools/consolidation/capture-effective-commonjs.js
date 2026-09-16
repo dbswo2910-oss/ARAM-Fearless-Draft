@@ -55,7 +55,10 @@ Module.prototype._compile=function(content,filename){
     compileCount++;
     const text=String(content);
     captured=text;
-    const isSuccessor=/module\._compile\s*\(\s*src\s*,\s*__filename\s*\)/.test(text);
+    // Successor wrappers use several argument names (`src`, `patched.source`, etc.).
+    // Any runtime _compile in the active entry means we have not reached the final
+    // effective CommonJS source yet.
+    const isSuccessor=/module\._compile\s*\(/.test(text);
     if(!isSuccessor){
       stopped=true;
       fs.mkdirSync(path.dirname(out),{recursive:true});
