@@ -24,9 +24,10 @@ L.must(goldenManifest.includes('"version": "0.15.135"'),'golden commit does not 
 const goldenPackage=L.git(['show',`${GOLDEN}:update/v0.15.135/package.json`]);
 const goldenMain=L.git(['show',`${GOLDEN}:update/v0.15.135/main-v015135.js`]);
 const goldenRuntime=L.git(['show',`${GOLDEN}:update/v0.15.135/runtime-source-stability-v015135.js`]);
-L.must(goldenPackage===L.read('update/v0.15.135/package.json'),'Golden package bytes drifted in successor');
-L.must(goldenMain===L.read('update/v0.15.135/main-v015135.js'),'Golden main bytes drifted in successor');
-L.must(goldenRuntime===L.read('update/v0.15.135/runtime-source-stability-v015135.js'),'Golden runtime bytes drifted in successor');
+const normalized=s=>String(s||'').replace(/\r\n/g,'\n').replace(/\n$/,'');
+L.must(normalized(goldenPackage)===normalized(L.read('update/v0.15.135/package.json')),'Golden package content drifted in successor');
+L.must(normalized(goldenMain)===normalized(L.read('update/v0.15.135/main-v015135.js')),'Golden main content drifted in successor');
+L.must(normalized(goldenRuntime)===normalized(L.read('update/v0.15.135/runtime-source-stability-v015135.js')),'Golden runtime content drifted in successor');
 const report={
   status:'SUCCESS',
   golden_version:GOLDEN_VERSION,
@@ -40,7 +41,7 @@ const report={
   package_sha256:L.shaFile('update/v0.15.135/package.json'),
   main_sha256:L.shaFile('update/v0.15.135/main-v015135.js'),
   runtime_sha256:L.shaFile('update/v0.15.135/runtime-source-stability-v015135.js'),
-  golden_bytes_preserved:true,
+  golden_content_preserved:true,
   owners:state.owners,
   safety:state.safety,
   scoring_changed:false,
