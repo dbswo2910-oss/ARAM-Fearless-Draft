@@ -1,0 +1,9 @@
+{
+  "schema": "aram-rating-r29-preflight-status-v1",
+  "production_activation_authorized": false,
+  "automatic_promotion": false,
+  "physical_run_required": true,
+  "physical_run_can_be_substituted_by_ci": false,
+  "expected_report": "audit-output/r29-one-shot-evidence-refresh/r29-one-shot-evidence-refresh.json",
+  "note": "GitHub-side preflight can be completed before the physical run, but installed-state evidence must still be generated on the user's PC."
+}
