@@ -9,6 +9,11 @@ const versionNew="const VERSION='0.16.1';";
 if(!src.includes(versionOld))throw new Error('v0.16.1 successor contract mismatch: v0.16.0 version marker missing');
 src=src.replace(versionOld,versionNew);
 
+const stableRootOld="const stable=path.join(app.getPath('appData'),STABLE_APP_ID);";
+const stableRootNew="const stable=String(process.env.ARAM_UNIVERSAL_SHADOW_USER_DATA_ROOT||'').trim()||path.join(app.getPath('appData'),STABLE_APP_ID);";
+if(!src.includes(stableRootOld))throw new Error('v0.16.1 successor contract mismatch: stable storage root marker missing');
+src=src.replace(stableRootOld,stableRootNew);
+
 const pinOld="pinStableUserData();\nconst canonicalRegistry=loadCanonicalRegistry();";
 const pinNew="const __universalRatingUserData=pinStableUserData();\nrequire('./src/main/universal-rating-ipc').installUniversalRatingIpc({ipcMain:require('electron').ipcMain,userDataPath:String(process.env.ARAM_UNIVERSAL_RATING_DB_ROOT||__universalRatingUserData)});\nconst canonicalRegistry=loadCanonicalRegistry();";
 if(!src.includes(pinOld))throw new Error('v0.16.1 successor contract mismatch: stable userData anchor missing');
