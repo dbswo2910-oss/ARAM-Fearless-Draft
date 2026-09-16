@@ -19,6 +19,8 @@ on:
       - 'tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js'
       - 'tools/research/universal-rating-r2-physical-shadow-rc.ps1'
       - 'tools/research/universal-rating-r3-build-shipped-shadow-candidate.js'
+      - 'tools/research/universal-rating-r4-build-shipped-shadow-physical-harness.js'
+      - 'tools/research/universal-rating-r5-shipped-shadow-physical.ps1'
       - '.github/workflows/aram-rating-universal-integration-v1.yml'
       - 'update/v0.15.129/rating-engine-v01.js'
   pull_request:
@@ -37,6 +39,8 @@ on:
       - 'tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js'
       - 'tools/research/universal-rating-r2-physical-shadow-rc.ps1'
       - 'tools/research/universal-rating-r3-build-shipped-shadow-candidate.js'
+      - 'tools/research/universal-rating-r4-build-shipped-shadow-physical-harness.js'
+      - 'tools/research/universal-rating-r5-shipped-shadow-physical.ps1'
       - '.github/workflows/aram-rating-universal-integration-v1.yml'
       - 'update/v0.15.129/rating-engine-v01.js'
   workflow_dispatch:
@@ -71,6 +75,7 @@ jobs:
           node --check test/universal-rating-shipped-shadow-v0161.test.js
           node --check tools/research/universal-rating-r1-build-physical-shadow-rc-kit.js
           node --check tools/research/universal-rating-r3-build-shipped-shadow-candidate.js
+          node --check tools/research/universal-rating-r4-build-shipped-shadow-physical-harness.js
       - name: Universal integration invariant tests
         run: node --test test/universal-rating-integration-v1.test.js test/universal-rating-null-safety-v1.test.js test/universal-rating-shipped-shadow-v0161.test.js
       - name: Build physical shadow RC kit
@@ -91,6 +96,11 @@ jobs:
           if(kit.active_manifest_mutated!==false||kit.history_network_owner!=='existing_match_history_only'||kit.rating_network_owner!==false)process.exit(1);
           console.log('V0.16.1 SHIPPED SHADOW CANDIDATE PASS');
           NODE
+      - name: Build shipped shadow physical harness
+        run: node tools/research/universal-rating-r4-build-shipped-shadow-physical-harness.js
+      - name: Shipped shadow physical dry run
+        shell: pwsh
+        run: ./tools/research/universal-rating-r5-shipped-shadow-physical.ps1 -DryRun
       - name: Safety flags remain off
         run: |
           node - <<'NODE'
