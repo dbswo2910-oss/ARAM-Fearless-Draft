@@ -1,28 +1,32 @@
 # ARAM Rating v0.3.2 Research
 
-Accuracy-first research branch for ARAM rating calibration and match-network expansion.
+Accuracy-first research branch for ARAM player rating. Production activation remains OFF.
 
-## Current B5.1 recovery status
+## Current checkpoint path
 
-- R2: one-shot external target request accepted.
-- R3: original legacy request shape accepted on anchor 1.
-- R4: same shape accepted on anchor 2.
-- R5: anchors 1 -> 2 accepted sequentially in one session.
-- R6: preserved legacy checkpoint forensic proved 15/15 anchors failed 3 times each (45 HTTP 400 requests) and were incorrectly marked completed.
-- R7: read-only repair preview confirmed all 15 false completions should be requeued.
-- R8: guarded checkpoint repair requeued all 15 without changing the 1982 stored matches.
-- R9: guarded one-anchor recovery succeeded on the user PC; 20 valid target matches returned, 18 duplicates, 2 new unique matches accepted. Checkpoint advanced 1982 -> 1984, completed 0 -> 1, remaining 15 -> 14, with prior-match integrity preserved.
-- R10: guarded three-anchor bounded recovery prepared. Exact R9 state is required; maximum 3 requests, no retries, stop on first request/validation failure, and per-anchor rollback on postcondition failure.
+- B2/B3/B4/B5/B5.1 research stages are manual-only.
+- B5.1 legacy collector failure was diagnosed and repaired without destructive migration.
+- R8 repaired 15 false HTTP400 completion entries while preserving the 1982-match checkpoint.
+- R9 resumed collection safely: 1 request, 20 valid returned, 2 new unique matches, checkpoint 1982 -> 1984.
+- R10 expanded the recovery to 3 more anchors: all 3 accepted, 60 valid matches returned in aggregate, **0 new unique matches**, checkpoint remained 1984. This is a strong marginal-yield saturation signal for the current fixed queue.
+
+## R11
+
+`phase-b51r11-v032-evaluate-devtools.js` is the next read-only step. It requires the exact post-R10 state (1984 matches / 4 completed / 11 remaining), performs **zero Riot/LCU requests** and **zero checkpoint writes**, and evaluates:
+
+- Elo / Glicko / TrueSkill-family frozen and walk-forward metrics
+- primary metric: log loss
+- secondary metrics: Brier, ECE, accuracy
+- cold-start exposure
+- candidate selection gate / paired bootstrap signal from the pinned reference engine
+- current network coverage
+- R9+R10 marginal collection efficiency
+
+If the candidate gate passes while marginal yield is saturated, the next technical step is production-shadow validation rather than bulk collection. If no model clears the gate, further collection should be targeted by information gain rather than by blindly exhausting the remaining queue.
 
 ## Safety
 
-- Research-only; not shipped in the production manifest.
-- Automatic collection remains disabled.
-- Production rating activation remains disabled.
-- Destructive reset/migration is forbidden.
-- Live collection requires explicit manual confirmation.
-- Privacy-safe evidence does not store raw PUUIDs or Riot IDs.
-
-## Next step
-
-Run R10 on the user PC, then evaluate checkpoint growth and closed-network quality before widening recovery or activating any production rating path.
+- production activation: OFF
+- automatic collection: OFF
+- destructive reset/migration: forbidden
+- research diagnostics are not shipped in the production manifest
