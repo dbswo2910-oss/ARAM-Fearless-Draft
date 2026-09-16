@@ -1,0 +1,19 @@
+{
+  "phase": "B5.1-R10",
+  "date": "2026-09-16",
+  "classification": "R10_THREE_ANCHOR_RECOVERY_ACCEPTED",
+  "ok": true,
+  "riot_lcu_requests_performed": 3,
+  "anchors_committed": 3,
+  "checkpoint_matches_before": 1984,
+  "checkpoint_matches_after": 1984,
+  "total_new_unique_matches": 0,
+  "completed_after": 4,
+  "remaining_after": 11,
+  "production_changed": false,
+  "privacy": {
+    "contains_raw_puuid": false,
+    "contains_riot_id": false
+  },
+  "note": "Three additional exact-shape recovery requests succeeded and committed with zero new unique matches, indicating very low marginal yield in the current closed-network queue."
+}
