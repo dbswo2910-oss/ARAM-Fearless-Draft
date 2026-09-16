@@ -12,6 +12,11 @@ Accuracy-first research branch for ARAM player rating. Production activation rem
 - R9+R10 combined: 4 requests / 80 valid returned / 2 new unique = **2.5% unique-yield ratio**, a strong fixed-queue saturation signal.
 - R13 replaced manual one-by-one iteration with bounded targeted collection and completed 3 information-gain-ranked anchors in one guarded run.
 - R14 confirmed Elo remains the observed leader but the model-selection gate remains `no_clear_winner` on the 2020-match checkpoint.
+- R15 added the isolated Elo/Glicko dual shadow.
+- R16 added a manual-review-only promotion gate.
+- R17 added a passive installed-shadow RC core with a separate privacy-safe local evidence store.
+- R18 builds a temporary-copy-only installed RC overlay kit without changing the production install or manifest.
+- R19 adds a guarded Windows physical-acceptance harness; its Windows CI dry run is green, but real user-PC execution remains the final physical gate.
 
 ## R11 result
 
@@ -74,12 +79,72 @@ Before a model can even become **eligible for manual production review**, the ga
 
 Even after every condition passes, R16 returns only `eligible_for_manual_promotion_review`; it never authorizes or performs production activation automatically. The current R14 `no_clear_winner` evidence is explicitly classified as `hold_shadow`.
 
+## R17 passive installed shadow RC core
+
+`src/research/installed-shadow-rc.js` is the bounded normal-use observation core. It does not add a polling loop or a second Riot/LCU collector.
+
+For one explicit RC run it:
+
+1. reads `aram-rating-research-v03 / checkpoint-v03` read-only,
+2. optionally performs at most one bounded call through the already-existing `window.aramDesktop.getAramMatchHistory` bridge,
+3. pseudonymizes new match/player identities before persistence,
+4. stores only privacy-safe delta evidence in the separate `aram-rating-shadow-evidence-v1` database,
+5. evaluates the canonical checkpoint plus the persisted delta through the existing rating engine,
+6. records a sanitized Elo/Glicko shadow snapshot, and
+7. runs the R16 promotion gate.
+
+The separate evidence store is capped, local-only, does not persist raw PUUIDs or raw match IDs, cannot write the canonical Research checkpoint, and cannot write the production score or UI.
+
+Synthetic R17 regression covers repeated-run deduplication, later-match accumulation, missing-bridge degradation, raw-identity rejection, one-request-per-run bounds, and unchanged production manifest behavior.
+
+## R18 temporary-copy installed RC kit
+
+R18 packages the R17 modules into a renderer bundle plus a tiny alternate main shim for **temporary-copy-only** testing.
+
+The kit deliberately:
+
+- does not contain or replace `package.json`
+- is not shipped by `update/manifest.json`
+- does not patch `main-v0160.js`
+- delegates to the exact production `main-v0160.js` after registering the temporary shadow injection hook
+- injects the shadow only after renderer load
+- runs the R17 core once, not on a recurring timer
+- can emit a machine-readable, privacy-safe physical-test result
+
+The intended physical path is `installed v0.16.0 -> temporary app copy -> R18 overlay -> stable userData`, so the installed production tree remains untouched.
+
+## R19 guarded Windows physical gate
+
+`tools/research/aram-rating-v032-r19-physical-shadow-rc.ps1` is the real-PC acceptance harness. Before asking for a user-PC run it is parsed and exercised in `ARAM Rating R19 Windows Dry Run` on `windows-latest`.
+
+The harness:
+
+- auto-detects the installed v0.16.0 app and Electron runtime when possible
+- hashes key production files before and after the test
+- creates a temporary copy of the installed app
+- overlays only the R18 shadow RC kit into that temporary copy
+- changes `package.main` only inside the temporary copy
+- uses the existing stable `aram-fearless-draft` userData so it can see the real Research checkpoint and local match history
+- reads the canonical Research checkpoint before and after and requires its digest/count to remain unchanged
+- requires exactly one successful bounded match-history request with at least one valid ARAM match
+- requires production score/UI/canonical-checkpoint writes and production activation to remain false
+- requires privacy-safe output with no raw identity export
+- removes the temporary app copy after the run
+
+A green Windows dry run proves the harness syntax and safety contract on Windows CI. It does **not** substitute for the one remaining physical user-PC + real League/LCU acceptance run.
+
 ## Safety
 
 - production activation: OFF
 - automatic collection: OFF
+- blind bulk collection: OFF
+- recurring shadow polling: OFF
 - automatic promotion: OFF
 - destructive reset/migration: forbidden
+- canonical Research checkpoint writes from R17-R19: forbidden
+- production score/UI writes from R17-R19: forbidden
+- raw PUUID/raw match-ID persistence in the shadow evidence DB: forbidden
 - Research dual shadow does not replace the production rating
 - R16 requires separate manual release approval even after evidence matures
-- research diagnostics and dual-shadow source are not shipped in the production manifest
+- R17/R18/R19 sources are not shipped through the production manifest
+- real user-PC physical acceptance is required before considering the installed shadow RC physically validated
