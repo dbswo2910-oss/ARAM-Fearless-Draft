@@ -12,6 +12,7 @@ on:
       - 'docs/AI_HANDOFF.md'
       - 'docs/KNOWN_ISSUES.md'
       - 'tools/v015135-production-audit.js'
+      - 'tools/v015135-golden-successor-audit.js'
       - 'tools/prepare-v015135-release.js'
       - '.github/workflows/v015135-production-audit.yml'
   workflow_dispatch:
@@ -40,8 +41,16 @@ jobs:
           node -c update/v0.15.135/cold-start-promotion-v015135.js
           node -c tools/prepare-v015135-release.js
           node -c tools/v015135-production-audit.js
+          node -c tools/v015135-golden-successor-audit.js
       - name: v0.15.135 semantic shell regression
-        run: node tools/v015135-production-audit.js
+        shell: bash
+        run: |
+          version="$(node -p "require('./update/manifest.json').version")"
+          if [ "$version" = "0.15.135" ]; then
+            node tools/v015135-production-audit.js
+          else
+            node tools/v015135-golden-successor-audit.js
+          fi
       - name: Full Regression
         run: node tools/full-regression-audit.js
       - name: AI Continuity Audit
