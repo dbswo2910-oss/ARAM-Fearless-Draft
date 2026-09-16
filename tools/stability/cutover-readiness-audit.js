@@ -70,7 +70,10 @@ if(preCutover){
   assert.ok(stateAudit.includes('VERIFIED_SUCCESSOR_IN_PLACE_TWO_RESTARTS'),'successor installed persistence evidence not promoted into state audit');
 }
 
-for(const needle of ['research_checkpoint_matches=159','Run-Golden 1','Run-Golden 2','state-integrity-v015117'])assert.ok(persistenceWorkflow.includes(needle),`persistence gate missing ${needle}`);
+const persistenceNeedles=preCutover
+  ? ['research_checkpoint_matches=159','state-integrity-v015117']
+  : ['research_checkpoint_matches=159','Run-Current 1','Verify-State 1','Run-Current 2','Verify-State 2','restart_cycles=2','research_checkpoint_exact','research_latest_run_exact','state-integrity-v015117'];
+for(const needle of persistenceNeedles)assert.ok(persistenceWorkflow.includes(needle),`persistence gate missing ${needle}`);
 if(preCutover){
   for(const needle of ['electron_version','aram-fearless-draft','0.15.135'])assert.ok(windowsWorkflow.includes(needle)||windowsWorkflow.includes(needle.replace('_','-')),`installed Windows gate missing ${needle}`);
 }else{
