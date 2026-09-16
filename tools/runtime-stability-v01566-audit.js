@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm');
+const {resolveCurrentRuntimeSource}=require('./current-runtime-source');
 const ROOT=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const exists=p=>fs.existsSync(path.join(ROOT,p));
@@ -10,7 +11,7 @@ const ge=(a,b)=>{const A=String(a||'0').split('.').map(Number),B=String(b||'0').
 const m=JSON.parse(read('update/manifest.json'));
 const byPath=new Map((m.files||[]).map(x=>[x.path,x.source]));
 const runtimePath=byPath.get('item-art-runtime-v01566.js');
-const mainPath=byPath.get('main.js');
+const mainPath=resolveCurrentRuntimeSource(ROOT,m);
 const pkgPath=byPath.get('package.json');
 
 ok(ge(m.version,'0.15.66'),'Manifest is v0.15.66 or newer',m.version);
