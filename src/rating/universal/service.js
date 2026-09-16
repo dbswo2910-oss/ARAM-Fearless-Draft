@@ -72,18 +72,19 @@ class UniversalRatingService{
 
   async lookup(query,{limit=30,force=false,reason='SEARCH'}={}){
     if(!this.connector)throw new Error('connector required for lookup; use rateResolved for preloaded history');
-    const player=await this.connector.resolvePlayer(query);
+    let networkRequests=0;
+    const player=await this.connector.resolvePlayer(query);networkRequests++;
     if(!player?.puuid)throw new Error('player_not_resolved');
     const puuid=String(player.puuid);
-    const ids=[...new Set((await this.connector.fetchMatchIds(puuid,{limit,queueId:this.queueId}))||[])].map(String).filter(Boolean);
+    const ids=[...new Set((await this.connector.fetchMatchIds(puuid,{limit,queueId:this.queueId}))||[])].map(String).filter(Boolean);networkRequests++;
     const fetched=[];
     for(const id of ids){
       if(!force&&this.store.getMatch(id))continue;
-      const raw=await this.connector.fetchMatch(id);
+      const raw=await this.connector.fetchMatch(id);networkRequests++;
       if(raw)fetched.push(raw);
     }
     const result=await this.rateResolved({player:{...player,puuid},matches:fetched,force,reason,source:'connector-lookup'});
-    return{...result,networkRequests:1+ids.filter(id=>force||!this.store.getMatch(id)).length,source:'connector-lookup'};
+    return{...result,networkRequests,source:'connector-lookup'};
   }
 }
 
