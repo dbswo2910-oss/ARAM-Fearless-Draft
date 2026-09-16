@@ -17,7 +17,7 @@ const READINESS_EXPR=`(()=>{const required={
   performance:Boolean(window.__ARAM_RUNTIME_PERFORMANCE_V01568__),
   liveAutoSync:Boolean(window.__ARAM_LIVE_AUTOSYNC_RUNTIME_V01571__),
   autoSyncConcurrency:Boolean(window.__ARAM_AUTOSYNC_CONCURRENCY_V015119__),
-  randomPick:Boolean(window.__ARAM_RANDOM_PRACTICE_FOCUS_V01549__),
+  randomPick:Boolean(window.__ARAM_RANDOM_PRACTICE_FOCUS_V01549__||(window.aramUiStabilityV015115?.audit?.()?.ok===true&&window.aramUiStabilityV015115?.audit?.()?.owners?.random==='random-focus-v015100')),
   randomPracticeRuntime:Boolean(window.__ARAM_RANDOM_PRACTICE_RUNTIME_V01572__),
   randomIngame:Boolean(window.__ARAM_RANDOM_INGAME_RUNTIME_V01570__),
   interaction:Boolean(window.__ARAM_INPUT_INTERACTION_STABILITY_V01539__),
