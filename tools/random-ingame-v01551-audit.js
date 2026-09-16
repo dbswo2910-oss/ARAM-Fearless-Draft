@@ -29,7 +29,7 @@ ok(s.includes('#random')&&s.includes('#riCoachShellV01550'),'UX patch targets ex
 ok(/riIngameFocusV01551/.test(s),'In-game focus class exists');
 ok(/#randomRecommendAnchor/.test(s)&&/\.rpStageHeadV01549/.test(s),'Pick-stage recommendation and stage headings are hidden in in-game mode');
 ok(/grid-template-columns:max-content repeat\(3,max-content\)/.test(s),'Preview controls are compacted into one-row desktop grid');
-ok(/data-ri51="situation"\] small/.test(s)&&/display:none!important/.test(s),'Duplicate current-situation metric is hidden');
+ok(/\.riMetric\[data-ri51="situation"\]\{display:none!important\}/.test(s),'Duplicate current-situation metric is hidden');
 ok(/grid-template-columns:minmax\(150px,\.78fr\) minmax\(280px,1\.55fr\) minmax\(180px,\.92fr\)/.test(s),'LIVE support cards use three-column priority layout');
 ok(/\.riBuildCard\.opt\{order:-1/.test(s),'Death build puts current-match optimized recommendation first');
 ok(/grid-template-columns:minmax\(0,1\.35fr\) minmax\(0,\.65fr\)/.test(s),'Death build gives optimized recommendation more visual weight');
