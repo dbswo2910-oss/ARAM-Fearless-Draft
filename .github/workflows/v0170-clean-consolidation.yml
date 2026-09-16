@@ -23,6 +23,8 @@ jobs:
           node-version: '20'
       - name: Inventory v0.16.3 successor debt
         run: node tools/consolidation/v0170-successor-inventory.js
+      - name: Audit hidden wrapper runtime side effects
+        run: node tools/consolidation/v0170-wrapper-side-effect-audit.js
       - name: Build static clean runtime from validated v0.16.3 behavior
         run: |
           node tools/consolidation/build-v0170-clean-runtime.js
@@ -31,7 +33,7 @@ jobs:
         run: |
           node --check src/app/main.js
           node --check src/app/legacy-safety-bootstrap.js
-          node --check src/app/preload.js
+          node --check preload.js
           node --check legacy-runtime-core.js
           node --check update/v0.17.0/src/app/main.js
           node --check update/v0.17.0/src/app/legacy-safety-bootstrap.js
@@ -39,6 +41,7 @@ jobs:
           node --check update/v0.17.0/legacy-runtime-core.js
           node --check tools/consolidation/capture-effective-commonjs.js
           node --check tools/consolidation/build-v0170-clean-runtime.js
+          node --check tools/consolidation/v0170-wrapper-side-effect-audit.js
           node --check tools/consolidation/v0170-clean-audit.js
       - name: Strict no-wrapper consolidation audit
         run: node tools/consolidation/v0170-clean-audit.js
@@ -48,7 +51,7 @@ jobs:
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
-          if ! git diff --quiet -- legacy-runtime-core.js src/app/preload.js update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
+          if ! git diff --quiet -- legacy-runtime-core.js preload.js src/app/preload.js update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
             echo 'v0.17.0 generated runtime/distribution metadata is stale in PR head.'
             git diff --stat
             exit 1
@@ -57,13 +60,13 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/refactor/v0170-clean-consolidation'
         shell: bash
         run: |
-          if git diff --quiet -- legacy-runtime-core.js src/app/preload.js update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
+          if git diff --quiet -- legacy-runtime-core.js preload.js src/app/preload.js update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
             echo 'Clean runtime already authoritative.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add legacy-runtime-core.js src/app/preload.js update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md
+          git add -A -- legacy-runtime-core.js preload.js src/app/preload.js update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md
           git commit -m 'refactor: materialize authoritative v0.17 clean runtime'
           git push origin HEAD:refactor/v0170-clean-consolidation
       - name: Upload consolidation evidence
@@ -73,5 +76,6 @@ jobs:
           name: v0170-clean-consolidation
           path: |
             audit-output/consolidation/v0170-successor-inventory.json
+            audit-output/consolidation/v0170-wrapper-side-effects.json
             audit-output/consolidation/v0170-clean-runtime-build.json
             audit-output/consolidation/v0170-clean-audit.json
