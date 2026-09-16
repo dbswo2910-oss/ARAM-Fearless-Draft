@@ -1,0 +1,111 @@
+name: v0.17.0 Clean Consolidation
+
+on:
+  push:
+    branches:
+      - 'refactor/v0.17.0-clean-consolidation'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/app/**'
+      - 'tools/refactor/materialize-v0170-clean-runtime.js'
+      - 'tools/release/build-v0170-clean-consolidation-manifest.js'
+      - 'tools/stability/v0170-clean-consolidation-audit.js'
+      - 'release/v0.17.0-clean-consolidation.json'
+      - 'update/v0.17.0/**'
+      - 'update/manifest.json'
+      - 'update/current-state.json'
+      - 'docs/CURRENT_STATE.md'
+      - '.github/workflows/v0170-clean-consolidation.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  clean-runtime-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Materialize flat runtime and authoritative manifest
+        run: |
+          node tools/release/build-v0170-clean-consolidation-manifest.js
+          node tools/sync-current-state.js
+      - name: Syntax check clean runtime
+        run: |
+          node --check src/app/main.js
+          node --check src/app/legacy-runtime-v0170.js
+          node --check src/app/preload.js
+          node --check update/v0.17.0/main.js
+          node --check update/v0.17.0/legacy-runtime-v0170.js
+          node --check update/v0.17.0/preload.js
+          node --check tools/refactor/materialize-v0170-clean-runtime.js
+          node --check tools/release/build-v0170-clean-consolidation-manifest.js
+          node --check tools/stability/v0170-clean-consolidation-audit.js
+      - name: Prove runtime flattening and baseline preservation
+        run: node tools/stability/v0170-clean-consolidation-audit.js
+      - name: No active runtime successor wrappers
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R "module\._compile(" src/app update/v0.17.0/main.js update/v0.17.0/preload.js update/v0.17.0/legacy-runtime-v0170.js
+          ! grep -E "readFileSync\(.*main-v0?1(5|6)" update/v0.17.0/main.js update/v0.17.0/legacy-runtime-v0170.js
+          ! grep -E "replace(All)?\(.*0\.1(5|6)" update/v0.17.0/main.js
+          test "$(node -p "require('./update/v0.17.0/package.json').main")" = "main.js"
+          echo 'ACTIVE RUNTIME WRAPPER COUNT: 0'
+      - name: Canonical and updater snapshots are byte-identical
+        run: |
+          cmp --silent src/app/main.js update/v0.17.0/main.js
+          cmp --silent src/app/legacy-runtime-v0170.js update/v0.17.0/legacy-runtime-v0170.js
+          cmp --silent src/app/preload.js update/v0.17.0/preload.js
+          echo 'CANONICAL -> RELEASE SNAPSHOTS: BYTE-IDENTICAL'
+      - name: Continuity snapshot is authoritative
+        run: |
+          node tools/sync-current-state.js --check
+          node - <<'NODE'
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('update/manifest.json','utf8'));
+          const s=JSON.parse(fs.readFileSync('update/current-state.json','utf8'));
+          if(m.version!=='0.17.0'||m.clean_runtime_consolidated!==true||m.runtime_successor_wrappers!==false)throw new Error('v0.17 clean-runtime manifest metadata invalid');
+          if(s.active?.version!=='0.17.0'||s.package?.version!=='0.17.0'||s.package?.main!=='main.js')throw new Error('current-state did not adopt stable main.js entrypoint');
+          NODE
+      - name: Require checked-in generated runtime on PR
+        if: github.event_name == 'pull_request'
+        run: git diff --exit-code -- src/app update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md
+      - name: Commit generated clean runtime on refactor branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/refactor/v0.17.0-clean-consolidation'
+        shell: bash
+        run: |
+          if git diff --quiet -- src/app update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md; then
+            echo 'Clean runtime already authoritative.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/app update/v0.17.0 update/manifest.json update/current-state.json docs/CURRENT_STATE.md
+          git commit -m 'refactor: materialize authoritative v0.17 clean runtime'
+          git push origin HEAD:refactor/v0.17.0-clean-consolidation
+      - name: Rating remains shadow-only
+        run: |
+          node - <<'NODE'
+          const rt=require('./src/rating/universal/runtime');
+          const ipc=require('./src/main/universal-rating-ipc');
+          if(rt.production_active!==false||rt.automatic_promotion!==false)throw new Error('Rating runtime activated');
+          if(ipc.production_active!==false||ipc.automatic_promotion!==false||ipc.network_owner!==false)throw new Error('Rating IPC safety changed');
+          console.log('RATING SHADOW SAFETY: PASS');
+          NODE
+      - name: Upload clean consolidation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0170-clean-consolidation
+          path: |
+            audit-output/stability/v0170-clean-consolidation-report.json
+            update/current-state.json
+            docs/CURRENT_STATE.md
+          if-no-files-found: warn
