@@ -21,6 +21,7 @@ function publicCandidate(result){
     targetMatches:Number(result?.targetMatches)||0,
     newMatches:Number(result?.newMatches)||0,
     cacheHit:result?.cacheHit===true,
+    updatedAt:Number(result?.updatedAt)||null,
     networkRequests:0,
     productionActive:false
   };
@@ -64,9 +65,33 @@ function createUniversalRatingRuntime({userDataPath,modelVersions=DEFAULT_MODELS
     return Object.fromEntries(services.map(row=>[row.modelName||row.modelVersion,publicCandidate(ratingStore.getRating(row.modelVersion,id))]));
   }
 
+  function getShadowDiagnostics(puuid){
+    const id=String(puuid||'').trim();
+    if(!id)return{schemaVersion:1,status:'NO_TARGET',mode:'DUAL_SHADOW',productionActive:false,automaticPromotion:false,productionRating:null,modelSelection:'no_clear_winner',player:null,candidates:{},networkRequests:0,updatedAt:null};
+    const player=ratingStore.getPlayer(id)||null;
+    const candidates=getStoredCandidates(id);
+    const timestamps=Object.values(candidates).map(x=>Number(x?.updatedAt)||0).filter(Boolean);
+    const targetMatches=Math.max(0,...Object.values(candidates).map(x=>Number(x?.targetMatches)||0));
+    return{
+      schemaVersion:1,
+      status:Object.values(candidates).some(x=>Number(x?.games)>0)?'READY':'NO_RATING_YET',
+      mode:'DUAL_SHADOW',
+      productionActive:false,
+      automaticPromotion:false,
+      productionRating:null,
+      modelSelection:'no_clear_winner',
+      player:player?{gameName:String(player.gameName||''),tagLine:String(player.tagLine||''),platformId:String(player.platformId||'KR')}:null,
+      candidates,
+      targetMatches,
+      networkRequests:0,
+      updatedAt:timestamps.length?Math.max(...timestamps):null
+    };
+  }
+
   return{
     rateResolved,
     getStoredCandidates,
+    getShadowDiagnostics,
     modelVersions:Object.freeze([...versions]),
     dbPath:store?null:path.join(userDataPath,'rating',DB_BASENAME),
     store:ratingStore,
