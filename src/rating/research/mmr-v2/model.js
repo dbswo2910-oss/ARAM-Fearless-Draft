@@ -4,6 +4,7 @@ const { buildGraph } = require('./dataset');
 
 const DISPLAY_BASE = 1500;
 const DISPLAY_SCALE = 400 / Math.log(10);
+const DAY_MS = 24 * 60 * 60 * 1000;
 const EPS = 1e-12;
 
 function stableSigmoid(z) {
@@ -21,6 +22,12 @@ function clamp(value, lo, hi) {
 
 function mapGet(map, key) {
   return map.get(key) || 0;
+}
+
+function recencyWeight(timestamp, latestTimestamp, halfLifeDays) {
+  if (!Number.isFinite(halfLifeDays) || halfLifeDays <= 0 || !timestamp || !latestTimestamp) return 1;
+  const ageDays = Math.max(0, (latestTimestamp - timestamp) / DAY_MS);
+  return Math.pow(0.5, ageDays / halfLifeDays);
 }
 
 function matchFeatures(match, includeChampionEffects) {
@@ -51,7 +58,7 @@ function recenterMap(values) {
 }
 
 function scoreMatch(match, state, options) {
-  let z = state.sideBias;
+  let z = options.includeSideBias ? state.sideBias : 0;
   for (const id of match.teamA) z += mapGet(state.playerSkill, id);
   for (const id of match.teamB) z -= mapGet(state.playerSkill, id);
   if (options.includeChampionEffects) {
@@ -61,12 +68,13 @@ function scoreMatch(match, state, options) {
   return z;
 }
 
-function objective(matches, state, options) {
+function objective(matches, state, options, latestTimestamp) {
   let loss = 0;
   for (const match of matches) {
     const y = match.teamAWin ? 1 : 0;
     const p = clamp(stableSigmoid(scoreMatch(match, state, options)), 1e-12, 1 - 1e-12);
-    loss -= y * Math.log(p) + (1 - y) * Math.log(1 - p);
+    const weight = recencyWeight(match.timestamp, latestTimestamp, options.halfLifeDays);
+    loss += weight * (-(y * Math.log(p) + (1 - y) * Math.log(1 - p)));
   }
   for (const value of state.playerSkill.values()) loss += 0.5 * options.playerLambda * value * value;
   if (options.includeChampionEffects) for (const value of state.championSkill.values()) loss += 0.5 * options.championLambda * value * value;
@@ -86,10 +94,12 @@ function fitGlobalLatent(matches, opts = {}) {
   const options = Object.freeze({
     includeChampionEffects: !!opts.includeChampionEffects,
     includeSideBias: opts.includeSideBias !== false,
-    playerLambda: Number.isFinite(opts.playerLambda) ? Math.max(EPS, opts.playerLambda) : 2.0,
-    championLambda: Number.isFinite(opts.championLambda) ? Math.max(EPS, opts.championLambda) : 10.0,
+    playerLambda: Number.isFinite(opts.playerLambda) ? Math.max(EPS, opts.playerLambda) : 0.35,
+    championLambda: Number.isFinite(opts.championLambda) ? Math.max(EPS, opts.championLambda) : 5.0,
     sideLambda: Number.isFinite(opts.sideLambda) ? Math.max(EPS, opts.sideLambda) : 8.0,
-    learningRate: Number.isFinite(opts.learningRate) ? clamp(opts.learningRate, 0.01, 1) : 0.55,
+    halfLifeDays: Number.isFinite(opts.halfLifeDays) && opts.halfLifeDays > 0 ? Number(opts.halfLifeDays) : null,
+    uncertaintyInflation: Number.isFinite(opts.uncertaintyInflation) ? clamp(opts.uncertaintyInflation, 1, 3) : 1.35,
+    learningRate: Number.isFinite(opts.learningRate) ? clamp(opts.learningRate, 0.01, 1) : 0.5,
     maxStep: Number.isFinite(opts.maxStep) ? clamp(opts.maxStep, 0.01, 2) : 0.35,
     maxIterations: Number.isInteger(opts.maxIterations) ? clamp(opts.maxIterations, 10, 2000) : 350,
     minIterations: Number.isInteger(opts.minIterations) ? clamp(opts.minIterations, 1, 500) : 25,
@@ -97,6 +107,7 @@ function fitGlobalLatent(matches, opts = {}) {
   });
 
   const graph = opts.graph || buildGraph(rows);
+  const latestTimestamp = rows.reduce((max, row) => Math.max(max, Number(row.timestamp) || 0), 0);
   const players = [...new Set(rows.flatMap(m => [...m.teamA, ...m.teamB]))].sort();
   const champions = options.includeChampionEffects
     ? [...new Set(rows.flatMap(m => [...(m.teamAChampions || []), ...(m.teamBChampions || [])]).filter(x => x != null).map(String))].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b))
@@ -125,8 +136,9 @@ function fitGlobalLatent(matches, opts = {}) {
     for (const match of rows) {
       const y = match.teamAWin ? 1 : 0;
       const p = stableSigmoid(scoreMatch(match, state, options));
-      const residual = y - p;
-      const curvature = Math.max(1e-8, p * (1 - p));
+      const weight = recencyWeight(match.timestamp, latestTimestamp, options.halfLifeDays);
+      const residual = (y - p) * weight;
+      const curvature = Math.max(1e-8, p * (1 - p) * weight);
       for (const [kind, id, sign] of matchFeatures(match, options.includeChampionEffects)) {
         const gradients = kind === 'p' ? gradPlayer : gradChampion;
         const diagonal = kind === 'p' ? diagPlayer : diagChampion;
@@ -176,7 +188,8 @@ function fitGlobalLatent(matches, opts = {}) {
   fisherSide = options.sideLambda;
   for (const match of rows) {
     const p = stableSigmoid(scoreMatch(match, state, options));
-    const curvature = Math.max(1e-8, p * (1 - p));
+    const weight = recencyWeight(match.timestamp, latestTimestamp, options.halfLifeDays);
+    const curvature = Math.max(1e-8, p * (1 - p) * weight);
     for (const [kind, id] of matchFeatures(match, options.includeChampionEffects)) {
       const target = kind === 'p' ? fisherPlayer : fisherChampion;
       target.set(id, mapGet(target, id) + curvature);
@@ -184,12 +197,20 @@ function fitGlobalLatent(matches, opts = {}) {
     if (options.includeSideBias) fisherSide += curvature;
   }
 
+  const componentMatches = new Map();
+  for (const match of rows) {
+    const componentId = graph.players[match.teamA[0]]?.componentId;
+    if (componentId) componentMatches.set(componentId, (componentMatches.get(componentId) || 0) + 1);
+  }
+
   const views = {};
   for (const id of players) {
     const stats = graph.players[id];
     const latent = mapGet(state.playerSkill, id);
     const sigma = 1 / Math.sqrt(Math.max(EPS, mapGet(fisherPlayer, id)));
-    const uncertainty = sigma * DISPLAY_SCALE;
+    const componentMatchCount = componentMatches.get(stats?.componentId) || 0;
+    const networkPenalty = (stats?.componentSize || 0) < 20 ? 1.35 : (stats?.componentSize || 0) < 50 ? 1.2 : componentMatchCount < 20 ? 1.15 : 1;
+    const uncertainty = clamp(sigma * DISPLAY_SCALE * options.uncertaintyInflation * networkPenalty, 35, 500);
     const rating = DISPLAY_BASE + latent * DISPLAY_SCALE;
     views[id] = Object.freeze({
       puuid: id,
@@ -198,13 +219,14 @@ function fitGlobalLatent(matches, opts = {}) {
       latentSkill: latent,
       uncertainty,
       uncertainty95: 1.96 * uncertainty,
-      uncertaintyKind: 'diagonal_fisher_approximation',
+      uncertaintyKind: 'diagonal_fisher_network_inflated_approximation',
       games: stats?.games || 0,
       wins: stats?.wins || 0,
       uniqueTeammates: stats?.uniqueTeammates || 0,
       uniqueOpponents: stats?.uniqueOpponents || 0,
       componentId: stats?.componentId || null,
       componentSize: stats?.componentSize || 0,
+      componentMatches: componentMatchCount,
       connectivity: connectivityLabel(stats),
       provisional: (stats?.games || 0) < 20 || uncertainty > 120
     });
@@ -217,7 +239,7 @@ function fitGlobalLatent(matches, opts = {}) {
       championId: Number(id),
       latentEffect: latent,
       displayEquivalent: latent * DISPLAY_SCALE,
-      uncertainty: (1 / Math.sqrt(Math.max(EPS, mapGet(fisherChampion, id)))) * DISPLAY_SCALE
+      uncertainty: clamp((1 / Math.sqrt(Math.max(EPS, mapGet(fisherChampion, id)))) * DISPLAY_SCALE * options.uncertaintyInflation, 20, 500)
     });
   }
 
@@ -230,13 +252,13 @@ function fitGlobalLatent(matches, opts = {}) {
     converged,
     iterations,
     maxAbsStep,
-    objective: objective(rows, state, options),
+    objective: objective(rows, state, options, latestTimestamp),
     matchCount: rows.length,
     playerCount: players.length,
     componentCount: graph.components.length,
     sideBias: options.includeSideBias ? state.sideBias : 0,
     sideBiasDisplayEquivalent: options.includeSideBias ? state.sideBias * DISPLAY_SCALE : 0,
-    sideBiasUncertainty: options.includeSideBias ? (1 / Math.sqrt(Math.max(EPS, fisherSide))) * DISPLAY_SCALE : null,
+    sideBiasUncertainty: options.includeSideBias ? clamp((1 / Math.sqrt(Math.max(EPS, fisherSide))) * DISPLAY_SCALE * options.uncertaintyInflation, 20, 500) : null,
     championEffects: Object.freeze(championEffects),
     players: Object.freeze(views),
     predict(match) {
@@ -258,6 +280,7 @@ function fitGlobalLatent(matches, opts = {}) {
         uniqueOpponents: 0,
         componentId: null,
         componentSize: 0,
+        componentMatches: 0,
         connectivity: 'NONE',
         provisional: true
       });
@@ -269,7 +292,9 @@ function fitGlobalLatent(matches, opts = {}) {
 module.exports = {
   DISPLAY_BASE,
   DISPLAY_SCALE,
+  DAY_MS,
   stableSigmoid,
+  recencyWeight,
   fitGlobalLatent,
   production_active: false,
   automatic_promotion: false
