@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   inventory:
@@ -44,36 +44,21 @@ jobs:
           node --check src/app/runtime-v0180.js
           grep -F "require('../autosync').installHistoryOwners(autosyncCore);" src/app/runtime-v0180.js
           grep -F "const itemCatalog=require('../items').catalogService;" src/app/runtime-v0180.js
+          grep -F "const updater=require('../updater');" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-queue-v01517')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-cc-impact-v01525')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-mission-timeline-v01529')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-telemetry-v01534')" src/app/runtime-v0180.js
           ! grep -F "require('./item-catalog-v01527')" src/app/runtime-v0180.js
+          ! grep -F "require('./update-safety-v01579')" src/app/runtime-v0180.js
           ! grep -F "module._compile(" src/app/runtime-v0180.js
-          echo 'V0.18 CANDIDATE MIGRATED LEGACY REQUIRES: 0 (autosync history + item catalog)'
-      - name: Require checked-in candidate snapshot on PR
-        if: github.event_name == 'pull_request'
+          echo 'V0.18 CANDIDATE MIGRATED LEGACY REQUIRES: 0 (autosync history + item catalog + updater transaction)'
+      - name: Require checked-in candidate snapshot
         shell: bash
         run: |
           set -euo pipefail
           git ls-files --error-unmatch src/app/runtime-v0180.js >/dev/null
           git diff --exit-code -- src/app/runtime-v0180.js
-      - name: Commit generated candidate snapshot on refactor branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/refactor/v0.18.0-legacy-removal'
-        shell: bash
-        run: |
-          set -euo pipefail
-          tracked=1
-          git ls-files --error-unmatch src/app/runtime-v0180.js >/dev/null 2>&1 || tracked=0
-          if [ "$tracked" = "1" ] && git diff --quiet -- src/app/runtime-v0180.js; then
-            echo 'v0.18 candidate runtime already authoritative.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/app/runtime-v0180.js
-          git commit -m 'refactor: materialize v0.18 candidate runtime'
-          git push origin HEAD:refactor/v0.18.0-legacy-removal
       - name: Upload inventory
         if: always()
         uses: actions/upload-artifact@v4
