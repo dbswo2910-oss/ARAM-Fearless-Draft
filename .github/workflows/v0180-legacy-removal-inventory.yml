@@ -1,0 +1,23 @@
+name: v0.18.0 Legacy Removal Inventory
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build active legacy inventory
+        run: node tools/legacy-removal-inventory-v0180.js
+      - name: Upload inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-removal-inventory-v0180
+          path: audit-output/legacy-removal-inventory-v0180.json
+          if-no-files-found: error
