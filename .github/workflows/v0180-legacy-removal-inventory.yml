@@ -37,18 +37,20 @@ jobs:
         run: node tools/refactor/materialize-v0180-candidate-runtime.js
       - name: Prove candidate differs only by approved migration
         run: node tools/v0180-candidate-differential-audit.js
-      - name: Guard candidate runtime against migrated legacy AutoSync owners
+      - name: Guard candidate runtime against migrated legacy owners
         shell: bash
         run: |
           set -euo pipefail
           node --check src/app/runtime-v0180.js
           grep -F "require('../autosync').installHistoryOwners(autosyncCore);" src/app/runtime-v0180.js
+          grep -F "const itemCatalog=require('../items').catalogService;" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-queue-v01517')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-cc-impact-v01525')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-mission-timeline-v01529')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-telemetry-v01534')" src/app/runtime-v0180.js
+          ! grep -F "require('./item-catalog-v01527')" src/app/runtime-v0180.js
           ! grep -F "module._compile(" src/app/runtime-v0180.js
-          echo 'V0.18 CANDIDATE AUTOSYNC HISTORY LEGACY REQUIRES: 0'
+          echo 'V0.18 CANDIDATE MIGRATED LEGACY REQUIRES: 0 (autosync history + item catalog)'
       - name: Require checked-in candidate snapshot on PR
         if: github.event_name == 'pull_request'
         shell: bash
