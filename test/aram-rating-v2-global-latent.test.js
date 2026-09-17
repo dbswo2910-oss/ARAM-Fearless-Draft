@@ -10,8 +10,10 @@ const {
   pairedBootstrapDiff,
   temporalSplit,
   temporalThreeWaySplit,
-  evaluateMmrV2
+  evaluateMmrV2,
+  measureMmrV2
 } = require('../src/rating/research/mmr-v2');
+const { parseArgs, extractMatches } = require('../tools/rating/evaluate-mmr-v2');
 const productionEstimator = require('../src/rating/universal/estimator');
 
 function makeMatch(id, timestamp, teamA, teamB, teamAWin, {
@@ -213,6 +215,41 @@ test('untouched final outcomes cannot change model or baseline selection', () =>
   assert.equal(a.temporal.trainFingerprint, b.temporal.trainFingerprint);
   assert.equal(a.temporal.validationFingerprint, b.temporal.validationFingerprint);
   assert.notEqual(a.temporal.testFingerprint, b.temporal.testFingerprint);
+});
+
+test('current measurement is research-provisional and fits all accepted evidence after frozen selection', () => {
+  const matches = balancedSynthetic(20);
+  const evaluation = {
+    selection: {
+      selectedV2: 'test_measure_model',
+      selectedV2Options: { includeChampionEffects: false, playerLambda: 0.35, maxIterations: 50, minIterations: 10 }
+    },
+    promotionGate: { decision: 'insufficient_real_data', reason: 'fixture' },
+    temporal: { finalTestMatches: 4 }
+  };
+  const measured = measureMmrV2(matches, 'p-01', { evaluation });
+  assert.equal(measured.status, 'RESEARCH_PROVISIONAL');
+  assert.equal(measured.productionRatingActive, false);
+  assert.equal(measured.automaticPromotion, false);
+  assert.ok(Number.isFinite(measured.rating));
+  assert.ok(Number.isFinite(measured.uncertainty));
+  assert.equal(measured.modelId, 'test_measure_model');
+  assert.equal(measured.evidenceMatches, 20);
+  const unseen = measureMmrV2(matches, 'never-seen', { evaluation });
+  assert.equal(unseen.status, 'UNMEASURED');
+  assert.equal(unseen.rating, null);
+});
+
+test('local CLI accepts Universal Rating DB match maps without mutating shape', () => {
+  const matches = balancedSynthetic(3);
+  const db = { schemaVersion: 1, matches: Object.fromEntries(matches.map(m => [m.matchId, m])) };
+  const extracted = extractMatches(db);
+  assert.equal(extracted.length, 3);
+  assert.deepEqual(new Set(extracted.map(m => m.matchId)), new Set(matches.map(m => m.matchId)));
+  assert.deepEqual(parseArgs(['input.json', '--target', 'PUUID-X', '--out', 'report.json', '--skip-walk-forward']), {
+    input: 'input.json', target: 'PUUID-X', out: 'report.json', skipWalkForward: true
+  });
+  assert.equal(parseArgs(['--help']).help, true);
 });
 
 test('small real dataset cannot force a model winner', () => {
