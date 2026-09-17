@@ -49,6 +49,11 @@ async function main(){
   const p2=hook.patchPreloadSource(src);
   ok(p2.changed===false&&p2.alreadyPatched===true,'preload patch must be idempotent');
 
+  const diagnosticsOnly=`'use strict';\nconst {contextBridge,ipcRenderer}=require('electron');\ncontextBridge.exposeInMainWorld('aramDesktop', {\n  getAramMatchHistory: options => ipcRenderer.invoke('match-history:load', options || {}),\n});\n`;
+  const legacyPatched=hook.patchPreloadSource(diagnosticsOnly);
+  ok(legacyPatched.source.includes('getUniversalRatingShadowDiagnostics:'),'diagnostics-only legacy preload must still patch');
+  ok(!legacyPatched.source.includes('__ARAM_UNIVERSAL_RATING_AUTO_SYNC_V1__'),'legacy preload without AutoSync owner must not create a second owner');
+
   const frozenNames=['aram-rating-research-v03','checkpoint-v03'];
   const autoSource=fs.readFileSync(path.join(ROOT,'src/preload/universal-rating-auto-sync.js'),'utf8');
   for(const needle of frozenNames)ok(!autoSource.includes(needle),`live auto-sync must not mutate frozen research checkpoint: ${needle}`);
@@ -76,8 +81,9 @@ async function main(){
   ok(!runtimeSource.includes('aram-rating-research-v03')&&!runtimeSource.includes('checkpoint-v03'),'runtime must not touch frozen research checkpoint');
 
   const ipcContract=require('../src/preload/ipc-contract');
-  for(const name of ['getUniversalRatingShadowDiagnostics','getUniversalRatingAutoSyncState','onUniversalRatingAutoSync','offUniversalRatingAutoSync'])ok(ipcContract.bridgeMethods.includes(name),`IPC contract missing ${name}`);
+  for(const name of ['getUniversalRatingShadowDiagnostics','getUniversalRatingAutoSyncState','onUniversalRatingAutoSync','offUniversalRatingAutoSync'])ok(ipcContract.optionalBridgeMethods.includes(name),`optional IPC contract missing ${name}`);
+  for(const channel of ['rating:universal-rate-resolved-history','rating:universal-shadow-diagnostics'])ok(ipcContract.shadowInvokeChannels.includes(channel),`shadow IPC channel missing ${channel}`);
 
-  console.log(JSON.stringify({status:'PASS',tests:{transition:true,noSecondPoll:true,historyOwnerPreserved:true,idempotentPatch:true,dedup:true,affectedPlayers:10,frozenResearchUntouched:true,productionRatingStillOff:true}},null,2));
+  console.log(JSON.stringify({status:'PASS',tests:{transition:true,noSecondPoll:true,historyOwnerPreserved:true,idempotentPatch:true,legacyDiagnosticsCompatibility:true,dedup:true,affectedPlayers:10,frozenResearchUntouched:true,productionRatingStillOff:true}},null,2));
 }
 main().catch(err=>{console.error(err&&err.stack||err);process.exit(1)});
