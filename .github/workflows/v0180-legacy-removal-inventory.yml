@@ -42,17 +42,22 @@ jobs:
         run: |
           set -euo pipefail
           node --check src/app/runtime-v0180.js
-          grep -F "require('../autosync').installHistoryOwners(autosyncCore);" src/app/runtime-v0180.js
-          grep -F "const itemCatalog=require('../items').catalogService;" src/app/runtime-v0180.js
-          grep -F "const updater=require('../updater');" src/app/runtime-v0180.js
+          test "$(grep -Fc "const canonicalOwners=require('./canonical-runtime-owners');" src/app/runtime-v0180.js)" -eq 1
+          test "$(grep -Fc "canonicalOwners.installCore({autosyncCore});" src/app/runtime-v0180.js)" -eq 1
+          test "$(grep -Fc "canonicalOwners.installIpc({ipcMain});" src/app/runtime-v0180.js)" -eq 1
+          grep -F "const {itemCatalog,updater}=canonicalOwners;" src/app/runtime-v0180.js
+          grep -F "updater.prepareTransaction" src/app/runtime-v0180.js
+          grep -F "updater.markApplied" src/app/runtime-v0180.js
+          grep -F "updater.abortTransaction" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-queue-v01517')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-cc-impact-v01525')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-mission-timeline-v01529')" src/app/runtime-v0180.js
           ! grep -F "require('./autosync-telemetry-v01534')" src/app/runtime-v0180.js
           ! grep -F "require('./item-catalog-v01527')" src/app/runtime-v0180.js
           ! grep -F "require('./update-safety-v01579')" src/app/runtime-v0180.js
+          ! grep -F "itemCatalog.register(ipcMain);itemCatalog.fetchCatalog().catch(()=>{});" src/app/runtime-v0180.js
           ! grep -F "module._compile(" src/app/runtime-v0180.js
-          echo 'V0.18 EPHEMERAL CANDIDATE MIGRATED LEGACY REQUIRES: 0 (autosync history + item catalog + updater transaction)'
+          echo 'V0.18 EPHEMERAL CANDIDATE MIGRATED LEGACY OWNER REFERENCES: 0 (autosync history + item catalog + updater transaction)'
       - name: Ensure generated candidate is not a source-controlled owner
         shell: bash
         run: |
