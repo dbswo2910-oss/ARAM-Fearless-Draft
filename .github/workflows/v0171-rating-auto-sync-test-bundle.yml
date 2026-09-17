@@ -1,0 +1,120 @@
+name: v0.17.1 Rating Auto Sync Windows Test Bundle
+
+on:
+  push:
+    branches:
+      - feature/v0171-rating-auto-sync-test-bundle
+    paths:
+      - 'src/preload/ipc-contract.js'
+      - 'src/preload/universal-rating-auto-sync.js'
+      - 'src/preload/universal-rating-history-hook.js'
+      - 'src/rating/universal/**'
+      - 'src/main/universal-rating-ipc.js'
+      - 'tools/v0171-rating-auto-sync-audit.js'
+      - 'tools/v0171-materialize-test-runtime.js'
+      - 'tools/v0171-build-test-bundle.ps1'
+      - 'tools/stability/materialize-installed-app.js'
+      - 'tools/stability/fixtures/**'
+      - '.github/workflows/v0171-rating-auto-sync-test-bundle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows-test-bundle:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Compile v0.17.1 Rating sources
+        shell: pwsh
+        run: |
+          $files = @(
+            'src/preload/ipc-contract.js',
+            'src/preload/universal-rating-auto-sync.js',
+            'src/preload/universal-rating-history-hook.js',
+            'src/rating/universal/runtime.js',
+            'src/rating/universal/service.js',
+            'src/main/universal-rating-ipc.js',
+            'tools/v0171-rating-auto-sync-audit.js',
+            'tools/v0171-materialize-test-runtime.js'
+          )
+          foreach ($f in $files) {
+            node --check $f
+            if ($LASTEXITCODE -ne 0) { throw "syntax failed: $f" }
+          }
+
+      - name: Run Rating Auto Sync audit
+        run: node tools/v0171-rating-auto-sync-audit.js
+
+      - name: Run existing AutoSync concurrency regression
+        shell: pwsh
+        run: |
+          if (Test-Path 'tools/v015119-autosync-concurrency-audit.js') {
+            node tools/v015119-autosync-concurrency-audit.js
+            if ($LASTEXITCODE -ne 0) { throw 'AutoSync concurrency regression failed' }
+          }
+
+      - name: Run Full Regression
+        run: node tools/full-regression-audit.js
+
+      - name: Build isolated Windows x64 test bundle
+        shell: pwsh
+        run: ./tools/v0171-build-test-bundle.ps1
+
+      - name: Smoke launch packaged TEST app with isolated userData
+        shell: pwsh
+        run: |
+          $bundle = Join-Path $PWD 'dist-v0171-test\ARAM-Fearless-Draft-v0.17.1-TEST-windows-x64'
+          $exe = Join-Path $bundle 'ARAM-Fearless-Draft-v0.17.1-TEST.exe'
+          if (!(Test-Path $exe)) { throw "test exe missing: $exe" }
+          $profile = Join-Path $env:RUNNER_TEMP 'v0171-smoke-profile'
+          if (Test-Path $profile) { Remove-Item $profile -Recurse -Force }
+          $env:APPDATA = Join-Path $profile 'AppData\Roaming'
+          $env:LOCALAPPDATA = Join-Path $profile 'AppData\Local'
+          $env:ARAM_UNIVERSAL_SHADOW_USER_DATA_ROOT = Join-Path $profile 'aram-fearless-draft'
+          $env:ARAM_UNIVERSAL_RATING_DB_ROOT = Join-Path $profile 'aram-fearless-draft'
+          New-Item -ItemType Directory -Force -Path $env:APPDATA,$env:LOCALAPPDATA,$env:ARAM_UNIVERSAL_SHADOW_USER_DATA_ROOT | Out-Null
+          $stdout = Join-Path $env:RUNNER_TEMP 'v0171-test-stdout.log'
+          $stderr = Join-Path $env:RUNNER_TEMP 'v0171-test-stderr.log'
+          $p = Start-Process -FilePath $exe -ArgumentList @('--aram-v0171-test-ci') -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+          Start-Sleep -Seconds 12
+          if ($p.HasExited) {
+            $out = if (Test-Path $stdout) { Get-Content $stdout -Raw } else { '' }
+            $err = if (Test-Path $stderr) { Get-Content $stderr -Raw } else { '' }
+            Write-Host $out
+            Write-Error $err
+            throw "packaged TEST app exited early with code $($p.ExitCode)"
+          }
+          Stop-Process -Id $p.Id -Force
+          $preload = Get-Content (Join-Path $bundle 'resources\app\preload.js') -Raw
+          if ($preload -notmatch '__ARAM_UNIVERSAL_RATING_HISTORY_HOOK_V3__') { throw 'packaged preload missing V3 hook' }
+          if ($preload -notmatch '__ARAM_UNIVERSAL_RATING_AUTO_SYNC_V1__') { throw 'packaged preload missing auto-sync V1 marker' }
+          Write-Host 'PACKAGED TEST APP COLD START: PASS'
+
+      - name: Write artifact checksum
+        shell: pwsh
+        run: |
+          $bundle = Join-Path $PWD 'dist-v0171-test\ARAM-Fearless-Draft-v0.17.1-TEST-windows-x64'
+          $exe = Join-Path $bundle 'ARAM-Fearless-Draft-v0.17.1-TEST.exe'
+          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "ARAM-Fearless-Draft-v0.17.1-TEST.exe  $hash" | Set-Content -Path (Join-Path $bundle 'SHA256SUMS.txt') -Encoding Ascii
+          Write-Host "TEST EXE SHA256: $hash"
+
+      - name: Upload Windows test bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARAM-Fearless-Draft-v0.17.1-TEST-windows-x64
+          path: dist-v0171-test/ARAM-Fearless-Draft-v0.17.1-TEST-windows-x64/
+          if-no-files-found: error
+          retention-days: 14
