@@ -1,6 +1,6 @@
 {
-  "version": "0.17.0",
-  "message": "v0.17.0 · CLEAN CONSOLIDATED RUNTIME",
+  "version": "0.17.1",
+  "message": "v0.17.1 · RATING AUTO SYNC",
   "min_launcher": "2.0.2",
   "files": [
     {
@@ -257,8 +257,8 @@
     },
     {
       "path": "preload.js",
-      "source": "update/v0.17.0/preload.js",
-      "sha256": "24f590944229cc9afaba445f9cf03fed9d212292766cad32f590dd6dd20405d2"
+      "source": "update/v0.17.1/preload.js",
+      "sha256": "ab397eb29f44ea696baf4a1e87855d0bbbb4d0aafb438af2a314e53b353226a6"
     },
     {
       "path": "input-interaction-stability-v01539.js",
@@ -294,8 +294,8 @@
     },
     {
       "path": "main.js",
-      "source": "update/v0.17.0/main.js",
-      "sha256": "7c48d2bbb91ff2f8ad22c512866b0f128c77837167dab4f7df79bbd81dff376b"
+      "source": "update/v0.17.1/main.js",
+      "sha256": "a9fca16585a2e646a66e7adaed5532c6878d641a8e01d6dd323ad247d39a0a84"
     },
     {
       "path": "ingame-transition-patch-v01575.js",
@@ -819,8 +819,8 @@
     },
     {
       "path": "package.json",
-      "source": "update/v0.17.0/package.json",
-      "sha256": "3168c66521785a3d32e59c47c11f2a81a2717b475b46a0a797d4d6eca087f982"
+      "source": "update/v0.17.1/package.json",
+      "sha256": "17ad6cc044944372ea839b96d1a8e48685cea015493faa09322d20bbb2fd78ef"
     },
     {
       "path": "rating-engine-v01.js",
@@ -1431,8 +1431,8 @@
     },
     {
       "path": "src/preload/universal-rating-history-hook.js",
-      "source": "update/v0.16.2/src/preload/universal-rating-history-hook.js",
-      "sha256": "e9263e76addade16b71620d6bb0b065f374e8b03fba1ce27a045b8d60b18a8e0"
+      "source": "update/v0.17.1/src/preload/universal-rating-history-hook.js",
+      "sha256": "e441246f4aa04d0759c6238057ea70bf03ebc770c11fd10da54e38c14be99d10"
     },
     {
       "path": "src/rating/universal/contracts.js",
@@ -1461,13 +1461,13 @@
     },
     {
       "path": "src/rating/universal/service.js",
-      "source": "update/v0.16.1/src/rating/universal/service.js",
-      "sha256": "8eeeeb70ac1e4e04bd73b303edd2926116ac69cf2c22fc9f07ec6f04628d5816"
+      "source": "update/v0.17.1/src/rating/universal/service.js",
+      "sha256": "d1a491703422fea8feb384785758327438d58fe4a08f9b51f9f76ae8d6ef811a"
     },
     {
       "path": "src/rating/universal/runtime.js",
-      "source": "update/v0.16.3/src/rating/universal/runtime.js",
-      "sha256": "4c9305bd3b756dbb8c01d78336e95bbb4b0ed73050ac1062e0cf7bd1d56edfaa"
+      "source": "update/v0.17.1/src/rating/universal/runtime.js",
+      "sha256": "e1861151292733b78900860bf4cdf6cd198037f02e32061f249cb31896aa5800"
     },
     {
       "path": "src/rating/universal/index.js",
@@ -1498,6 +1498,16 @@
       "path": "legacy-runtime-v0170.js",
       "source": "update/v0.17.0/legacy-runtime-v0170.js",
       "sha256": "608c89db69f8a0c84713fceaa53934db651fa1242355a53767fab5d5447c22cc"
+    },
+    {
+      "path": "src/preload/ipc-contract.js",
+      "source": "update/v0.17.1/src/preload/ipc-contract.js",
+      "sha256": "b33848aa167457517f91f06829919fdaf16f586febbb469d85e9efd506072376"
+    },
+    {
+      "path": "src/preload/universal-rating-auto-sync.js",
+      "source": "update/v0.17.1/src/preload/universal-rating-auto-sync.js",
+      "sha256": "4c2fcb7ec174e0c59477283a6f565f990284ab548460cc7b35fdaf6933f1f45b"
     }
   ],
   "delete": [
@@ -1554,5 +1564,8 @@
   "universal_rating_shadow_diagnostics": true,
   "universal_rating_shadow_transparency": true,
   "clean_runtime_consolidated": true,
-  "runtime_successor_wrappers": false
+  "runtime_successor_wrappers": false,
+  "universal_rating_auto_sync": true,
+  "rating_auto_sync_game_end": true,
+  "rating_auto_sync_search_refresh": true
 }

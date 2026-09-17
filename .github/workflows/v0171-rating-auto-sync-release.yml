@@ -1,0 +1,91 @@
+# v0.17.1 authoritative production release gate
+name: v0.17.1 Rating Auto Sync Release
+
+on:
+  push:
+    branches:
+      - feature/v0171-rating-auto-sync-final
+    paths:
+      - 'src/preload/ipc-contract.js'
+      - 'src/preload/universal-rating-auto-sync.js'
+      - 'src/preload/universal-rating-history-hook.js'
+      - 'src/rating/universal/**'
+      - 'src/main/universal-rating-ipc.js'
+      - 'tools/v0171-rating-auto-sync-audit.js'
+      - 'tools/release/build-v0171-rating-auto-sync-release.js'
+      - '.github/workflows/v0171-rating-auto-sync-release.yml'
+      - 'update/v0.17.1/**'
+      - 'update/manifest.json'
+      - 'release/v0.17.1-rating-auto-sync.json'
+      - 'docs/CURRENT_STATE.md'
+      - 'update/current-state.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Source Rating Auto Sync audit
+        run: node tools/v0171-rating-auto-sync-audit.js
+
+      - name: Materialize v0.17.1 updater payload
+        run: node tools/release/build-v0171-rating-auto-sync-release.js
+
+      - name: Syntax check generated release payload
+        run: |
+          node --check update/v0.17.1/main.js
+          node --check update/v0.17.1/preload.js
+          node --check update/v0.17.1/src/preload/ipc-contract.js
+          node --check update/v0.17.1/src/preload/universal-rating-auto-sync.js
+          node --check update/v0.17.1/src/preload/universal-rating-history-hook.js
+          node --check update/v0.17.1/src/rating/universal/runtime.js
+          node --check update/v0.17.1/src/rating/universal/service.js
+
+      - name: Validate release invariants
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const m=require('./update/manifest.json');
+          if(m.version!=='0.17.1')throw new Error('manifest version mismatch');
+          if(m.universal_rating_auto_sync!==true||m.rating_auto_sync_game_end!==true||m.rating_auto_sync_search_refresh!==true)throw new Error('auto-sync metadata missing');
+          if(m.production_rating_active!==false||m.automatic_rating_promotion!==false)throw new Error('rating promotion safety changed');
+          const pre=fs.readFileSync('./update/v0.17.1/preload.js','utf8');
+          for(const x of ['__ARAM_UNIVERSAL_RATING_HISTORY_HOOK_V3__','__ARAM_UNIVERSAL_RATING_AUTO_SYNC_V1__','getUniversalRatingAutoSyncState','onUniversalRatingAutoSync'])if(!pre.includes(x))throw new Error('missing '+x);
+          const pkg=require('./update/v0.17.1/package.json');
+          if(pkg.version!=='0.17.1')throw new Error('package version mismatch');
+          console.log('V0.17.1 RELEASE INVARIANTS: PASS');
+          NODE
+
+      - name: Current AutoSync canonical regression
+        run: node tools/stability/autosync-canonical-differential-audit.js
+
+      - name: Full Regression
+        run: node tools/full-regression-audit.js
+
+      - name: Sync continuity metadata
+        run: |
+          node tools/sync-current-state.js
+          node tools/sync-current-state.js --check
+
+      - name: Commit authoritative v0.17.1 release payload
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add update/v0.17.1 update/manifest.json release/v0.17.1-rating-auto-sync.json update/current-state.json docs/CURRENT_STATE.md docs/continuity-manual.json docs/AI_HANDOFF.md docs/KNOWN_ISSUES.md
+          if git diff --cached --quiet; then
+            echo 'v0.17.1 release payload already authoritative.'
+            exit 0
+          fi
+          git commit -m 'release: materialize v0.17.1 Rating Auto Sync updater payload'
+          git push origin HEAD:feature/v0171-rating-auto-sync-final

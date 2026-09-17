@@ -1,0 +1,10 @@
+{
+  "name": "aram-fearless-draft",
+  "version": "0.17.1",
+  "description": "v0.17.1 Rating Auto Sync",
+  "main": "main.js",
+  "engines": {
+    "electron": ">=28",
+    "node": ">=18"
+  }
+}

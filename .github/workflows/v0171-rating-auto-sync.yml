@@ -1,0 +1,59 @@
+name: v0.17.1 Universal Rating Auto Sync Audit
+
+on:
+  push:
+    branches: [ feature/v0171-rating-auto-sync ]
+    paths:
+      - 'src/preload/universal-rating-auto-sync.js'
+      - 'src/preload/universal-rating-history-hook.js'
+      - 'src/preload/ipc-contract.js'
+      - 'src/rating/universal/**'
+      - 'src/profile/shadow-rating-diagnostics-renderer.js'
+      - 'tools/v0171-rating-auto-sync-audit.js'
+      - '.github/workflows/v0171-rating-auto-sync.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/preload/universal-rating-auto-sync.js'
+      - 'src/preload/universal-rating-history-hook.js'
+      - 'src/preload/ipc-contract.js'
+      - 'src/rating/universal/**'
+      - 'src/profile/shadow-rating-diagnostics-renderer.js'
+      - 'tools/v0171-rating-auto-sync-audit.js'
+      - '.github/workflows/v0171-rating-auto-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Compile changed Rating sources
+        run: |
+          node -c src/preload/universal-rating-auto-sync.js
+          node -c src/preload/universal-rating-history-hook.js
+          node -c src/preload/ipc-contract.js
+          node -c src/rating/universal/service.js
+          node -c src/rating/universal/runtime.js
+          node -c tools/v0171-rating-auto-sync-audit.js
+      - name: Run Rating auto-sync audit
+        run: node tools/v0171-rating-auto-sync-audit.js
+      - name: Run existing AutoSync concurrency regression
+        run: |
+          if [ -f tools/v015119-autosync-concurrency-audit.js ]; then node tools/v015119-autosync-concurrency-audit.js; fi
+      - name: Run Full Regression
+        run: node tools/full-regression-audit.js
+      - name: Run AI continuity audit
+        run: |
+          if [ -f tools/ai-continuity-audit.js ]; then node tools/ai-continuity-audit.js; fi

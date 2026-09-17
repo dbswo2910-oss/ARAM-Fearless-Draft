@@ -4,11 +4,11 @@
 
 ## Active distribution
 
-- Active updater: **v0.17.0**
-- Manifest message: v0.17.0 · CLEAN CONSOLIDATED RUNTIME
-- Manifest fingerprint: `d9f45a409d7ab00847e8df99fb7b699071ef6e162ee76b84ccedf21a38b360f6`
-- Package: `update/v0.17.0/package.json` → **v0.17.0**
-- Electron entry: `main.js` → `update/v0.17.0/main.js`
+- Active updater: **v0.17.1**
+- Manifest message: v0.17.1 · RATING AUTO SYNC
+- Manifest fingerprint: `558638b2f38f1c2fbe8eba978fa4d3efa8ccdcb780c11dfad414f96c3dab040c`
+- Package: `update/v0.17.1/package.json` → **v0.17.1**
+- Electron entry: `main.js` → `update/v0.17.1/main.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
 
 ## Active ownership — do not create competing owners
