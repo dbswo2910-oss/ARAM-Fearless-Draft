@@ -84,33 +84,35 @@ jobs:
           $exe = Join-Path $bundle 'electron.exe'
           $testExe = Join-Path $bundle 'ARAM-Fearless-Draft-v0.17.1-TEST.exe'
           Move-Item $exe $testExe -Force
-          @'
-@echo off
-setlocal
-cd /d "%~dp0"
-set "ARAM_UNIVERSAL_SHADOW_USER_DATA_ROOT=%~dp0test-user-data"
-set "ARAM_UNIVERSAL_RATING_DB_ROOT=%~dp0test-user-data"
-start "ARAM v0.17.1 TEST" "%~dp0ARAM-Fearless-Draft-v0.17.1-TEST.exe" --v0171-physical-test
-endlocal
-'@ | Set-Content (Join-Path $bundle 'START-v0.17.1-TEST.bat') -Encoding ascii
-          @'
-ARAM Fearless Draft v0.17.1 TEST
-================================
-
-이 빌드는 정식 업데이트가 아니라 자동 Rating 동기화 실기 검증용 포터블 빌드입니다.
-반드시 START-v0.17.1-TEST.bat 로 실행하세요.
-기존 설치본의 userData와 분리된 test-user-data 폴더를 사용합니다.
-
-검증 순서
-1) 롤 클라이언트를 켠 상태에서 START-v0.17.1-TEST.bat 실행
-2) 일반 칼바람(Queue 450) 1판 플레이
-3) 게임 종료 후 약 5초~30초 대기
-4) Rating 자동동기화가 1회만 발생하는지 확인
-5) 같은 경기가 중복 저장되지 않는지 확인
-6) 전적/프로필/AutoSync/RANDOM/DATA/IN GAME 기능이 정상인지 확인
-
-이 테스트 빌드는 production manifest를 변경하지 않습니다.
-'@ | Set-Content (Join-Path $bundle 'README-TEST.txt') -Encoding utf8
+          $bat = @(
+            '@echo off',
+            'setlocal',
+            'cd /d "%~dp0"',
+            'set "ARAM_UNIVERSAL_SHADOW_USER_DATA_ROOT=%~dp0test-user-data"',
+            'set "ARAM_UNIVERSAL_RATING_DB_ROOT=%~dp0test-user-data"',
+            'start "ARAM v0.17.1 TEST" "%~dp0ARAM-Fearless-Draft-v0.17.1-TEST.exe" --v0171-physical-test',
+            'endlocal'
+          )
+          $bat | Set-Content (Join-Path $bundle 'START-v0.17.1-TEST.bat') -Encoding ascii
+          $readme = @(
+            'ARAM Fearless Draft v0.17.1 TEST',
+            '================================',
+            '',
+            '이 빌드는 정식 업데이트가 아니라 자동 Rating 동기화 실기 검증용 포터블 빌드입니다.',
+            '반드시 START-v0.17.1-TEST.bat 로 실행하세요.',
+            '기존 설치본의 userData와 분리된 test-user-data 폴더를 사용합니다.',
+            '',
+            '검증 순서',
+            '1) 롤 클라이언트를 켠 상태에서 START-v0.17.1-TEST.bat 실행',
+            '2) 일반 칼바람(Queue 450) 1판 플레이',
+            '3) 게임 종료 후 약 5초~30초 대기',
+            '4) Rating 자동동기화가 1회만 발생하는지 확인',
+            '5) 같은 경기가 중복 저장되지 않는지 확인',
+            '6) 전적/프로필/AutoSync/RANDOM/DATA/IN GAME 기능이 정상인지 확인',
+            '',
+            '이 테스트 빌드는 production manifest를 변경하지 않습니다.'
+          )
+          $readme | Set-Content (Join-Path $bundle 'README-TEST.txt') -Encoding utf8
           "V0171_BUNDLE_DIR=$bundle" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Portable cold-start smoke
