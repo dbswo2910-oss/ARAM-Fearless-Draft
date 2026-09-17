@@ -32,6 +32,7 @@ function patchPreloadSource(source){
   const bareHistoryNeedle="getAramMatchHistory: options => ipcRenderer.invoke('match-history:load', options || {}),";
   const wrappedHistoryNeedle='getAramMatchHistory: options => universalRatingShadowHistory(options),';
   const bareStateNeedle="getAutoSyncState: () => ipcRenderer.invoke('autosync:get-state'),";
+  const wrappedStateNeedle='getAutoSyncState: () => universalRatingAutoSyncState(),';
   if(!source.includes(exposeNeedle))throw new Error('preload aramDesktop expose contract missing');
 
   let next=source;
@@ -40,19 +41,28 @@ function patchPreloadSource(source){
     if(!next.includes(bareHistoryNeedle))throw new Error('preload match-history contract missing');
     next=next.replace(exposeNeedle,shadowHelperSource()+exposeNeedle).replace(bareHistoryNeedle,wrappedHistoryNeedle);
   }
-  if(!next.includes('__ARAM_UNIVERSAL_RATING_AUTO_SYNC_V1__')){
-    next=next.replace(exposeNeedle,buildPreloadAutoSyncSource({historyChannel:HISTORY_CHANNEL,ratingChannel:RATING_CHANNEL})+exposeNeedle);
+
+  // Auto-sync is an optional extension of the existing AutoSync owner. Old/minimal
+  // preload fixtures that never exposed getAutoSyncState must remain valid for the
+  // diagnostics-only shadow path instead of being forced into the newer contract.
+  const hasAutoSyncOwner=next.includes(bareStateNeedle)||next.includes(wrappedStateNeedle);
+  if(hasAutoSyncOwner){
+    if(!next.includes('__ARAM_UNIVERSAL_RATING_AUTO_SYNC_V1__')){
+      next=next.replace(exposeNeedle,buildPreloadAutoSyncSource({historyChannel:HISTORY_CHANNEL,ratingChannel:RATING_CHANNEL})+exposeNeedle);
+    }
+    if(next.includes(bareStateNeedle))next=next.replace(bareStateNeedle,wrappedStateNeedle);
+    else if(!next.includes(wrappedStateNeedle))throw new Error('preload autosync state bridge contract missing');
   }
-  if(next.includes(bareStateNeedle))next=next.replace(bareStateNeedle,"getAutoSyncState: () => universalRatingAutoSyncState(),");
-  else if(!next.includes('getAutoSyncState: () => universalRatingAutoSyncState(),'))throw new Error('preload autosync state bridge contract missing');
 
   const diagnosticsNeedle='getUniversalRatingShadowDiagnostics: () => universalRatingShadowDiagnostics(),';
   if(!next.includes(diagnosticsNeedle)){
     if(!next.includes(wrappedHistoryNeedle))throw new Error('preload wrapped history bridge missing');
     next=next.replace(wrappedHistoryNeedle,wrappedHistoryNeedle+"\n    "+diagnosticsNeedle);
   }
-  const autoBridge="getUniversalRatingAutoSyncState: () => __urasPublicState(),\n    onUniversalRatingAutoSync: callback => __urasSubscribe(callback),\n    offUniversalRatingAutoSync: id => __urasUnsubscribe(id),";
-  if(!next.includes('getUniversalRatingAutoSyncState:'))next=next.replace(diagnosticsNeedle,diagnosticsNeedle+'\n    '+autoBridge);
+  if(hasAutoSyncOwner){
+    const autoBridge="getUniversalRatingAutoSyncState: () => __urasPublicState(),\n    onUniversalRatingAutoSync: callback => __urasSubscribe(callback),\n    offUniversalRatingAutoSync: id => __urasUnsubscribe(id),";
+    if(!next.includes('getUniversalRatingAutoSyncState:'))next=next.replace(diagnosticsNeedle,diagnosticsNeedle+'\n    '+autoBridge);
+  }
   return{source:next,changed:next!==source,count:next===source?0:1,alreadyPatched:false};
 }
 
