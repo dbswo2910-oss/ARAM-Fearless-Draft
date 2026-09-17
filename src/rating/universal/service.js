@@ -52,6 +52,8 @@ class UniversalRatingService{
       status:estimate.status,
       rating:finiteOrNull(estimate.rating),
       uncertainty:finiteOrNull(estimate.uncertainty),
+      uncertaintyKind:String(estimate.uncertaintyKind||''),
+      details:estimate.details&&typeof estimate.details==='object'?estimate.details:null,
       games:Number(estimate.games)||0,
       confidence:conf,
       evidenceFingerprint,
