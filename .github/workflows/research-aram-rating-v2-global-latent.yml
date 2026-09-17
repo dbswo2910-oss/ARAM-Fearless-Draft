@@ -1,0 +1,44 @@
+name: ARAM Rating MMR v2 Global Latent Shadow
+
+on:
+  push:
+    branches:
+      - research/aram-rating-v2-global-latent-shadow
+  pull_request:
+    paths:
+      - 'src/rating/research/mmr-v2/**'
+      - 'test/aram-rating-v2-global-latent.test.js'
+      - 'docs/research/ARAM_RATING_MMR_V2_GLOBAL_LATENT.md'
+      - '.github/workflows/research-aram-rating-v2-global-latent.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  mmr-v2-research-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check research modules
+        run: |
+          node --check src/rating/research/mmr-v2/dataset.js
+          node --check src/rating/research/mmr-v2/model.js
+          node --check src/rating/research/mmr-v2/metrics.js
+          node --check src/rating/research/mmr-v2/evaluator.js
+          node --check src/rating/research/mmr-v2/index.js
+          node --check test/aram-rating-v2-global-latent.test.js
+      - name: Run MMR v2 research tests
+        run: node --test test/aram-rating-v2-global-latent.test.js
+      - name: Verify production Rating remains shadow-only
+        run: |
+          node - <<'NODE'
+          const estimator = require('./src/rating/universal/estimator');
+          if (estimator.production_active !== false) throw new Error('production Rating unexpectedly active');
+          if (estimator.automatic_promotion !== false) throw new Error('automatic Rating promotion unexpectedly active');
+          if (Object.keys(estimator.MODELS).some(k => /mmr-v2|global-latent/i.test(k))) throw new Error('MMR v2 leaked into production estimator registry');
+          console.log('production Rating boundary: preserved');
+          NODE
