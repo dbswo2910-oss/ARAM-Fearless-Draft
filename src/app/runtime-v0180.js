@@ -9,7 +9,7 @@ const {app,BrowserWindow,Tray,Menu,ipcMain,nativeImage,shell}=require('electron'
 if(process.platform==='win32'&&process.env.ARAM_DISABLE_HARDWARE_ACCELERATION==='1')app.disableHardwareAcceleration();
 const autosyncCore=require('./autosync-core');
 require('../autosync').installHistoryOwners(autosyncCore);
-const itemCatalog=require('./item-catalog-v01527');
+const itemCatalog=require('../items').catalogService;
 const riotGrade=require('./riot-grade-collector-v01532');
 const {LeagueAutoSyncCore}=autosyncCore;
 
