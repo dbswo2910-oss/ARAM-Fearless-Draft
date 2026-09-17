@@ -47,12 +47,19 @@ jobs:
           echo 'V0.18 CANDIDATE AUTOSYNC HISTORY LEGACY REQUIRES: 0'
       - name: Require checked-in candidate snapshot on PR
         if: github.event_name == 'pull_request'
-        run: git diff --exit-code -- src/app/runtime-v0180.js
+        shell: bash
+        run: |
+          set -euo pipefail
+          git ls-files --error-unmatch src/app/runtime-v0180.js >/dev/null
+          git diff --exit-code -- src/app/runtime-v0180.js
       - name: Commit generated candidate snapshot on refactor branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/refactor/v0.18.0-legacy-removal'
         shell: bash
         run: |
-          if git diff --quiet -- src/app/runtime-v0180.js; then
+          set -euo pipefail
+          tracked=1
+          git ls-files --error-unmatch src/app/runtime-v0180.js >/dev/null 2>&1 || tracked=0
+          if [ "$tracked" = "1" ] && git diff --quiet -- src/app/runtime-v0180.js; then
             echo 'v0.18 candidate runtime already authoritative.'
             exit 0
           fi
