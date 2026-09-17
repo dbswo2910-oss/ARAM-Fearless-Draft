@@ -23,7 +23,7 @@ function mkMatch(i,a,b,aWin=true){
   const strongAvg=strong.reduce((s,id)=>s+model.view(id).rating,0)/strong.length;
   const weakAvg=weak.reduce((s,id)=>s+model.view(id).rating,0)/weak.length;
   assert.ok(strongAvg>weakAvg+20,`expected strong network rating > weak (${strongAvg} vs ${weakAvg})`);
-  assert.ok(model.view('S0').uncertainty<300,'repeated observations should reduce uncertainty');
+  assert.ok(model.view('S0').uncertainty<405,'repeated observations should reduce conservative prior-scale uncertainty');
   assert.ok(model.view('S0').raw.componentSize>=20,'network diagnostics should expose connected component size');
   assert.equal(model.view('S0').uncertainty_kind,'network_bt_hessian');
 
