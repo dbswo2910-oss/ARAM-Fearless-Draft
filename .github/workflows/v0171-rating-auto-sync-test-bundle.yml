@@ -58,13 +58,8 @@ jobs:
       - name: Run Rating Auto Sync audit
         run: node tools/v0171-rating-auto-sync-audit.js
 
-      - name: Run existing AutoSync concurrency regression
-        shell: pwsh
-        run: |
-          if (Test-Path 'tools/v015119-autosync-concurrency-audit.js') {
-            node tools/v015119-autosync-concurrency-audit.js
-            if ($LASTEXITCODE -ne 0) { throw 'AutoSync concurrency regression failed' }
-          }
+      - name: Run current AutoSync canonical regression
+        run: node tools/stability/autosync-canonical-differential-audit.js
 
       - name: Run Full Regression
         run: node tools/full-regression-audit.js
