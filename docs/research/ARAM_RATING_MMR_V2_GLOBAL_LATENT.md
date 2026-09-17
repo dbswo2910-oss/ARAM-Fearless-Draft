@@ -18,7 +18,7 @@ The current Elo/Glicko/TrueSkill-family baselines update players sequentially. M
 
 `P(team A wins) = sigmoid(sum(player skill A) - sum(player skill B) + optional champion effects + side bias)`
 
-The player-only candidate is the default v2 research candidate. Champion effects are stronger-shrunk nuisance parameters and are accepted only when a future holdout of at least 100 matches shows a paired-bootstrap Log Loss improvement without Brier/ECE regression.
+The default v2 path is player-only. Regularization strength is selected only on a chronological validation block. Recency weighting and champion effects are optional nuisance-model extensions; neither is assumed helpful. Each can replace the simpler model only when the validation block shows a paired-bootstrap Log Loss improvement without Brier/ECE regression. Champion control additionally requires high champion-ID coverage.
 
 ## Evidence rules
 
@@ -34,34 +34,54 @@ The player-only candidate is the default v2 research candidate. Champion effects
 ## Estimation
 
 - Player latent skills use an L2 zero prior.
-- Optional champion effects use a stronger L2 prior.
+- Optional champion effects use a substantially stronger L2 prior so champion strength is treated as a nuisance correction rather than a second player rating.
 - Optional team-100 side bias is estimated separately.
+- Optional recency decay is expressed as a half-life and must win a validation ablation before it is selected.
 - Optimization is deterministic batch diagonal-Newton-style iteration with bounded steps.
 - Player parameters are recentered inside each connected component after every iteration.
 - The display scale maps logistic latent units to the familiar Elo-like 1500 scale using `400 / ln(10)`. This is presentation only; it does not make the estimate Riot MMR.
-- Uncertainty is a **diagonal Fisher approximation**. It is intentionally labelled approximate and must not be presented as a full Bayesian posterior or predictive accuracy.
+- Uncertainty is a **diagonal Fisher approximation**, inflated conservatively for sparse/small match-network components. It is intentionally labelled approximate and must not be presented as a full Bayesian posterior or predictive accuracy.
 
 ## What is intentionally excluded for now
 
 KDA, kills, deaths, assists, damage, healing, shielding, CS, item build, role-like heuristics, and other post-game performance features do **not** directly change MMR v2. They may be researched later only if strict future prediction improves. This avoids rewarding stat padding and systematically underrating tanks/supportive play.
 
-Patch recency/decay and richer team-composition interactions are also excluded from this first global-latent candidate. They require separate ablations rather than being assumed useful.
+Richer team-composition interactions and patch-specific parameters are also excluded from the first candidate. They require their own leakage-safe ablations rather than being assumed useful.
 
 ## Validation contract
 
-Chronological order is mandatory. The evaluator uses an 80/20 temporal split by default and supports exact walk-forward refits.
+Chronological order is mandatory. The default evaluator uses a **nested 60 / 20 / 20 temporal split**:
+
+- first 60%: training,
+- next 20%: validation/model selection,
+- final 20%: untouched future test.
+
+The final 20% is never used to choose Elo/Glicko/TrueSkill baseline, player regularization, recency decay, or champion control. After validation locks the choices, the selected models are refit on the first 80% and evaluated once on the untouched final 20%. The evaluator can additionally perform exact walk-forward refits through that final future period.
 
 Primary metric: **Log Loss**.
 
 Secondary metrics: **Brier score, ECE calibration, Accuracy**.
 
-Reports are split into cold-start, developing, and mature evidence cohorts. Candidate comparisons use paired bootstrap confidence intervals on the same future matches.
+Reports are split into cold-start, developing, and mature evidence cohorts. Candidate comparisons use paired bootstrap confidence intervals on identical future matches.
 
-The current promotion evidence gate is deliberately strict:
+### Complexity gates
+
+The simpler player-only static model is preferred unless added complexity proves useful on validation data.
+
+- Recency weighting requires at least 100 validation matches, a paired-bootstrap Log Loss improvement, and Brier/ECE non-regression.
+- Champion effects require the same validation evidence plus at least 95% champion-ID coverage across train + validation.
+- Failed complexity gates fall back to the simpler already-selected model.
+
+This keeps a feature from entering the MMR formula merely because it sounds plausible.
+
+### Final promotion evidence gate
+
+The current evidence gate is deliberately strict:
 
 - at least 500 accepted real standard-ARAM matches,
-- at least 100 frozen future-test matches,
-- candidate Log Loss improvement with a 95% paired-bootstrap interval fully below zero versus the strongest existing baseline,
+- at least 100 validation matches,
+- at least 100 untouched final future-test matches,
+- candidate Log Loss improvement on the untouched final test with a 95% paired-bootstrap interval fully below zero versus the validation-selected existing baseline,
 - Brier no worse than baseline by more than 0.002,
 - ECE no worse than baseline by more than 0.01.
 
