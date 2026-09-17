@@ -15,7 +15,7 @@ function manifestEntry(target,source){const p=path.join(ROOT,...source.split('/'
 function replaceEntry(m,target,source){const e=manifestEntry(target,source);const i=(m.files||[]).findIndex(x=>String(x.path)===target);if(i>=0)m.files[i]=e;else m.files.push(e)}
 function main(){
   const base=JSON.parse(fs.readFileSync(MANIFEST,'utf8'));
-  if(String(base.version)!=='0.17.0')throw new Error('v0.17.1 release must build from manifest 0.17.0, got '+base.version);
+  if(!['0.17.0',VERSION].includes(String(base.version)))throw new Error('v0.17.1 release must build from manifest 0.17.0 or idempotently from 0.17.1, got '+base.version);
   fs.rmSync(OUT,{recursive:true,force:true});ensure(OUT);
 
   const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,'update','v0.17.0','package.json'),'utf8'));
