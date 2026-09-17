@@ -77,18 +77,37 @@ function createUniversalRatingRuntime({userDataPath,modelVersions=DEFAULT_MODELS
     return{modelVersion,modelName:estimator.modelName,service:new UniversalRatingService({store:ratingStore,estimator})};
   });
 
+  async function recalcAffected(affected,target,reason,source){
+    const ids=[...new Set((Array.isArray(affected)?affected:[]).map(String).filter(Boolean))].filter(id=>id!==String(target||''));
+    let recalculated=0;
+    for(const id of ids){
+      let touched=false;
+      for(const row of services){
+        try{await row.service.rateResolved({player:{puuid:id},matches:[],force:false,reason,source});touched=true}catch{}
+      }
+      if(touched)recalculated++;
+    }
+    return recalculated;
+  }
+
   async function rateResolved({player,matches=[],force=false,reason='PROFILE_HISTORY_IPC'}={}){
     const puuid=String(player?.puuid||'').trim();
     if(!puuid)throw new Error('player.puuid required');
+    const isAutoSync=String(reason||'').toUpperCase()==='GAME_END_AUTO_SYNC';
+    const source=isAutoSync?'game-end-auto-sync':'profile-history-ipc';
     const candidates={};
     let ingestBasis=null;
     for(const row of services){
-      const result=await row.service.rateResolved({player,matches,force,reason,source:'profile-history-ipc'});
+      const result=await row.service.rateResolved({player,matches,force,reason,source});
       if(!ingestBasis)ingestBasis=result;
       candidates[row.modelName||row.modelVersion]=publicCandidate(result);
     }
+    let recalculatedPlayers=0;
+    if(isAutoSync&&Number(ingestBasis?.newMatches)>0){
+      recalculatedPlayers=await recalcAffected(ingestBasis?.affectedPuuids,puuid,'GAME_END_AFFECTED_RECALC',source);
+    }
     const ingestRow={
-      type:'SHADOW_INGEST_SUMMARY',at:Date.now(),reason,source:'profile-history-ipc',puuid,
+      type:'SHADOW_INGEST_SUMMARY',at:Date.now(),reason,source,puuid,
       receivedMatches:Array.isArray(matches)?matches.length:0,
       newMatches:Number(ingestBasis?.newMatches)||0,
       duplicateMatches:Number(ingestBasis?.duplicateMatches)||0,
@@ -97,6 +116,7 @@ function createUniversalRatingRuntime({userDataPath,modelVersions=DEFAULT_MODELS
       targetMatches:Number(ingestBasis?.totalMatches??ingestBasis?.targetMatches)||0,
       evidenceMatches:Number(ingestBasis?.evidenceMatches)||0,
       cacheHit:ingestBasis?.cacheHit===true,
+      recalculatedPlayers,
       networkRequests:0,productionActive:false
     };
     ratingStore.appendAudit(ingestRow);
@@ -110,6 +130,7 @@ function createUniversalRatingRuntime({userDataPath,modelVersions=DEFAULT_MODELS
       modelSelection:'no_clear_winner',
       candidates,
       ingest:publicIngest(ingestRow),
+      autoSync:isAutoSync?{trigger:'game-end',recalculatedPlayers}:null,
       database:databaseStats(ratingStore),
       networkRequests:0,
       updatedAt:Date.now()
