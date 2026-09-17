@@ -22,12 +22,14 @@ assert.deepStrictEqual(after,before,'canonical item catalog compact output chang
 for(const id of [1,9999,10000,13001,'3001','bad'])assert.strictEqual(canonical.isStandardLiveItemId(id),legacy.isStandardLiveItemId(id),`standard live item classification changed: ${id}`);
 function fakeIpc(){const calls=[];return{calls,handle:(channel,fn)=>calls.push({channel,fn})}}
 const ipcLegacy=fakeIpc(),ipcCanonical=fakeIpc();
-const legacyReturn=legacy.register(ipcLegacy),service=canonical.createCatalogService(),canonicalReturn=service.register(ipcCanonical),canonicalSecond=service.register(ipcCanonical);
-assert.strictEqual(legacyReturn,undefined,'legacy register contract unexpectedly changed');
-assert.strictEqual(canonicalReturn,legacyReturn,'canonical register return contract changed');
-assert.strictEqual(canonicalSecond,undefined,'canonical repeated register must remain no-op');
+legacy.register(ipcLegacy);
+const service=canonical.createCatalogService(),canonicalReturn=service.register(ipcCanonical),canonicalSecond=service.register(ipcCanonical);
+assert.strictEqual(canonicalReturn,true,'canonical first registration must explicitly claim ownership');
+assert.strictEqual(canonicalSecond,false,'canonical repeated registration must explicitly report no-op');
 assert.deepStrictEqual(ipcCanonical.calls.map(x=>x.channel),ipcLegacy.calls.map(x=>x.channel),'catalog IPC channel changed');
+assert.strictEqual(ipcCanonical.calls.length,ipcLegacy.calls.length,'catalog IPC registration count changed');
 assert.strictEqual(ipcCanonical.calls.length,1,'canonical catalog registered duplicate IPC handlers');
+assert.strictEqual(typeof ipcCanonical.calls[0]?.fn,'function','canonical catalog IPC handler missing');
 assert.strictEqual(canonical.production_capable,true,'canonical catalog must be production-capable after parity lock');
 assert.strictEqual(canonical.production_active,false,'whole item owner must remain inactive until cutover');
-console.log(JSON.stringify({status:'PASS',owner:canonical.OWNER,compactParity:true,iconParity:true,classificationParity:true,ipcRegistrationParity:true,productionActive:false}));
+console.log(JSON.stringify({status:'PASS',owner:canonical.OWNER,compactParity:true,iconParity:true,classificationParity:true,ipcRegistrationParity:true,explicitOwnerClaim:true,productionActive:false}));
