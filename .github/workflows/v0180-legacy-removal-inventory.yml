@@ -17,6 +17,8 @@ jobs:
         run: node tools/legacy-removal-inventory-v0180.js
       - name: Verify canonical AutoSync telemetry parity
         run: node tools/autosync-telemetry-parity-v0180.js
+      - name: Verify canonical AutoSync queue parity
+        run: node tools/autosync-queue-parity-v0180.js
       - name: Upload inventory
         uses: actions/upload-artifact@v4
         with:
