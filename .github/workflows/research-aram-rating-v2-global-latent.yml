@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - 'src/rating/research/mmr-v2/**'
+      - 'tools/rating/evaluate-mmr-v2.js'
       - 'test/aram-rating-v2-global-latent.test.js'
       - 'docs/research/ARAM_RATING_MMR_V2_GLOBAL_LATENT.md'
       - '.github/workflows/research-aram-rating-v2-global-latent.yml'
@@ -29,7 +30,9 @@ jobs:
           node --check src/rating/research/mmr-v2/model.js
           node --check src/rating/research/mmr-v2/metrics.js
           node --check src/rating/research/mmr-v2/evaluator.js
+          node --check src/rating/research/mmr-v2/measure.js
           node --check src/rating/research/mmr-v2/index.js
+          node --check tools/rating/evaluate-mmr-v2.js
           node --check test/aram-rating-v2-global-latent.test.js
       - name: Run MMR v2 research tests
         run: node --test test/aram-rating-v2-global-latent.test.js
