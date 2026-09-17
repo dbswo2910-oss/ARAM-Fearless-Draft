@@ -28,6 +28,16 @@ async function exercise(patcher){
   const sanitized=api.sanitize({kills:9,puuid:'SECRET',token:'SECRET',nested:{assists:4,email:'NOPE'},items:[{gold:100},{gameId:'NOPE'}]});
   return{out,sanitized,leafCount:api.leafCount(sanitized),legacyReady:!!mod.__ARAM_AUTOSYNC_TELEMETRY_V01534__,semanticReady:!!mod.__ARAM_AUTOSYNC_TELEMETRY__};
 }
+function assertNoDoubleWrap(){
+  const mod=createModule();canonical.install(mod);
+  const lcu=mod.LeagueAutoSyncCore.prototype.lcuGet,history=mod.LeagueAutoSyncCore.prototype.getAramMatchHistory;
+  legacy.patch(mod);
+  assert.strictEqual(mod.LeagueAutoSyncCore.prototype.lcuGet,lcu,'legacy telemetry re-wrapped canonical lcuGet');
+  assert.strictEqual(mod.LeagueAutoSyncCore.prototype.getAramMatchHistory,history,'legacy telemetry re-wrapped canonical history');
+  canonical.install(mod);
+  assert.strictEqual(mod.LeagueAutoSyncCore.prototype.lcuGet,lcu,'canonical telemetry is not idempotent');
+  assert.strictEqual(mod.LeagueAutoSyncCore.prototype.getAramMatchHistory,history,'canonical history wrapper is not idempotent');
+}
 (async()=>{
   const before=await exercise(legacy.patch);
   const after=await exercise(canonical.install);
@@ -37,5 +47,6 @@ async function exercise(patcher){
   assert.strictEqual(after.legacyReady,true,'canonical telemetry must keep frozen readiness compatibility during migration');
   assert.strictEqual(after.semanticReady,true,'canonical semantic readiness marker missing');
   assert.strictEqual(canonical.production_active,true,'canonical telemetry must be production-capable');
-  console.log(JSON.stringify({status:'PASS',owner:canonical.OWNER,historyParity:true,sanitizeParity:true,leafCountParity:true,compatibilityAlias:true}));
+  assertNoDoubleWrap();
+  console.log(JSON.stringify({status:'PASS',owner:canonical.OWNER,historyParity:true,sanitizeParity:true,leafCountParity:true,compatibilityAlias:true,noDoubleWrap:true}));
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
