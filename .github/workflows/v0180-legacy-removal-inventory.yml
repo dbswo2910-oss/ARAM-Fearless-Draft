@@ -31,6 +31,8 @@ jobs:
         run: node tools/autosync-cc-impact-parity-v0180.js
       - name: Verify canonical AutoSync mission-timeline parity
         run: node tools/autosync-mission-timeline-parity-v0180.js
+      - name: Verify canonical item catalog parity
+        run: node tools/items-catalog-parity-v0180.js
       - name: Materialize v0.18 candidate runtime
         run: node tools/refactor/materialize-v0180-candidate-runtime.js
       - name: Prove candidate differs only by approved migration
