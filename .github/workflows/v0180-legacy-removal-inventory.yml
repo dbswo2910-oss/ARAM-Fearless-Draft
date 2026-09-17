@@ -33,7 +33,7 @@ jobs:
         run: node tools/autosync-mission-timeline-parity-v0180.js
       - name: Verify canonical item catalog parity
         run: node tools/items-catalog-parity-v0180.js
-      - name: Materialize v0.18 candidate runtime
+      - name: Materialize ephemeral v0.18 candidate runtime
         run: node tools/refactor/materialize-v0180-candidate-runtime.js
       - name: Prove candidate differs only by approved migration
         run: node tools/v0180-candidate-differential-audit.js
@@ -52,14 +52,16 @@ jobs:
           ! grep -F "require('./item-catalog-v01527')" src/app/runtime-v0180.js
           ! grep -F "require('./update-safety-v01579')" src/app/runtime-v0180.js
           ! grep -F "module._compile(" src/app/runtime-v0180.js
-          echo 'V0.18 CANDIDATE MIGRATED LEGACY REQUIRES: 0 (autosync history + item catalog + updater transaction)'
-      - name: Require checked-in candidate snapshot
+          echo 'V0.18 EPHEMERAL CANDIDATE MIGRATED LEGACY REQUIRES: 0 (autosync history + item catalog + updater transaction)'
+      - name: Ensure generated candidate is not a source-controlled owner
         shell: bash
         run: |
           set -euo pipefail
-          git ls-files --error-unmatch src/app/runtime-v0180.js >/dev/null
-          git diff --exit-code -- src/app/runtime-v0180.js
-      - name: Upload inventory
+          if git ls-files --error-unmatch src/app/runtime-v0180.js >/dev/null 2>&1; then
+            echo 'Generated runtime-v0180.js must not be committed under src/app.' >&2
+            exit 1
+          fi
+      - name: Upload inventory and ephemeral candidate
         if: always()
         uses: actions/upload-artifact@v4
         with:
