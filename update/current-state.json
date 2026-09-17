@@ -6,8 +6,8 @@
     "version": "0.17.1",
     "message": "v0.17.1 · RATING AUTO SYNC",
     "min_launcher": "2.0.2",
-    "manifest_fingerprint": "a999926d809180202f549354de5943efff640be6ccff5d5d4644deee632be2ff",
-    "manifest_commit": "a999926d809180202f549354de5943efff640be6ccff5d5d4644deee632be2ff"
+    "manifest_fingerprint": "558638b2f38f1c2fbe8eba978fa4d3efa8ccdcb780c11dfad414f96c3dab040c",
+    "manifest_commit": "558638b2f38f1c2fbe8eba978fa4d3efa8ccdcb780c11dfad414f96c3dab040c"
   },
   "package": {
     "source": "update/v0.17.1/package.json",

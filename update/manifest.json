@@ -1432,7 +1432,7 @@
     {
       "path": "src/preload/universal-rating-history-hook.js",
       "source": "update/v0.17.1/src/preload/universal-rating-history-hook.js",
-      "sha256": "731c6637d1fb38584bf17702ee7a5caff79135d0081f4a0968887e125e7c830c"
+      "sha256": "e441246f4aa04d0759c6238057ea70bf03ebc770c11fd10da54e38c14be99d10"
     },
     {
       "path": "src/rating/universal/contracts.js",

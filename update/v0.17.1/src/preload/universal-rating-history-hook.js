@@ -32,6 +32,7 @@ function patchPreloadSource(source){
   const bareHistoryNeedle="getAramMatchHistory: options => ipcRenderer.invoke('match-history:load', options || {}),";
   const wrappedHistoryNeedle='getAramMatchHistory: options => universalRatingShadowHistory(options),';
   const bareStateNeedle="getAutoSyncState: () => ipcRenderer.invoke('autosync:get-state'),";
+  const wrappedStateNeedle='getAutoSyncState: () => universalRatingAutoSyncState(),';
   if(!source.includes(exposeNeedle))throw new Error('preload aramDesktop expose contract missing');
 
   let next=source;
@@ -43,8 +44,8 @@ function patchPreloadSource(source){
   if(!next.includes('__ARAM_UNIVERSAL_RATING_AUTO_SYNC_V1__')){
     next=next.replace(exposeNeedle,buildPreloadAutoSyncSource({historyChannel:HISTORY_CHANNEL,ratingChannel:RATING_CHANNEL})+exposeNeedle);
   }
-  if(next.includes(bareStateNeedle))next=next.replace(bareStateNeedle,"getAutoSyncState: () => universalRatingAutoSyncState(),");
-  else if(!next.includes('getAutoSyncState: () => universalRatingAutoSyncState(),'))throw new Error('preload autosync state bridge contract missing');
+  if(next.includes(bareStateNeedle))next=next.replace(bareStateNeedle,wrappedStateNeedle);
+  else if(!next.includes(wrappedStateNeedle))next=next.replace(exposeNeedle,exposeNeedle+"\n  "+wrappedStateNeedle);
 
   const diagnosticsNeedle='getUniversalRatingShadowDiagnostics: () => universalRatingShadowDiagnostics(),';
   if(!next.includes(diagnosticsNeedle)){

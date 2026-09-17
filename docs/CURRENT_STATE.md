@@ -6,7 +6,7 @@
 
 - Active updater: **v0.17.1**
 - Manifest message: v0.17.1 · RATING AUTO SYNC
-- Manifest fingerprint: `a999926d809180202f549354de5943efff640be6ccff5d5d4644deee632be2ff`
+- Manifest fingerprint: `558638b2f38f1c2fbe8eba978fa4d3efa8ccdcb780c11dfad414f96c3dab040c`
 - Package: `update/v0.17.1/package.json` → **v0.17.1**
 - Electron entry: `main.js` → `update/v0.17.1/main.js`
 - Current runtime stability source: `update/v0.15.135/runtime-source-stability-v015135.js`
