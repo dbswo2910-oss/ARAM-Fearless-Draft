@@ -27,6 +27,7 @@ class UniversalRatingService{
       if(this.store.getMatch(match.matchId)){duplicates++;continue}
       accepted.push(match);
     }
+    const affectedPuuids=[...new Set(accepted.flatMap(m=>[...(m?.teamA||[]),...(m?.teamB||[])]).map(String).filter(Boolean))];
     if(accepted.length){
       if(typeof this.store.putMatches==='function')this.store.putMatches(accepted);
       else accepted.forEach(m=>this.store.putMatch(m));
@@ -37,7 +38,7 @@ class UniversalRatingService{
     const evidenceFingerprint=fingerprint(allMatches,this.estimator.modelVersion);
     const before=this.store.getRating(this.estimator.modelVersion,puuid);
     if(!force&&before?.evidenceFingerprint===evidenceFingerprint){
-      return{...before,player:this.store.getPlayer(puuid)||player,cacheHit:true,newMatches:accepted.length,totalMatches:ownMatches.length,rejectedMatches:rejected,targetMismatchMatches:targetMismatch,duplicateMatches:duplicates,networkRequests:0,source};
+      return{...before,player:this.store.getPlayer(puuid)||player,cacheHit:true,newMatches:accepted.length,totalMatches:ownMatches.length,rejectedMatches:rejected,targetMismatchMatches:targetMismatch,duplicateMatches:duplicates,affectedPuuids,networkRequests:0,source};
     }
 
     const estimate=await this.estimator.estimate({puuid,matches:allMatches,player:this.store.getPlayer(puuid)||player});
@@ -68,7 +69,7 @@ class UniversalRatingService{
       delta:before&&Number.isFinite(before.rating)&&Number.isFinite(record.rating)?record.rating-before.rating:null,
       networkRequests:0,productionActive:false
     });
-    return{...record,player:this.store.getPlayer(puuid)||player,cacheHit:false,newMatches:accepted.length,totalMatches:ownMatches.length,rejectedMatches:rejected,targetMismatchMatches:targetMismatch,duplicateMatches:duplicates,networkRequests:0,source};
+    return{...record,player:this.store.getPlayer(puuid)||player,cacheHit:false,newMatches:accepted.length,totalMatches:ownMatches.length,rejectedMatches:rejected,targetMismatchMatches:targetMismatch,duplicateMatches:duplicates,affectedPuuids,networkRequests:0,source};
   }
 
   async lookup(query,{limit=30,force=false,reason='SEARCH'}={}){
