@@ -1,0 +1,28 @@
+{
+  "version": "0.17.1",
+  "status": "READY_FOR_PRODUCTION_AUDIT",
+  "feature": "Universal Rating Auto Sync",
+  "gameEndAutoSync": true,
+  "searchedPlayerRefresh": true,
+  "dedupeByMatchId": true,
+  "productionRatingActive": false,
+  "automaticRatingPromotion": false,
+  "researchCheckpointReset": false,
+  "sourceOverlay": [
+    "src/preload/ipc-contract.js",
+    "src/preload/universal-rating-auto-sync.js",
+    "src/preload/universal-rating-history-hook.js",
+    "src/rating/universal/runtime.js",
+    "src/rating/universal/service.js"
+  ],
+  "manifestEntries": [
+    "package.json",
+    "main.js",
+    "preload.js",
+    "src/preload/ipc-contract.js",
+    "src/preload/universal-rating-auto-sync.js",
+    "src/preload/universal-rating-history-hook.js",
+    "src/rating/universal/runtime.js",
+    "src/rating/universal/service.js"
+  ]
+}

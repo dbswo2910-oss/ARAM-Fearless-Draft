@@ -3,17 +3,17 @@
   "repository": "dbswo2910-oss/ARAM-Fearless-Draft",
   "authority": "update/manifest.json is authoritative for active distribution; this file is a generated handoff snapshot",
   "active": {
-    "version": "0.17.0",
-    "message": "v0.17.0 · CLEAN CONSOLIDATED RUNTIME",
+    "version": "0.17.1",
+    "message": "v0.17.1 · RATING AUTO SYNC",
     "min_launcher": "2.0.2",
-    "manifest_fingerprint": "d9f45a409d7ab00847e8df99fb7b699071ef6e162ee76b84ccedf21a38b360f6",
-    "manifest_commit": "d9f45a409d7ab00847e8df99fb7b699071ef6e162ee76b84ccedf21a38b360f6"
+    "manifest_fingerprint": "a999926d809180202f549354de5943efff640be6ccff5d5d4644deee632be2ff",
+    "manifest_commit": "a999926d809180202f549354de5943efff640be6ccff5d5d4644deee632be2ff"
   },
   "package": {
-    "source": "update/v0.17.0/package.json",
-    "version": "0.17.0",
+    "source": "update/v0.17.1/package.json",
+    "version": "0.17.1",
     "main": "main.js",
-    "main_source": "update/v0.17.0/main.js"
+    "main_source": "update/v0.17.1/main.js"
   },
   "owners": {
     "random_pick": {
