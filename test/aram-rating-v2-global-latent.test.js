@@ -6,8 +6,10 @@ const assert = require('node:assert/strict');
 const {
   normalizeResearchDataset,
   fitGlobalLatent,
+  recencyWeight,
   pairedBootstrapDiff,
   temporalSplit,
+  temporalThreeWaySplit,
   evaluateMmrV2
 } = require('../src/rating/research/mmr-v2');
 const productionEstimator = require('../src/rating/universal/estimator');
@@ -31,6 +33,15 @@ function makeMatch(id, timestamp, teamA, teamB, teamAWin, {
     teamB,
     teamAWin: !!teamAWin,
     participants
+  };
+}
+
+function flipOutcome(match) {
+  const teamAWin = !match.teamAWin;
+  return {
+    ...match,
+    teamAWin,
+    participants: match.participants.map(p => ({ ...p, win: p.teamId === 100 ? teamAWin : !teamAWin }))
   };
 }
 
@@ -92,6 +103,8 @@ test('disconnected match graphs stay explicitly incomparable by component', () =
   assert.notEqual(model.viewPlayer(a[0]).componentId, model.viewPlayer(b[0]).componentId);
   assert.equal(model.viewPlayer(a[0]).componentSize, 10);
   assert.equal(model.viewPlayer(b[0]).componentSize, 10);
+  assert.ok(model.viewPlayer(a[0]).uncertainty >= 35);
+  assert.match(model.viewPlayer(a[0]).uncertaintyKind, /network_inflated/);
 });
 
 test('unobserved player is unmeasured, never fake-1500', () => {
@@ -102,6 +115,18 @@ test('unobserved player is unmeasured, never fake-1500', () => {
   assert.equal(view.rating, null);
   assert.equal(view.uncertainty, null);
   assert.equal(view.games, 0);
+});
+
+test('recency weighting is optional and monotonically downweights older evidence', () => {
+  const latest = 200 * 24 * 60 * 60 * 1000;
+  const now = recencyWeight(latest, latest, 120);
+  const sixtyDaysOld = recencyWeight(latest - 60 * 24 * 60 * 60 * 1000, latest, 120);
+  const oneTwentyDaysOld = recencyWeight(latest - 120 * 24 * 60 * 60 * 1000, latest, 120);
+  assert.equal(now, 1);
+  assert.ok(now > sixtyDaysOld);
+  assert.ok(sixtyDaysOld > oneTwentyDaysOld);
+  assert.ok(Math.abs(oneTwentyDaysOld - 0.5) < 1e-12);
+  assert.equal(recencyWeight(latest - 999999, latest, null), 1);
 });
 
 test('champion-confounding fixture is separable from rotating player identities', () => {
@@ -128,7 +153,7 @@ test('champion-confounding fixture is separable from rotating player identities'
   assert.ok(model.championEffects['999'].displayEquivalent > 0);
 });
 
-test('temporal split never leaks a future row into train', () => {
+test('simple temporal split never leaks a future row into train', () => {
   const rows = normalizeResearchDataset([
     ...balancedSynthetic(12).reverse(),
     ...balancedSynthetic(3).map((m, i) => ({ ...m, matchId: `late-${i}`, timestamp: 5000 + i }))
@@ -140,6 +165,18 @@ test('temporal split never leaks a future row into train', () => {
   assert.equal(split.test.some(m => trainIds.has(m.matchId)), false);
 });
 
+test('nested temporal split isolates train, validation and untouched final future', () => {
+  const rows = normalizeResearchDataset(balancedSynthetic(50)).matches;
+  const split = temporalThreeWaySplit(rows);
+  assert.equal(split.train.length, 30);
+  assert.equal(split.validation.length, 10);
+  assert.equal(split.test.length, 10);
+  assert.ok(split.train.at(-1).timestamp <= split.validation[0].timestamp);
+  assert.ok(split.validation.at(-1).timestamp <= split.test[0].timestamp);
+  const earlier = new Set([...split.train, ...split.validation].map(m => m.matchId));
+  assert.equal(split.test.some(m => earlier.has(m.matchId)), false);
+});
+
 test('paired bootstrap keeps no clear improvement when predictions are identical', () => {
   const rows = Array.from({ length: 120 }, (_, i) => ({ matchId: `x-${i}`, actual: i % 2, probability: i % 2 ? 0.6 : 0.4 }));
   const result = pairedBootstrapDiff(rows, rows, { iterations: 300, seed: 123 });
@@ -149,14 +186,46 @@ test('paired bootstrap keeps no clear improvement when predictions are identical
   assert.equal(result.clearImprovement, false);
 });
 
+test('untouched final outcomes cannot change model or baseline selection', () => {
+  const original = balancedSynthetic(180);
+  const split = temporalThreeWaySplit(original);
+  const finalIds = new Set(split.test.map(m => m.matchId));
+  const altered = original.map(match => finalIds.has(match.matchId) ? flipOutcome(match) : match);
+  const options = {
+    skipWalkForward: true,
+    bootstrapIterations: 100,
+    minMatches: 9999,
+    commonModelOptions: { maxIterations: 45, minIterations: 10 },
+    staticPlayerGrid: [
+      { id: 'test_p025', modelOptions: { playerLambda: 0.25 } },
+      { id: 'test_p050', modelOptions: { playerLambda: 0.50 } }
+    ],
+    recencyHalfLives: [],
+    championLambdas: []
+  };
+  const a = evaluateMmrV2(original, options);
+  const b = evaluateMmrV2(altered, options);
+  assert.equal(a.selection.selectionSource, 'validation_only');
+  assert.equal(a.selection.finalTestUsedForSelection, false);
+  assert.equal(a.selection.selectedBaseline, b.selection.selectedBaseline);
+  assert.equal(a.selection.selectedV2, b.selection.selectedV2);
+  assert.deepEqual(a.selection.selectedV2Options, b.selection.selectedV2Options);
+  assert.equal(a.temporal.trainFingerprint, b.temporal.trainFingerprint);
+  assert.equal(a.temporal.validationFingerprint, b.temporal.validationFingerprint);
+  assert.notEqual(a.temporal.testFingerprint, b.temporal.testFingerprint);
+});
+
 test('small real dataset cannot force a model winner', () => {
   const report = evaluateMmrV2(balancedSynthetic(120), {
     skipWalkForward: true,
-    bootstrapIterations: 200,
-    playerOnlyModel: { maxIterations: 80 },
-    playerChampionModel: { maxIterations: 80 }
+    bootstrapIterations: 100,
+    commonModelOptions: { maxIterations: 60, minIterations: 10 },
+    recencyHalfLives: [],
+    championLambdas: []
   });
   assert.equal(report.temporal.leakageSafe, true);
+  assert.equal(report.temporal.scheme, 'nested_temporal_60_20_20_default');
+  assert.equal(report.selection.finalTestUsedForSelection, false);
   assert.equal(report.promotionGate.dataGatePassed, false);
   assert.equal(report.promotionGate.decision, 'insufficient_real_data');
   assert.equal(report.productionRatingActive, false);
