@@ -1,0 +1,53 @@
+name: Rating MMR v2 Research Validation
+
+on:
+  push:
+    branches: [ research/mmr-v2-network-calibrated ]
+    paths:
+      - 'src/rating/universal/**'
+      - 'src/rating/research/**'
+      - 'src/main/universal-rating-ipc.js'
+      - 'test/universal-rating-network-bt-v2.test.js'
+      - '.github/workflows/rating-mmr-v2-research.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/rating/universal/**'
+      - 'src/rating/research/**'
+      - 'src/main/universal-rating-ipc.js'
+      - 'test/universal-rating-network-bt-v2.test.js'
+      - '.github/workflows/rating-mmr-v2-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check MMR v2 sources
+        run: |
+          node -c src/rating/universal/network-bt.js
+          node -c src/rating/universal/estimator.js
+          node -c src/rating/universal/service.js
+          node -c src/rating/research/temporal-evaluator-v2.js
+          node -c src/main/universal-rating-ipc.js
+          node -c test/universal-rating-network-bt-v2.test.js
+      - name: Run MMR v2 unit and temporal-gate tests
+        run: node test/universal-rating-network-bt-v2.test.js
+      - name: Preserve existing Universal Rating diagnostics contracts
+        run: |
+          node test/universal-rating-shadow-diagnostics-v1.test.js
+          node test/universal-rating-shadow-transparency-v1.test.js
+      - name: Full regression
+        run: node tools/full-regression-audit.js
