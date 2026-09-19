@@ -1,0 +1,77 @@
+{
+  "schema": "aram-rating-v031-real-evaluator-summary",
+  "real_data": true,
+  "fixture_only": false,
+  "source": "local user Phase B1 export evaluated privately; raw file not committed",
+  "privacy": {
+    "contains_puuid": false,
+    "contains_riot_id": false,
+    "contains_summoner_identity": false,
+    "raw_match_json_committed": false
+  },
+  "dataset": {
+    "matches": 159,
+    "players": 1238,
+    "train": 127,
+    "frozen_test": 32,
+    "single_match_fraction": 0.9006462035541195,
+    "players_2_plus": 123,
+    "players_5_plus": 15,
+    "players_10_plus": 11,
+    "patch_distribution": [
+      {"patch":"16.15","n":1},
+      {"patch":"16.16","n":11},
+      {"patch":"16.17","n":40},
+      {"patch":"16.18","n":107}
+    ]
+  },
+  "cold_start": {
+    "frozen_player_fraction": 0.7875,
+    "walk_forward_player_fraction": 0.721875,
+    "frozen_matches_with_any_cold_start_fraction": 1.0,
+    "walk_forward_matches_with_any_cold_start_fraction": 1.0,
+    "frozen_no_cold_start_matches": 0,
+    "walk_forward_no_cold_start_matches": 0,
+    "note": "All 32 held-out matches still contain at least three unseen players; no-cold-start subset metrics are therefore unavailable."
+  },
+  "models": {
+    "elo": {
+      "frozen": {"n":32,"log_loss":0.6882200699811409,"brier":0.24753848197387107,"accuracy":0.5,"ece":0.15300114598231462},
+      "walk_forward": {"n":32,"log_loss":0.6869683593947417,"brier":0.24691151913319895,"accuracy":0.5,"ece":0.15106554073676665}
+    },
+    "glicko": {
+      "frozen": {"n":32,"log_loss":0.6898084574050914,"brier":0.24830173042229953,"accuracy":0.53125,"ece":0.1632819645978532},
+      "walk_forward": {"n":32,"log_loss":0.7046083968840675,"brier":0.2554620546402143,"accuracy":0.5,"ece":0.15039522510845568}
+    },
+    "trueskill_family": {
+      "frozen": {"n":32,"log_loss":0.6856104343911636,"brier":0.2461333706924208,"accuracy":0.5,"ece":0.18041807562506584},
+      "walk_forward": {"n":32,"log_loss":0.686531350748896,"brier":0.24608775578349237,"accuracy":0.5,"ece":0.17647160946850154}
+    }
+  },
+  "baselines": {
+    "constant_50": {
+      "frozen": {"n":32,"log_loss":0.6931471805599453,"brier":0.25,"accuracy":0.65625,"ece":0.15625},
+      "walk_forward": {"n":32,"log_loss":0.6931471805599453,"brier":0.25,"accuracy":0.65625,"ece":0.15625}
+    },
+    "historical_winrate": {
+      "frozen": {"n":32,"log_loss":0.6904995112049059,"brier":0.24867457736523046,"accuracy":0.5,"ece":0.15279649399824033},
+      "walk_forward": {"n":32,"log_loss":0.6952640081712873,"brier":0.2510439974966961,"accuracy":0.53125,"ece":0.15357195645790178}
+    },
+    "recent_winrate": {
+      "frozen": {"n":32,"log_loss":0.6899548592810089,"brier":0.24840199652777778,"accuracy":0.625,"ece":0.15255208333333334},
+      "walk_forward": {"n":32,"log_loss":0.6950719170221475,"brier":0.25094366319444444,"accuracy":0.53125,"ece":0.15098958333333334}
+    }
+  },
+  "observed_leader_by_frozen_log_loss": "trueskill_family",
+  "selection": {
+    "status": "insufficient_real_data",
+    "candidate_winner": false,
+    "reason": "existing v0.2 gate requires at least 500 real matches and 100 frozen-test matches; current sample has 159 / 32",
+    "winner_forced": false
+  },
+  "uncertainty_by_observation_count": {
+    "elo": [{"games_at_least":1,"players":1238,"mean":241.29897370066178,"median":247.48737341529161},{"games_at_least":5,"players":15,"mean":92.68733011703303,"median":76.37626158259734},{"games_at_least":10,"players":11,"mean":77.36086624204962,"median":76.37626158259734}],
+    "glicko": [{"games_at_least":1,"players":1238,"mean":253.1174278711617,"median":258.2795446582847},{"games_at_least":5,"players":15,"mean":109.27767832097143,"median":92.23375083944822},{"games_at_least":10,"players":11,"mean":92.46597297323655,"median":91.02733684317829}],
+    "trueskill_family": [{"games_at_least":1,"players":1238,"mean":161.38721566111178,"median":162.24081978697137},{"games_at_least":5,"players":15,"mean":123.52822877656823,"median":115.61124018722401},{"games_at_least":10,"players":11,"mean":115.8640289846453,"median":115.2604087134763}]
+  }
+}
