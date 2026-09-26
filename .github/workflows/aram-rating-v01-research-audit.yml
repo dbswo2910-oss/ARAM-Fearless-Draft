@@ -1,0 +1,35 @@
+name: ARAM Rating v0.1 Research Audit
+
+on:
+  push:
+    branches: [ main, research/aram-rating-v01-foundation ]
+    paths:
+      - 'research/aram-rating-v01/**'
+      - 'tools/aram-rating-v01-audit.py'
+      - '.github/workflows/aram-rating-v01-research-audit.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'research/aram-rating-v01/**'
+      - 'tools/aram-rating-v01-audit.py'
+      - '.github/workflows/aram-rating-v01-research-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile research modules
+        run: python -m py_compile research/aram-rating-v01/*.py tools/aram-rating-v01-audit.py
+      - name: Run ARAM Rating v0.1 research audit
+        run: python tools/aram-rating-v01-audit.py
