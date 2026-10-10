@@ -1,0 +1,14 @@
+수정안 / 미배포
+목적: 수집된 외부 평가 라벨의 잘못된 연결 방지.
+질문: 계정 정보 누락과 전환, 비동기 화면 전환이 평가 라벨을 오염시키는가?
+근거: 01 감사 H01/H02/H03의 코드 분기 및 합성 재현 테스트.
+수정: PUUID 필수, 요청 전후 계정 일치, 양의 정수 championId 및 gameId 필수.
+UI: gameId + PUUID + championId 일치 및 mastery 직접 gameId 출처만 허용.
+UI: await 이후 계정/선택 경기/상세 DOM 확인 후 삽입.
+관측 누락: null/빈 문자열 championId를 0으로 정규화하지 않음.
+안전한 제한: 검증되지 않은 별도 EOG gameId 연결을 보류. 일부 등급 수집률이 낮아질 수 있음. 현재 응답의 실제 상관키/소유자 검증 전 복구하지 않음.
+위치: work-in-progress/riot-grade-identity/collector.js, ui.js
+기존 v0.15.28 및 manifest, main.js, package.json 변경 없음. 기존 런타임 API 이름을 유지한 교체 후보이며 추가 중복 주입용이 아님.
+테스트: tests/riot-grade-identity.test.cjs 9/9 PASS.
+남은 위험: 실제 Match Lab의 championId 정규화 위치, core.account 갱신 순서, 실제 LCU payload를 기본 앱과 함께 검증해야 함. 현재 초안은 완성 릴리스 아님.
+다음: 원본 확보 후 전체 앱에 후보를 통합, 실제 스키마 확인, 회귀검사, 신규 버전/CHANGELOG/manifest 구성.
