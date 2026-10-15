@@ -1,0 +1,62 @@
+{
+  "engine": "ARAM Rating",
+  "version": "0.1-research-foundation",
+  "scope": {
+    "platform": "KR",
+    "queue_id": 450,
+    "queue": "standard ARAM",
+    "mayhem_excluded": true
+  },
+  "runtime_integration": {
+    "enabled": false,
+    "manifest_modified": false,
+    "ui_card_enabled": false,
+    "reason": "requires real future-match predictive validation and Riot policy/product review before player-facing skill-rating output"
+  },
+  "providers": {
+    "riot_match_v5": {
+      "preferred_long_term": true,
+      "automated_collection_enabled": false,
+      "reason": "policy/product review gate; no API key is stored in repository or binary"
+    },
+    "opgg": {
+      "automated_collection_enabled": false,
+      "reason": "no sanctioned data API assumed; automated scraping intentionally excluded"
+    },
+    "existing_program_import": {
+      "enabled": true,
+      "network_expansion": false,
+      "requires_stable_puuid_for_all_10_players": true
+    }
+  },
+  "rating_inputs_v01": ["team membership", "win/loss", "pre-match teammate/opponent ratings"],
+  "stored_for_future_not_used_in_v01": ["champion", "kills", "deaths", "assists", "damage", "damage_taken", "healing", "shielding", "gold", "patch"],
+  "models": ["Team Elo", "Glicko-1-family team approximation", "TrueSkill-family Gaussian team model"],
+  "validation": {
+    "split": "chronological 80/20",
+    "primary": "frozen future test",
+    "secondary": "walk-forward prediction-before-update",
+    "metrics": ["accuracy", "log_loss", "brier", "ECE/calibration", "rating-difference win-rate bins"],
+    "paired_model_comparison": "bootstrap log-loss delta"
+  },
+  "real_kr_dataset": {
+    "collected": false,
+    "matches": 0,
+    "players": 0,
+    "reason": "no sanctioned live collection executed in this research foundation"
+  },
+  "synthetic_smoke_test": {
+    "purpose": "pipeline validation only; not evidence about real ARAM",
+    "matches": 700,
+    "players": 160,
+    "train": 560,
+    "test": 140,
+    "frozen_log_loss": {
+      "elo": 0.651867,
+      "glicko": 0.651378,
+      "trueskill_family": 0.632297
+    },
+    "selection": "no_clear_winner",
+    "why": "best-vs-runner paired bootstrap 95% CI overlaps zero"
+  }
+}
