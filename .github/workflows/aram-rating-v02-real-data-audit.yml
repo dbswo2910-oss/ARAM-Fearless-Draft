@@ -1,0 +1,76 @@
+name: ARAM Rating v0.2 Real-Data Research Audit
+
+on:
+  push:
+    branches: [ research/aram-rating-v02-real-data ]
+    paths:
+      - 'research/aram-rating-v01/**'
+      - 'research/aram-rating-v02/**'
+      - 'tools/aram-rating-v01-audit.py'
+      - 'tools/aram-rating-v02-audit.py'
+      - 'tools/aram-rating-phase-a-audit.py'
+      - 'tools/aram-rating-export-v02-audit.js'
+      - '.github/workflows/aram-rating-v02-real-data-audit.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'research/aram-rating-v01/**'
+      - 'research/aram-rating-v02/**'
+      - 'tools/aram-rating-v01-audit.py'
+      - 'tools/aram-rating-v02-audit.py'
+      - 'tools/aram-rating-phase-a-audit.py'
+      - 'tools/aram-rating-export-v02-audit.js'
+      - '.github/workflows/aram-rating-v02-real-data-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Compile research modules
+        run: python -m py_compile research/aram-rating-v01/*.py research/aram-rating-v02/*.py tools/aram-rating-v01-audit.py tools/aram-rating-v02-audit.py tools/aram-rating-phase-a-audit.py
+      - name: Re-run v0.1 baseline audit
+        run: python tools/aram-rating-v01-audit.py
+      - name: Run v0.2 data/evaluation/report audit
+        run: python tools/aram-rating-v02-audit.py
+      - name: Audit existing desktop export bridge and JSON download path
+        run: node tools/aram-rating-export-v02-audit.js
+      - name: Run one-command Phase A pipeline audit
+        run: python tools/aram-rating-phase-a-audit.py
+      - name: Assert CI does not fabricate real data
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open('audit-output/aram-rating-v02-report.json',encoding='utf-8'))
+          assert r['real_kr_matches_in_ci']==0
+          assert r['real_data_conclusion']=='insufficient_real_data'
+          p=json.load(open('audit-output/aram-rating-phase-a-report.json',encoding='utf-8'))
+          assert p['selection']=='insufficient_for_model_selection'
+          assert p['riot_match_v5_auto_expansion'] is False
+          print('real-data / Phase-A guards: PASS')
+          PY
+      - name: Upload research audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aram-rating-v02-research-audit
+          path: |
+            audit-output/aram-rating-v01-report.json
+            audit-output/aram-rating-v02-report.json
+            audit-output/aram-rating-export-v02-report.json
+            audit-output/aram-rating-phase-a-report.json
+          if-no-files-found: error
