@@ -1,0 +1,54 @@
+{
+  "schema": "aram-rating-v031-b1-counterfactual",
+  "real_b1_aggregate": true,
+  "privacy": {
+    "contains_puuid": false,
+    "contains_riot_id": false,
+    "contains_raw_matches": false
+  },
+  "method": {
+    "old_priority": "v0.3 exported pre-request priority",
+    "new_priority": "v0.3.1 formula",
+    "observation_count": "recovered exactly from the exported v0.3 uncertainty component",
+    "retrospective_recent_overlap": "realized duplicate count is used only as a retrospective overlap oracle because v0.3 did not persist pre-request recent-overlap match IDs",
+    "runtime_v031_does_not_use_realized_outcomes": true
+  },
+  "rows": [
+    {"candidate":"Player 001","old_priority":7.4090169944,"new_priority":-8.3900,"observations":20,"retrospective_observed_recent_matches":20,"expected_new_headroom":0,"expected_duplicate_ratio":1.0,"skip":true,"realized_information_gain":-10.0},
+    {"candidate":"Player 002","old_priority":6.5334617322,"new_priority":-3.6780,"observations":13,"retrospective_observed_recent_matches":13,"expected_new_headroom":7,"expected_duplicate_ratio":0.65,"skip":false,"realized_information_gain":-4.2},
+    {"candidate":"Player 003","old_priority":5.3231856091,"new_priority":8.5080,"observations":3,"retrospective_observed_recent_matches":3,"expected_new_headroom":17,"expected_duplicate_ratio":0.15,"skip":false,"realized_information_gain":14.1},
+    {"candidate":"Player 004","old_priority":5.1900341558,"new_priority":9.6390,"observations":2,"retrospective_observed_recent_matches":2,"expected_new_headroom":18,"expected_duplicate_ratio":0.10,"skip":false,"realized_information_gain":34.9},
+    {"candidate":"Player 005","old_priority":5.0000341558,"new_priority":9.6390,"observations":2,"retrospective_observed_recent_matches":2,"expected_new_headroom":18,"expected_duplicate_ratio":0.10,"skip":false,"realized_information_gain":31.2},
+    {"candidate":"Player 006","old_priority":4.9765222486,"new_priority":9.4360,"observations":2,"retrospective_observed_recent_matches":2,"expected_new_headroom":18,"expected_duplicate_ratio":0.10,"skip":false,"realized_information_gain":24.3},
+    {"candidate":"Player 007","old_priority":4.9765222486,"new_priority":9.4360,"observations":2,"retrospective_observed_recent_matches":2,"expected_new_headroom":18,"expected_duplicate_ratio":0.10,"skip":false,"realized_information_gain":53.0},
+    {"candidate":"Player 008","old_priority":4.9765222486,"new_priority":9.6360,"observations":2,"retrospective_observed_recent_matches":2,"expected_new_headroom":18,"expected_duplicate_ratio":0.10,"skip":false,"realized_information_gain":61.6},
+    {"candidate":"Player 009","old_priority":4.9765222486,"new_priority":2.3030,"observations":2,"retrospective_observed_recent_matches":13,"expected_new_headroom":7,"expected_duplicate_ratio":0.65,"skip":false,"realized_information_gain":9.3},
+    {"candidate":"Player 010","old_priority":4.9521566249,"new_priority":9.6330,"observations":2,"retrospective_observed_recent_matches":2,"expected_new_headroom":18,"expected_duplicate_ratio":0.10,"skip":false,"realized_information_gain":56.5}
+  ],
+  "rank_quality": {
+    "spearman_old_priority_vs_realized_information_gain": -0.7191012094,
+    "spearman_v031_priority_vs_realized_information_gain": 0.7987953376,
+    "top3_realized_information_gain_old": -0.1,
+    "top3_realized_information_gain_v031": 127.7,
+    "top5_realized_information_gain_old": 66.0,
+    "top5_realized_information_gain_v031": 208.5,
+    "top5_mean_information_gain_per_selected_candidate_old": 13.2,
+    "top5_mean_information_gain_per_selected_candidate_v031": 41.7
+  },
+  "b1_totals": {
+    "requests": 12,
+    "fetched_matches": 200,
+    "new_unique_matches": 139,
+    "duplicates": 61,
+    "new_players": 1078,
+    "known_player_appearances": 205,
+    "two_plus_crossings": 44,
+    "five_plus_crossings": 8,
+    "ten_plus_crossings": 8,
+    "information_gain": 270.7,
+    "information_gain_per_request": 22.5583333333,
+    "new_unique_matches_per_request": 11.5833333333,
+    "density_gain_per_request": 25.1
+  },
+  "interpretation": "v0.3 strongly over-ranked saturated high-repeat candidates. v0.3.1 turns headroom/duplicate saturation into first-class features, so Player 001 is skipped, Player 002/009 fall, and the shallow 17-18 headroom band including Players 007/008/010 moves to the top group. Among otherwise near-identical shallow candidates the heuristic intentionally does not claim it can foresee realized information gain without pre-request evidence."
+}
