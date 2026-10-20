@@ -1,0 +1,27 @@
+제품 감사 — 2026-09-09
+기준: main 70113a5aa3ecbc409bb18d7338e162282b62b09f / v0.15.28
+목적: 기존 LIVE/CC/173챔 요청과 후속 수집기·역할 프로필의 구현 및 검증 가능 범위 확인.
+질문과 이유: 다른 계정/다른 경기 등급이 연결되는가? 외부 검증 라벨 자체가 틀리면 후속 ROLE 보정의 근거가 오염되므로 최우선 조사.
+확인 코드: update/v0.15.28/riot-grade-collector-v01528.js, riot-grade-ui-v01528.js, main.js, update/manifest.json, update/v0.15.23/role-profile-context-v01523.js, Git 전체 트리 및 릴리스 메타데이터.
+
+확인된 문제
+High H01: UI findRecord는 !puuid 또는 !r.puuid일 때 계정 조건을 통과한다. gameId가 같으면 타 참가자의 등급과 연결될 수 있다. championId 검사도 없다.
+High H02: collector는 비동기 LCU 호출 완료 후 core.account를 읽는다. 요청 도중 계정 변경 시 이전 응답을 새 계정에 저장할 수 있다. PUUID 없는 기록도 저장·중복 병합한다.
+High H03: annotate가 await state 이후 선택 경기/계정/DOM 유효성을 재검사하지 않는다. 전환 중 오래된 결과가 새 화면에 삽입될 수 있다.
+High H04: tracked source에 index.html, autosync-core.js, 챔피언 원본 데이터, 전체 앱 부팅 테스트가 없다. Git checkout+manifest만으로 전체 재현 불가. bootstrap 브랜치에도 README만 있다. 릴리스 v0.14.2 ZIP은 존재하나 다운로드가 네트워크 승인 취소로 완료되지 않았다.
+Medium M01: collector fallback은 EOG 내부 첫 gameId만 가져와 서로 다른 응답의 동시성/챔피언/계정 일치를 검증하지 않는다. 오연결 재현 전 의심 위험; 검증 없는 자동 연결은 중단하는 보수적 수정 필요.
+Medium M02: roleCoach가 누락 지표를 num(...)=0으로 취급하고 최저축 목표를 만든다. 없는 관측값이 약점으로 둔갑 가능. 전체 모델 및 실제 rows 스키마 검증 후 수정 필요.
+Medium M03: 역할 전용 육각형은 구현되지 않았고 scout가 전체 성향축을 재사용한다. 인수인계의 미완료 판정과 일치.
+Low L01: README 앱 버전 v0.15.9와 manifest v0.15.28 불일치.
+의심: updater rollback 중 rename 실패 시 현재 파일이 written 목록에 들어가기 전 삭제될 수 있음. 별도 파일 실패 주입 검사 필요.
+
+기존 번호 상태
+1 LIVE: v0.15.27 구현 있음. 전체 실전 재검증 미완료.
+2 CC: v0.15.25 구현 있음. 핵심 원본 엔진 포함 재검증 미완료.
+3 173챔 진입·데스·관측성: 미구현, 원본 전체 데이터와 통계 관측성 검토 필요.
+후속 순서: 수집기 신뢰성 → 역할 프로필 → 173챔 기준표 및 제한적 감점 환급.
+
+검사 범위: 정적 코드 감사. 전체 앱 부팅/UI/Windows/Riot E2E는 PASS 아님.
+수정 전 기록이며 패치·테스트 결과는 후속 보고서에 작성.
+남은 위험: 원본 앱이 없는 상태에서 런타임 주입 및 배포 성공 보장 불가.
+다음 검사: 계정 정보 누락/전환, 챔피언 불일치, 비동기 화면 전환의 합성 회귀검사.

@@ -1,0 +1,18 @@
+사이클 rg-persist-20260909-01
+버전: v0.15.28 기반 후보 / 미배포. PR #1.
+기준: main 70113a5, PR 2ed40a3; handoff bootstrap-20260909-01 소비 및 running 상태를 원격 기록 후 진행.
+질문: 최초 저장 실패 이후 동일 응답/클라이언트 연결 종료 시 저장이 복구되는가? 기존 파일 교체 실패는 정상 기록을 보존하는가?
+이유: 외부 검증 등급의 영구 유실은 후속 평가 검증을 오염시킴.
+확인 코드: work-in-progress/riot-grade-identity/collector.js poll/save/atomicWrite 및 기존 update/v0.15.28 동형 코드.
+발견: High RG-PERSIST-RETRY-001 확정(합성 재현). 메모리 기록 추가 후 save 실패, 재조회 added=0으로 영구 저장 생략. High RG-REPLACE-001 확정(합성 재현). rename 실패 catch에서 기존 파일을 unlink하여 정상 기록 유실.
+수정: dirty 상태와 flush로 LCU 조회 전 pending 저장 재시도. 연결 종료에도 재시도 가능. 파일 교체 실패 시 원본 삭제 금지, 임시 파일 정리. persistencePending 및 재시도 대기 상태 노출. ROLE 점수 변경 없음.
+회귀: node --test tests/riot-grade-identity.test.cjs.
+수정 전 기존 9 PASS + 신규 3 FAIL. 수정 후 12/12 PASS.
+신규 검사: 최초 write 실패→동일 응답 재시도→재시작 후 보존; 실패 후 클라이언트 연결 종료→저장 복구; rename 실패→기존 기록 보존→복구 후 2건→임시 파일 없음.
+문법: update 및 후보 JS 56개 node --check PASS. 기존 manifest 참조 파일 모두 존재.
+GitHub CI: claim commit combined status pending, total_count=0. CI 성공이라고 주장하지 않음.
+전체 앱/Windows/Riot/Live API/DPI: 미검증. 원본 index.html/autosync-core.js 부재로 전체 부팅·전체 챔피언·LIVE·추천 회귀는 실행 못함.
+미수정: 실제 배포본, main/manifest/package 버전, ROLE/173챔. 후보가 실제 앱에 통합된 상태로 표기하지 않음.
+남은 위험: 디스크가 계속 불가하면 메모리 pending은 프로세스 종료 시 소실 가능. OS 전원차단 내구성 보장 없음.
+다음 조사 RG-STORE-LOAD-002: safeJsonRead가 ENOENT/손상 JSON/일시 read 오류를 모두 null 처리. 다음 저장이 기존 기록을 덮는지 재현. STATE의 구체 테스트 수행.
+AUTO_CONTINUE: YES
