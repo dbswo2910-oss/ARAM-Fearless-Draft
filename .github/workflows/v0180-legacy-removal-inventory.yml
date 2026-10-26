@@ -1,0 +1,92 @@
+name: v0.18.0 Legacy Removal Inventory
+
+on:
+  push:
+    branches:
+      - 'refactor/v0.18.0-legacy-removal'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build active legacy inventory
+        run: node tools/legacy-removal-inventory-v0180.js
+      - name: Verify canonical AutoSync telemetry parity
+        run: node tools/autosync-telemetry-parity-v0180.js
+      - name: Verify canonical AutoSync queue parity
+        run: node tools/autosync-queue-parity-v0180.js
+      - name: Verify canonical AutoSync CC-impact parity
+        run: node tools/autosync-cc-impact-parity-v0180.js
+      - name: Verify canonical AutoSync mission-timeline parity
+        run: node tools/autosync-mission-timeline-parity-v0180.js
+      - name: Verify canonical item catalog parity
+        run: node tools/items-catalog-parity-v0180.js
+      - name: Verify canonical updater client boundary
+        run: node tools/updater-client-boundary-v0180.js
+      - name: Verify canonical window shell boundary
+        run: node tools/window-shell-boundary-v0180.js
+      - name: Materialize ephemeral v0.18 candidate runtime
+        run: node tools/refactor/materialize-v0180-candidate-runtime.js
+      - name: Prove candidate differs only by approved migration
+        run: node tools/v0180-candidate-differential-audit.js
+      - name: Guard candidate runtime against migrated legacy owners
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/app/runtime-v0180.js
+          node --check src/main/updater-client.js
+          node --check src/main/window-shell.js
+          node --check src/main/renderer-compat-stack.js
+          test "$(grep -Fc "const canonicalOwners=require('./canonical-runtime-owners');" src/app/runtime-v0180.js)" -eq 1
+          test "$(grep -Fc "canonicalOwners.installCore({autosyncCore});" src/app/runtime-v0180.js)" -eq 1
+          test "$(grep -Fc "canonicalOwners.installIpc({ipcMain});" src/app/runtime-v0180.js)" -eq 1
+          test "$(grep -Fc "const updaterClient=require('../main/updater-client').createUpdaterClient" src/app/runtime-v0180.js)" -eq 1
+          test "$(grep -Fc "updaterClient.checkAndApplyUpdate()" src/app/runtime-v0180.js)" -eq 1
+          test "$(grep -Fc "require('../main/window-shell').createWindowShell" src/app/runtime-v0180.js)" -eq 1
+          test "$(grep -Fc "require('../main/renderer-compat-stack')" src/app/runtime-v0180.js)" -eq 1
+          ! grep -F "require('./autosync-queue-v01517')" src/app/runtime-v0180.js
+          ! grep -F "require('./autosync-cc-impact-v01525')" src/app/runtime-v0180.js
+          ! grep -F "require('./autosync-mission-timeline-v01529')" src/app/runtime-v0180.js
+          ! grep -F "require('./autosync-telemetry-v01534')" src/app/runtime-v0180.js
+          ! grep -F "require('./item-catalog-v01527')" src/app/runtime-v0180.js
+          ! grep -F "require('./update-safety-v01579')" src/app/runtime-v0180.js
+          ! grep -F "require('./runtime-loader-v01579')" src/app/runtime-v0180.js
+          ! grep -F "itemCatalog.register(ipcMain);itemCatalog.fetchCatalog().catch(()=>{});" src/app/runtime-v0180.js
+          ! grep -F "function checkAndApplyUpdate(){" src/app/runtime-v0180.js
+          ! grep -F "function validateManifestV015116(" src/app/runtime-v0180.js
+          ! grep -F "function getBuffer(" src/app/runtime-v0180.js
+          ! grep -F "function createWindow(){" src/app/runtime-v0180.js
+          ! grep -F "function createTray(){" src/app/runtime-v0180.js
+          ! grep -F "function iconPath(){" src/app/runtime-v0180.js
+          ! grep -F "module._compile(" src/app/runtime-v0180.js
+          echo 'V0.18 EPHEMERAL CANDIDATE: AutoSync/Items/Updater/Window shell migrated; renderer legacy isolated behind one compatibility boundary'
+      - name: Ensure generated candidate is not a source-controlled owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files --error-unmatch src/app/runtime-v0180.js >/dev/null 2>&1; then
+            echo 'Generated runtime-v0180.js must not be committed under src/app.' >&2
+            exit 1
+          fi
+      - name: Upload inventory and ephemeral candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-removal-inventory-v0180
+          path: |
+            audit-output/legacy-removal-inventory-v0180.json
+            audit-output/v0180-candidate-differential.json
+            src/app/runtime-v0180.js
+          if-no-files-found: warn
