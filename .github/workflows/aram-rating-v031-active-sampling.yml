@@ -1,0 +1,76 @@
+name: ARAM Rating v0.3.1 Active Sampling + Research UI Audit
+
+on:
+  push:
+    branches: [ research/aram-rating-v031-active-sampling ]
+    paths:
+      - 'research/aram-rating-v031/**'
+      - 'update/v0.15.129/research-ui-core.js'
+      - 'update/v0.15.129/research-ui-devtools.js'
+      - 'tools/v015129-aram-rating-research-ui-audit.js'
+      - 'tools/aram-rating-v031-audit.js'
+      - '.github/workflows/aram-rating-v031-active-sampling.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'research/aram-rating-v031/**'
+      - 'update/v0.15.129/research-ui-core.js'
+      - 'update/v0.15.129/research-ui-devtools.js'
+      - 'tools/v015129-aram-rating-research-ui-audit.js'
+      - 'tools/aram-rating-v031-audit.js'
+      - '.github/workflows/aram-rating-v031-active-sampling.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - name: Compile research and UI sources
+        run: |
+          node -c research/aram-rating-v031/collector-core-v031.js
+          node -c research/aram-rating-v031/collector-core-v031.test.js
+          node -c research/aram-rating-v031/phase-b2-v031-devtools.js
+          node -c update/v0.15.129/research-ui-core.js
+          node -c update/v0.15.129/research-ui-devtools.js
+          node -c tools/v015129-aram-rating-research-ui-audit.js
+          node -c tools/aram-rating-v031-audit.js
+      - name: Run sampling fixtures
+        run: node research/aram-rating-v031/collector-core-v031.test.js
+      - name: Run Research UI identity and terminology fixtures
+        run: node tools/v015129-aram-rating-research-ui-audit.js
+      - name: Audit real aggregates and B2 safety
+        run: node tools/aram-rating-v031-audit.js
+      - name: Run production regressions
+        run: |
+          node tools/profile-ux-audit.js
+          node tools/v015128-history-latency-audit.js
+          node tools/v015119-autosync-concurrency-audit.js
+          node tools/v015121-random-practice-restore-audit.js
+          node tools/v015120-data-subnav-audit.js
+          node tools/item-recommendation-v01581-audit.js
+          node tools/v015116-runtime-update-stability-audit.js
+          node tools/v015117-state-integrity-audit.js
+          node tools/v015118-resource-lifecycle-audit.js
+      - name: Full Regression
+        run: node tools/full-regression-audit.js
+      - name: AI continuity
+        run: node tools/ai-continuity-audit.js
+      - name: Upload privacy-safe reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aram-rating-v031-audit
+          path: |
+            audit-output/aram-rating-v031-report.json
+            audit-output/v015129-aram-rating-research-ui-report.json
+            audit-output/full-regression-report.json
+            research/aram-rating-v031/reports/*.json
+          if-no-files-found: warn
