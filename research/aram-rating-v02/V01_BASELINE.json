@@ -1,0 +1,16 @@
+{
+  "version": "ARAM Rating v0.1 research foundation",
+  "commit": "fb4c23da9f5584fcfc82bc3982c47854a3c27f4b",
+  "research_audit_run": 34766068249,
+  "full_regression_run": 34766087689,
+  "research_audit": "success",
+  "full_regression": "success",
+  "active_app_at_baseline": "0.15.128",
+  "manifest_changed_by_v01": false,
+  "runtime_integration": false,
+  "v02_validation_at_commit": "a440004e8ede8067a9030da3b84ce78686303ac2",
+  "v02_research_ci_run": 34766475111,
+  "v02_research_ci": "success",
+  "v02_full_regression_run": 34766475088,
+  "v02_full_regression": "success"
+}

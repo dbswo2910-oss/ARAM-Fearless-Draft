@@ -1,0 +1,79 @@
+{
+  "title": "ARAM Rating Research v0.2 — Phase A first real KR sample",
+  "status": "insufficient_for_model_selection",
+  "actual_data": {
+    "matches": 20,
+    "players": 160,
+    "participants": 200,
+    "date_range_kst": [
+      "2026-09-13T13:23:59.610000+09:00",
+      "2026-09-13T23:17:41.753000+09:00"
+    ],
+    "patch_range": ["16.18.817.5716"]
+  },
+  "data_quality": {
+    "accepted": 20,
+    "rejected": 0,
+    "duplicates": 0,
+    "invalid_queue": 0,
+    "missing_puuid": 0,
+    "observed_export_schema": "current Match Lab team[5] + enemy[5] with nested player.puuid",
+    "exporter_validation_bug_found_and_fixed": true,
+    "raw_puuid_committed": false
+  },
+  "network_quality": {
+    "largest_component_players": 160,
+    "largest_component_fraction": 1.0,
+    "avg_matches_per_player": 1.25,
+    "median_matches_per_player": 1.0,
+    "single_match_players": 150,
+    "single_match_fraction": 0.9375,
+    "ten_plus_match_players": 2,
+    "repeated_teammate_clusters": 7,
+    "frozen_test_cold_start_rate": 0.8
+  },
+  "split": {
+    "train": 16,
+    "frozen_test": 4
+  },
+  "models": {
+    "elo": {
+      "frozen": {"log_loss": 0.6937521401, "brier": 0.2503022969, "accuracy": 0.5},
+      "walk_forward": {"log_loss": 0.6970228895, "brier": 0.2519347509, "accuracy": 0.5}
+    },
+    "glicko": {
+      "frozen": {"log_loss": 0.6969252540, "brier": 0.2518819177, "accuracy": 0.5},
+      "walk_forward": {"log_loss": 0.6714152191, "brier": 0.2391422826, "accuracy": 0.75}
+    },
+    "trueskill_family": {
+      "frozen": {"log_loss": 0.7092349590, "brier": 0.2579158578, "accuracy": 0.5},
+      "walk_forward": {"log_loss": 0.7048530309, "brier": 0.2555470067, "accuracy": 0.5}
+    }
+  },
+  "baselines": {
+    "constant_50": {"frozen": {"log_loss": 0.6931471806, "brier": 0.25, "accuracy": 0.5}},
+    "historical_winrate": {
+      "frozen": {"log_loss": 0.6938843833, "brier": 0.2503683298, "accuracy": 0.5},
+      "walk_forward": {"log_loss": 0.6874864704, "brier": 0.2471686557, "accuracy": 0.75}
+    },
+    "recent_winrate": {
+      "frozen": {"log_loss": 0.6941134488, "brier": 0.2504826676, "accuracy": 0.5},
+      "walk_forward": {"log_loss": 0.6874474984, "brier": 0.2471456038, "accuracy": 0.5}
+    }
+  },
+  "bootstrap": null,
+  "bootstrap_note": "Frozen test n=4; paired bootstrap requires at least 20 matched predictions.",
+  "phase_b_collection_strategy": {
+    "case": "CASE_B_REPEAT_EXISTING_PLAYERS",
+    "reason": "single-match players 93.75% and frozen-test cold-start 80%; the graph is connected but too shallow",
+    "recommendation": "Add repeated history for already-observed participants before adding random seeds.",
+    "riot_match_v5_auto_expansion": false
+  },
+  "conclusion": "The first real export validates the live schema and rating pipeline path, but 20 matches / 4 frozen-test matches are far below model-selection requirements. No model winner is selected.",
+  "player_facing_ui_enabled": false,
+  "candidate_winner_forbidden": true,
+  "kr_percentile_forbidden": true,
+  "skill_tier_forbidden": true,
+  "raw_real_match_json_committed": false,
+  "sqlite_committed": false
+}
