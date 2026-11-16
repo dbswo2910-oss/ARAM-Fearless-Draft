@@ -1,0 +1,36 @@
+{
+  "name": "noir-chat",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Private local AI character chat (single-user, local-first)",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3210",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 3210",
+    "typecheck": "tsc --noEmit",
+    "mock-ollama": "node scripts/mock-ollama.mjs",
+    "test:e2e": "node scripts/e2e-test.mjs",
+    "reset-password": "node scripts/reset-password.mjs",
+    "test:unit": "node --experimental-strip-types --no-warnings --test tests/*.test.ts"
+  },
+  "engines": {
+    "node": ">=20.9"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "next": "^15.5.29",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.23"
+  }
+}
