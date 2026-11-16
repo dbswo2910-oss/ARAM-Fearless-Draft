@@ -1,0 +1,896 @@
+<title>NOIR Chat</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#121016">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: one-screen mobile app — top bar, scrolling body, pinned composer. Dark-only by design (a night-bar mood). */
+:root {
+  --ink: #0d0b10;
+  --bg: #121016;
+  --surface: #1a171f;
+  --surface-2: #231f29;
+  --surface-3: #2e2935;
+  --line: #34303c;
+  --text: #efe9f0;
+  --dim: #a9a1b2;
+  --faint: #756e7f;
+  --amber: #e9ac83;
+  --amber-ink: #2b1a10;
+  --wine: #3b2730;
+  --wine-line: #533744;
+  --rose: #dd8296;
+  --danger: #ea6b74;
+  --ok: #86cba8;
+  --display: 'Gowun Batang', 'Noto Serif KR', 'Apple SD Gothic Neo', Georgia, serif;
+  --body: 'Noto Sans KR', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--body); font-size: 15px; line-height: 1.6;
+  overflow: hidden; -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+#app { height: 100%; display: flex; flex-direction: column; max-width: 760px; margin: 0 auto; position: relative; }
+.bar {
+  flex-shrink: 0; display: flex; align-items: center; gap: 8px; min-height: 56px;
+  padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 6px;
+  border-bottom: 1px solid var(--surface-2); background: var(--bg);
+}
+.bar h2 { margin: 0; font-size: 16px; font-weight: 700; min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mark { font-family: var(--display); font-weight: 700; letter-spacing: .22em; font-size: 18px; margin-right: auto; }
+.mark i { font-style: normal; color: var(--amber); }
+.scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+.wrap { padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 18px 40px; display: flex; flex-direction: column; gap: 14px; }
+
+.icon { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; color: var(--dim); display: grid; place-items: center; flex-shrink: 0; }
+.icon:hover { background: var(--surface-2); color: var(--text); }
+.icon svg { width: 22px; height: 22px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; padding: 0 18px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); font-weight: 500; font-size: 14px; white-space: nowrap;
+}
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.primary { background: var(--amber); border-color: var(--amber); color: var(--amber-ink); font-weight: 700; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--dim); }
+.btn.danger { color: var(--danger); border-color: rgba(234, 107, 116, .35); background: transparent; }
+.btn.sm { min-height: 34px; padding: 0 13px; font-size: 13px; }
+.btn.block { width: 100%; }
+
+h1 { font-family: var(--display); font-weight: 700; font-size: 25px; line-height: 1.3; margin: 4px 0 0; text-wrap: balance; }
+.lead { color: var(--dim); font-size: 14px; margin: 0; }
+.label { font-size: 12px; letter-spacing: .08em; color: var(--faint); font-weight: 700; margin: 14px 0 -4px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: var(--surface-2); color: var(--dim); }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+.pill.warn .dot { background: var(--amber); }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; font-size: 13.5px; color: var(--dim); }
+.note.err { border-color: rgba(234, 107, 116, .35); color: #f2b0b6; }
+
+/* 이어서 대화하기 */
+.rows { display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 14px; background: var(--surface); border: 1px solid transparent; text-align: left; width: 100%; }
+.row:hover { border-color: var(--line); }
+.row .body { flex: 1; min-width: 0; }
+.row b { display: block; font-size: 14.5px; font-weight: 700; }
+.row small { display: block; color: var(--dim); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row time { color: var(--faint); font-size: 12px; flex-shrink: 0; }
+
+.ava { border-radius: 50%; background: var(--surface-3); display: grid; place-items: center; overflow: hidden; flex-shrink: 0; font-family: var(--display); color: var(--amber); font-weight: 700; }
+.ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* 캐릭터 카드 */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 620px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.card { position: relative; border-radius: 16px; overflow: hidden; background: var(--surface); display: flex; flex-direction: column; }
+.cover { aspect-ratio: 4 / 5; max-width: 100%; position: relative; display: grid; place-items: center; background: linear-gradient(165deg, #2d2333, #16131a 72%); border: 0; padding: 0; width: 100%; }
+.cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cover .init { font-family: var(--display); font-size: 58px; color: rgba(233, 172, 131, .45); }
+.cover::after { content: ''; position: absolute; inset: 42% 0 0; background: linear-gradient(transparent, rgba(13, 11, 16, .94)); }
+.meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px; z-index: 1; text-align: left; }
+.meta b { font-size: 17px; display: block; }
+.meta b span { font-weight: 400; color: var(--faint); font-size: 13px; margin-left: 4px; }
+.meta small { color: var(--dim); font-size: 12.5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.45; }
+.tag { position: absolute; top: 9px; left: 9px; z-index: 1; }
+.card .acts { display: flex; gap: 4px; padding: 8px; }
+.card .acts .btn { flex: 1; padding: 0 8px; }
+.newcard { border: 1px dashed var(--line); border-radius: 16px; background: transparent; color: var(--dim); display: grid; place-items: center; min-height: 200px; gap: 4px; }
+.newcard:hover { border-color: var(--amber); color: var(--amber); }
+.newcard span { font-size: 32px; line-height: 1; display: block; }
+.example { border: 1px solid var(--wine-line); }
+
+/* 폼 */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span { font-size: 13px; color: var(--dim); font-weight: 500; }
+.field small { color: var(--faint); font-size: 12px; line-height: 1.45; }
+.in, .ta, .sel { width: 100%; background: var(--ink); border: 1px solid var(--line); border-radius: 11px; padding: 11px 12px; outline: none; font-size: 15px; }
+.in:focus, .ta:focus, .sel:focus { border-color: var(--amber); }
+.ta { resize: vertical; min-height: 80px; line-height: 1.55; }
+.trio { display: grid; grid-template-columns: minmax(0, 1fr) 84px 96px; gap: 10px; }
+.group { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.group h3 { margin: 0; font-size: 15px; }
+.avatar-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.err-text { color: var(--danger); font-size: 13.5px; }
+.footer-acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.choice { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice label { flex: 1; min-width: 130px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.choice label:has(input:checked) { border-color: var(--amber); background: rgba(233, 172, 131, .07); }
+.choice input { accent-color: var(--amber); margin-top: 5px; }
+.choice b { display: block; font-size: 14px; }
+.choice small { color: var(--faint); font-size: 12px; }
+
+/* 채팅 */
+.msgs { padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 18px 12px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 9px; align-items: flex-start; }
+.msg.u { justify-content: flex-end; }
+.bub {
+  max-width: 86%; min-width: 0; padding: 10px 14px; border-radius: 18px; white-space: pre-wrap; word-break: break-word;
+  line-height: 1.7; font-size: 15.5px; border: 1px solid transparent; text-align: left;
+}
+.msg.a .bub { background: var(--surface); border-color: var(--surface-2); border-top-left-radius: 6px; }
+.msg.u .bub { background: var(--wine); border-color: var(--wine-line); border-top-right-radius: 6px; }
+.bub em { font-style: italic; color: var(--dim); }
+.msg.u .bub em { color: #d9b7a3; }
+.bub .flag { display: block; margin-top: 4px; font-size: 11.5px; color: var(--faint); font-style: normal; }
+.caret { display: inline-block; width: 7px; height: 1em; background: var(--amber); vertical-align: text-bottom; margin-left: 2px; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.dots { display: inline-flex; gap: 4px; align-items: center; color: var(--faint); font-size: 13px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); animation: hop 1.2s infinite; }
+.dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes hop { 0%, 60%, 100% { transform: none; opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
+.intro { text-align: center; padding: 26px 8px 6px; color: var(--dim); font-size: 13.5px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.intro b { font-family: var(--display); font-size: 21px; color: var(--text); }
+.memo-hint { align-self: center; font-size: 12px; color: var(--faint); background: var(--surface); border-radius: 999px; padding: 3px 12px; }
+
+.dock { flex-shrink: 0; padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 6px 10px; background: var(--bg); display: flex; flex-direction: column; gap: 7px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.chips:empty { display: none; }
+.chip { flex-shrink: 0; border: 1px solid var(--line); background: var(--surface); color: var(--dim); border-radius: 999px; padding: 5px 12px; font-size: 13px; }
+.chip:hover { color: var(--text); }
+.composer { display: flex; align-items: flex-end; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 5px 5px 5px 16px; }
+.composer textarea { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; resize: none; max-height: 160px; padding: 9px 0; font-size: 16px; line-height: 1.45; }
+.send { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--amber); color: var(--amber-ink); display: grid; place-items: center; flex-shrink: 0; }
+.send:disabled { background: var(--surface-3); color: var(--faint); }
+.send.stop { background: var(--surface-3); color: var(--text); }
+.send svg { width: 20px; height: 20px; }
+.hint { text-align: center; color: var(--faint); font-size: 11.5px; }
+
+/* 시트 */
+#sheet { position: fixed; inset: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center; background: rgba(5, 4, 7, .62); }
+.panel {
+  width: 100%; max-width: 560px; max-height: 86%; overflow-y: auto; background: var(--surface); border-radius: 20px 20px 0 0;
+  padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-top: 10px; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 6px; animation: rise .18s ease-out;
+}
+@keyframes rise { from { transform: translateY(24px); opacity: .6; } }
+.grab { width: 38px; height: 4px; border-radius: 4px; background: var(--surface-3); align-self: center; margin-bottom: 6px; }
+.panel h3 { margin: 4px 0 6px; font-size: 16px; }
+.item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 6px; border: 0; background: transparent; border-radius: 12px; text-align: left; font-size: 15px; }
+.item:hover { background: var(--surface-2); }
+.item.red { color: var(--danger); }
+.item small { color: var(--faint); font-size: 12.5px; display: block; }
+#toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+  background: var(--surface-3); border: 1px solid var(--line); border-radius: 999px; padding: 9px 18px; font-size: 14px; max-width: calc(100% - 32px); text-align: center;
+}
+</style>
+
+<div id="app" aria-live="polite"></div>
+<div id="sheet" hidden></div>
+<div id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+'use strict';
+
+// ---------- 유틸 ----------
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const rich = (s) => esc(s).replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+const newId = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-5);
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const ICON = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
+};
+function timeAgo(t) {
+  if (!t) return '';
+  const m = Math.floor((Date.now() - t) / 60000);
+  if (m < 1) return '방금';
+  if (m < 60) return m + '분 전';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + '시간 전';
+  const d = Math.floor(h / 24);
+  if (d < 7) return d + '일 전';
+  return new Date(t).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+}
+function ava(ch, size) {
+  const name = ch?.name || '?';
+  return `<div class="ava" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.42)}px">${ch?.avatar ? `<img src="${esc(ch.avatar)}" alt="">` : esc(name.slice(0, 1))}</div>`;
+}
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.hidden = true), 2600);
+}
+
+// ---------- 성인 캐릭터 규칙 ----------
+const MIN_AGE = 19;
+const MINOR_KO = ['미성년', '초등학생', '중학생', '고등학생', '초딩', '중딩', '고딩', '여중생', '남중생', '여고생', '남고생', '어린 소녀', '어린 소년', '사춘기 전'];
+const MINOR_EN = ['minor', 'underage', 'under-age', 'loli', 'lolita', 'shota', 'preteen', 'pre-teen', 'schoolgirl', 'schoolboy', 'middle school', 'high school student', 'elementary school'];
+const TEEN_RE = /(?:^|[^0-9])(1[0-8]|[1-9])\s*(?:살|세)(?![0-9])(?!\s*(?:연상|연하|차이|많|어린|위|아래|때|무렵|부터|에|이후|이전|전|후|까지))/;
+const TEEN_EN = /\b(thirteen|fourteen|fifteen|sixteen|seventeen|eighteen)[- ]year[- ]old\b|\b1[0-7][- ]?(?:yo|y\/o|years? old)\b/i;
+function minorHits(text) {
+  const hits = new Set();
+  for (const t of MINOR_KO) if (new RegExp(t + '(?!\\s*(?:때|시절|시기|이었|였던|였을|무렵))').test(text)) hits.add(t);
+  for (const t of MINOR_EN) if (new RegExp('\\b' + t.replace(/[-/]/g, '[- ]?') + '\\b', 'i').test(text)) hits.add(t);
+  const m = text.match(TEEN_RE); if (m) hits.add(m[0].trim());
+  const e = text.match(TEEN_EN); if (e) hits.add(e[0]);
+  return [...hits];
+}
+
+// ---------- 상태 ----------
+const S = {
+  mode: 'loading',            // loading | db | local
+  syncSlow: false,
+  profile: { userName: '나', persona: '', speed: 'quick' },
+  chars: {}, convs: {},
+  busy: null,                 // { id, text, ctl }
+  err: '',
+};
+let sample = null, tts = null, downloads = null, col = null;
+let route = { name: 'home', id: null };
+
+// ---------- 저장소 (PC·휴대폰 동기화 = db, 아니면 이 브라우저) ----------
+const LS = 'noir-chat-v1';
+function lsAll() { try { return JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch { return {}; } }
+function lsPut(all) { try { localStorage.setItem(LS, JSON.stringify(all)); return true; } catch { return false; } }
+function applyDocs(map) {
+  const chars = {}, convs = {}; let profile = { ...S.profile };
+  for (const [k, v] of Object.entries(map)) {
+    if (!v) continue;
+    if (k === 'profile') profile = { ...profile, ...v };
+    else if (k.startsWith('ch-')) chars[k.slice(3)] = v;
+    else if (k.startsWith('cv-')) convs[k.slice(3)] = v;
+  }
+  // 생성 중인 대화는 화면의 최신 상태를 유지
+  if (S.busy && S.convs[S.busy.id]) convs[S.busy.id] = S.convs[S.busy.id];
+  S.chars = chars; S.convs = convs; S.profile = profile;
+}
+function snapshotAll() {
+  const all = { profile: S.profile };
+  for (const [id, c] of Object.entries(S.chars)) all['ch-' + id] = c;
+  for (const [id, c] of Object.entries(S.convs)) all['cv-' + id] = c;
+  return all;
+}
+const queue = {};
+function saveDoc(key, data) {
+  const body = clone(data);
+  if (S.mode !== 'db') {
+    const all = lsAll(); all[key] = body;
+    if (!lsPut(all)) toast('이 브라우저의 저장 공간이 가득 찼어요. 설정에서 백업 후 오래된 대화를 지워 주세요.');
+    return;
+  }
+  const q = (queue[key] ||= { next: null, running: false });
+  q.next = body;
+  if (!q.running) flush(key);
+}
+async function flush(key) {
+  const q = queue[key]; q.running = true;
+  while (q.next) {
+    const body = q.next; q.next = null;
+    try { await col.doc(key).set(body); }
+    catch (e) { dbFail(e); break; }
+  }
+  q.running = false;
+}
+function removeDoc(key) {
+  if (S.mode !== 'db') { const all = lsAll(); delete all[key]; lsPut(all); return; }
+  col.doc(key).delete().catch(dbFail);
+}
+function dbFail(e) {
+  if (e?.code === 'quota_exceeded') return toast('저장 공간이 가득 찼어요. 오래된 대화를 지워 주세요.');
+  if (e?.code === 'resource_exhausted' || e?.code === 'unavailable') return toast('저장이 잠시 지연되고 있어요.');
+  // 쓰기 권한이 없거나 저장소를 쓸 수 없음 → 이 브라우저 저장으로 전환
+  toLocal(true);
+}
+function toLocal(carry) {
+  if (S.mode === 'local') return;
+  if (carry) lsPut({ ...lsAll(), ...snapshotAll() });
+  else applyDocs(lsAll());
+  S.mode = 'local';
+  if (carry) toast('동기화 저장소를 쓸 수 없어 이 브라우저에 저장합니다.');
+  refresh();
+}
+const saveConv = (id) => S.convs[id] && saveDoc('cv-' + id, trimConv(S.convs[id]));
+const saveChar = (id) => S.chars[id] && saveDoc('ch-' + id, S.chars[id]);
+const saveProfile = () => saveDoc('profile', S.profile);
+function trimConv(cv) {
+  // 문서 1개 256KB 한도: 가장 오래된(이미 기억에 요약된) 메시지부터 정리
+  while (JSON.stringify(cv).length > 200000 && cv.messages.length > 60) {
+    cv.messages.shift();
+    cv.memUpto = Math.max(0, (cv.memUpto || 0) - 1);
+  }
+  return cv;
+}
+
+// ---------- 라우팅 ----------
+function parseHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h === 'new') return { name: 'edit', id: null };
+  if (h === 'me') return { name: 'me', id: null };
+  if (h.startsWith('e-')) return { name: 'edit', id: h.slice(2) };
+  if (h.startsWith('c-')) return { name: 'chat', id: h.slice(2) };
+  return { name: 'home', id: null };
+}
+const go = (hash) => { if (location.hash.slice(1) === hash) { route = parseHash(); render(); } else location.hash = hash; };
+window.addEventListener('hashchange', () => { closeSheet(); route = parseHash(); render(); });
+
+// 데이터 변경 시: 입력 중인 화면(편집/설정)은 다시 그리지 않음
+function refresh() {
+  if (route.name === 'home') render();
+  else if (route.name === 'chat') { if ($('#msgs')) { renderHead(); renderMsgs(); renderChips(); } else render(); }
+  else if (S.mode !== 'loading' && !$('#form')) render();
+}
+
+// ---------- 화면 ----------
+function render() {
+  const app = $('#app');
+  if (S.mode === 'loading') {
+    app.innerHTML = `<div class="bar"><span class="mark">N<i>O</i>IR</span></div><div class="scroll"><div class="wrap"><p class="lead">불러오는 중…</p></div></div>`;
+    return;
+  }
+  if (route.name === 'chat') return renderChat();
+  if (route.name === 'edit') return renderEdit();
+  if (route.name === 'me') return renderMe();
+  renderHome();
+}
+
+function storePill() {
+  if (S.mode === 'db') return S.syncSlow
+    ? '<span class="pill warn"><span class="dot"></span>동기화 연결 대기 중</span>'
+    : '<span class="pill"><span class="dot"></span>PC·휴대폰 자동 동기화</span>';
+  return '<span class="pill warn"><span class="dot"></span>이 브라우저에만 저장</span>';
+}
+
+const EXAMPLE = {
+  name: '서아', age: 27, gender: '여성', tagline: '새벽에만 문을 여는 바의 바텐더',
+  appearance: '어깨에 닿는 검은 단발, 소매를 걷어 올린 흰 셔츠와 검은 앞치마. 낮게 깔리는 목소리.',
+  personality: '차분하고 관찰력이 좋다. 무심한 척하지만 단골의 사소한 변화를 다 기억한다. 가끔 장난스럽다.',
+  speech: '{{user}}에게 반말. 문장이 짧고 담백하다. "손님"이라고 부르다가 가끔 이름을 부른다.',
+  background: '회사를 그만두고 작은 바를 열었다. 바 뒤편 선반에 손님마다 어울리는 술을 기록한 노트가 있다.',
+  world: '현대 서울, 비 오는 날이 많은 골목의 지하 바.',
+  relationship: '{{user}}는 몇 달째 같은 요일에 오는 단골. 서로 이름은 알지만 그 이상은 모른다. 서아는 조금 궁금해하는 중.',
+  greeting: '*잔을 닦다 문 쪽을 본다* 왔네, {{user}}. 비 맞았어? *마른 수건을 카운터에 올려 둔다* 오늘은 뭐로 줄까.',
+  examples: '{{user}}: 오늘 좀 힘들었어\n{{char}}: *말없이 따뜻한 물 한 잔을 먼저 내민다* 그럼 오늘은 독한 거 말고. 얘기할 거면 듣고.',
+  extra: '', voice: 'airy',
+};
+
+function renderHome() {
+  const chars = Object.entries(S.chars).sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0));
+  const convs = Object.entries(S.convs).filter(([, c]) => S.chars[c.charId]).sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0)).slice(0, 6);
+  $('#app').innerHTML = `
+    <div class="bar"><span class="mark">N<i>O</i>IR</span><button class="icon" data-go="me" aria-label="내 정보·설정">${ICON.gear}</button></div>
+    <div class="scroll"><div class="wrap">
+      <div><h1>오늘 밤은 누구와 이야기할까요</h1></div>
+      <div>${storePill()}</div>
+      ${!sample ? '<div class="note err">이 화면에서는 AI 대화를 쓸 수 없어요. claude.ai에 로그인한 상태에서 열어 주세요.</div>' : ''}
+      ${convs.length ? `<div class="label">이어서 대화하기</div><div class="rows">${convs.map(([id, c]) => {
+        const ch = S.chars[c.charId]; const last = c.messages[c.messages.length - 1];
+        return `<button class="row" data-go="c-${id}">${ava(ch, 44)}<div class="body"><b>${esc(c.title || ch.name)}</b><small>${esc(last ? last.c.replace(/\*/g, '') : '…')}</small></div><time>${timeAgo(c.updatedAt)}</time></button>`;
+      }).join('')}</div>` : ''}
+      <div class="label">내 캐릭터</div>
+      <div class="grid">
+        ${chars.map(([id, c]) => `
+          <div class="card">
+            <button class="cover" data-start="${id}" aria-label="${esc(c.name)}와 대화">
+              ${c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : `<span class="init">${esc(c.name.slice(0, 1))}</span>`}
+              <span class="meta"><b>${esc(c.name)}<span>${esc(c.age)}</span></b><small>${esc(c.tagline || c.personality)}</small></span>
+            </button>
+            <div class="acts"><button class="btn sm primary" data-start="${id}">대화</button><button class="btn sm ghost" data-go="e-${id}">편집</button></div>
+          </div>`).join('')}
+        ${chars.length ? '' : `
+          <div class="card example">
+            <div class="cover"><span class="tag pill">예시</span><span class="init">서</span>
+              <span class="meta"><b>${EXAMPLE.name}<span>${EXAMPLE.age}</span></b><small>${EXAMPLE.tagline}</small></span></div>
+            <div class="acts"><button class="btn sm primary" id="addExample">예시 캐릭터 추가</button></div>
+          </div>`}
+        <button class="newcard" data-go="new"><div><span>+</span>새 캐릭터</div></button>
+      </div>
+    </div></div>`;
+  const ex = $('#addExample');
+  if (ex) ex.onclick = () => { const id = newId(); S.chars[id] = { ...EXAMPLE, createdAt: Date.now(), updatedAt: Date.now() }; saveChar(id); startChat(id); };
+}
+
+function startChat(charId, forceNew = false) {
+  if (!forceNew) {
+    const latest = Object.entries(S.convs).filter(([, c]) => c.charId === charId).sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0))[0];
+    if (latest) return go('c-' + latest[0]);
+  }
+  const ch = S.chars[charId]; const id = newId(); const now = Date.now();
+  const n = Object.values(S.convs).filter((c) => c.charId === charId).length;
+  S.convs[id] = {
+    charId, title: n ? `${ch.name} · ${n + 1}번째 이야기` : ch.name, memory: '', memUpto: 0, createdAt: now, updatedAt: now,
+    messages: ch.greeting?.trim() ? [{ r: 'a', c: fill(ch.greeting, ch), t: now }] : [],
+  };
+  saveConv(id);
+  go('c-' + id);
+}
+const fill = (t, ch) => String(t || '').replace(/\{\{\s*char\s*\}\}/gi, ch.name).replace(/\{\{\s*user\s*\}\}/gi, S.profile.userName || '나');
+
+// ---------- 캐릭터 편집 ----------
+const FIELDS = [
+  { k: 'appearance', l: '외모', p: '머리, 눈빛, 체형, 즐겨 입는 옷, 목소리, 버릇…' },
+  { k: 'personality', l: '성격', p: '겉모습과 속마음, 좋아하는 것과 싫어하는 것, 감정 표현 방식' },
+  { k: 'speech', l: '말투', p: '반말/존댓말, 말버릇, {{user}}를 부르는 호칭, 문장 길이' },
+  { k: 'background', l: '배경', p: '직업, 과거, 지금의 상황, 숨기고 있는 것' },
+  { k: 'world', l: '세계관', p: '현대 서울 / 판타지 왕국 / 근미래 도시 등 무대와 규칙', rows: 2 },
+  { k: 'relationship', l: '{{user}}와의 관계', p: '처음 만난 사이, 오래된 친구, 연인… 지금 감정의 온도', rows: 2 },
+  { k: 'greeting', l: '첫 인사말', p: '*고개를 든다* 왔어? 오늘은 좀 늦었네.', help: '새 대화를 시작하면 캐릭터가 이 말로 먼저 말을 겁니다.' },
+  { k: 'examples', l: '말투 예시', p: '{{user}}: 뭐 해?\n{{char}}: *책을 덮으며* 너 기다렸지.', help: '말투를 잡는 데 가장 효과가 큽니다.' },
+  { k: 'extra', l: '추가 지침', p: '예: 답변은 짧게. 질투가 많지만 티 내지 않으려 한다.', rows: 2 },
+];
+function renderEdit() {
+  const id = route.id; const c = id ? S.chars[id] : null;
+  if (id && !c) { $('#app').innerHTML = `<div class="bar"><button class="icon" data-go="" aria-label="뒤로">${ICON.back}</button><h2>캐릭터</h2></div><div class="scroll"><div class="wrap"><p class="lead">캐릭터를 찾을 수 없어요.</p></div></div>`; return; }
+  const v = c || { name: '', age: 25, gender: '', tagline: '', voice: 'buttery' };
+  let avatar = v.avatar || null;
+  $('#app').innerHTML = `
+    <div class="bar"><button class="icon" data-go="" aria-label="뒤로">${ICON.back}</button><h2>${c ? esc(c.name) + ' 편집' : '새 캐릭터'}</h2></div>
+    <div class="scroll"><form class="wrap" id="form" novalidate>
+      <p class="lead">모든 캐릭터는 만 ${MIN_AGE}세 이상 성인이어야 합니다. <b>{{user}}</b>, <b>{{char}}</b>는 대화에서 이름으로 바뀝니다.</p>
+      <div class="group">
+        <div class="avatar-row"><div id="avaPrev">${ava({ ...v, avatar }, 68)}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn sm" id="pickImg">프로필 사진</button>${avatar ? '<button type="button" class="btn sm ghost" id="dropImg">지우기</button>' : ''}</div>
+          <input type="file" id="imgFile" accept="image/*" hidden></div>
+        <div class="trio">
+          <label class="field"><span>이름</span><input class="in" id="f-name" maxlength="40" value="${esc(v.name)}" required></label>
+          <label class="field"><span>나이</span><input class="in" id="f-age" type="number" inputmode="numeric" min="${MIN_AGE}" value="${esc(v.age)}"></label>
+          <label class="field"><span>성별</span><input class="in" id="f-gender" maxlength="20" value="${esc(v.gender)}"></label>
+        </div>
+        <label class="field"><span>한 줄 소개</span><input class="in" id="f-tagline" maxlength="120" value="${esc(v.tagline)}" placeholder="새벽에만 문을 여는 바의 바텐더"></label>
+      </div>
+      <div class="group">
+        ${FIELDS.map((f) => `<label class="field"><span>${esc(f.l)}</span><textarea class="ta" id="f-${f.k}" rows="${f.rows || 3}" maxlength="3000" placeholder="${esc(f.p)}">${esc(v[f.k] || '')}</textarea>${f.help ? `<small>${esc(f.help)}</small>` : ''}</label>`).join('')}
+      </div>
+      <div class="group">
+        <label class="field"><span>목소리 (듣기 기능)</span>
+          <select class="sel" id="f-voice">${[['buttery', '부드러운'], ['airy', '가벼운'], ['glassy', '맑은'], ['rounded', '둥근']].map(([k, l]) => `<option value="${k}" ${v.voice === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+          <small>답변을 길게 누르거나 탭해서 '듣기'를 고르면 이 목소리로 읽어 줍니다. 지원되는 브라우저에서만 동작합니다.</small></label>
+      </div>
+      <div id="formErr" class="err-text" role="alert"></div>
+      <div class="footer-acts">
+        ${c ? '<button type="button" class="btn danger" id="delChar">삭제</button>' : ''}
+        <button type="submit" class="btn primary">${c ? '저장' : '만들고 대화하기'}</button>
+      </div>
+    </form></div>`;
+
+  $('#pickImg').onclick = () => $('#imgFile').click();
+  if ($('#dropImg')) $('#dropImg').onclick = () => { avatar = null; $('#avaPrev').innerHTML = ava({ name: $('#f-name').value }, 68); };
+  $('#imgFile').onchange = async (e) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    try { avatar = await shrink(f, 320); $('#avaPrev').innerHTML = ava({ name: $('#f-name').value, avatar }, 68); }
+    catch { $('#formErr').textContent = '이 이미지는 열 수 없어요. JPG나 PNG로 다시 골라 주세요.'; }
+  };
+  let delArmed = false;
+  if ($('#delChar')) $('#delChar').onclick = (e) => {
+    if (!delArmed) { delArmed = true; e.target.textContent = '대화까지 모두 삭제할까요? 한 번 더 누르기'; return; }
+    for (const [cid, cv] of Object.entries(S.convs)) if (cv.charId === id) { delete S.convs[cid]; removeDoc('cv-' + cid); }
+    delete S.chars[id]; removeDoc('ch-' + id); toast('삭제했어요'); go('');
+  };
+  $('#form').onsubmit = (e) => {
+    e.preventDefault();
+    const val = (k) => $('#f-' + k).value.trim();
+    const data = { name: val('name'), age: Number(val('age')), gender: val('gender'), tagline: val('tagline'), voice: $('#f-voice').value, avatar };
+    for (const f of FIELDS) data[f.k] = val(f.k);
+    const err = $('#formErr');
+    if (!data.name) return (err.textContent = '이름을 입력해 주세요.');
+    if (!Number.isInteger(data.age) || data.age < MIN_AGE || data.age > 10000) return (err.textContent = `나이는 ${MIN_AGE} 이상의 숫자로 입력해 주세요. 성인 캐릭터만 만들 수 있어요.`);
+    const hits = minorHits([data.name, data.tagline, ...FIELDS.map((f) => data[f.k])].join('\n'));
+    if (hits.length) return (err.textContent = `미성년자를 떠올리게 하는 표현이 있어요: ${hits.join(', ')}. 성인 설정으로 바꿔 주세요.`);
+    const cid = id || newId(); const now = Date.now();
+    S.chars[cid] = { ...(c || { createdAt: now }), ...data, updatedAt: now };
+    saveChar(cid);
+    if (c) { toast('저장했어요'); go(''); } else startChat(cid, true);
+  };
+}
+async function shrink(file, max) {
+  const bmp = await createImageBitmap(file);
+  const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(bmp.width * s); cv.height = Math.round(bmp.height * s);
+  cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+  return cv.toDataURL('image/jpeg', 0.82);
+}
+
+// ---------- 내 정보 · 설정 ----------
+function renderMe() {
+  const p = S.profile;
+  $('#app').innerHTML = `
+    <div class="bar"><button class="icon" data-go="" aria-label="뒤로">${ICON.back}</button><h2>내 정보 · 설정</h2></div>
+    <div class="scroll"><form class="wrap" id="form" novalidate>
+      <div class="group">
+        <h3>캐릭터가 아는 나</h3>
+        <label class="field"><span>내 이름</span><input class="in" id="p-name" maxlength="40" value="${esc(p.userName)}"></label>
+        <label class="field"><span>내 설정</span><textarea class="ta" id="p-persona" rows="3" maxlength="2000" placeholder="외모, 직업, 성격처럼 캐릭터가 알고 있을 나의 모습">${esc(p.persona)}</textarea></label>
+      </div>
+      <div class="group">
+        <h3>응답 방식</h3>
+        <div class="choice">
+          <label><input type="radio" name="speed" value="quick" ${p.speed !== 'default' ? 'checked' : ''}><span><b>빠른 대화</b><small>바로 답이 나오기 시작해요. 일상 대화에 추천.</small></span></label>
+          <label><input type="radio" name="speed" value="default" ${p.speed === 'default' ? 'checked' : ''}><span><b>깊은 대화</b><small>생각한 뒤 답해요. 시작까지 수십 초 걸릴 수 있어요.</small></span></label>
+        </div>
+      </div>
+      <div class="footer-acts"><button type="submit" class="btn primary">저장</button></div>
+      <div class="group">
+        <h3>저장 · 백업</h3>
+        <div>${storePill()}</div>
+        <p class="lead" style="font-size:13px">${S.mode === 'db' ? '같은 claude.ai 계정으로 PC와 휴대폰에서 열면 캐릭터와 대화가 함께 보입니다. 내 데이터는 나만 볼 수 있어요.' : '지금은 이 브라우저에만 저장됩니다. 다른 기기로 옮기려면 백업 파일을 사용하세요.'}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${downloads ? '<button type="button" class="btn sm" id="exportBtn">백업 파일 저장</button>' : ''}
+          <button type="button" class="btn sm" id="importBtn">백업 불러오기</button><input type="file" id="importFile" accept="application/json,.json" hidden>
+        </div>
+        <small class="lead" style="font-size:12px">불러오기는 같은 캐릭터·대화를 덮어쓰고 나머지는 그대로 둡니다.</small>
+      </div>
+      <div class="note">AI는 Claude가 맡습니다. 로맨스와 설렘은 자유롭게 표현하지만, 성적인 장면은 노골적으로 쓰지 않고 분위기만 남긴 채 다음 장면으로 넘어갑니다.</div>
+    </form></div>`;
+  $('#form').onsubmit = (e) => {
+    e.preventDefault();
+    S.profile = { ...S.profile, userName: $('#p-name').value.trim() || '나', persona: $('#p-persona').value.trim(), speed: $('input[name=speed]:checked').value };
+    saveProfile(); toast('저장했어요');
+  };
+  if ($('#exportBtn')) $('#exportBtn').onclick = async () => {
+    const data = JSON.stringify({ app: 'noir-chat', version: 1, exportedAt: new Date().toISOString(), ...snapshotAll() }, null, 1);
+    try { await downloads.save({ filename: `noir-backup-${new Date().toISOString().slice(0, 10)}.json`, data }); toast('백업 파일을 저장했어요'); }
+    catch (e) { if (e?.code !== 'declined') toast('백업 파일을 저장하지 못했어요.'); }
+  };
+  $('#importBtn').onclick = () => $('#importFile').click();
+  $('#importFile').onchange = async (e) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    try {
+      const d = JSON.parse(await f.text());
+      if (d.app !== 'noir-chat') throw 0;
+      let n = 0;
+      for (const [k, v] of Object.entries(d)) {
+        if (k === 'profile') { S.profile = { ...S.profile, ...v }; saveProfile(); }
+        else if (k.startsWith('ch-') && v?.name && Number(v.age) >= MIN_AGE) { S.chars[k.slice(3)] = v; saveDoc(k, v); n++; }
+        else if (k.startsWith('cv-') && Array.isArray(v?.messages)) { S.convs[k.slice(3)] = v; saveDoc(k, v); }
+      }
+      toast(`캐릭터 ${n}명을 불러왔어요`); go('');
+    } catch { toast('NOIR 백업 파일이 아니에요.'); }
+  };
+}
+
+// ---------- 채팅 ----------
+function renderChat() {
+  const cv = S.convs[route.id];
+  if (!cv || !S.chars[cv.charId]) {
+    $('#app').innerHTML = `<div class="bar"><button class="icon" data-go="" aria-label="뒤로">${ICON.back}</button><h2>대화</h2></div><div class="scroll"><div class="wrap"><p class="lead">이 대화를 찾을 수 없어요.</p></div></div>`;
+    return;
+  }
+  $('#app').innerHTML = `
+    <div class="bar" id="head"></div>
+    <div class="scroll" id="scroller"><div class="msgs" id="msgs"></div></div>
+    <div class="dock">
+      ${S.err ? `<div class="note err" id="errNote">${esc(S.err)}</div>` : ''}
+      <div class="chips" id="chips"></div>
+      <div class="composer">
+        <textarea id="box" rows="1" maxlength="4000" aria-label="메시지" placeholder="메시지 보내기"></textarea>
+        <button class="send" id="sendBtn" aria-label="보내기">${ICON.send}</button>
+      </div>
+      <div class="hint">*행동*은 별표로 감싸면 묘사로 보여요</div>
+    </div>`;
+  renderHead(); renderMsgs(true); renderChips(); updateSend();
+  const box = $('#box');
+  box.oninput = () => { box.style.height = 'auto'; box.style.height = Math.min(box.scrollHeight, 160) + 'px'; updateSend(); };
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  box.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey && !coarse && !e.isComposing) { e.preventDefault(); onSend(); } };
+  $('#sendBtn').onclick = onSend;
+  $('#scroller').onscroll = () => { const s = $('#scroller'); stick = s.scrollHeight - s.scrollTop - s.clientHeight < 140; };
+}
+let stick = true;
+function renderHead() {
+  const cv = S.convs[route.id]; if (!cv) return; const ch = S.chars[cv.charId];
+  $('#head').innerHTML = `<button class="icon" data-go="" aria-label="뒤로">${ICON.back}</button>${ava(ch, 36)}<h2>${esc(ch.name)}<br><small style="font-weight:400;color:var(--faint);font-size:12px">${esc(cv.title)}</small></h2><button class="icon" id="chatMenu" aria-label="대화 메뉴">${ICON.menu}</button>`;
+  $('#chatMenu').onclick = chatMenu;
+}
+function renderMsgs(jump) {
+  const box = $('#msgs'); const cv = S.convs[route.id]; if (!box || !cv) return;
+  const ch = S.chars[cv.charId];
+  const busy = S.busy && S.busy.id === route.id;
+  let html = `<div class="intro">${ava(ch, 64)}<b>${esc(ch.name)}</b><span>${esc(ch.tagline || '')}</span></div>`;
+  if (cv.memory) html += `<button class="memo-hint" id="memoHint">지난 이야기를 기억하고 있어요 · 보기</button>`;
+  html += cv.messages.map((m, i) => `
+    <div class="msg ${m.r}">${m.r === 'a' ? '' : ''}<button class="bub" data-i="${i}">${rich(m.c)}${m.s === 'partial' ? '<span class="flag">중간에 멈춘 답변</span>' : ''}</button></div>`).join('');
+  if (busy) html += `<div class="msg a"><div class="bub" id="live">${S.busy.text ? rich(S.busy.text) + '<span class="caret"></span>' : '<span class="dots"><i></i><i></i><i></i>&nbsp;생각하는 중</span>'}</div></div>`;
+  box.innerHTML = html;
+  box.querySelectorAll('.bub[data-i]').forEach((b) => (b.onclick = () => msgMenu(Number(b.dataset.i))));
+  if ($('#memoHint')) $('#memoHint').onclick = memoryEditor;
+  const s = $('#scroller'); if (jump || stick) s.scrollTop = s.scrollHeight;
+}
+function updateLive() {
+  const live = $('#live'); if (!live) return renderMsgs();
+  live.innerHTML = rich(S.busy.text) + '<span class="caret"></span>';
+  const s = $('#scroller'); if (stick) s.scrollTop = s.scrollHeight;
+}
+function renderChips() {
+  const el = $('#chips'); const cv = S.convs[route.id]; if (!el || !cv) return;
+  const last = cv.messages[cv.messages.length - 1];
+  const busy = !!S.busy;
+  let h = '';
+  if (!busy && last?.r === 'u') h += '<button class="chip" data-act="reply">답변 받기</button>';
+  if (!busy && last?.r === 'a' && cv.messages.length > 1) h += '<button class="chip" data-act="regen">다시 쓰기</button><button class="chip" data-act="cont">이어서 계속</button>';
+  if (!busy && cv.messages.length <= 1) h += '<button class="chip" data-fill="*조용히 옆자리에 앉는다* ">*행동*으로 시작하기</button>';
+  el.innerHTML = h;
+  el.querySelectorAll('[data-act]').forEach((b) => (b.onclick = () => ({ reply: () => generate(route.id), regen: regenerate, cont: () => generate(route.id, { cont: true }) })[b.dataset.act]()));
+  el.querySelectorAll('[data-fill]').forEach((b) => (b.onclick = () => { const box = $('#box'); box.value = b.dataset.fill; box.focus(); updateSend(); }));
+}
+function updateSend() {
+  const btn = $('#sendBtn'); if (!btn) return;
+  const busy = S.busy && S.busy.id === route.id;
+  btn.classList.toggle('stop', !!busy);
+  btn.innerHTML = busy ? ICON.stop : ICON.send;
+  btn.setAttribute('aria-label', busy ? '멈추기' : '보내기');
+  btn.disabled = !busy && (!sample || !$('#box').value.trim() || !!S.busy);
+}
+function setErr(msg) {
+  S.err = msg;
+  const dock = $('.dock'); if (!dock) return;
+  $('#errNote')?.remove();
+  if (msg) dock.insertAdjacentHTML('afterbegin', `<div class="note err" id="errNote">${esc(msg)}</div>`);
+}
+function onSend() {
+  if (S.busy) { if (S.busy.id === route.id) S.busy.ctl.abort(); return; }
+  const box = $('#box'); const text = box.value.trim(); if (!text || !sample) return;
+  const cv = S.convs[route.id];
+  cv.messages.push({ r: 'u', c: text, t: Date.now() }); cv.updatedAt = Date.now();
+  box.value = ''; box.style.height = 'auto';
+  stick = true; saveConv(route.id); renderMsgs(); generate(route.id);
+}
+
+const WINDOW = 30;
+function rules(ch, cv) {
+  const user = S.profile.userName || '나';
+  const f = (t) => fill(t, ch);
+  const sec = (title, body) => (body && String(body).trim() ? `\n[${title}]\n${String(body).trim()}\n` : '');
+  return `너는 지금부터 한국어 1:1 캐릭터 롤플레이에서 "${ch.name}" 한 사람만 연기한다. 상대는 ${user}이다.
+
+[연기 규칙]
+- 자연스러운 한국어 구어체로 말한다. 번역투나 설명조를 피한다.
+- ${ch.name}의 성격, 말투, ${user}와의 관계를 끝까지 유지한다. AI라고 밝히거나 설정 밖의 해설을 덧붙이지 않는다.
+- 행동과 표정은 *별표* 안에 짧게 쓰고, 대사는 그대로 쓴다. 이름표("${ch.name}:")를 붙이지 않는다.
+- ${user}의 대사, 행동, 감정을 대신 정하지 않는다. ${user}가 반응할 여지를 남기고 멈춘다.
+- 같은 표현을 반복하지 않고 장면을 조금씩 앞으로 움직인다. 지난 이야기와 기억을 자연스럽게 활용한다.
+- 답변은 대화 흐름에 맞게 1~4문단.
+- 설렘, 질투, 스킨십 직전의 긴장 같은 로맨스 감정은 섬세하게 표현해도 된다. 다만 성적인 장면은 노골적으로 묘사하지 않고, 분위기를 암시한 뒤 시간을 건너뛰어 다음 장면으로 넘어간다.
+- 등장인물은 모두 성인이다.
+${sec('캐릭터', `이름: ${ch.name} / 나이: ${ch.age}세${ch.gender ? ' / 성별: ' + ch.gender : ''}${ch.tagline ? '\n소개: ' + f(ch.tagline) : ''}`)}${sec('외모', f(ch.appearance))}${sec('성격', f(ch.personality))}${sec('말투', f(ch.speech))}${sec('배경', f(ch.background))}${sec('세계관', f(ch.world))}${sec(user + '와의 관계', f(ch.relationship))}${sec('추가 지침', f(ch.extra))}${sec('상대(' + user + ') 정보', f(S.profile.persona))}${sec('지금까지의 이야기 (장기 기억)', cv.memory)}${sec('말투 예시 — 참고만 하고 그대로 반복하지 말 것', f(ch.examples))}
+이 안내에는 대답하지 말고, 이어지는 대화에서 ${ch.name}으로서만 답하라.`;
+}
+function buildTurns(cv, ch, cont) {
+  const turns = [{ role: 'user', content: rules(ch, cv) }];
+  for (const m of cv.messages.slice(-WINDOW)) if (m.c.trim()) turns.push({ role: m.r === 'u' ? 'user' : 'assistant', content: m.c });
+  const last = turns[turns.length - 1];
+  if (cont) turns.push({ role: 'user', content: `(${ch.name}의 방금 말과 행동에 바로 이어서, 같은 장면을 계속 써 줘.)` });
+  else if (last.role === 'assistant') turns.push({ role: 'user', content: '(계속)' });
+  return turns;
+}
+function cleanReply(text, ch) {
+  return text.trim().replace(new RegExp('^\\s*' + ch.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[:：]\\s*'), '');
+}
+const ERR = {
+  rate_limited: '잠깐 사이에 너무 많이 요청했어요. 조금 뒤에 다시 보내 주세요.',
+  not_granted: 'AI 사용을 허용해야 대화할 수 있어요. 페이지를 새로고침하면 다시 물어봅니다.',
+  sampling_disabled: '이 계정에서는 AI 대화를 쓸 수 없어요.',
+  session_expired: 'claude.ai에 다시 로그인해 주세요.',
+  prompt_too_large: '대화가 너무 길어요. 새 대화를 시작해 주세요.',
+  empty_completion: '답이 비어 있었어요. 다시 쓰기를 눌러 보세요.',
+};
+async function generate(id, { cont = false } = {}) {
+  const cv = S.convs[id]; if (!cv || S.busy || !sample) return;
+  const ch = S.chars[cv.charId];
+  const ctl = new AbortController();
+  S.busy = { id, text: '', ctl }; setErr(''); stick = true;
+  if (route.id === id) { renderMsgs(); renderChips(); updateSend(); }
+  let reply = null, partial = false;
+  try {
+    const r = await sample(buildTurns(cv, ch, cont), {
+      cache: false, signal: ctl.signal, modelTier: S.profile.speed === 'default' ? 'default' : 'quick',
+      onText: ({ text }) => { S.busy.text = text; if (route.name === 'chat' && route.id === id) updateLive(); },
+    });
+    reply = cleanReply(r.text, ch); partial = r.truncated;
+  } catch (e) {
+    if (e?.code === 'refused') setErr('이 방향으로는 이어갈 수 없었어요. 표현을 바꾸거나 다른 장면으로 이어가 보세요.');
+    else {
+      if (e?.text) { reply = cleanReply(e.text, ch); partial = true; }
+      if (e?.code !== 'cancelled') setErr(ERR[e?.code] || '연결이 잠시 끊겼어요. 다시 쓰기를 눌러 주세요.');
+    }
+  }
+  S.busy = null;
+  const now = S.convs[id];
+  if (now && reply) {
+    now.messages.push({ r: 'a', c: reply, t: Date.now(), ...(partial ? { s: 'partial' } : {}) });
+    now.updatedAt = Date.now(); saveConv(id);
+  }
+  if (route.name === 'chat' && route.id === id) { renderMsgs(); renderChips(); updateSend(); }
+  if (reply && !partial) summarize(id);
+}
+function regenerate() {
+  const cv = S.convs[route.id]; if (!cv || S.busy) return;
+  if (cv.messages[cv.messages.length - 1]?.r === 'a' && cv.messages.length > 1) cv.messages.pop();
+  saveConv(route.id); renderMsgs(); generate(route.id);
+}
+
+// 장기 기억: 대화창 밖으로 밀려나는 부분을 요약해 관계 변화와 함께 보관
+async function summarize(id) {
+  const cv = S.convs[id]; if (!cv || !sample) return;
+  const end = cv.messages.length - WINDOW; const from = cv.memUpto || 0;
+  if (end - from < 12) return;
+  const ch = S.chars[cv.charId]; const user = S.profile.userName || '나';
+  const log = cv.messages.slice(from, end).map((m) => `${m.r === 'u' ? user : ch.name}: ${m.c}`).join('\n').slice(-24000);
+  const prompt = `다음은 ${ch.name}(캐릭터)와 ${user}의 롤플레이 대화 일부와, 지금까지의 기억 요약이다. 둘을 합쳐 앞으로의 대화에 필요한 장기 기억을 한국어로 갱신하라.
+형식(그대로, 다른 말 없이):
+- 관계: 지금 두 사람의 관계와 감정의 온도, 호칭 변화
+- 있었던 일: 시간순 핵심 사건 (짧은 불릿 여러 개)
+- ${user}에 대해 알게 된 것:
+- 약속·남은 이야기:
+전체 1200자 이내. 성적인 내용은 "가까워졌다" 정도로만 요약.
+
+[기존 기억]
+${cv.memory || '(없음)'}
+
+[새 대화]
+${log}`;
+  try {
+    const { text } = await sample(prompt, { modelTier: 'quick', cache: false });
+    const c = S.convs[id]; if (!c) return;
+    c.memory = text.trim().slice(0, 3000); c.memUpto = end; saveConv(id);
+    if (route.name === 'chat' && route.id === id) renderMsgs();
+  } catch { /* 다음 답변 뒤 다시 시도 */ }
+}
+
+// ---------- 시트 ----------
+function openSheet(html, bind) {
+  const sh = $('#sheet');
+  sh.innerHTML = `<div class="panel" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
+  sh.hidden = false;
+  sh.onclick = (e) => { if (e.target === sh) closeSheet(); };
+  bind?.(sh);
+}
+function closeSheet() { const sh = $('#sheet'); sh.hidden = true; sh.innerHTML = ''; }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+function msgMenu(i) {
+  const cv = S.convs[route.id]; const m = cv?.messages[i]; if (!m) return;
+  const isLast = i === cv.messages.length - 1;
+  const ch = S.chars[cv.charId];
+  openSheet(`
+    <button class="item" data-a="copy">복사</button>
+    <button class="item" data-a="edit">수정</button>
+    ${m.r === 'a' && tts ? '<button class="item" data-a="speak">듣기<small>대사만 읽어 줘요</small></button>' : ''}
+    ${m.r === 'a' && isLast && i > 0 && !S.busy ? '<button class="item" data-a="regen">다시 쓰기</button>' : ''}
+    <button class="item red" data-a="del">삭제</button>`, (sh) => {
+    sh.querySelectorAll('[data-a]').forEach((b) => (b.onclick = async () => {
+      const a = b.dataset.a;
+      if (a === 'copy') { try { await navigator.clipboard.writeText(m.c); toast('복사했어요'); } catch { toast('복사할 수 없는 환경이에요'); } closeSheet(); }
+      if (a === 'edit') editMsg(i);
+      if (a === 'regen') { closeSheet(); regenerate(); }
+      if (a === 'speak') { closeSheet(); speak(m.c, ch); }
+      if (a === 'del') {
+        if (b.dataset.armed) {
+          cv.messages.splice(i, 1);
+          if (i < (cv.memUpto || 0)) cv.memUpto--;
+          saveConv(route.id); closeSheet(); renderMsgs(); renderChips();
+        } else { b.dataset.armed = '1'; b.textContent = '정말 삭제할까요? 한 번 더 누르기'; }
+      }
+    }));
+  });
+}
+function editMsg(i) {
+  const cv = S.convs[route.id]; const m = cv.messages[i];
+  const canRegen = m.r === 'u' && !S.busy;
+  openSheet(`<h3>메시지 수정</h3>
+    <textarea class="ta" id="editBox" rows="6" maxlength="4000">${esc(m.c)}</textarea>
+    <div class="footer-acts" style="margin-top:8px">
+      <button class="btn ghost" id="eCancel">취소</button>
+      <button class="btn" id="eSave">저장</button>
+      ${canRegen ? '<button class="btn primary" id="eRegen">저장하고 여기서 다시</button>' : ''}
+    </div>
+    ${canRegen ? '<small class="lead" style="font-size:12px">\'여기서 다시\'는 이 메시지 뒤의 대화를 지우고 새 답을 받아요.</small>' : ''}`, () => {
+    $('#eCancel').onclick = closeSheet;
+    const commit = () => { const t = $('#editBox').value.trim(); if (!t) return false; m.c = t; delete m.s; return true; };
+    $('#eSave').onclick = () => { if (commit()) { saveConv(route.id); closeSheet(); renderMsgs(); } };
+    if ($('#eRegen')) $('#eRegen').onclick = () => {
+      if (!commit()) return;
+      cv.messages.splice(i + 1); cv.memUpto = Math.min(cv.memUpto || 0, cv.messages.length);
+      saveConv(route.id); closeSheet(); renderMsgs(); generate(route.id);
+    };
+  });
+}
+async function speak(text, ch) {
+  const lines = text.replace(/\*[^*\n]+\*/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!lines) return toast('읽을 대사가 없어요');
+  try { await tts.speak(lines.slice(0, 2000), { voice: ch.voice || 'buttery', language: 'ko' }); }
+  catch (e) { if (e?.code === 'not_granted') { tts = null; toast('듣기 기능이 꺼져 있어요'); } else if (e?.code !== 'viewer_stopped') toast('지금은 읽어 줄 수 없어요'); }
+}
+function chatMenu() {
+  const id = route.id; const cv = S.convs[id]; const ch = S.chars[cv.charId];
+  const others = Object.entries(S.convs).filter(([, c]) => c.charId === cv.charId).sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0));
+  openSheet(`
+    <button class="item" data-a="new">새 대화 시작<small>${esc(ch.name)}와 처음부터 다시</small></button>
+    <button class="item" data-a="memory">기억 보기 · 고치기<small>${cv.memory ? '요약된 지난 이야기와 관계' : '대화가 길어지면 자동으로 정리돼요'}</small></button>
+    <button class="item" data-a="rename">대화 이름 바꾸기</button>
+    <button class="item" data-a="char">캐릭터 편집</button>
+    ${others.length > 1 ? `<div class="label" style="margin:10px 6px 2px">${esc(ch.name)}와의 다른 대화</div>${others.filter(([cid]) => cid !== id).map(([cid, c]) => `<button class="item" data-conv="${cid}">${esc(c.title)}<small>${timeAgo(c.updatedAt)} · 메시지 ${c.messages.length}개</small></button>`).join('')}` : ''}
+    <button class="item red" data-a="del">이 대화 삭제</button>`, (sh) => {
+    sh.querySelectorAll('[data-conv]').forEach((b) => (b.onclick = () => go('c-' + b.dataset.conv)));
+    sh.querySelectorAll('[data-a]').forEach((b) => (b.onclick = () => {
+      const a = b.dataset.a;
+      if (a === 'new') { closeSheet(); startChat(cv.charId, true); }
+      if (a === 'memory') memoryEditor();
+      if (a === 'char') go('e-' + cv.charId);
+      if (a === 'rename') openSheet(`<h3>대화 이름</h3><input class="in" id="tName" maxlength="60" value="${esc(cv.title)}"><div class="footer-acts" style="margin-top:8px"><button class="btn primary" id="tSave">저장</button></div>`, () => {
+        $('#tSave').onclick = () => { const t = $('#tName').value.trim(); if (t) { cv.title = t; saveConv(id); renderHead(); } closeSheet(); };
+      });
+      if (a === 'del') {
+        if (b.dataset.armed) { S.busy?.id === id && S.busy.ctl.abort(); delete S.convs[id]; removeDoc('cv-' + id); closeSheet(); go(''); toast('대화를 삭제했어요'); }
+        else { b.dataset.armed = '1'; b.textContent = '정말 삭제할까요? 한 번 더 누르기'; }
+      }
+    }));
+  });
+}
+function memoryEditor() {
+  const id = route.id; const cv = S.convs[id];
+  openSheet(`<h3>기억</h3>
+    <p class="lead" style="font-size:13px">캐릭터가 기억하는 지난 이야기와 관계예요. 직접 고치면 다음 답변부터 반영돼요.</p>
+    <textarea class="ta" id="memBox" rows="10" maxlength="3000" placeholder="아직 정리된 기억이 없어요. 직접 적어 둘 수도 있어요. 예: - 관계: 서로 이름을 부르기 시작했다">${esc(cv.memory || '')}</textarea>
+    <div class="footer-acts" style="margin-top:8px"><button class="btn ghost" id="mCancel">닫기</button><button class="btn primary" id="mSave">저장</button></div>`, () => {
+    $('#mCancel').onclick = closeSheet;
+    $('#mSave').onclick = () => { cv.memory = $('#memBox').value.trim(); saveConv(id); closeSheet(); renderMsgs(); toast('기억을 저장했어요'); };
+  });
+}
+
+// 공통 링크 버튼
+document.addEventListener('click', (e) => {
+  const g = e.target.closest('[data-go]'); if (g) { go(g.dataset.go); return; }
+  const s = e.target.closest('[data-start]'); if (s) startChat(s.dataset.start);
+});
+
+// ---------- 시작 ----------
+async function init() {
+  route = parseHash();
+  render();
+  const use = (n) => (window.claude?.use ? window.claude.use(n).catch(() => null) : Promise.resolve(null));
+  const [dbx, user, sm, tt, dl] = await Promise.all([use('db'), use('user'), use('sample'), use('tts'), use('downloads')]);
+  sample = sm; tts = tt; downloads = dl;
+  const uid = user ? await user.id().catch(() => null) : null;
+  if (!dbx || !uid) { S.mode = 'loading'; toLocal(false); return; }
+  col = dbx.collection('data/users/' + uid);
+  let first = true;
+  const slow = setTimeout(() => { if (first) { S.mode = 'db'; S.syncSlow = true; refresh(); } }, 10000);
+  col.onSnapshot((snap) => {
+    const map = {}; snap.docs.forEach((d) => { const v = d.data(); if (v) map[d.id] = clone(v); });
+    applyDocs(map);
+    if (!snap.metadata.fromCache) { clearTimeout(slow); S.syncSlow = false; }
+    const wasLoading = S.mode === 'loading';
+    S.mode = 'db';
+    if (first || wasLoading) { first = false; render(); } else refresh();
+  }, () => { clearTimeout(slow); toLocal(true); });
+}
+init();
+})();
+</script>
