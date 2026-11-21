@@ -59,6 +59,13 @@ L.must(updater.bootGuard.production_active===false,'canonical updater boot guard
 
 for(const fn of ['createCoordinator','backoffMs','credentialSignature','historyTargetKey','mergeHistoryPayload'])L.must(typeof autosync[fn]==='function',`canonical AutoSync missing ${fn}`);
 L.must(autosync.CORE_INTERVAL_MS===1200&&autosync.HISTORY_CACHE_MAX_KEYS===12&&autosync.HISTORY_CACHE_MAX_ROWS===40,'canonical AutoSync constants drift');
+if(autosync.contract?.status==='legacy-removal-in-progress'){
+  for(const name of ['queue','ccImpact','missionTimeline','telemetry']){
+    const owner=autosync.contract?.canonical_owners?.[name];
+    L.must(owner?.production_capable===true&&owner?.parity_locked===true,`AutoSync canonical ${name} migration is not parity locked`);
+  }
+  L.must(autosync.contract?.legacy_removal_complete===false,'AutoSync legacy removal cannot be complete during partial migration');
+}
 
 for(const fn of ['normGrade','canonGameId','extractPrimaryRows','trustedRecord','migrateLegacyRecords','validStore'])L.must(typeof riot.grade?.[fn]==='function',`canonical Riot grade missing ${fn}`);
 L.must(riot.grade.PRIMARY_PROVENANCE==='riot-primary-update','canonical Riot primary provenance drift');
@@ -76,7 +83,9 @@ L.must(typeof data.patchModeShell?.applyPatchShellSemanticSweep==='function'&&ty
 L.must(data.patchModeShell?.UI_ROLE==='data-detail-generic-shell-header'&&data.contract?.components?.patch_mode_shell==='shadow'&&data.contract?.components?.workspace_topology==='shadow'&&data.contract?.components?.mode_owner==='planned','DATA partial migration contract drift');
 
 L.must(typeof items.identity?.itemIdentityRank==='function'&&typeof items.identity?.buildCanonicalNameIndex==='function'&&typeof items.recommendation?.createRecommendationEngine==='function'&&typeof items.artResolver?.createArtResolver==='function'&&typeof items.artRuntime?.createArtRuntime==='function'&&typeof items.catalogContract?.validateCatalog==='function'&&typeof items.catalogService?.createCatalogService==='function','canonical Item shadow API incomplete');
-L.must(items.contract?.status==='shadow'&&items.contract?.components?.catalog_identity==='shadow'&&items.contract?.components?.recommendation_gate==='shadow'&&items.contract?.components?.art_resolver==='shadow'&&items.contract?.components?.art_dom_runtime==='shadow'&&items.contract?.components?.catalog_ipc_contract==='shadow'&&items.contract?.components?.catalog_ipc_owner==='shadow','Item migration contract drift');
+const itemShadowContract=items.contract?.status==='shadow'&&items.contract?.components?.catalog_identity==='shadow'&&items.contract?.components?.recommendation_gate==='shadow'&&items.contract?.components?.art_resolver==='shadow'&&items.contract?.components?.art_dom_runtime==='shadow'&&items.contract?.components?.catalog_ipc_contract==='shadow'&&items.contract?.components?.catalog_ipc_owner==='shadow';
+const itemLegacyRemovalContract=items.contract?.status==='legacy-removal-in-progress'&&items.contract?.components?.catalog_identity==='shadow'&&items.contract?.components?.recommendation_gate==='shadow'&&items.contract?.components?.art_resolver==='shadow'&&items.contract?.components?.art_dom_runtime==='shadow'&&items.contract?.components?.catalog_ipc_contract==='shadow'&&items.contract?.components?.catalog_ipc_owner==='canonical-parity-locked'&&items.contract?.canonical_owners?.catalog?.module==='src/items/catalog-service.js'&&items.contract?.canonical_owners?.catalog?.production_capable===true&&items.contract?.canonical_owners?.catalog?.parity_locked===true&&items.contract?.legacy_removal_complete===false&&items.catalogService.production_capable===true&&items.catalogService.legacy_behavior_locked===true;
+L.must(itemShadowContract||itemLegacyRemovalContract,'Item migration contract drift');
 L.must(items.identity.score_logic_changed===false&&items.recommendation.score_logic_changed===false&&items.recommendation.item_recommendation_logic_changed===false&&items.artResolver.score_logic_changed===false&&items.artRuntime.score_logic_changed===false&&items.catalogContract.score_logic_changed===false&&items.catalogService.score_logic_changed===false,'Item shadow migration must not change scoring or recommendations');
 
 L.must(typeof profile.results?.createResultsNormalizer==='function'&&typeof profile.history?.createHistoryService==='function'&&typeof profile.metrics?.buildProfile==='function'&&typeof profile.riotGradeLink?.findAuthoritativeRecord==='function','canonical Profile shadow API incomplete');
@@ -102,21 +111,22 @@ for(const name of required){
 
 const report={
   status:'SUCCESS',
-  architecture:'v0.16-production-adapter-with-shadow-implementations',
+  architecture:'v0.16-production-adapter-with-v0.18-legacy-removal-migration',
   registry_production_active:registry.production_active,
   legacy_removal_authorized:registry.legacy_removal_authorized,
   active_module_adapters:['draft','random_pick','data'],
   inactive_canonical_implementations:Object.keys(inactiveModules),
+  migrating_subsystems:{autosync:autosync.contract?.status||'unknown',items:items.contract?.status||'unknown'},
   main:{app_id:main.APP_ID,user_data_probe:probe},
   preload:{bridge_methods:preload.bridgeMethods.length,invoke_channels:preload.invokeChannels,send_channels:preload.sendChannels},
   state:{mode:'canonical-shadow',implementation_version:state.IMPLEMENTATION_VERSION,format_version:state.FORMAT_VERSION},
   lifecycle:{mode:'canonical-shadow',implementation_version:lifecycle.IMPLEMENTATION_VERSION},
   updater:{mode:'canonical-shadow',implementation_version:updater.IMPLEMENTATION_VERSION,format_root:updater.FORMAT_ROOT},
-  autosync:{mode:'canonical-shadow',implementation_version:autosync.IMPLEMENTATION_VERSION,core_interval_ms:autosync.CORE_INTERVAL_MS,history_cache_max_keys:autosync.HISTORY_CACHE_MAX_KEYS},
+  autosync:{mode:'canonical-shadow-with-parity-locked-subowners',implementation_version:autosync.IMPLEMENTATION_VERSION,core_interval_ms:autosync.CORE_INTERVAL_MS,history_cache_max_keys:autosync.HISTORY_CACHE_MAX_KEYS},
   riot:{mode:'canonical-shadow',implementation_version:riot.grade.IMPLEMENTATION_VERSION,primary_provenance:riot.grade.PRIMARY_PROVENANCE},
   adapters:{draft:draft.implementation_mode,random_pick:randomPick.implementation_mode,data:data.implementation_mode},
   cutover_allowed:true,
-  next_gate:'Preserve v0.16 production adapters while remaining canonical implementations continue shadow validation; legacy removal remains separately gated.'
+  next_gate:'Continue parity-locked legacy removal; global legacy removal authorization remains false until every active owner is direct canonical.'
 };
 L.write('audit-output/stability/subsystem-shadow-report.json',report);
-console.log('SUBSYSTEM ARCHITECTURE AUDIT: SUCCESS · production adapters and shadow implementations match the v0.16 cutover contract');
+console.log('SUBSYSTEM ARCHITECTURE AUDIT: SUCCESS · v0.16 adapters preserved while v0.18 parity-locked legacy removal progresses');
